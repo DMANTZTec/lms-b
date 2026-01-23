@@ -6,7 +6,7 @@
            http://www.liquibase.org/xml/ns/dbchangelog
            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.15.xsd">
 
-    <changeSet id="202601231015" author="shiva">
+    <changeSet id="202601231700" author="shiva">
 
         <createTable tableName="chapter">
             <column name="id" type="BIGINT" autoIncrement="true">
@@ -15,6 +15,11 @@
 
             <!-- references course.course_id -->
             <column name="course_id" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- chapter number -->
+            <column name="chapter_num" type="INT">
                 <constraints nullable="false"/>
             </column>
 
@@ -50,6 +55,12 @@
                 referencedTableName="course"
                 referencedColumnNames="course_id"
                 constraintName="fk_chapter_course"/>
+
+        <!-- Unique chapter number per course -->
+        <addUniqueConstraint
+                tableName="chapter"
+                columnNames="course_id, chapter_num"
+                constraintName="uk_chapter_course_chapter_num"/>
 
     </changeSet>
 
