@@ -6,7 +6,30 @@
            http://www.liquibase.org/xml/ns/dbchangelog
            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.15.xsd">
 
-    <!-- Include Student table changelog -->
-    <include file="changelogs/student.xml" relativeToChangelogFile="true"/>
+    <!-- Student table -->
+    <include file="db/changelog/changelogs/202601221937-create-student-table.xml"/>
 
+    <!-- Staff table -->
+    <include file="db/changelog/changelogs/202601221947-create-staff-table.xml"/>
+
+    <!-- Role table -->
+    <include file="db/changelog/changelogs/202601221953-create-role-table.xml"/>
+
+    <!-- Provider table -->
+    <include file="db/changelog/changelogs/202601230958-create-provider-table.xml"/>
+
+    <!-- Subject table -->
+    <include file="db/changelog/changelogs/202601231006-create-subject-table.xml"/>
+
+    <!-- Course table -->
+    <include file="db/changelog/changelogs/202601231012-create-course-table.xml"/>
+
+    <!-- Chapter table -->
+    <include file="db/changelog/changelogs/202601231015-create-chapter-table.xml"/>
+
+    <!-- Topic table -->
+    <include file="db/changelog/changelogs/202601231018-create-topic-table.xml"/>
+
+    <!-- Topic Reference table -->
+    <include file="db/changelog/changelogs/202601231020-create-topic_reference-table.xml"/>
 </databaseChangeLog>

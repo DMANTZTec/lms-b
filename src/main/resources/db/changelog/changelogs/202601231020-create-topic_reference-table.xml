@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+           http://www.liquibase.org/xml/ns/dbchangelog
+           http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.15.xsd">
+
+    <changeSet id="202601231020" author="shiva">
+
+        <createTable tableName="topic_reference">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="topic_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="ref_type" type="VARCHAR(150)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="ref_value" type="JSON">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="ref_by" type="VARCHAR(100)"/>
+
+            <column name="ref_by_id" type="BIGINT"/>
+        </createTable>
+
+        <!-- FK: topic_reference → topic -->
+        <addForeignKeyConstraint
+                baseTableName="topic_reference"
+                baseColumnNames="topic_id"
+                referencedTableName="topic"
+                referencedColumnNames="id"
+                constraintName="fk_topic_reference_topic"/>
+
+    </changeSet>
+
+</databaseChangeLog>
