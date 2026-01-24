@@ -32,4 +32,11 @@
 
     <!-- Topic Reference table -->
     <include file="db/changelog/changelogs/202601231709-create-topic_reference-table.xml"/>
+
+    <!-- Student OTP table -->
+    <include file="db/changelog/changelogs/202601241035-create-student_otp-table.xml"/>
+
+    <!-- Staff OTP table -->
+    <include file="db/changelog/changelogs/202601241041-create-staff_otp-table.xml"/>
+
 </databaseChangeLog>
