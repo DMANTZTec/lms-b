@@ -7,7 +7,7 @@
            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.15.xsd">
 
     <!-- ChangeSet to create 'student' table -->
-    <changeSet id="2201202608" author="Shivashankar">
+    <changeSet id="202601241537" author="Shivashankar">
 
         <createTable tableName="student">
             <column name="id" type="BIGINT" autoIncrement="true">
@@ -22,10 +22,10 @@
                 <constraints unique="true" nullable="false"/>
             </column>
 
-            <column name="first_name" type="VARCHAR(100)">
+            <column name="first_nm" type="VARCHAR(100)">
                 <constraints nullable="false"/>
             </column>
-            <column name="last_name" type="VARCHAR(100)"/>
+            <column name="last_nm" type="VARCHAR(100)"/>
 
             <column name="gender" type="VARCHAR(10)">
                 <constraints nullable="false"/>
@@ -53,7 +53,7 @@
 
             <column name="status" type="VARCHAR(20)" defaultValue="y"/>
             <column name="enabled" type="CHAR(1)" defaultValue="y"/>
-            <column name="emergency_contact_name" type="VARCHAR(100)"/>
+            <column name="emergency_contact_nm" type="VARCHAR(100)"/>
             <column name="emergency_contact_num" type="VARCHAR(15)"/>
             <column name="profile_img" type="BLOB"/>
 

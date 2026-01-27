@@ -6,7 +6,7 @@
            http://www.liquibase.org/xml/ns/dbchangelog
            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.15.xsd">
 
-    <changeSet id="202601241035" author="shiva">
+    <changeSet id="202601241540" author="shiva">
 
         <createTable tableName="student_otp">
 
