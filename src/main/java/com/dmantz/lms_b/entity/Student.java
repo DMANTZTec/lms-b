@@ -58,6 +58,7 @@ public class Student {
 
 	public Long getId() {return id;}
 	public void setId(Long id) {this.id = id;}
+
 	public String getStudent_id() {return student_id;}
 
 	public void setStudent_id(String student_id) {

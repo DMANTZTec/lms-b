@@ -1,21 +1,31 @@
 package com.dmantz.lms_b.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
 @Table(name ="student_otp")
-public class Student_otp {
+public class StudentOtp {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false, updatable = false)
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+            name = "UUID",
+            strategy = "org.hibernate.id.UUIDGenerator"
+    )
+    @JdbcTypeCode(SqlTypes.CHAR) //  Tells Hibernate to store as CHAR(36)
+    @Column(name = "id", length = 36, nullable = false, updatable = false)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "student_id", nullable = false)
+    @JoinColumn(name = "student_id",
+            referencedColumnName = "student_id",
+            nullable = false)
     private Student student;
 
     @Column(name = "otp", nullable = false, length = 10)
@@ -24,8 +34,9 @@ public class Student_otp {
     @Column(name = "attempts_num")
     private Integer attemptsNum = 0;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
-    private String status;
+    private OtpStatus status = OtpStatus.NEW;        // default
 
     @Column(name = "created_by")
     private Long createdBy;
@@ -71,11 +82,11 @@ public class Student_otp {
         this.attemptsNum = attemptsNum;
     }
 
-    public String getStatus() {
+    public OtpStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(OtpStatus status) {
         this.status = status;
     }
 
@@ -118,7 +129,7 @@ public class Student_otp {
                 ", student=" + student +
                 ", otp='" + otp + '\'' +
                 ", attemptsNum=" + attemptsNum +
-                ", status='" + status + '\'' +
+                ", status=" + status +
                 ", createdBy=" + createdBy +
                 ", createdDt=" + createdDt +
                 ", updatedBy=" + updatedBy +

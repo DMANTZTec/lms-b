@@ -1,6 +1,7 @@
 package com.dmantz.lms_b.mapper;
 
 import com.dmantz.lms_b.dto.request.StudentRegistrationRequest;
+import com.dmantz.lms_b.dto.response.StudentLoginResponse;
 import com.dmantz.lms_b.dto.response.StudentResponse;
 import com.dmantz.lms_b.entity.Student;
 import org.mapstruct.Mapper;
@@ -42,6 +43,13 @@ public interface StudentMapper {
             @Mapping(source = "enabled", target = "enabled")
     })
     StudentResponse toResponse(Student student);
+
+
+
+    @Mapping(source = "student_id", target = "studentId")
+    @Mapping(source = "email_id", target = "email")
+    StudentLoginResponse toLoginResponse(Student student);
+
 }
 
 

@@ -1,12 +1,24 @@
 package com.dmantz.lms_b.dto.response;
 
-public  class ApiResponse {
-    private String message;
-    private Object data;
+import java.time.LocalDateTime;
 
-    public ApiResponse(String message, Object data) {
+public  class ApiResponse {
+    private String code;
+    private String message;
+    private LocalDateTime timestamp;
+
+    public ApiResponse(String code, String message) {
+        this.code = code;
         this.message = message;
-        this.data = data;
+        this.timestamp = LocalDateTime.now();
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public String getMessage() {
@@ -17,12 +29,21 @@ public  class ApiResponse {
         this.message = message;
     }
 
-    public Object getData() {
-        return data;
+    public LocalDateTime getTimestamp() {
+        return timestamp;
     }
 
-    public void setData(Object data) {
-        this.data = data;
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    @Override
+    public String toString() {
+        return "ApiResponse{" +
+                "code='" + code + '\'' +
+                ", message='" + message + '\'' +
+                ", timestamp=" + timestamp +
+                '}';
     }
 }
 

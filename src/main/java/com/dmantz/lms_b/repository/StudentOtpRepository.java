@@ -1,12 +1,19 @@
 package com.dmantz.lms_b.repository;
 
-import com.dmantz.lms_b.entity.Student_otp;
+import com.dmantz.lms_b.entity.StudentOtp;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface StudentOtpRepository extends JpaRepository<Student_otp, UUID> {
+public interface StudentOtpRepository extends JpaRepository<StudentOtp, UUID> {
+
+    @Query("SELECT s FROM StudentOtp s WHERE s.student.student_id = :studentId ORDER BY s.createdDt DESC")
+    List<StudentOtp> findByStudentIdOrderByCreatedDtDesc(@Param("studentId") String studentId);
 
 }

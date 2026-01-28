@@ -1,19 +1,16 @@
 package com.dmantz.lms_b.dto.request;
 
-import java.util.UUID;
 
 public class OtpVerifyRequest {
-    private UUID otpId;
+    private String studentId;
     private String otp;
 
-    public OtpVerifyRequest() {}
-
-    public UUID getOtpId() {
-        return otpId;
+    public String getStudentId() {
+        return studentId;
     }
 
-    public void setOtpId(UUID otpId) {
-        this.otpId = otpId;
+    public void setStudentId(String studentId) {
+        this.studentId = studentId;
     }
 
     public String getOtp() {
@@ -22,5 +19,13 @@ public class OtpVerifyRequest {
 
     public void setOtp(String otp) {
         this.otp = otp;
+    }
+
+    @Override
+    public String toString() {
+        return "OtpVerifyRequest{" +
+                "studentId='" + studentId + '\'' +
+                ", otp='" + otp + '\'' +
+                '}';
     }
 }

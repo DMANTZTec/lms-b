@@ -1,5 +1,6 @@
 package com.dmantz.lms_b.exceptions;
 
+import com.dmantz.lms_b.dto.response.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -26,5 +27,24 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleOther(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+    }
+
+
+    @ExceptionHandler(OtpExpiredException.class)
+    public ResponseEntity<ApiResponse> handleOtpExpired(OtpExpiredException ex) {
+        return ResponseEntity.status(HttpStatus.GONE)
+                .body(new ApiResponse("OTP_410", ex.getMessage()));
+    }
+
+    @ExceptionHandler(OtpInvalidException.class)
+    public ResponseEntity<ApiResponse> handleOtpInvalid(OtpInvalidException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ApiResponse("OTP_400", ex.getMessage()));
+    }
+
+    @ExceptionHandler(OtpNotFoundException.class)
+    public ResponseEntity<ApiResponse> handleOtpNotFound(OtpNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ApiResponse("OTP_404", ex.getMessage()));
     }
 }
