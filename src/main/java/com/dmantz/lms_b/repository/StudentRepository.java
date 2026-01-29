@@ -11,19 +11,6 @@ import java.util.Optional;
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Long> {
 
-//    @Query("""
-//        SELECT s FROM Student s
-//        WHERE s.login_id = :username
-//           OR s.email_id = :username
-//           OR s.mobile_num = :username
-//    """)
-//    Optional<Student> findByUsername(String username);
-//
-//
-//    @Query("SELECT MAX(s.student_id) FROM Student s")
-//    String findMaxStudentId();
-
-
     @Query("select count(s) > 0 from Student s where s.email_id = :email")
     boolean existsByEmail(@Param("email") String email);
 

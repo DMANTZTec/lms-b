@@ -12,7 +12,8 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name="role")
-	 public class Role {
+public class Role {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -29,23 +30,6 @@ import jakarta.persistence.Table;
 	@ManyToMany(mappedBy = "roles")
 	private Set<Staff> staff;
 
-	public Role() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
-
-	public Role(Long id, String role_nm, String role_desc, Long created_by, LocalDateTime created_dt, Long updated_by,
-			LocalDateTime updated_dt, Set<Staff> staff) {
-		super();
-		this.id = id;
-		this.role_nm = role_nm;
-		this.role_desc = role_desc;
-		this.created_by = created_by;
-		this.created_dt = created_dt;
-		this.updated_by = updated_by;
-		this.updated_dt = updated_dt;
-		this.staff = staff;
-	}
 
 	public Long getId() {
 		return id;
@@ -110,9 +94,22 @@ import jakarta.persistence.Table;
 	public void setStaff(Set<Staff> staff) {
 		this.staff = staff;
 	}
-	
 
+	@Override
+	public String toString() {
+		return "Role{" +
+				"id=" + id +
+				", role_nm='" + role_nm + '\'' +
+				", role_desc='" + role_desc + '\'' +
+				", created_by=" + created_by +
+				", created_dt=" + created_dt +
+				", updated_by=" + updated_by +
+				", updated_dt=" + updated_dt +
+				", staff=" + staff +
+				'}';
 	}
+
+}
 
 
 

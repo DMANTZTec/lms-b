@@ -16,27 +16,30 @@
     <include file="db/changelog/changelogs/202601221953-create-role-table.xml"/>
 
     <!-- Provider table -->
-    <include file="db/changelog/changelogs/202601230958-create-provider-table.xml"/>
+    <include file="db/changelog/changelogs/202601291347-create-provider-table.xml"/>
 
     <!-- Subject table -->
-    <include file="db/changelog/changelogs/202601231006-create-subject-table.xml"/>
+    <include file="db/changelog/changelogs/202601291349-create-subject-table.xml"/>
 
     <!-- Course table -->
-    <include file="db/changelog/changelogs/202601231012-create-course-table.xml"/>
+    <include file="db/changelog/changelogs/202601291350-create-course-table.xml"/>
 
     <!-- Chapter table -->
-    <include file="db/changelog/changelogs/202601231700-create-chapter-table.xml"/>
+    <include file="db/changelog/changelogs/202601291351-create-chapter-table.xml"/>
 
     <!-- Topic table -->
-    <include file="db/changelog/changelogs/202601231708-create-topic-table.xml"/>
+    <include file="db/changelog/changelogs/202601291348-create-topic-table.xml"/>
 
     <!-- Topic Reference table -->
-    <include file="db/changelog/changelogs/202601231709-create-topic_reference-table.xml"/>
+    <include file="db/changelog/changelogs/202601291355-create-topic_reference-table.xml"/>
 
     <!-- Student OTP table -->
     <include file="db/changelog/changelogs/202601281216-create-student_otp-table.xml"/>
 
     <!-- Staff OTP table -->
     <include file="db/changelog/changelogs/202601241041-create-staff_otp-table.xml"/>
+
+    <!-- Staff role table -->
+    <include file="db/changelog/changelogs/202601291209-create-staff_role-table.xml"/>
 
 </databaseChangeLog>

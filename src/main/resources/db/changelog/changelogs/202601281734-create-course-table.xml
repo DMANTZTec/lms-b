@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+           http://www.liquibase.org/xml/ns/dbchangelog
+           http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.15.xsd">
+
+    <changeSet id="202601281734" author="shiva">
+
+        <createTable tableName="course">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="course_id" type="VARCHAR(20)">
+                <constraints unique="true"/>
+            </column>
+
+            <column name="course_title" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="description" type="TEXT"/>
+
+            <column name="language" type="VARCHAR(50)"/>
+
+            <column name="skills" type="JSON"/>
+
+            <column name="subject_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="provider_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_by" type="BIGINT"> </column>
+
+            <column name="created_dt"
+                    type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="updated_by" type="BIGINT"/>
+
+            <column name="updated_dt"
+                    type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- FK: subject -->
+        <addForeignKeyConstraint
+                baseTableName="course"
+                baseColumnNames="subject_id"
+                referencedTableName="subject"
+                referencedColumnNames="id"
+                constraintName="fk_course_subject"/>
+
+        <!-- FK: provider -->
+        <addForeignKeyConstraint
+                baseTableName="course"
+                baseColumnNames="provider_id"
+                referencedTableName="provider"
+                referencedColumnNames="id"
+                constraintName="fk_course_provider"/>
+
+    </changeSet>
+
+</databaseChangeLog>
