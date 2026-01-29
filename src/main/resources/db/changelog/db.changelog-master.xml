@@ -42,4 +42,5 @@
     <!-- Staff role table -->
     <include file="db/changelog/changelogs/202601291209-create-staff_role-table.xml"/>
 
+
 </databaseChangeLog>
