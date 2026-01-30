@@ -44,8 +44,6 @@ public interface StudentMapper {
     })
     StudentResponse toResponse(Student student);
 
-
-
     @Mapping(source = "student_id", target = "studentId")
     @Mapping(source = "email_id", target = "email")
     StudentLoginResponse toLoginResponse(Student student);
