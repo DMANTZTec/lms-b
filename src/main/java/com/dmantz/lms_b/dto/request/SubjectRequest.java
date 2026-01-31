@@ -1,39 +1,52 @@
 package com.dmantz.lms_b.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public class SubjectRequest {
 
 	@NotBlank(message = "Subject name is required")
 	@Size(max = 100, message = "Subject name must be at most 100 characters")
-	private String subject_nm;
+	@Pattern(regexp = "^[A-Za-z]+( [A-Za-z]+)*$", message = "Subject name must contain only letters and single spaces")
+	private String subjectNm;
 
 	@NotBlank(message = "Subject short code is required")
-	@Size(max = 5, message = "Subject short code must be at most 5 characters")
-	private String subject_short_cd;
+	@Size(max = 2, message = "Subject short code must be at most 2 characters")
+	@Pattern(regexp = "^[A-Z]+$", message = "Subject short code must contain only uppercase letters")
+	private String subjectShortCd;
 
 	@NotBlank(message = "Subject category is required")
 	@Size(max = 100, message = "Subject category must be at most 100 characters")
-	private String subject_category;
+	@Pattern(regexp = "^[A-Za-z]+( [A-Za-z]+)*$", message = "Subject category must contain only letters and single spaces")
+	private String subjectCategory;
 
 	@Size(max = 500, message = "Description must be at most 500 characters")
+
 	private String description;
 
-	public String getSubject_nm() {
-		return subject_nm;
+	public String getSubjectNm() {
+		return subjectNm;
 	}
 
-	public void setSubject_nm(String subject_nm) {
-		this.subject_nm = subject_nm;
+	public void setSubjectNm(String subjectNm) {
+		this.subjectNm = subjectNm;
 	}
 
-	public String getSubject_category() {
-		return subject_category;
+	public String getSubjectShortCd() {
+		return subjectShortCd;
 	}
 
-	public void setSubject_category(String subject_category) {
-		this.subject_category = subject_category;
+	public void setSubjectShortCd(String subjectShortCd) {
+		this.subjectShortCd = subjectShortCd;
+	}
+
+	public String getSubjectCategory() {
+		return subjectCategory;
+	}
+
+	public void setSubjectCategory(String subjectCategory) {
+		this.subjectCategory = subjectCategory;
 	}
 
 	public String getDescription() {
@@ -42,14 +55,6 @@ public class SubjectRequest {
 
 	public void setDescription(String description) {
 		this.description = description;
-	}
-
-	public String getSubject_short_cd() {
-		return subject_short_cd;
-	}
-
-	public void setSubject_short_cd(String subject_short_cd) {
-		this.subject_short_cd = subject_short_cd;
 	}
 
 }

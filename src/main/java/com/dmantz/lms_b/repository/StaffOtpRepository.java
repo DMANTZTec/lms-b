@@ -1,9 +1,10 @@
 package com.dmantz.lms_b.repository;
 
-import com.dmantz.lms_b.entity.StaffOtp;
+import java.util.UUID;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.UUID;
+import com.dmantz.lms_b.entity.StaffOtp;
 
 public interface StaffOtpRepository extends JpaRepository<StaffOtp, UUID> {
 
