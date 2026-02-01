@@ -123,8 +123,6 @@ public class StudentServiceImpl implements StudentService {
                     otp.getOtp(),
                     OtpPurpose.LOGIN
             );
-
-
             otp.setStatus(OtpStatus.SENT);
             otp.setUpdatedDt(LocalDateTime.now());
             otpRepository.save(otp);
@@ -196,7 +194,7 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public void forgotPassword(ForgotPasswordRequest request) {
 
-        // 🔹 Make sure we use student_id here
+        // Make sure we use student_id here
         Student student = studentRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Student not found"));
 
@@ -225,22 +223,22 @@ public class StudentServiceImpl implements StudentService {
     @Transactional
     public void resetPassword(ResetPasswordRequest request) {
 
-        // 0️⃣ Extract studentId from request
+        //  Extract studentId from request
         String studentId = request.getStudentId(); // e.g. S000002
 
-        // 1️⃣ Get latest OTP for student
+        // Get latest OTP for student
         StudentOtp studentOtp = otpRepository
                 .findLatestOtpByStudentId(studentId)
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("OTP not found"));
 
-        // 2️⃣ OTP already used
+        // OTP already used
         if (studentOtp.getStatus() == OtpStatus.VERIFIED) {
             throw new RuntimeException("OTP already used");
         }
 
-        // 3️⃣ OTP expired (10 minutes)
+        // OTP expired (10 minutes)
         if (studentOtp.getCreatedDt()
                 .isBefore(LocalDateTime.now().minusMinutes(10))) {
 
@@ -249,34 +247,32 @@ public class StudentServiceImpl implements StudentService {
             throw new RuntimeException("OTP expired");
         }
 
-        // 4️⃣ OTP mismatch
+        //  OTP mismatch
         if (!studentOtp.getOtp().equals(request.getOtp())) {
             throw new RuntimeException("Invalid OTP");
         }
 
-        // 5️⃣ Get student (UNIQUE by student_id)
+        //  Get student (UNIQUE by student_id)
         Student student = studentRepository
                 .findByStudentId(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
 
-        // 6️⃣ Update password
+        //  Update password
         student.setPassword(passwordEncoder.encode(request.getNewPassword()));
         student.setUpdated_dt(LocalDateTime.now());
         studentRepository.save(student);
 
-        // 7️⃣ Mark OTP as verified
         studentOtp.setStatus(OtpStatus.VERIFIED);
         studentOtp.setUpdatedDt(LocalDateTime.now());
         otpRepository.save(studentOtp);
 
-        // 8️⃣ Send confirmation email
+        // Send confirmation email
         emailService.sendOtpEmail(
                 student.getEmail_id(),
                 null,
                 OtpPurpose.PASSWORD_RESET_SUCCESS
         );
     }
-
 
 }
 
