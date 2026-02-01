@@ -4,6 +4,7 @@ import com.dmantz.lms_b.dto.request.*;
 import com.dmantz.lms_b.dto.response.OtpVerifyResponse;
 import com.dmantz.lms_b.dto.response.StudentLoginResponse;
 import com.dmantz.lms_b.dto.response.StudentResponse;
+import com.dmantz.lms_b.entity.OtpPurpose;
 import com.dmantz.lms_b.entity.OtpStatus;
 import com.dmantz.lms_b.entity.Student;
 import com.dmantz.lms_b.entity.StudentOtp;
@@ -15,6 +16,7 @@ import com.dmantz.lms_b.repository.StudentOtpRepository;
 import com.dmantz.lms_b.repository.StudentRepository;
 import com.dmantz.lms_b.service.EmailService;
 import com.dmantz.lms_b.service.StudentService;
+import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -116,7 +118,12 @@ public class StudentServiceImpl implements StudentService {
 
         // Send OTP email
         try {
-            emailService.sendOtpEmail(student.getEmail_id(), otp.getOtp());
+            emailService.sendOtpEmail(
+                    student.getEmail_id(),
+                    otp.getOtp(),
+                    OtpPurpose.LOGIN
+            );
+
 
             otp.setStatus(OtpStatus.SENT);
             otp.setUpdatedDt(LocalDateTime.now());
@@ -185,6 +192,92 @@ public class StudentServiceImpl implements StudentService {
                 .map(studentMapper::toResponse) // map entity to DTO
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public void forgotPassword(ForgotPasswordRequest request) {
+
+        // 🔹 Make sure we use student_id here
+        Student student = studentRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        // Generate OTP
+        StudentOtp otp = generateOtp(student);
+
+        try {
+            emailService.sendOtpEmail(
+                    student.getLogin_id(), // assuming login_id is the email
+                    otp.getOtp(),
+                    OtpPurpose.FORGOT_PASSWORD
+            );
+
+            otp.setStatus(OtpStatus.SENT);
+            otp.setUpdatedDt(LocalDateTime.now());
+            otpRepository.save(otp);
+
+        } catch (Exception e) {
+            otp.setStatus(OtpStatus.FAILED);
+            otpRepository.save(otp);
+            throw new RuntimeException("Failed to send OTP");
+        }
+    }
+
+    @Override
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
+
+        // 0️⃣ Extract studentId from request
+        String studentId = request.getStudentId(); // e.g. S000002
+
+        // 1️⃣ Get latest OTP for student
+        StudentOtp studentOtp = otpRepository
+                .findLatestOtpByStudentId(studentId)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("OTP not found"));
+
+        // 2️⃣ OTP already used
+        if (studentOtp.getStatus() == OtpStatus.VERIFIED) {
+            throw new RuntimeException("OTP already used");
+        }
+
+        // 3️⃣ OTP expired (10 minutes)
+        if (studentOtp.getCreatedDt()
+                .isBefore(LocalDateTime.now().minusMinutes(10))) {
+
+            studentOtp.setStatus(OtpStatus.EXPIRED);
+            otpRepository.save(studentOtp);
+            throw new RuntimeException("OTP expired");
+        }
+
+        // 4️⃣ OTP mismatch
+        if (!studentOtp.getOtp().equals(request.getOtp())) {
+            throw new RuntimeException("Invalid OTP");
+        }
+
+        // 5️⃣ Get student (UNIQUE by student_id)
+        Student student = studentRepository
+                .findByStudentId(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        // 6️⃣ Update password
+        student.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        student.setUpdated_dt(LocalDateTime.now());
+        studentRepository.save(student);
+
+        // 7️⃣ Mark OTP as verified
+        studentOtp.setStatus(OtpStatus.VERIFIED);
+        studentOtp.setUpdatedDt(LocalDateTime.now());
+        otpRepository.save(studentOtp);
+
+        // 8️⃣ Send confirmation email
+        emailService.sendOtpEmail(
+                student.getEmail_id(),
+                null,
+                OtpPurpose.PASSWORD_RESET_SUCCESS
+        );
+    }
+
+
 }
 
 

@@ -1,8 +1,6 @@
 package com.dmantz.lms_b.controller;
 
-import com.dmantz.lms_b.dto.request.OtpVerifyRequest;
-import com.dmantz.lms_b.dto.request.StudentLoginRequest;
-import com.dmantz.lms_b.dto.request.StudentRegistrationRequest;
+import com.dmantz.lms_b.dto.request.*;
 import com.dmantz.lms_b.dto.response.OtpVerifyResponse;
 import com.dmantz.lms_b.dto.response.StudentLoginResponse;
 import com.dmantz.lms_b.dto.response.StudentResponse;
@@ -56,5 +54,19 @@ public class StudentController {
         return ResponseEntity.ok(students);
     }
 
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+
+        studentService.forgotPassword(request);
+        return ResponseEntity.ok("OTP sent successfully");
+    }
+
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest request) {
+
+        studentService.resetPassword(request);
+        return ResponseEntity.ok("Password reset successful");
+    }
 }
 

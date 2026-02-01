@@ -16,4 +16,12 @@ public interface StudentOtpRepository extends JpaRepository<StudentOtp, UUID> {
     @Query("SELECT s FROM StudentOtp s WHERE s.student.student_id = :studentId ORDER BY s.createdDt DESC")
     List<StudentOtp> findByStudentIdOrderByCreatedDtDesc(@Param("studentId") String studentId);
 
+
+    @Query("""
+        SELECT o 
+        FROM StudentOtp o
+        WHERE o.student.student_id = :studentId
+        ORDER BY o.createdDt DESC
+    """)
+    List<StudentOtp> findLatestOtpByStudentId(@Param("studentId") String studentId);
 }
