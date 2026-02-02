@@ -12,42 +12,22 @@ import org.mapstruct.factory.Mappers;
 @Mapper(componentModel = "spring")
 public interface StudentMapper {
 
-    // ---------- DTO → Entity ----------
-    @Mappings({
-            @Mapping(source = "firstnm", target = "first_nm"),
-            @Mapping(source = "lastnm", target = "last_nm"),
-
-            @Mapping(source = "email_id", target = "email_id"),
-            @Mapping(source = "mobile_num", target = "mobile_num"),
-
-            @Mapping(source = "emergencyContactnm", target = "emergency_contact_nm"),
-            @Mapping(source = "emergencyContactnum", target = "emergency_contact_num")
-    })
+    // DTO → Entity
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "createdDt", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
+    @Mapping(target = "updatedDt", ignore = true)
     Student toEntity(StudentRegistrationRequest request);
 
-    // ---------- Entity → Response ----------
-    @Mappings({
-            @Mapping(source = "student_id", target = "studentid"),
-            @Mapping(source = "login_id", target = "loginid"),
-
-            @Mapping(source = "first_nm", target = "firstnm"),
-            @Mapping(source = "last_nm", target = "lastnm"),
-
-            @Mapping(source = "email_id", target = "emailid"),
-            @Mapping(source = "mobile_num", target = "mobilenumber"),
-
-            @Mapping(source = "emergency_contact_nm", target = "emergencycontactnm"),
-            @Mapping(source = "emergency_contact_num", target = "emergencycontactnum"),
-
-            @Mapping(source = "status", target = "status"),
-            @Mapping(source = "enabled", target = "enabled")
-    })
+    // Entity → Response
     StudentResponse toResponse(Student student);
 
-    @Mapping(source = "student_id", target = "studentId")
-    @Mapping(source = "email_id", target = "email")
+    //  Entity → Login Response
+    @Mapping(source = "studentId", target = "studentId")
+    @Mapping(source = "emailId", target = "email")
     StudentLoginResponse toLoginResponse(Student student);
-
 }
 
 

@@ -24,7 +24,7 @@ public class StudentOtp {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "student_id",
-            referencedColumnName = "student_id",
+            referencedColumnName = "studentId",
             nullable = false)
     private Student student;
 

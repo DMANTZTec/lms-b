@@ -50,25 +50,25 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public StudentResponse register(StudentRegistrationRequest request) {
 
-        if (studentRepository.existsByEmail(request.getEmail_id())) {
+        if (studentRepository.existsByEmailId(request.getEmailId())) {
             throw new RuntimeException("email already exists");
         }
-        if (studentRepository.existsByMobile(request.getMobile_num())) {
+        if (studentRepository.existsByMobileNum(request.getMobileNum())) {
             throw new RuntimeException("mobile number already exists");
         }
 
         // DTO → Entity
         Student student = studentMapper.toEntity(request);
 
-        student.setStudent_id(generateStudentId());
-        student.setLogin_id(request.getEmail_id());
+        student.setStudentId(generateStudentId());
+        student.setLoginId(request.getEmailId());
 
         student.setPassword(passwordEncoder.encode(request.getPassword()));    //  Encrypt password
 
         //  System fields
         student.setStatus("ACTIVE");
         student.setEnabled("Y");
-        student.setCreated_dt(LocalDateTime.now());
+        student.setCreatedDt(LocalDateTime.now());
 
         Student savedStudent = studentRepository.save(student);  // Save
         generateOtp(savedStudent);
@@ -98,7 +98,13 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public StudentLoginResponse login(StudentLoginRequest request) {
 
-        Student student = studentRepository.findByUsername(request.getUsername());
+        // Extract username from request
+        String username = request.getUsername();
+
+        // Find student by email, mobile, or login ID
+        Student student = studentRepository
+                .findByEmailIdOrMobileNumOrLoginId(username, username, username);
+
         if (student == null) {
             throw new RuntimeException("Invalid login credentials");
         }
@@ -119,7 +125,7 @@ public class StudentServiceImpl implements StudentService {
         // Send OTP email
         try {
             emailService.sendOtpEmail(
-                    student.getEmail_id(),
+                    student.getEmailId(),
                     otp.getOtp(),
                     OtpPurpose.LOGIN
             );
@@ -145,7 +151,7 @@ public class StudentServiceImpl implements StudentService {
     public OtpVerifyResponse verifyOtp(OtpVerifyRequest request) {
 
         StudentOtp otp = studentOtpRepository
-                .findByStudentIdOrderByCreatedDtDesc(request.getStudentId())
+                .findByStudent_StudentIdOrderByCreatedDtDesc(request.getStudentId())
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> new OtpNotFoundException("OTP not found"));
@@ -195,7 +201,7 @@ public class StudentServiceImpl implements StudentService {
     public void forgotPassword(ForgotPasswordRequest request) {
 
         // Make sure we use student_id here
-        Student student = studentRepository.findByEmail(request.getEmail())
+        Student student = studentRepository.findByEmailId(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Student not found"));
 
         // Generate OTP
@@ -203,7 +209,7 @@ public class StudentServiceImpl implements StudentService {
 
         try {
             emailService.sendOtpEmail(
-                    student.getLogin_id(), // assuming login_id is the email
+                    student.getLoginId(), // assuming login_id is the email
                     otp.getOtp(),
                     OtpPurpose.FORGOT_PASSWORD
             );
@@ -259,7 +265,7 @@ public class StudentServiceImpl implements StudentService {
 
         //  Update password
         student.setPassword(passwordEncoder.encode(request.getNewPassword()));
-        student.setUpdated_dt(LocalDateTime.now());
+        student.setUpdatedDt(LocalDateTime.now());
         studentRepository.save(student);
 
         studentOtp.setStatus(OtpStatus.VERIFIED);
@@ -268,7 +274,7 @@ public class StudentServiceImpl implements StudentService {
 
         // Send confirmation email
         emailService.sendOtpEmail(
-                student.getEmail_id(),
+                student.getEmailId(),
                 null,
                 OtpPurpose.PASSWORD_RESET_SUCCESS
         );

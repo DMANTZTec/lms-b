@@ -5,38 +5,37 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 
 public class StudentResponse {
-
     private Long id;
-    private String studentid;          // from student_id
-    private String loginid;            // from login_id
 
-    private String firstnm;             // from first_nm
-    private String lastnm;              // from last_nm
+    private String studentId;
+    private String loginId;
+
+    private String firstNm;
+    private String lastNm;
+
     private String gender;
     private LocalDate dob;
 
     private String addr1;
-    private String addr2;
     private String city;
     private String state;
     private String country;
     private String pin;
 
-    private String emailid;             // from email_id
-    private String mobilenumber;        // from mobile_num
+    private String emailId;
+    private String mobileNum;
 
     private String status;
     private String enabled;
 
-    private String emergencycontactnm;  // from emergency_contact_nm
-    private String emergencycontactnum; // from emergency_contact_num
+    private String emergencyContactNm;
+    private String emergencyContactNum;
 
-    private byte[] profileimg;          // from profile_img
+    // Optional: return profile image URL instead of byte[]
+    private String profile_img;
 
-    private Long createdby;
-    private LocalDateTime createddt;
-    private Long updatedby;
-    private LocalDateTime updateddt;
+    private Long createdBy;
+    private LocalDateTime createdDt;
 
     public Long getId() {
         return id;
@@ -46,36 +45,36 @@ public class StudentResponse {
         this.id = id;
     }
 
-    public String getStudentid() {
-        return studentid;
+    public String getStudentId() {
+        return studentId;
     }
 
-    public void setStudentid(String studentid) {
-        this.studentid = studentid;
+    public void setStudentId(String studentId) {
+        this.studentId = studentId;
     }
 
-    public String getLoginid() {
-        return loginid;
+    public String getLoginId() {
+        return loginId;
     }
 
-    public void setLoginid(String loginid) {
-        this.loginid = loginid;
+    public void setLoginId(String loginId) {
+        this.loginId = loginId;
     }
 
-    public String getFirstnm() {
-        return firstnm;
+    public String getFirstNm() {
+        return firstNm;
     }
 
-    public void setFirstnm(String firstnm) {
-        this.firstnm = firstnm;
+    public void setFirstNm(String firstNm) {
+        this.firstNm = firstNm;
     }
 
-    public String getLastnm() {
-        return lastnm;
+    public String getLastNm() {
+        return lastNm;
     }
 
-    public void setLastnm(String lastnm) {
-        this.lastnm = lastnm;
+    public void setLastNm(String lastNm) {
+        this.lastNm = lastNm;
     }
 
     public String getGender() {
@@ -100,14 +99,6 @@ public class StudentResponse {
 
     public void setAddr1(String addr1) {
         this.addr1 = addr1;
-    }
-
-    public String getAddr2() {
-        return addr2;
-    }
-
-    public void setAddr2(String addr2) {
-        this.addr2 = addr2;
     }
 
     public String getCity() {
@@ -142,20 +133,20 @@ public class StudentResponse {
         this.pin = pin;
     }
 
-    public String getEmailid() {
-        return emailid;
+    public String getEmailId() {
+        return emailId;
     }
 
-    public void setEmailid(String emailid) {
-        this.emailid = emailid;
+    public void setEmailId(String emailId) {
+        this.emailId = emailId;
     }
 
-    public String getMobilenumber() {
-        return mobilenumber;
+    public String getMobileNum() {
+        return mobileNum;
     }
 
-    public void setMobilenumber(String mobilenumber) {
-        this.mobilenumber = mobilenumber;
+    public void setMobileNum(String mobileNum) {
+        this.mobileNum = mobileNum;
     }
 
     public String getStatus() {
@@ -174,89 +165,72 @@ public class StudentResponse {
         this.enabled = enabled;
     }
 
-    public String getEmergencycontactnm() {
-        return emergencycontactnm;
+    public String getEmergencyContactNm() {
+        return emergencyContactNm;
     }
 
-    public void setEmergencycontactnm(String emergencycontactnm) {
-        this.emergencycontactnm = emergencycontactnm;
+    public void setEmergencyContactNm(String emergencyContactNm) {
+        this.emergencyContactNm = emergencyContactNm;
     }
 
-    public String getEmergencycontactnum() {
-        return emergencycontactnum;
+    public String getEmergencyContactNum() {
+        return emergencyContactNum;
     }
 
-    public void setEmergencycontactnum(String emergencycontactnum) {
-        this.emergencycontactnum = emergencycontactnum;
+    public void setEmergencyContactNum(String emergencyContactNum) {
+        this.emergencyContactNum = emergencyContactNum;
     }
 
-    public byte[] getProfileimg() {
-        return profileimg;
+
+    public Long getCreatedBy() {
+        return createdBy;
     }
 
-    public void setProfileimg(byte[] profileimg) {
-        this.profileimg = profileimg;
+    public void setCreatedBy(Long createdBy) {
+        this.createdBy = createdBy;
     }
 
-    public Long getCreatedby() {
-        return createdby;
+    public LocalDateTime getCreatedDt() {
+        return createdDt;
     }
 
-    public void setCreatedby(Long createdby) {
-        this.createdby = createdby;
+    public void setCreatedDt(LocalDateTime createdDt) {
+        this.createdDt = createdDt;
     }
 
-    public LocalDateTime getCreateddt() {
-        return createddt;
+    public String getProfile_img() {
+        return profile_img;
     }
 
-    public void setCreateddt(LocalDateTime createddt) {
-        this.createddt = createddt;
-    }
-
-    public Long getUpdatedby() {
-        return updatedby;
-    }
-
-    public void setUpdatedby(Long updatedby) {
-        this.updatedby = updatedby;
-    }
-
-    public LocalDateTime getUpdateddt() {
-        return updateddt;
-    }
-
-    public void setUpdateddt(LocalDateTime updateddt) {
-        this.updateddt = updateddt;
+    public void setProfile_img(String profile_img) {
+        this.profile_img = profile_img;
     }
 
     @Override
     public String toString() {
         return "StudentResponse{" +
                 "id=" + id +
-                ", studentid='" + studentid + '\'' +
-                ", loginid='" + loginid + '\'' +
-                ", firstnm='" + firstnm + '\'' +
-                ", lastnm='" + lastnm + '\'' +
+                ", studentId='" + studentId + '\'' +
+                ", loginId='" + loginId + '\'' +
+                ", firstNm='" + firstNm + '\'' +
+                ", lastNm='" + lastNm + '\'' +
                 ", gender='" + gender + '\'' +
                 ", dob=" + dob +
                 ", addr1='" + addr1 + '\'' +
-                ", addr2='" + addr2 + '\'' +
                 ", city='" + city + '\'' +
                 ", state='" + state + '\'' +
                 ", country='" + country + '\'' +
                 ", pin='" + pin + '\'' +
-                ", emailid='" + emailid + '\'' +
-                ", mobilenumber='" + mobilenumber + '\'' +
+                ", emailId='" + emailId + '\'' +
+                ", mobileNum='" + mobileNum + '\'' +
                 ", status='" + status + '\'' +
                 ", enabled='" + enabled + '\'' +
-                ", emergencycontactnm='" + emergencycontactnm + '\'' +
-                ", emergencycontactnum='" + emergencycontactnum + '\'' +
-                ", profileimg=" + Arrays.toString(profileimg) +
-                ", createdby=" + createdby +
-                ", createddt=" + createddt +
-                ", updatedby=" + updatedby +
-                ", updateddt=" + updateddt +
+                ", emergencyContactNm='" + emergencyContactNm + '\'' +
+                ", emergencyContactNum='" + emergencyContactNum + '\'' +
+                ", profile_img='" + profile_img + '\'' +
+                ", createdBy=" + createdBy +
+                ", createdDt=" + createdDt +
                 '}';
     }
+
 }

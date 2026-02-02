@@ -9,18 +9,13 @@ import java.util.List;
 
 public interface StudentService {
 
-    // Register a student
     StudentResponse register(StudentRegistrationRequest request);
 
-    // Login a student (by email / mobile / loginId)
     StudentLoginResponse login(StudentLoginRequest request);
 
-
-//    // Verify OTP
     OtpVerifyResponse verifyOtp(OtpVerifyRequest request);
 
     List<StudentResponse> getAllStudents();
-
 
     void forgotPassword(ForgotPasswordRequest request);
 
