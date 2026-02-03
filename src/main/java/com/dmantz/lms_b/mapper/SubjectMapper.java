@@ -1,5 +1,6 @@
 package com.dmantz.lms_b.mapper;
 
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -11,28 +12,22 @@ import com.dmantz.lms_b.entity.Subject;
 @Mapper(componentModel = "spring")
 public interface SubjectMapper {
 
-    // Request → Entity
-    @Mapping(source = "subjectNm", target = "subject_nm")
-    @Mapping(source = "subjectShortCd", target = "subject_short_cd")
-    @Mapping(source = "subjectCategory", target = "subject_category")
+	 // Request → Entity (CREATE)
+    @BeanMapping(ignoreByDefault = true)
+    @Mapping(source = "subjectNm", target = "subjectNm")
+    @Mapping(source = "subjectShortCd", target = "subjectShortCd")
+    @Mapping(source = "subjectCategory", target = "subjectCategory")
     @Mapping(source = "description", target = "description")
     Subject toEntity(SubjectRequest request);
 
     // Entity → Response
-    @Mapping(source = "subject_nm", target = "subjectNm")
-    @Mapping(source = "subject_short_cd", target = "subjectShortCd")
-    @Mapping(source = "subject_category", target = "subjectCategory")
-    @Mapping(source = "description", target = "description")
-    @Mapping(source = "created_by", target = "createdBy")
-    @Mapping(source = "created_dt", target = "createdDt")
-    @Mapping(source = "updated_by", target = "updatedBy")
-    @Mapping(source = "updated_dt", target = "updatedDt")
     SubjectResponse toDto(Subject subject);
 
-    // Update mapping
-    @Mapping(source = "subjectNm", target = "subject_nm")
-    @Mapping(source = "subjectShortCd", target = "subject_short_cd")
-    @Mapping(source = "subjectCategory", target = "subject_category")
+    // Update existing entity (UPDATE)
+    @BeanMapping(ignoreByDefault = true)
+    @Mapping(source = "subjectNm", target = "subjectNm")
+    @Mapping(source = "subjectShortCd", target = "subjectShortCd")
+    @Mapping(source = "subjectCategory", target = "subjectCategory")
     @Mapping(source = "description", target = "description")
     void updateSubjectFromRequest(
             SubjectRequest request,

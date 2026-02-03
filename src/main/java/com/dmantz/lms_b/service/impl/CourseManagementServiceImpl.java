@@ -56,8 +56,8 @@ public class CourseManagementServiceImpl implements CourseManagementService {
                 });
 
         Subject subject = subjectMapper.toEntity(requestDto);
-        subject.setCreated_by(staffId);
-        subject.setCreated_dt(LocalDateTime.now());
+        subject.setCreatedBy(staffId);
+        subject.setCreatedDt(LocalDateTime.now());
 
         Subject savedSubject = subjectRepository.save(subject);
         return subjectMapper.toDto(savedSubject);
@@ -108,8 +108,8 @@ public class CourseManagementServiceImpl implements CourseManagementService {
         // Update fields using MapStruct
         subjectMapper.updateSubjectFromRequest(requestDto, subject);
 
-        subject.setUpdated_by(staffId);
-        subject.setUpdated_dt(LocalDateTime.now());
+        subject.setUpdatedBy(staffId);
+        subject.setUpdatedDt(LocalDateTime.now());
 
         Subject updatedSubject = subjectRepository.save(subject);
         return subjectMapper.toDto(updatedSubject);
@@ -134,8 +134,8 @@ public class CourseManagementServiceImpl implements CourseManagementService {
                 );
 
         // Audit before delete (optional but good)
-        subject.setUpdated_by(staffId);
-        subject.setUpdated_dt(LocalDateTime.now());
+        subject.setUpdatedBy(staffId);
+        subject.setUpdatedDt(LocalDateTime.now());
 
         subjectRepository.delete(subject);
 

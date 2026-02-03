@@ -2,6 +2,7 @@ package com.dmantz.lms_b.entity;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,35 +15,33 @@ public class Subject {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-
-	private String subject_nm;
-	private String subject_short_cd;
-	private String subject_category;
+	
+	@Column(name = "subject_nm")
+	private String subjectNm;
+	
+	@Column(name = "subject_short_cd")
+	private String subjectShortCd;
+	
+	@Column(name = "subject_category")
+	private String subjectCategory;
+	
 	private String description;
+	
+	@Column(name = "created_by")
+	private Long createdBy;
+	
+	@Column(name = "created_dt")
+	private LocalDateTime createdDt;
 
-	private Long created_by;
-	private LocalDateTime created_dt;
-
-	private Long updated_by;
-	private LocalDateTime updated_dt;
+	@Column(name = "updated_by")
+	private Long updatedBy;
+	
+	@Column(name = "updated_dt")
+	private LocalDateTime updatedDt;
 
 	public Subject() {
 		super();
 		// TODO Auto-generated constructor stub
-	}
-
-	public Subject(Long id, String subject_nm, String subject_short_cd, String subject_category, String description,
-			Long created_by, LocalDateTime created_dt, Long updated_by, LocalDateTime updated_dt) {
-		super();
-		this.id = id;
-		this.subject_nm = subject_nm;
-		this.subject_short_cd = subject_short_cd;
-		this.subject_category = subject_category;
-		this.description = description;
-		this.created_by = created_by;
-		this.created_dt = created_dt;
-		this.updated_by = updated_by;
-		this.updated_dt = updated_dt;
 	}
 
 	public Long getId() {
@@ -53,28 +52,28 @@ public class Subject {
 		this.id = id;
 	}
 
-	public String getSubject_nm() {
-		return subject_nm;
+	public String getSubjectNm() {
+		return subjectNm;
 	}
 
-	public void setSubject_nm(String subject_nm) {
-		this.subject_nm = subject_nm;
+	public void setSubjectNm(String subjectNm) {
+		this.subjectNm = subjectNm;
 	}
 
-	public String getSubject_short_cd() {
-		return subject_short_cd;
+	public String getSubjectShortCd() {
+		return subjectShortCd;
 	}
 
-	public void setSubject_short_cd(String subject_short_cd) {
-		this.subject_short_cd = subject_short_cd;
+	public void setSubjectShortCd(String subjectShortCd) {
+		this.subjectShortCd = subjectShortCd;
 	}
 
-	public String getSubject_category() {
-		return subject_category;
+	public String getSubjectCategory() {
+		return subjectCategory;
 	}
 
-	public void setSubject_category(String subject_category) {
-		this.subject_category = subject_category;
+	public void setSubjectCategory(String subjectCategory) {
+		this.subjectCategory = subjectCategory;
 	}
 
 	public String getDescription() {
@@ -85,36 +84,38 @@ public class Subject {
 		this.description = description;
 	}
 
-	public Long getCreated_by() {
-		return created_by;
+	public Long getCreatedBy() {
+		return createdBy;
 	}
 
-	public void setCreated_by(Long created_by) {
-		this.created_by = created_by;
+	public void setCreatedBy(Long createdBy) {
+		this.createdBy = createdBy;
 	}
 
-	public LocalDateTime getCreated_dt() {
-		return created_dt;
+	public LocalDateTime getCreatedDt() {
+		return createdDt;
 	}
 
-	public void setCreated_dt(LocalDateTime created_dt) {
-		this.created_dt = created_dt;
+	public void setCreatedDt(LocalDateTime createdDt) {
+		this.createdDt = createdDt;
 	}
 
-	public Long getUpdated_by() {
-		return updated_by;
+	public Long getUpdatedBy() {
+		return updatedBy;
 	}
 
-	public void setUpdated_by(Long updated_by) {
-		this.updated_by = updated_by;
+	public void setUpdatedBy(Long updatedBy) {
+		this.updatedBy = updatedBy;
 	}
 
-	public LocalDateTime getUpdated_dt() {
-		return updated_dt;
+	public LocalDateTime getUpdatedDt() {
+		return updatedDt;
 	}
 
-	public void setUpdated_dt(LocalDateTime updated_dt) {
-		this.updated_dt = updated_dt;
+	public void setUpdatedDt(LocalDateTime updatedDt) {
+		this.updatedDt = updatedDt;
 	}
+
+	
 
 }
