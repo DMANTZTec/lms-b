@@ -19,14 +19,14 @@ public class Role {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	private String role_nm;
-	private String role_desc;
+	private String roleNm;
+	private String roleDesc;
 
-	private Long created_by;
-	private LocalDateTime created_dt;
+	private Long createdBy;
+	private LocalDateTime createdDt;
 
-	private Long updated_by;
-	private LocalDateTime updated_dt;
+	private Long updatedBy;
+	private LocalDateTime updatedDt;
 
 	@ManyToMany(mappedBy = "roles")
 	private Set<Staff> staff;
@@ -40,52 +40,52 @@ public class Role {
 		this.id = id;
 	}
 
-	public String getRole_nm() {
-		return role_nm;
+	public String getRoleNm() {
+		return roleNm;
 	}
 
-	public void setRole_nm(String role_nm) {
-		this.role_nm = role_nm;
+	public void setRoleNm(String roleNm) {
+		this.roleNm = roleNm;
 	}
 
-	public String getRole_desc() {
-		return role_desc;
+	public String getRoleDesc() {
+		return roleDesc;
 	}
 
-	public void setRole_desc(String role_desc) {
-		this.role_desc = role_desc;
+	public void setRoleDesc(String roleDesc) {
+		this.roleDesc = roleDesc;
 	}
 
-	public Long getCreated_by() {
-		return created_by;
+	public Long getCreatedBy() {
+		return createdBy;
 	}
 
-	public void setCreated_by(Long created_by) {
-		this.created_by = created_by;
+	public void setCreatedBy(Long createdBy) {
+		this.createdBy = createdBy;
 	}
 
-	public LocalDateTime getCreated_dt() {
-		return created_dt;
+	public LocalDateTime getCreatedDt() {
+		return createdDt;
 	}
 
-	public void setCreated_dt(LocalDateTime created_dt) {
-		this.created_dt = created_dt;
+	public void setCreatedDt(LocalDateTime createdDt) {
+		this.createdDt = createdDt;
 	}
 
-	public Long getUpdated_by() {
-		return updated_by;
+	public Long getUpdatedBy() {
+		return updatedBy;
 	}
 
-	public void setUpdated_by(Long updated_by) {
-		this.updated_by = updated_by;
+	public void setUpdatedBy(Long updatedBy) {
+		this.updatedBy = updatedBy;
 	}
 
-	public LocalDateTime getUpdated_dt() {
-		return updated_dt;
+	public LocalDateTime getUpdatedDt() {
+		return updatedDt;
 	}
 
-	public void setUpdated_dt(LocalDateTime updated_dt) {
-		this.updated_dt = updated_dt;
+	public void setUpdatedDt(LocalDateTime updatedDt) {
+		this.updatedDt = updatedDt;
 	}
 
 	public Set<Staff> getStaff() {
@@ -100,16 +100,15 @@ public class Role {
 	public String toString() {
 		return "Role{" +
 				"id=" + id +
-				", role_nm='" + role_nm + '\'' +
-				", role_desc='" + role_desc + '\'' +
-				", created_by=" + created_by +
-				", created_dt=" + created_dt +
-				", updated_by=" + updated_by +
-				", updated_dt=" + updated_dt +
+				", roleNm='" + roleNm + '\'' +
+				", roleDesc='" + roleDesc + '\'' +
+				", createdBy=" + createdBy +
+				", createdDt=" + createdDt +
+				", updatedBy=" + updatedBy +
+				", updatedDt=" + updatedDt +
 				", staff=" + staff +
 				'}';
 	}
-
 }
 
 

@@ -24,10 +24,10 @@ public class Staff {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	private String staff_id;
+	private String staffId;
 
-	private String first_nm;
-	private String last_nm;
+	private String firstNm;
+	private String lastNm;
 
 	private String addr1;
 	private String addr2;
@@ -36,8 +36,8 @@ public class Staff {
 	private String country;
 	private String pin;
 
-	private String email_id;
-	private String mobile_num;
+	private String emailId;
+	private String mobileNum;
 
 	private String password;
 
@@ -46,19 +46,19 @@ public class Staff {
 
 	private String designation;
 
-	private String emergency_contact_nm;
-	private String emergency_contact_num;
+	private String emergencyContactNm;
+	private String emergencyContactNum;
 
 	@Lob
-	private byte[] profile_img;
+	private byte[] profileImg;
 
 	private LocalDate dob;
 
-	private Long created_by;
-	private LocalDateTime created_dt;
+	private Long createdBy;
+	private LocalDateTime createdDt;
 
-	private Long updated_by;
-	private LocalDateTime updated_dt;
+	private Long updatedBy;
+	private LocalDateTime updatedDt;
 
 	@ManyToMany
 	@JoinTable(
@@ -77,28 +77,28 @@ public class Staff {
 		this.id = id;
 	}
 
-	public String getStaff_id() {
-		return staff_id;
+	public String getStaffId() {
+		return staffId;
 	}
 
-	public void setStaff_id(String staff_id) {
-		this.staff_id = staff_id;
+	public void setStaffId(String staffId) {
+		this.staffId = staffId;
 	}
 
-	public String getFirst_nm() {
-		return first_nm;
+	public String getFirstNm() {
+		return firstNm;
 	}
 
-	public void setFirst_nm(String first_nm) {
-		this.first_nm = first_nm;
+	public void setFirstNm(String firstNm) {
+		this.firstNm = firstNm;
 	}
 
-	public String getLast_nm() {
-		return last_nm;
+	public String getLastNm() {
+		return lastNm;
 	}
 
-	public void setLast_nm(String last_nm) {
-		this.last_nm = last_nm;
+	public void setLastNm(String lastNm) {
+		this.lastNm = lastNm;
 	}
 
 	public String getAddr1() {
@@ -149,20 +149,20 @@ public class Staff {
 		this.pin = pin;
 	}
 
-	public String getEmail_id() {
-		return email_id;
+	public String getEmailId() {
+		return emailId;
 	}
 
-	public void setEmail_id(String email_id) {
-		this.email_id = email_id;
+	public void setEmailId(String emailId) {
+		this.emailId = emailId;
 	}
 
-	public String getMobile_num() {
-		return mobile_num;
+	public String getMobileNum() {
+		return mobileNum;
 	}
 
-	public void setMobile_num(String mobile_num) {
-		this.mobile_num = mobile_num;
+	public void setMobileNum(String mobileNum) {
+		this.mobileNum = mobileNum;
 	}
 
 	public String getPassword() {
@@ -197,28 +197,28 @@ public class Staff {
 		this.designation = designation;
 	}
 
-	public String getEmergency_contact_nm() {
-		return emergency_contact_nm;
+	public String getEmergencyContactNm() {
+		return emergencyContactNm;
 	}
 
-	public void setEmergency_contact_nm(String emergency_contact_nm) {
-		this.emergency_contact_nm = emergency_contact_nm;
+	public void setEmergencyContactNm(String emergencyContactNm) {
+		this.emergencyContactNm = emergencyContactNm;
 	}
 
-	public String getEmergency_contact_num() {
-		return emergency_contact_num;
+	public String getEmergencyContactNum() {
+		return emergencyContactNum;
 	}
 
-	public void setEmergency_contact_num(String emergency_contact_num) {
-		this.emergency_contact_num = emergency_contact_num;
+	public void setEmergencyContactNum(String emergencyContactNum) {
+		this.emergencyContactNum = emergencyContactNum;
 	}
 
-	public byte[] getProfile_img() {
-		return profile_img;
+	public byte[] getProfileImg() {
+		return profileImg;
 	}
 
-	public void setProfile_img(byte[] profile_img) {
-		this.profile_img = profile_img;
+	public void setProfileImg(byte[] profileImg) {
+		this.profileImg = profileImg;
 	}
 
 	public LocalDate getDob() {
@@ -229,36 +229,36 @@ public class Staff {
 		this.dob = dob;
 	}
 
-	public Long getCreated_by() {
-		return created_by;
+	public Long getCreatedBy() {
+		return createdBy;
 	}
 
-	public void setCreated_by(Long created_by) {
-		this.created_by = created_by;
+	public void setCreatedBy(Long createdBy) {
+		this.createdBy = createdBy;
 	}
 
-	public LocalDateTime getCreated_dt() {
-		return created_dt;
+	public LocalDateTime getCreatedDt() {
+		return createdDt;
 	}
 
-	public void setCreated_dt(LocalDateTime created_dt) {
-		this.created_dt = created_dt;
+	public void setCreatedDt(LocalDateTime createdDt) {
+		this.createdDt = createdDt;
 	}
 
-	public Long getUpdated_by() {
-		return updated_by;
+	public Long getUpdatedBy() {
+		return updatedBy;
 	}
 
-	public void setUpdated_by(Long updated_by) {
-		this.updated_by = updated_by;
+	public void setUpdatedBy(Long updatedBy) {
+		this.updatedBy = updatedBy;
 	}
 
-	public LocalDateTime getUpdated_dt() {
-		return updated_dt;
+	public LocalDateTime getUpdatedDt() {
+		return updatedDt;
 	}
 
-	public void setUpdated_dt(LocalDateTime updated_dt) {
-		this.updated_dt = updated_dt;
+	public void setUpdatedDt(LocalDateTime updatedDt) {
+		this.updatedDt = updatedDt;
 	}
 
 	public Set<Role> getRoles() {
@@ -273,29 +273,29 @@ public class Staff {
 	public String toString() {
 		return "Staff{" +
 				"id=" + id +
-				", staff_id='" + staff_id + '\'' +
-				", first_nm='" + first_nm + '\'' +
-				", last_nm='" + last_nm + '\'' +
+				", staffId='" + staffId + '\'' +
+				", firstNm='" + firstNm + '\'' +
+				", lastNm='" + lastNm + '\'' +
 				", addr1='" + addr1 + '\'' +
 				", addr2='" + addr2 + '\'' +
 				", city='" + city + '\'' +
 				", state='" + state + '\'' +
 				", country='" + country + '\'' +
 				", pin='" + pin + '\'' +
-				", email_id='" + email_id + '\'' +
-				", mobile_num='" + mobile_num + '\'' +
+				", emailId='" + emailId + '\'' +
+				", mobileNum='" + mobileNum + '\'' +
 				", password='" + password + '\'' +
 				", status='" + status + '\'' +
 				", enabled='" + enabled + '\'' +
 				", designation='" + designation + '\'' +
-				", emergency_contact_nm='" + emergency_contact_nm + '\'' +
-				", emergency_contact_num='" + emergency_contact_num + '\'' +
-				", profile_img=" + Arrays.toString(profile_img) +
+				", emergencyContactNm='" + emergencyContactNm + '\'' +
+				", emergencyContactNum='" + emergencyContactNum + '\'' +
+				", profileImg=" + Arrays.toString(profileImg) +
 				", dob=" + dob +
-				", created_by=" + created_by +
-				", created_dt=" + created_dt +
-				", updated_by=" + updated_by +
-				", updated_dt=" + updated_dt +
+				", createdBy=" + createdBy +
+				", createdDt=" + createdDt +
+				", updatedBy=" + updatedBy +
+				", updatedDt=" + updatedDt +
 				", roles=" + roles +
 				'}';
 	}

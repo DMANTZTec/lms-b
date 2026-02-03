@@ -20,11 +20,11 @@ public class StaffRole {
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
-    private Long created_by;
-    private LocalDateTime created_dt;
+    private Long createdBy;
+    private LocalDateTime createdDt;
 
-    private Long updated_by;
-    private LocalDateTime updated_dt;
+    private Long updatedBy;
+    private LocalDateTime updatedDt;
 
     public Long getId() {
         return id;
@@ -50,36 +50,36 @@ public class StaffRole {
         this.role = role;
     }
 
-    public Long getCreated_by() {
-        return created_by;
+    public Long getCreatedBy() {
+        return createdBy;
     }
 
-    public void setCreated_by(Long created_by) {
-        this.created_by = created_by;
+    public void setCreatedBy(Long createdBy) {
+        this.createdBy = createdBy;
     }
 
-    public LocalDateTime getCreated_dt() {
-        return created_dt;
+    public LocalDateTime getCreatedDt() {
+        return createdDt;
     }
 
-    public void setCreated_dt(LocalDateTime created_dt) {
-        this.created_dt = created_dt;
+    public void setCreatedDt(LocalDateTime createdDt) {
+        this.createdDt = createdDt;
     }
 
-    public Long getUpdated_by() {
-        return updated_by;
+    public Long getUpdatedBy() {
+        return updatedBy;
     }
 
-    public void setUpdated_by(Long updated_by) {
-        this.updated_by = updated_by;
+    public void setUpdatedBy(Long updatedBy) {
+        this.updatedBy = updatedBy;
     }
 
-    public LocalDateTime getUpdated_dt() {
-        return updated_dt;
+    public LocalDateTime getUpdatedDt() {
+        return updatedDt;
     }
 
-    public void setUpdated_dt(LocalDateTime updated_dt) {
-        this.updated_dt = updated_dt;
+    public void setUpdatedDt(LocalDateTime updatedDt) {
+        this.updatedDt = updatedDt;
     }
 
     @Override
@@ -88,10 +88,10 @@ public class StaffRole {
                 "id=" + id +
                 ", staff=" + staff +
                 ", role=" + role +
-                ", created_by=" + created_by +
-                ", created_dt=" + created_dt +
-                ", updated_by=" + updated_by +
-                ", updated_dt=" + updated_dt +
+                ", createdBy=" + createdBy +
+                ", createdDt=" + createdDt +
+                ", updatedBy=" + updatedBy +
+                ", updatedDt=" + updatedDt +
                 '}';
     }
 }

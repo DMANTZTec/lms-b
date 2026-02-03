@@ -15,19 +15,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/staff")
 public class StaffController {
 
-    private final StaffService staffService;
+//    private final StaffService staffService;
+//
+//    public StaffController(StaffService staffService) {
+//        this.staffService = staffService;
+//    }
+//
+//
+//    @PostMapping("/register")
+//    public ResponseEntity<StaffResponse> registerStaff(
+//            @Valid @RequestBody StaffRegistrationRequest request) {
+//
+//        StaffResponse response = staffService.register_staff(request);
+//        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+//
+//    }
 
-    public StaffController(StaffService staffService) {
-        this.staffService = staffService;
-    }
-
-
-    @PostMapping("/register")
-    public ResponseEntity<StaffResponse> registerStaff(
-            @Valid @RequestBody StaffRegistrationRequest request) {
-
-        StaffResponse response = staffService.register_staff(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-
-    }
 }
