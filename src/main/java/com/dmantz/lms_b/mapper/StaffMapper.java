@@ -8,6 +8,7 @@ import com.dmantz.lms_b.entity.Staff;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -45,4 +46,8 @@ public interface StaffMapper {
                 .map(Role::getRoleNm)
                 .collect(java.util.stream.Collectors.toSet());
     }
+
+    List<StaffResponse> toResponseList(List<Staff> staffList);
+
+
 }

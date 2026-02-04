@@ -20,6 +20,15 @@ public interface StaffRepository extends JpaRepository<Staff, Long> {
 
     long count();
 
+    @Query("""
+        SELECT s FROM Staff s
+        WHERE s.emailId = :loginId
+           OR s.mobileNum = :loginId
+           OR s.staffId = :loginId
+    """)
+    Optional<Staff> findByLoginId(@Param("loginId") String loginId);
+
 
 
 }
+

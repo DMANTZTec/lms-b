@@ -5,17 +5,16 @@ import jakarta.validation.constraints.NotBlank;
 public class StaffLoginRequest {
 
     @NotBlank
-    private String emailId;
-
+    private String loginId;
     @NotBlank
     private String password;
 
-    public String getEmailId() {
-        return emailId;
+    public String getLoginId() {
+        return loginId;
     }
 
-    public void setEmailId(String emailId) {
-        this.emailId = emailId;
+    public void setLoginId(String loginId) {
+        this.loginId = loginId;
     }
 
     public String getPassword() {
@@ -29,7 +28,7 @@ public class StaffLoginRequest {
     @Override
     public String toString() {
         return "StaffLoginRequest{" +
-                "emailId='" + emailId + '\'' +
+                "loginId='" + loginId + '\'' +
                 ", password='" + password + '\'' +
                 '}';
     }

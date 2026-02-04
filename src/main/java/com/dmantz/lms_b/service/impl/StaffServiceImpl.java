@@ -1,9 +1,7 @@
 package com.dmantz.lms_b.service.impl;
 
-import com.dmantz.lms_b.dto.request.ForgotPasswordRequest;
-import com.dmantz.lms_b.dto.request.StaffLoginRequest;
-import com.dmantz.lms_b.dto.request.StaffRegistrationRequest;
-import com.dmantz.lms_b.dto.request.StaffResetPasswordRequest;
+import com.dmantz.lms_b.dto.request.*;
+import com.dmantz.lms_b.dto.response.OtpVerifyResponse;
 import com.dmantz.lms_b.dto.response.StaffLoginResponse;
 import com.dmantz.lms_b.dto.response.StaffPasswordResponse;
 import com.dmantz.lms_b.dto.response.StaffResponse;
@@ -83,7 +81,7 @@ public class StaffServiceImpl implements StaffService {
 
         //  First staff must be ADMIN
         if (isFirstStaff && request.getRoles().stream()
-                .noneMatch(r -> "ADMIN".equalsIgnoreCase(r))) {
+                .noneMatch("ADMIN"::equalsIgnoreCase)) {
             throw new RuntimeException("First staff must have ADMIN role");
         }
 
@@ -153,8 +151,8 @@ public class StaffServiceImpl implements StaffService {
     @Override
     public StaffLoginResponse login(StaffLoginRequest request) {
 
-        Staff staff = staffRepository.findByEmailId(request.getEmailId())
-                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+        Staff staff = staffRepository.findByLoginId(request.getLoginId())
+                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
 
         if (!"Y".equalsIgnoreCase(staff.getEnabled())) {
             throw new RuntimeException("Staff account is disabled");
@@ -196,33 +194,28 @@ public class StaffServiceImpl implements StaffService {
         return response;
     }
 
-    @Override
-    @Transactional
-    public StaffLoginResponse verifyOtp(String staffId, String otpValue) {
 
-        otpValue = otpValue.trim();
+    @Override
+    public OtpVerifyResponse verifyStaffOtp(StaffOtpVerifyRequest request) {
 
         StaffOtp otp = staffOtpRepository
-                .findTopByStaffIdOrderByIdDesc(staffId)
+                .findTopByStaffIdOrderByCreatedDtDesc(request.getStaffId())
                 .orElseThrow(() -> new RuntimeException("OTP not found"));
 
-        // Status check HERE (not in query)
         if (otp.getStatus() != OtpStatus.SENT) {
-            throw new RuntimeException("OTP already used or expired");
+            throw new RuntimeException("OTP is not valid");
         }
 
-        if (otp.getAttemptsNum() == null) {
-            otp.setAttemptsNum(0);
-        }
-
-        if (otp.getAttemptsNum() >= 3) {
+        if (otp.getCreatedDt().isBefore(LocalDateTime.now().minusMinutes(5))) {
             otp.setStatus(OtpStatus.EXPIRED);
+            otp.setUpdatedDt(LocalDateTime.now());
             staffOtpRepository.save(otp);
-            throw new RuntimeException("OTP attempts exceeded");
+            throw new RuntimeException("OTP expired");
         }
 
-        if (!otp.getOtp().equals(otpValue)) {
+        if (!otp.getOtp().equals(request.getOtp())) {
             otp.setAttemptsNum(otp.getAttemptsNum() + 1);
+            otp.setUpdatedDt(LocalDateTime.now());
             staffOtpRepository.save(otp);
             throw new RuntimeException("Invalid OTP");
         }
@@ -231,10 +224,11 @@ public class StaffServiceImpl implements StaffService {
         otp.setUpdatedDt(LocalDateTime.now());
         staffOtpRepository.save(otp);
 
-        Staff staff = staffRepository.findByStaffId(staffId)
-                .orElseThrow(() -> new RuntimeException("Staff not found"));
+        OtpVerifyResponse response = new OtpVerifyResponse();
+        response.setVerified(true);
+        response.setMessage("OTP verified successfully");
 
-        return staffMapper.toLoginResponse(staff);
+        return response;
     }
 
 
@@ -314,6 +308,27 @@ public class StaffServiceImpl implements StaffService {
         response.setMessage("Password reset successful.");
 
         return response;
+    }
+
+    @Override
+    public List<StaffResponse> getAllStaff() {
+
+        List<Staff> staffList = staffRepository.findAll();
+
+        if (staffList.isEmpty()) {
+            throw new RuntimeException("No staff found");
+        }
+
+        return staffMapper.toResponseList(staffList);
+    }
+
+    @Override
+    public StaffResponse getStaffByStaffId(String staffId) {
+
+        Staff staff = staffRepository.findByStaffId(staffId)
+                .orElseThrow(() -> new RuntimeException("Staff not found"));
+
+        return staffMapper.toResponse(staff);
     }
 
 }

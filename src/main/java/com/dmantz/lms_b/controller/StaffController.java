@@ -1,6 +1,7 @@
 package com.dmantz.lms_b.controller;
 
 import com.dmantz.lms_b.dto.request.*;
+import com.dmantz.lms_b.dto.response.OtpVerifyResponse;
 import com.dmantz.lms_b.dto.response.StaffLoginResponse;
 import com.dmantz.lms_b.dto.response.StaffPasswordResponse;
 import com.dmantz.lms_b.dto.response.StaffResponse;
@@ -11,6 +12,8 @@ import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/staff")
@@ -50,10 +53,10 @@ public class StaffController {
         return ResponseEntity.ok(staffService.login(request));
     }
 
-    @PostMapping("/otp-verify")
-    public ResponseEntity<StaffLoginResponse> verifyOtp(
+    @PostMapping("/verify-otp")
+    public ResponseEntity<OtpVerifyResponse> verifyOtp(
             @RequestBody StaffOtpVerifyRequest request) {
-        return ResponseEntity.ok(staffService.verifyOtp(request.getStaffId(), request.getOtp()));
+        return ResponseEntity.ok(staffService.verifyStaffOtp(request));
     }
 
 
@@ -67,6 +70,16 @@ public class StaffController {
     public ResponseEntity<StaffPasswordResponse> resetPassword(
             @RequestBody StaffResetPasswordRequest request) {
         return ResponseEntity.ok(staffService.resetPassword(request));
+    }
+
+    @GetMapping("/view-staff")
+    public ResponseEntity<List<StaffResponse>> getAllStaff() {
+        return ResponseEntity.ok(staffService.getAllStaff());
+    }
+
+    @GetMapping("/{staffId}")
+    public ResponseEntity<StaffResponse> getStaffById(@PathVariable String staffId) {
+        return ResponseEntity.ok(staffService.getStaffByStaffId(staffId));
     }
 
 }

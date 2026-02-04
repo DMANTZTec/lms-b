@@ -32,6 +32,9 @@ public interface StaffOtpRepository extends JpaRepository<StaffOtp, UUID> {
             @Param("activeStatuses") List<OtpStatus> activeStatuses);
 
     Optional<StaffOtp> findTopByStaffIdAndStatusOrderByCreatedDtDesc(String staffId, OtpStatus status);
+
+    Optional<StaffOtp> findTopByStaffIdOrderByCreatedDtDesc(String staffId);
+
 }
 
 

@@ -20,4 +20,13 @@ public class StaffOtpVerifyRequest {
     public void setOtp(String otp) {
         this.otp = otp;
     }
+
+
+    @Override
+    public String toString() {
+        return "StaffOtpVerifyRequest{" +
+                "staffId='" + staffId + '\'' +
+                ", otp='" + otp + '\'' +
+                '}';
+    }
 }
