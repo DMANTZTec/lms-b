@@ -1,34 +1,72 @@
 package com.dmantz.lms_b.controller;
 
-import com.dmantz.lms_b.dto.request.StaffRegistrationRequest;
+import com.dmantz.lms_b.dto.request.*;
+import com.dmantz.lms_b.dto.response.StaffLoginResponse;
+import com.dmantz.lms_b.dto.response.StaffPasswordResponse;
 import com.dmantz.lms_b.dto.response.StaffResponse;
+import com.dmantz.lms_b.entity.Staff;
 import com.dmantz.lms_b.service.StaffService;
+
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
+
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/staff")
 public class StaffController {
 
-//    private final StaffService staffService;
-//
-//    public StaffController(StaffService staffService) {
-//        this.staffService = staffService;
-//    }
-//
-//
-//    @PostMapping("/register")
+    private final StaffService staffService;
+
+    public StaffController(StaffService staffService) {
+        this.staffService = staffService;
+    }
+
+//    @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE)
 //    public ResponseEntity<StaffResponse> registerStaff(
-//            @Valid @RequestBody StaffRegistrationRequest request) {
-//
-//        StaffResponse response = staffService.register_staff(request);
+//            @RequestBody @Valid StaffRegistrationRequest request,
+//            @AuthenticationPrincipal Staff loggedInStaff // Injected by Spring Security
+//    ) {
+//        StaffResponse response = staffService.registerStaff(request, loggedInStaff);
 //        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-//
 //    }
+
+    @PostMapping("/register")
+    public ResponseEntity<StaffResponse> registerStaff(
+            @RequestBody StaffRegistrationRequest request,
+            @RequestParam(required = false) String loggedInStaffId  // string staffId
+    ) {
+        Staff loggedInStaff = null;
+        if (loggedInStaffId != null) {
+            loggedInStaff = staffService.findByStaffId(loggedInStaffId)
+                    .orElseThrow(() -> new RuntimeException("Logged-in staff not found"));
+        }
+        StaffResponse response = staffService.registerStaff(request, loggedInStaff);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<StaffLoginResponse> login(@RequestBody @Valid StaffLoginRequest request) {
+        return ResponseEntity.ok(staffService.login(request));
+    }
+
+    @PostMapping("/otp-verify")
+    public ResponseEntity<StaffLoginResponse> verifyOtp(
+            @RequestBody StaffOtpVerifyRequest request) {
+        return ResponseEntity.ok(staffService.verifyOtp(request.getStaffId(), request.getOtp()));
+    }
+
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<StaffPasswordResponse> forgotPassword(
+            @RequestBody ForgotPasswordRequest request) {
+        return ResponseEntity.ok(staffService.forgotPassword(request));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<StaffPasswordResponse> resetPassword(
+            @RequestBody StaffResetPasswordRequest request) {
+        return ResponseEntity.ok(staffService.resetPassword(request));
+    }
 
 }

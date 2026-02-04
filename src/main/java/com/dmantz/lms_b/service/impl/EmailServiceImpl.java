@@ -51,6 +51,35 @@ public class EmailServiceImpl implements EmailService {
                                 "Regards,\nLMS Team";
                 break;
 
+            case STAFF_LOGIN:
+                subject = "Your LMS Staff Login OTP";
+                body =
+                        "Hello Staff,\n\n" +
+                                "Your OTP for logging into the LMS is: " + otp + "\n" +
+                                "Please use this OTP within 5 minutes.\n\n" +
+                                "Thank you,\nLMS Team";
+                break;
+
+            case STAFF_FORGOT_PASSWORD:
+                subject = "LMS Password Reset OTP";
+                body =
+                        "Hello Staff,\n\n" +
+                                "Your OTP to reset your LMS password is: " + otp + "\n" +
+                                "This OTP is valid for 10 minutes.\n\n" +
+                                "If you did not request this, please ignore this email.\n\n" +
+                                "Thanks,\nLMS Team";
+                break;
+
+            case STAFF_PASSWORD_RESET_SUCCESS:
+                subject = "LMS Password Reset Successful";
+                body =
+                        "Hello Staff,\n\n" +
+                                "Your LMS password has been reset successfully.\n\n" +
+                                "If this was not you, please contact support immediately.\n\n" +
+                                "Regards,\nLMS Team";
+                break;
+
+
 
             default:
                 throw new IllegalArgumentException("Invalid OTP purpose");

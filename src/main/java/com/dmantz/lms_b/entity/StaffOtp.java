@@ -24,8 +24,7 @@ public class StaffOtp {
 
     // Difference: No @ManyToOne, direct staff_id reference
     @Column(name = "staff_id", nullable = false)
-    private Long staffId;
-
+    private String staffId;
     @Column(name = "otp", nullable = false, length = 10)
     private String otp;
 
@@ -56,11 +55,11 @@ public class StaffOtp {
         this.id = id;
     }
 
-    public Long getStaffId() {
+    public String getStaffId() {
         return staffId;
     }
 
-    public void setStaffId(Long staffId) {
+    public void setStaffId(String staffId) {
         this.staffId = staffId;
     }
 
@@ -124,7 +123,7 @@ public class StaffOtp {
     public String toString() {
         return "StaffOtp{" +
                 "id=" + id +
-                ", staffId=" + staffId +
+                ", staffId='" + staffId + '\'' +
                 ", otp='" + otp + '\'' +
                 ", attemptsNum=" + attemptsNum +
                 ", status=" + status +

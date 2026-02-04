@@ -2,7 +2,6 @@ package com.dmantz.lms_b.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
@@ -10,10 +9,9 @@ import java.util.Set;
 
 public class StaffRegistrationRequest {
 
-
     @NotBlank
-    private String first_nm;
-    private String last_nm;
+    private String firstNm;
+    private String lastNm;
 
     private String addr1;
     private String addr2;
@@ -24,40 +22,43 @@ public class StaffRegistrationRequest {
 
     @Email
     @NotBlank
-    private String email_id;
+    private String emailId;
 
     @NotBlank
-    private String mobile_num;
+    private String mobileNum;
 
     @NotBlank
     @Size(min = 8, max = 20)
     private String password;
 
-    private String profile_img;
-
     @NotBlank
     private String designation;
 
-    private String emergency_contact_nm;
-    private String emergency_contact_num;
+    private String emergencyContactNm;
+    private String emergencyContactNum;
 
     private LocalDate dob;
 
+    // Base64 image
+    private String profileImgBase64;
 
-    public String getFirst_nm() {
-        return first_nm;
+    // Role names: ADMIN, STAFF, MENTOR
+    private Set<String> roles;
+
+    public String getFirstNm() {
+        return firstNm;
     }
 
-    public void setFirst_nm(String first_nm) {
-        this.first_nm = first_nm;
+    public void setFirstNm(String firstNm) {
+        this.firstNm = firstNm;
     }
 
-    public String getLast_nm() {
-        return last_nm;
+    public String getLastNm() {
+        return lastNm;
     }
 
-    public void setLast_nm(String last_nm) {
-        this.last_nm = last_nm;
+    public void setLastNm(String lastNm) {
+        this.lastNm = lastNm;
     }
 
     public String getAddr1() {
@@ -108,20 +109,20 @@ public class StaffRegistrationRequest {
         this.pin = pin;
     }
 
-    public String getEmail_id() {
-        return email_id;
+    public String getEmailId() {
+        return emailId;
     }
 
-    public void setEmail_id(String email_id) {
-        this.email_id = email_id;
+    public void setEmailId(String emailId) {
+        this.emailId = emailId;
     }
 
-    public String getMobile_num() {
-        return mobile_num;
+    public String getMobileNum() {
+        return mobileNum;
     }
 
-    public void setMobile_num(String mobile_num) {
-        this.mobile_num = mobile_num;
+    public void setMobileNum(String mobileNum) {
+        this.mobileNum = mobileNum;
     }
 
     public String getPassword() {
@@ -132,14 +133,6 @@ public class StaffRegistrationRequest {
         this.password = password;
     }
 
-    public String getProfile_img() {
-        return profile_img;
-    }
-
-    public void setProfile_img(String profile_img) {
-        this.profile_img = profile_img;
-    }
-
     public String getDesignation() {
         return designation;
     }
@@ -148,20 +141,20 @@ public class StaffRegistrationRequest {
         this.designation = designation;
     }
 
-    public String getEmergency_contact_nm() {
-        return emergency_contact_nm;
+    public String getEmergencyContactNm() {
+        return emergencyContactNm;
     }
 
-    public void setEmergency_contact_nm(String emergency_contact_nm) {
-        this.emergency_contact_nm = emergency_contact_nm;
+    public void setEmergencyContactNm(String emergencyContactNm) {
+        this.emergencyContactNm = emergencyContactNm;
     }
 
-    public String getEmergency_contact_num() {
-        return emergency_contact_num;
+    public String getEmergencyContactNum() {
+        return emergencyContactNum;
     }
 
-    public void setEmergency_contact_num(String emergency_contact_num) {
-        this.emergency_contact_num = emergency_contact_num;
+    public void setEmergencyContactNum(String emergencyContactNum) {
+        this.emergencyContactNum = emergencyContactNum;
     }
 
     public LocalDate getDob() {
@@ -172,26 +165,45 @@ public class StaffRegistrationRequest {
         this.dob = dob;
     }
 
+    public String getProfileImgBase64() {
+        return profileImgBase64;
+    }
+
+    public void setProfileImgBase64(String profileImgBase64) {
+        this.profileImgBase64 = profileImgBase64;
+    }
+
+    public Set<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<String> roles) {
+        this.roles = roles;
+    }
 
     @Override
     public String toString() {
         return "StaffRegistrationRequest{" +
-                "first_nm='" + first_nm + '\'' +
-                ", last_nm='" + last_nm + '\'' +
+                "firstNm='" + firstNm + '\'' +
+                ", lastNm='" + lastNm + '\'' +
                 ", addr1='" + addr1 + '\'' +
                 ", addr2='" + addr2 + '\'' +
                 ", city='" + city + '\'' +
                 ", state='" + state + '\'' +
                 ", country='" + country + '\'' +
                 ", pin='" + pin + '\'' +
-                ", email_id='" + email_id + '\'' +
-                ", mobile_num='" + mobile_num + '\'' +
+                ", emailId='" + emailId + '\'' +
+                ", mobileNum='" + mobileNum + '\'' +
                 ", password='" + password + '\'' +
-                ", profile_img='" + profile_img + '\'' +
                 ", designation='" + designation + '\'' +
-                ", emergency_contact_nm='" + emergency_contact_nm + '\'' +
-                ", emergency_contact_num='" + emergency_contact_num + '\'' +
+                ", emergencyContactNm='" + emergencyContactNm + '\'' +
+                ", emergencyContactNum='" + emergencyContactNum + '\'' +
                 ", dob=" + dob +
+                ", profileImgBase64='" + profileImgBase64 + '\'' +
+                ", roles=" + roles +
                 '}';
     }
 }
+
+
+

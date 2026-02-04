@@ -7,13 +7,13 @@ import java.util.Set;
 public class StaffResponse {
 
     private Long id;
-    private String staff_id;
+    private String staffId;
 
-    private String first_nm;
-    private String last_nm;
+    private String firstNm;
+    private String lastNm;
 
-    private String email_id;
-    private String mobile_num;
+    private String email;
+    private String mobileNum;
 
     private String designation;
 
@@ -22,8 +22,9 @@ public class StaffResponse {
 
     private LocalDate dob;
 
-    private LocalDateTime created_dt;
+    private LocalDateTime createdDt;
 
+    private Set<String> roles;
 
     public Long getId() {
         return id;
@@ -33,44 +34,44 @@ public class StaffResponse {
         this.id = id;
     }
 
-    public String getStaff_id() {
-        return staff_id;
+    public String getStaffId() {
+        return staffId;
     }
 
-    public void setStaff_id(String staff_id) {
-        this.staff_id = staff_id;
+    public void setStaffId(String staffId) {
+        this.staffId = staffId;
     }
 
-    public String getFirst_nm() {
-        return first_nm;
+    public String getFirstNm() {
+        return firstNm;
     }
 
-    public void setFirst_nm(String first_nm) {
-        this.first_nm = first_nm;
+    public void setFirstNm(String firstNm) {
+        this.firstNm = firstNm;
     }
 
-    public String getLast_nm() {
-        return last_nm;
+    public String getLastNm() {
+        return lastNm;
     }
 
-    public void setLast_nm(String last_nm) {
-        this.last_nm = last_nm;
+    public void setLastNm(String lastNm) {
+        this.lastNm = lastNm;
     }
 
-    public String getEmail_id() {
-        return email_id;
+    public String getEmail() {
+        return email;
     }
 
-    public void setEmail_id(String email_id) {
-        this.email_id = email_id;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public String getMobile_num() {
-        return mobile_num;
+    public String getMobileNum() {
+        return mobileNum;
     }
 
-    public void setMobile_num(String mobile_num) {
-        this.mobile_num = mobile_num;
+    public void setMobileNum(String mobileNum) {
+        this.mobileNum = mobileNum;
     }
 
     public String getDesignation() {
@@ -105,29 +106,37 @@ public class StaffResponse {
         this.dob = dob;
     }
 
-
-    public LocalDateTime getCreated_dt() {
-        return created_dt;
+    public LocalDateTime getCreatedDt() {
+        return createdDt;
     }
 
-    public void setCreated_dt(LocalDateTime created_dt) {
-        this.created_dt = created_dt;
+    public void setCreatedDt(LocalDateTime createdDt) {
+        this.createdDt = createdDt;
+    }
+
+    public Set<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<String> roles) {
+        this.roles = roles;
     }
 
     @Override
     public String toString() {
         return "StaffResponse{" +
                 "id=" + id +
-                ", staff_id='" + staff_id + '\'' +
-                ", first_nm='" + first_nm + '\'' +
-                ", last_nm='" + last_nm + '\'' +
-                ", email_id='" + email_id + '\'' +
-                ", mobile_num='" + mobile_num + '\'' +
+                ", staffId='" + staffId + '\'' +
+                ", firstNm='" + firstNm + '\'' +
+                ", lastNm='" + lastNm + '\'' +
+                ", email='" + email + '\'' +
+                ", mobileNum='" + mobileNum + '\'' +
                 ", designation='" + designation + '\'' +
                 ", status='" + status + '\'' +
                 ", enabled='" + enabled + '\'' +
                 ", dob=" + dob +
-                ", created_dt=" + created_dt +
+                ", createdDt=" + createdDt +
+                ", roles=" + roles +
                 '}';
     }
 }
