@@ -80,7 +80,7 @@ public class ProviderServiceImpl implements ProviderService {
 			throw new DuplicateValuesException("Provider name already exists");
 		}
 
-		providerMapper.updateEntityFromDto(request, provider);
+		providerMapper.updateEntityFromRequest(request, provider);
 		provider.setUpdated_by(staffId);
 		provider.setUpdated_dt(LocalDateTime.now());
 
@@ -101,17 +101,5 @@ public class ProviderServiceImpl implements ProviderService {
 		providerRepository.delete(provider);
 	}
 
-	// ================= DELETE ALL =================
-	@Override
-	public void deleteAllProviders(Long staffId) {
-
-		staffRepository.findById(staffId)
-				.orElseThrow(() -> new ResourceNotFoundException("Staff not found with id: " + staffId));
-
-		if (providerRepository.count() == 0) {
-			throw new ResourceNotFoundException("No providers found to delete");
-		}
-
-		providerRepository.deleteAll();
-	}
+	
 }

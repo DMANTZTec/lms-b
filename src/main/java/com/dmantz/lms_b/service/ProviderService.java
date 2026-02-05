@@ -16,7 +16,6 @@ public interface ProviderService {
 	            ProviderRequest request,
 	            Long staffId);
 	    void deleteProvider(Long providerId, Long staffId);
-	    void deleteAllProviders(Long staffId);
 
 	}
 

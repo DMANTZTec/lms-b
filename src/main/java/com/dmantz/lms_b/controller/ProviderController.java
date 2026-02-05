@@ -58,10 +58,5 @@ public class ProviderController {
 		return ResponseEntity.noContent().build();
 	}
 
-	@DeleteMapping
-	public ResponseEntity<Void> deleteAllProviders(@RequestParam Long staffId) {
-
-		providerService.deleteAllProviders(staffId);
-		return ResponseEntity.noContent().build();
-	}
+	
 }
