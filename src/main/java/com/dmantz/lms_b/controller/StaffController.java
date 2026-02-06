@@ -82,4 +82,13 @@ public class StaffController {
         return ResponseEntity.ok(staffService.getStaffByStaffId(staffId));
     }
 
-}
+    @PostMapping("/admin-register")
+    public ResponseEntity<StaffResponse> registerInitialAdmin(
+            @RequestBody @Valid StaffRegistrationRequest request) {
+
+        return ResponseEntity.ok(
+                staffService.registerInitialAdmin(request)
+        );
+      }
+
+    }

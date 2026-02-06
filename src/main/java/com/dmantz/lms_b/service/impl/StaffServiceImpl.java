@@ -331,6 +331,64 @@ public class StaffServiceImpl implements StaffService {
         return staffMapper.toResponse(staff);
     }
 
+    @Transactional
+    @Override
+    public StaffResponse registerInitialAdmin(StaffRegistrationRequest request) {
+
+        //  Check if staff already exists
+        if (staffRepository.count() > 0) {
+            throw new RuntimeException("Initial admin already created");
+        }
+
+        //  Validate ADMIN role
+        if (request.getRoles() == null ||
+                request.getRoles().stream()
+                        .noneMatch(r -> "ADMIN".equalsIgnoreCase(r))) {
+
+            throw new RuntimeException("Initial staff must have ADMIN role");
+        }
+
+        //  Email uniqueness
+        staffRepository.findByEmailId(request.getEmailId())
+                .ifPresent(s -> {
+                    throw new RuntimeException("Email already exists");
+                });
+
+
+        Staff staff = staffMapper.toEntity(request);
+
+        staff.setStaffId(generateStaffId());
+        staff.setPassword(passwordEncoder.encode(request.getPassword()));
+        staff.setStatus("ACTIVE");
+        staff.setEnabled("Y");
+        staff.setCreatedDt(LocalDateTime.now());
+        staff.setCreatedBy(null); // system created
+
+        //  Profile image (optional)
+        if (request.getProfileImgBase64() != null &&
+                !request.getProfileImgBase64().isBlank()) {
+
+            String base64 = request.getProfileImgBase64();
+            if (base64.contains(",")) {
+                base64 = base64.substring(base64.indexOf(",") + 1);
+            }
+            staff.setProfileImg(Base64.getDecoder().decode(base64));
+        }
+
+        // Assign ADMIN role
+        Set<Role> roles = request.getRoles().stream()
+                .map(r -> r.trim().toUpperCase())
+                .map(roleNm -> roleRepository.findByRoleNm(roleNm)
+                        .orElseThrow(() -> new RuntimeException(roleNm + " role not found")))
+                .collect(Collectors.toSet());
+
+        staff.setRoles(roles);
+
+        Staff saved = staffRepository.save(staff);
+        return staffMapper.toResponse(saved);
+    }
+
+
 }
 
 

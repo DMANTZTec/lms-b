@@ -31,4 +31,7 @@ public interface StaffService {
 
     StaffResponse getStaffByStaffId(String staffId);
 
+    @Transactional
+    StaffResponse registerInitialAdmin(StaffRegistrationRequest request);
 }
+

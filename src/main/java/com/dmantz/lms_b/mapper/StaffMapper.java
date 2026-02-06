@@ -30,6 +30,7 @@ public interface StaffMapper {
     Staff toEntity(StaffRegistrationRequest request);
 
     // Entity → Response
+    @Mapping(source = "emailId", target = "email")
     StaffResponse toResponse(Staff staff);
 
     @Mapping(target = "staffId", source = "staffId")
