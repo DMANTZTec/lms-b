@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,57 +18,85 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="staff")
+@Table(name = "staff")
 public class Staff {
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+
 	private String staffId;
 
+	@Column(name = "first_nm")
 	private String firstNm;
+
+	@Column(name = "last_nm")
 	private String lastNm;
 
+	@Column(name = "addr1")
 	private String addr1;
+
+	@Column(name = "addr2")
 	private String addr2;
+
+	@Column(name = "city")
 	private String city;
+
+	@Column(name = "state")
 	private String state;
+
+	@Column(name = "country")
 	private String country;
+
+	@Column(name = "pin")
 	private String pin;
 
+	@Column(name = "email_id")
 	private String emailId;
+
+	@Column(name = "mobile_num")
 	private String mobileNum;
 
+	@Column(name = "password")
 	private String password;
 
+	@Column(name = "status")
 	private String status;
+
+	@Column(name = "enabled")
 	private String enabled;
 
+	@Column(name = "designation")
 	private String designation;
 
+	@Column(name = "emergency_contact_nm")
 	private String emergencyContactNm;
+
+	@Column(name = "emergency_contact_num")
 	private String emergencyContactNum;
 
 	@Lob
+	@Column(name = "profile_img")
 	private byte[] profileImg;
 
+	@Column(name = "dob")
 	private LocalDate dob;
 
+	@Column(name = "created_by")
 	private Long createdBy;
+
+	@Column(name = "created_dt")
 	private LocalDateTime createdDt;
 
+	@Column(name = "updated_by")
 	private Long updatedBy;
+
+	@Column(name = "updated_dt")
 	private LocalDateTime updatedDt;
 
 	@ManyToMany
-	@JoinTable(
-			name = "staff_role",
-			joinColumns = @JoinColumn(name = "staff_id"),
-			inverseJoinColumns = @JoinColumn(name = "role_id")
-	)
+	@JoinTable(name = "staff_role", joinColumns = @JoinColumn(name = "staff_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private Set<Role> roles = new HashSet<>();
-
 
 	public Long getId() {
 		return id;
@@ -271,32 +300,14 @@ public class Staff {
 
 	@Override
 	public String toString() {
-		return "Staff{" +
-				"id=" + id +
-				", staffId='" + staffId + '\'' +
-				", firstNm='" + firstNm + '\'' +
-				", lastNm='" + lastNm + '\'' +
-				", addr1='" + addr1 + '\'' +
-				", addr2='" + addr2 + '\'' +
-				", city='" + city + '\'' +
-				", state='" + state + '\'' +
-				", country='" + country + '\'' +
-				", pin='" + pin + '\'' +
-				", emailId='" + emailId + '\'' +
-				", mobileNum='" + mobileNum + '\'' +
-				", password='" + password + '\'' +
-				", status='" + status + '\'' +
-				", enabled='" + enabled + '\'' +
-				", designation='" + designation + '\'' +
-				", emergencyContactNm='" + emergencyContactNm + '\'' +
-				", emergencyContactNum='" + emergencyContactNum + '\'' +
-				", profileImg=" + Arrays.toString(profileImg) +
-				", dob=" + dob +
-				", createdBy=" + createdBy +
-				", createdDt=" + createdDt +
-				", updatedBy=" + updatedBy +
-				", updatedDt=" + updatedDt +
-				", roles=" + roles +
-				'}';
+		return "Staff{" + "id=" + id + ", staffId='" + staffId + '\'' + ", firstNm='" + firstNm + '\'' + ", lastNm='"
+				+ lastNm + '\'' + ", addr1='" + addr1 + '\'' + ", addr2='" + addr2 + '\'' + ", city='" + city + '\''
+				+ ", state='" + state + '\'' + ", country='" + country + '\'' + ", pin='" + pin + '\'' + ", emailId='"
+				+ emailId + '\'' + ", mobileNum='" + mobileNum + '\'' + ", password='" + password + '\'' + ", status='"
+				+ status + '\'' + ", enabled='" + enabled + '\'' + ", designation='" + designation + '\''
+				+ ", emergencyContactNm='" + emergencyContactNm + '\'' + ", emergencyContactNum='" + emergencyContactNum
+				+ '\'' + ", profileImg=" + Arrays.toString(profileImg) + ", dob=" + dob + ", createdBy=" + createdBy
+				+ ", createdDt=" + createdDt + ", updatedBy=" + updatedBy + ", updatedDt=" + updatedDt + ", roles="
+				+ roles + '}';
 	}
 }

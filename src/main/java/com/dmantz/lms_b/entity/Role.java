@@ -3,6 +3,7 @@ package com.dmantz.lms_b.entity;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -10,27 +11,34 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 
-
 @Entity
-@Table(name="role")
+@Table(name = "role")
 public class Role {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@Column(name = "role_nm")
 	private String roleNm;
+
+	@Column(name = "role_desc")
 	private String roleDesc;
 
+	@Column(name = "created_by")
 	private Long createdBy;
+
+	@Column(name = "created_dt")
 	private LocalDateTime createdDt;
 
+	@Column(name = "updated_by")
 	private Long updatedBy;
+
+	@Column(name = "updated_dt")
 	private LocalDateTime updatedDt;
 
 	@ManyToMany(mappedBy = "roles")
 	private Set<Staff> staff;
-
 
 	public Long getId() {
 		return id;
@@ -98,18 +106,8 @@ public class Role {
 
 	@Override
 	public String toString() {
-		return "Role{" +
-				"id=" + id +
-				", roleNm='" + roleNm + '\'' +
-				", roleDesc='" + roleDesc + '\'' +
-				", createdBy=" + createdBy +
-				", createdDt=" + createdDt +
-				", updatedBy=" + updatedBy +
-				", updatedDt=" + updatedDt +
-				", staff=" + staff +
-				'}';
+		return "Role{" + "id=" + id + ", roleNm='" + roleNm + '\'' + ", roleDesc='" + roleDesc + '\'' + ", createdBy="
+				+ createdBy + ", createdDt=" + createdDt + ", updatedBy=" + updatedBy + ", updatedDt=" + updatedDt
+				+ ", staff=" + staff + '}';
 	}
 }
-
-
-

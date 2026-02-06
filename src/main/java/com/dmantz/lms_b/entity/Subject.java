@@ -15,34 +15,30 @@ public class Subject {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
+
 	@Column(name = "subject_nm")
 	private String subjectNm;
-	
+
 	@Column(name = "subject_short_cd")
 	private String subjectShortCd;
-	
+
 	@Column(name = "subject_category")
 	private String subjectCategory;
-	
+
+	@Column(name = "description")
 	private String description;
-	
+
 	@Column(name = "created_by")
 	private Long createdBy;
-	
+
 	@Column(name = "created_dt")
 	private LocalDateTime createdDt;
 
 	@Column(name = "updated_by")
 	private Long updatedBy;
-	
+
 	@Column(name = "updated_dt")
 	private LocalDateTime updatedDt;
-
-	public Subject() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
 
 	public Long getId() {
 		return id;
@@ -116,6 +112,11 @@ public class Subject {
 		this.updatedDt = updatedDt;
 	}
 
-	
+	@Override
+	public String toString() {
+		return "Subject [id=" + id + ", subjectNm=" + subjectNm + ", subjectShortCd=" + subjectShortCd
+				+ ", subjectCategory=" + subjectCategory + ", description=" + description + ", createdBy=" + createdBy
+				+ ", createdDt=" + createdDt + ", updatedBy=" + updatedBy + ", updatedDt=" + updatedDt + "]";
+	}
 
 }

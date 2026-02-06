@@ -1,5 +1,6 @@
 package com.dmantz.lms_b.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -11,83 +12,79 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "topic_reference")
 public class TopicReference {
-@Id
-@GeneratedValue(strategy = GenerationType.IDENTITY)
-private Long id;
 
-private String ref_type;
-private String ref_value;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-private String ref_by;
-private Long ref_by_id;
+	@Column(name = "ref_type")
+	private String refType;
 
-@ManyToOne
-@JoinColumn(name = "topic_id")  // FK in TOPIC_REFERENCE table
-private Topic topic;
+	@Column(name = "ref_value")
+	private String refValue;
 
-public TopicReference() {
-	super();
-	// TODO Auto-generated constructor stub
-}
+	@Column(name = "ref_by")
+	private String refBy;
 
-public TopicReference(Long id, String ref_type, String ref_value, String ref_by, Long ref_by_id, Topic topic) {
-	super();
-	this.id = id;
-	this.ref_type = ref_type;
-	this.ref_value = ref_value;
-	this.ref_by = ref_by;
-	this.ref_by_id = ref_by_id;
-	this.topic = topic;
-}
+	@Column(name = "ref_by_id")
+	private Long refById;
 
-public Long getId() {
-	return id;
-}
+	@ManyToOne
+	@JoinColumn(name = "topic_id")
+	private Topic topic;
 
-public void setId(Long id) {
-	this.id = id;
-}
+	public Long getId() {
+		return id;
+	}
 
-public String getRef_type() {
-	return ref_type;
-}
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-public void setRef_type(String ref_type) {
-	this.ref_type = ref_type;
-}
+	public String getRefType() {
+		return refType;
+	}
 
-public String getRef_value() {
-	return ref_value;
-}
+	public void setRefType(String refType) {
+		this.refType = refType;
+	}
 
-public void setRef_value(String ref_value) {
-	this.ref_value = ref_value;
-}
+	public String getRefValue() {
+		return refValue;
+	}
 
-public String getRef_by() {
-	return ref_by;
-}
+	public void setRefValue(String refValue) {
+		this.refValue = refValue;
+	}
 
-public void setRef_by(String ref_by) {
-	this.ref_by = ref_by;
-}
+	public String getRefBy() {
+		return refBy;
+	}
 
-public Long getRef_by_id() {
-	return ref_by_id;
-}
+	public void setRefBy(String refBy) {
+		this.refBy = refBy;
+	}
 
-public void setRef_by_id(Long ref_by_id) {
-	this.ref_by_id = ref_by_id;
-}
+	public Long getRefById() {
+		return refById;
+	}
 
-public Topic getTopic() {
-	return topic;
-}
+	public void setRefById(Long refById) {
+		this.refById = refById;
+	}
 
-public void setTopic(Topic topic) {
-	this.topic = topic;
-}
+	public Topic getTopic() {
+		return topic;
+	}
 
+	public void setTopic(Topic topic) {
+		this.topic = topic;
+	}
+
+	@Override
+	public String toString() {
+		return "TopicReference [id=" + id + ", refType=" + refType + ", refValue=" + refValue + ", refBy=" + refBy
+				+ ", refById=" + refById + ", topic=" + topic + "]";
+	}
 
 }
-

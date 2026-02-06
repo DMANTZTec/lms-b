@@ -20,10 +20,16 @@ public class StaffRole {
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
+    @Column(name ="created_by")
     private Long createdBy;
+    
+    @Column(name ="created_dt")
     private LocalDateTime createdDt;
 
+    @Column(name ="updated_by")
     private Long updatedBy;
+    
+    @Column(name ="updated_dt")
     private LocalDateTime updatedDt;
 
     public Long getId() {

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,7 +13,7 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name ="student")
+@Table(name = "student")
 public class Student {
 
 	@Id
@@ -20,41 +21,76 @@ public class Student {
 	private Long id;
 
 	private String studentId;
+
+	@Column(name = "login_id")
 	private String loginId;
 
+	@Column(name = "first_nm")
 	private String firstNm;
+
+	@Column(name = "last_nm")
 	private String lastNm;
 
+	@Column(name = "gender")
 	private String gender;
+
+	@Column(name = "dob")
 	private LocalDate dob;
 
+	@Column(name = "addr1")
 	private String addr1;
+
+	@Column(name = "addr2")
 	private String addr2;
+
+	@Column(name = "city")
 	private String city;
+
+	@Column(name = "state")
 	private String state;
+
+	@Column(name = "country")
 	private String country;
+
+	@Column(name = "pin")
 	private String pin;
 
+	@Column(name = "email_id")
 	private String emailId;
+
+	@Column(name = "mobile_num")
 	private String mobileNum;
 
+	@Column(name = "password")
 	private String password;
 
+	@Column(name = "status")
 	private String status;
+
+	@Column(name = "enabled")
 	private String enabled;
 
+	@Column(name = "emergency_contact_nm")
 	private String emergencyContactNm;
+
+	@Column(name = "emergency_contact_num")
 	private String emergencyContactNum;
 
 	@Lob
+	@Column(name = "profile_img")
 	private byte[] profileImg;
 
+	@Column(name = "created_by")
 	private Long createdBy;
+
+	@Column(name = "created_dt")
 	private LocalDateTime createdDt;
 
+	@Column(name = "updated_by")
 	private Long updatedBy;
-	private LocalDateTime updatedDt;
 
+	@Column(name = "updated_dt")
+	private LocalDateTime updatedDt;
 
 	public Long getId() {
 		return id;
@@ -258,36 +294,15 @@ public class Student {
 
 	@Override
 	public String toString() {
-		return "Student{" +
-				"id=" + id +
-				", studentId='" + studentId + '\'' +
-				", loginId='" + loginId + '\'' +
-				", firstNm='" + firstNm + '\'' +
-				", lastNm='" + lastNm + '\'' +
-				", gender='" + gender + '\'' +
-				", dob=" + dob +
-				", addr1='" + addr1 + '\'' +
-				", addr2='" + addr2 + '\'' +
-				", city='" + city + '\'' +
-				", state='" + state + '\'' +
-				", country='" + country + '\'' +
-				", pin='" + pin + '\'' +
-				", emailId='" + emailId + '\'' +
-				", mobileNum='" + mobileNum + '\'' +
-				", password='" + password + '\'' +
-				", status='" + status + '\'' +
-				", enabled='" + enabled + '\'' +
-				", emergencyContactNm='" + emergencyContactNm + '\'' +
-				", emergencyContactNum='" + emergencyContactNum + '\'' +
-				", profileImg=" + Arrays.toString(profileImg) +
-				", createdBy=" + createdBy +
-				", createdDt=" + createdDt +
-				", updatedBy=" + updatedBy +
-				", updatedDt=" + updatedDt +
-				'}';
+		return "Student{" + "id=" + id + ", studentId='" + studentId + '\'' + ", loginId='" + loginId + '\''
+				+ ", firstNm='" + firstNm + '\'' + ", lastNm='" + lastNm + '\'' + ", gender='" + gender + '\''
+				+ ", dob=" + dob + ", addr1='" + addr1 + '\'' + ", addr2='" + addr2 + '\'' + ", city='" + city + '\''
+				+ ", state='" + state + '\'' + ", country='" + country + '\'' + ", pin='" + pin + '\'' + ", emailId='"
+				+ emailId + '\'' + ", mobileNum='" + mobileNum + '\'' + ", password='" + password + '\'' + ", status='"
+				+ status + '\'' + ", enabled='" + enabled + '\'' + ", emergencyContactNm='" + emergencyContactNm + '\''
+				+ ", emergencyContactNum='" + emergencyContactNum + '\'' + ", profileImg=" + Arrays.toString(profileImg)
+				+ ", createdBy=" + createdBy + ", createdDt=" + createdDt + ", updatedBy=" + updatedBy + ", updatedDt="
+				+ updatedDt + '}';
 	}
 
 }
-
-
-

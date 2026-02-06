@@ -2,6 +2,7 @@ package com.dmantz.lms_b.entity;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -13,44 +14,38 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "topic")
 public class Topic {
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	private String topic_nm;
-	private Long topic_num;
+	@Column(name = "topic_nm")
+	private String topicNm;
+
+	@Column(name = "topic_num")
+	private Long topicNum;
+
+	@Column(name = "description")
 	private String description;
-	private Long expected_time_min;
+
+	@Column(name = "expected_time_min")
+	private Long expectedTimeMin;
 
 	@ManyToOne
-	@JoinColumn(name = "chapter_id") // FK in TOPIC table
+	@JoinColumn(name = "chapter_id")
 	private Chapter chapter;
 
-	private Long created_by;
-	private LocalDateTime created_dt;
+	@Column(name = "created_by")
+	private Long createdBy;
 
-	private Long updated_by;
-	private LocalDateTime updated_dt;
+	@Column(name = "created_dt")
+	private LocalDateTime createdDt;
 
-	public Topic() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
+	@Column(name = "updated_by")
+	private Long updatedBy;
 
-	public Topic(Long id, String topic_nm, Long topic_num, String description, Long expected_time_min, Chapter chapter,
-			Long created_by, LocalDateTime created_dt, Long updated_by, LocalDateTime updated_dt) {
-		super();
-		this.id = id;
-		this.topic_nm = topic_nm;
-		this.topic_num = topic_num;
-		this.description = description;
-		this.expected_time_min = expected_time_min;
-		this.chapter = chapter;
-		this.created_by = created_by;
-		this.created_dt = created_dt;
-		this.updated_by = updated_by;
-		this.updated_dt = updated_dt;
-	}
+	@Column(name = "updated_dt")
+	private LocalDateTime updatedDt;
 
 	public Long getId() {
 		return id;
@@ -60,20 +55,20 @@ public class Topic {
 		this.id = id;
 	}
 
-	public String getTopic_nm() {
-		return topic_nm;
+	public String getTopicNm() {
+		return topicNm;
 	}
 
-	public void setTopic_nm(String topic_nm) {
-		this.topic_nm = topic_nm;
+	public void setTopicNm(String topicNm) {
+		this.topicNm = topicNm;
 	}
 
-	public Long getTopic_num() {
-		return topic_num;
+	public Long getTopicNum() {
+		return topicNum;
 	}
 
-	public void setTopic_num(Long topic_num) {
-		this.topic_num = topic_num;
+	public void setTopicNum(Long topicNum) {
+		this.topicNum = topicNum;
 	}
 
 	public String getDescription() {
@@ -84,12 +79,12 @@ public class Topic {
 		this.description = description;
 	}
 
-	public Long getExpected_time_min() {
-		return expected_time_min;
+	public Long getExpectedTimeMin() {
+		return expectedTimeMin;
 	}
 
-	public void setExpected_time_min(Long expected_time_min) {
-		this.expected_time_min = expected_time_min;
+	public void setExpectedTimeMin(Long expectedTimeMin) {
+		this.expectedTimeMin = expectedTimeMin;
 	}
 
 	public Chapter getChapter() {
@@ -100,36 +95,43 @@ public class Topic {
 		this.chapter = chapter;
 	}
 
-	public Long getCreated_by() {
-		return created_by;
+	public Long getCreatedBy() {
+		return createdBy;
 	}
 
-	public void setCreated_by(Long created_by) {
-		this.created_by = created_by;
+	public void setCreatedBy(Long createdBy) {
+		this.createdBy = createdBy;
 	}
 
-	public LocalDateTime getCreated_dt() {
-		return created_dt;
+	public LocalDateTime getCreatedDt() {
+		return createdDt;
 	}
 
-	public void setCreated_dt(LocalDateTime created_dt) {
-		this.created_dt = created_dt;
+	public void setCreatedDt(LocalDateTime createdDt) {
+		this.createdDt = createdDt;
 	}
 
-	public Long getUpdated_by() {
-		return updated_by;
+	public Long getUpdatedBy() {
+		return updatedBy;
 	}
 
-	public void setUpdated_by(Long updated_by) {
-		this.updated_by = updated_by;
+	public void setUpdatedBy(Long updatedBy) {
+		this.updatedBy = updatedBy;
 	}
 
-	public LocalDateTime getUpdated_dt() {
-		return updated_dt;
+	public LocalDateTime getUpdatedDt() {
+		return updatedDt;
 	}
 
-	public void setUpdated_dt(LocalDateTime updated_dt) {
-		this.updated_dt = updated_dt;
+	public void setUpdatedDt(LocalDateTime updatedDt) {
+		this.updatedDt = updatedDt;
+	}
+
+	@Override
+	public String toString() {
+		return "Topic [id=" + id + ", topicNm=" + topicNm + ", topicNum=" + topicNum + ", description=" + description
+				+ ", expectedTimeMin=" + expectedTimeMin + ", chapter=" + chapter + ", createdBy=" + createdBy
+				+ ", createdDt=" + createdDt + ", updatedBy=" + updatedBy + ", updatedDt=" + updatedDt + "]";
 	}
 
 }
