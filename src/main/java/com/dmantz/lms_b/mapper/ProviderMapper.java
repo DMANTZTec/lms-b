@@ -12,27 +12,24 @@ import com.dmantz.lms_b.entity.Provider;
 @Mapper(componentModel = "spring")
 public interface ProviderMapper {
 
-    // ================= CREATE =================
-    @BeanMapping(ignoreByDefault = true)
-    @Mapping(source = "providerName", target = "providerName")
-    @Mapping(source = "providerOrgName", target = "providerOrgName")
-    Provider toEntity(ProviderRequest request);
+	// ================= CREATE =================
+	@BeanMapping(ignoreByDefault = true)
+	@Mapping(source = "providerName", target = "providerName")
+	@Mapping(source = "providerOrgName", target = "providerOrgName")
+	Provider toEntity(ProviderRequest request);
 
-    // ================= RESPONSE =================
-    @Mapping(source = "providerName", target = "providerName")
-    @Mapping(source = "providerOrgName", target = "providerOrgName")
-    @Mapping(source = "createdBy", target = "createdBy")
-    @Mapping(source = "createdDt", target = "createdDt")
-    @Mapping(source = "updatedBy", target = "updatedBy")
-    @Mapping(source = "updatedDt", target = "updatedDt")
-    ProviderResponse toResponse(Provider provider);
+	// ================= RESPONSE =================
+	@Mapping(source = "providerName", target = "providerName")
+	@Mapping(source = "providerOrgName", target = "providerOrgName")
+	@Mapping(source = "createdBy", target = "createdBy")
+	@Mapping(source = "createdDt", target = "createdDt")
+	@Mapping(source = "updatedBy", target = "updatedBy")
+	@Mapping(source = "updatedDt", target = "updatedDt")
+	ProviderResponse toResponse(Provider provider);
 
-    // ================= UPDATE =================
-    @BeanMapping(ignoreByDefault = true)
-    @Mapping(source = "providerName", target = "providerName")
-    @Mapping(source = "providerOrgName", target = "providerOrgName")
-    void updateEntityFromRequest(
-            ProviderRequest request,
-            @MappingTarget Provider provider
-    );
+	// ================= UPDATE =================
+	@BeanMapping(ignoreByDefault = true)
+	@Mapping(source = "providerName", target = "providerName")
+	@Mapping(source = "providerOrgName", target = "providerOrgName")
+	void updateEntityFromRequest(ProviderRequest request, @MappingTarget Provider provider);
 }
