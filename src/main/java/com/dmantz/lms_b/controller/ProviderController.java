@@ -58,5 +58,4 @@ public class ProviderController {
 		return ResponseEntity.noContent().build();
 	}
 
-	
 }

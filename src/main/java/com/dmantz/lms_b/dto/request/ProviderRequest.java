@@ -10,7 +10,7 @@ public class ProviderRequest {
 	@NotBlank(message = "Provider name must not be null or empty")
 	@Size(min = 2, max = 100, message = "Provider name must be between 2 and 100 characters")
 	@Pattern(regexp = "^[A-Za-z]+( [A-Za-z]+)*$", message = "Provider name must contain only letters and spaces")
-	private String providerName;;
+	private String providerName;
 
 	@NotBlank(message = "Provider organization name must not be null or empty")
 	@Size(min = 2, max = 150, message = "Organization name must be between 2 and 150 characters")

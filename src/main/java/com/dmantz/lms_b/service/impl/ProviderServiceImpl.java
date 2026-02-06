@@ -44,8 +44,8 @@ public class ProviderServiceImpl implements ProviderService {
 		}
 
 		Provider provider = providerMapper.toEntity(request);
-		provider.setCreated_by(staffId);
-		provider.setCreated_dt(LocalDateTime.now());
+		provider.setCreatedBy(staffId);
+		provider.setCreatedDt(LocalDateTime.now());
 		
 		Provider saved = providerRepository.save(provider);
 		return providerMapper.toResponse(saved);
@@ -76,13 +76,13 @@ public class ProviderServiceImpl implements ProviderService {
 		Provider provider = providerRepository.findById(providerId)
 				.orElseThrow(() -> new ResourceNotFoundException("Provider not found with id: " + providerId));
 
-		if (providerRepository.existsByProviderNameAndNotId(request.getProviderName(), providerId)) {
+		if (providerRepository.existsByProviderNameAndIdNot(request.getProviderName(), providerId)) {
 			throw new DuplicateValuesException("Provider name already exists");
 		}
 
 		providerMapper.updateEntityFromRequest(request, provider);
-		provider.setUpdated_by(staffId);
-		provider.setUpdated_dt(LocalDateTime.now());
+		provider.setUpdatedBy(staffId);
+		provider.setUpdatedDt(LocalDateTime.now());
 
 		Provider updated = providerRepository.save(provider);
 		return providerMapper.toResponse(updated);
