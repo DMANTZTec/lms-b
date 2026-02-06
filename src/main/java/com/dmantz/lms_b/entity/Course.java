@@ -2,6 +2,10 @@ package com.dmantz.lms_b.entity;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -11,16 +15,26 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="course")
+@Table(name = "course")
 public class Course {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	private String course_id;
-	private String course_title;
+	@Column(name = "course_id")
+	private String courseId;
+
+	@Column(name = "course_title")
+	private String courseTitle;
+
+	@Column(name = "description", columnDefinition = "TEXT")
 	private String description;
+
+	@Column(name = "language")
 	private String language;
+
+	@Column(name = "skills", columnDefinition = "json")
+	@JdbcTypeCode(SqlTypes.JSON)
 	private String skills;
 
 	@ManyToOne
@@ -31,34 +45,17 @@ public class Course {
 	@JoinColumn(name = "provider_id")
 	private Provider provider;
 
-	private Long created_by;
-	private LocalDateTime created_dt;
+	@Column(name = "created_by")
+	private Long createdBy;
 
-	private Long updated_by;
-	private LocalDateTime updated_dt;
+	@Column(name = "created_dt")
+	private LocalDateTime createdDt;
 
-	public Course() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
+	@Column(name = "updated_by")
+	private Long updatedBy;
 
-	public Course(Long id, String course_id, String course_title, String description, String language, String skills,
-			Subject subject, Provider provider, Long created_by, LocalDateTime created_dt, Long updated_by,
-			LocalDateTime updated_dt) {
-		super();
-		this.id = id;
-		this.course_id = course_id;
-		this.course_title = course_title;
-		this.description = description;
-		this.language = language;
-		this.skills = skills;
-		this.subject = subject;
-		this.provider = provider;
-		this.created_by = created_by;
-		this.created_dt = created_dt;
-		this.updated_by = updated_by;
-		this.updated_dt = updated_dt;
-	}
+	@Column(name = "updated_dt")
+	private LocalDateTime updatedDt;
 
 	public Long getId() {
 		return id;
@@ -68,20 +65,20 @@ public class Course {
 		this.id = id;
 	}
 
-	public String getCourse_id() {
-		return course_id;
+	public String getCourseId() {
+		return courseId;
 	}
 
-	public void setCourse_id(String course_id) {
-		this.course_id = course_id;
+	public void setCourseId(String courseId) {
+		this.courseId = courseId;
 	}
 
-	public String getCourse_title() {
-		return course_title;
+	public String getCourseTitle() {
+		return courseTitle;
 	}
 
-	public void setCourse_title(String course_title) {
-		this.course_title = course_title;
+	public void setCourseTitle(String courseTitle) {
+		this.courseTitle = courseTitle;
 	}
 
 	public String getDescription() {
@@ -124,36 +121,44 @@ public class Course {
 		this.provider = provider;
 	}
 
-	public Long getCreated_by() {
-		return created_by;
+	public Long getCreatedBy() {
+		return createdBy;
 	}
 
-	public void setCreated_by(Long created_by) {
-		this.created_by = created_by;
+	public void setCreatedBy(Long createdBy) {
+		this.createdBy = createdBy;
 	}
 
-	public LocalDateTime getCreated_dt() {
-		return created_dt;
+	public LocalDateTime getCreatedDt() {
+		return createdDt;
 	}
 
-	public void setCreated_dt(LocalDateTime created_dt) {
-		this.created_dt = created_dt;
+	public void setCreatedDt(LocalDateTime createdDt) {
+		this.createdDt = createdDt;
 	}
 
-	public Long getUpdated_by() {
-		return updated_by;
+	public Long getUpdatedBy() {
+		return updatedBy;
 	}
 
-	public void setUpdated_by(Long updated_by) {
-		this.updated_by = updated_by;
+	public void setUpdatedBy(Long updatedBy) {
+		this.updatedBy = updatedBy;
 	}
 
-	public LocalDateTime getUpdated_dt() {
-		return updated_dt;
+	public LocalDateTime getUpdatedDt() {
+		return updatedDt;
 	}
 
-	public void setUpdated_dt(LocalDateTime updated_dt) {
-		this.updated_dt = updated_dt;
+	public void setUpdatedDt(LocalDateTime updatedDt) {
+		this.updatedDt = updatedDt;
+	}
+
+	@Override
+	public String toString() {
+		return "Course [id=" + id + ", courseId=" + courseId + ", courseTitle=" + courseTitle + ", description="
+				+ description + ", language=" + language + ", skills=" + skills + ", subject=" + subject + ", provider="
+				+ provider + ", createdBy=" + createdBy + ", createdDt=" + createdDt + ", updatedBy=" + updatedBy
+				+ ", updatedDt=" + updatedDt + "]";
 	}
 
 }

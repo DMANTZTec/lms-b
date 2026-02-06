@@ -2,6 +2,7 @@ package com.dmantz.lms_b.entity;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -11,108 +12,114 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name="chapter")
+@Table(name = "chapter")
 public class Chapter {
-@Id
-@GeneratedValue(strategy = GenerationType.IDENTITY)
-private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-private String chapter_nm;
-private String chapter_desc;
-private Long chapter_num;
+	@Column(name = "chapter_nm")
+	private String chapterNm;
 
-@ManyToOne
-@JoinColumn(name = "course_id")  // FK in CHAPTER table
-private Course course;
+	@Column(name = "chapter_desc")
+	private String chapterDesc;
 
+	@Column(name = "chapter_num")
+	private Long chapterNum;
 
-private Long created_by;
-private LocalDateTime created_dt;
+	@ManyToOne
+	@JoinColumn(name = "course_id")
+	private Course course;
 
-private Long updated_by;
-private LocalDateTime updated_dt;
-public Chapter() {
-	super();
-	// TODO Auto-generated constructor stub
-}
-public Chapter(Long id, String chapter_nm, String chapter_desc, Long chapter_num, Course course, Long created_by,
-		LocalDateTime created_dt, Long updated_by, LocalDateTime updated_dt) {
-	super();
-	this.id = id;
-	this.chapter_nm = chapter_nm;
-	this.chapter_desc = chapter_desc;
-	this.chapter_num = chapter_num;
-	this.course = course;
-	this.created_by = created_by;
-	this.created_dt = created_dt;
-	this.updated_by = updated_by;
-	this.updated_dt = updated_dt;
-}
-public Long getId() {
-	return id;
-}
-public void setId(Long id) {
-	this.id = id;
-}
-public String getChapter_nm() {
-	return chapter_nm;
-}
-public void setChapter_nm(String chapter_nm) {
-	this.chapter_nm = chapter_nm;
-}
-public String getChapter_desc() {
-	return chapter_desc;
-}
-public void setChapter_desc(String chapter_desc) {
-	this.chapter_desc = chapter_desc;
-}
-public Long getChapter_num() {
-	return chapter_num;
-}
-public void setChapter_num(Long chapter_num) {
-	this.chapter_num = chapter_num;
-}
-public Course getCourse() {
-	return course;
-}
-public void setCourse(Course course) {
-	this.course = course;
-}
-public Long getCreated_by() {
-	return created_by;
-}
-public void setCreated_by(Long created_by) {
-	this.created_by = created_by;
-}
-public LocalDateTime getCreated_dt() {
-	return created_dt;
-}
-public void setCreated_dt(LocalDateTime created_dt) {
-	this.created_dt = created_dt;
-}
-public Long getUpdated_by() {
-	return updated_by;
-}
-public void setUpdated_by(Long updated_by) {
-	this.updated_by = updated_by;
-}
-public LocalDateTime getUpdated_dt() {
-	return updated_dt;
-}
-public void setUpdated_dt(LocalDateTime updated_dt) {
-	this.updated_dt = updated_dt;
-}
+	@Column(name = "created_by")
+	private Long createdBy;
 
+	@Column(name = "created_dt")
+	private LocalDateTime createdDt;
 
+	@Column(name = "updated_by")
+	private Long updatedBy;
+
+	@Column(name = "updated_dt")
+	private LocalDateTime updatedDt;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getChapterNm() {
+		return chapterNm;
+	}
+
+	public void setChapterNm(String chapterNm) {
+		this.chapterNm = chapterNm;
+	}
+
+	public String getChapterDesc() {
+		return chapterDesc;
+	}
+
+	public void setChapterDesc(String chapterDesc) {
+		this.chapterDesc = chapterDesc;
+	}
+
+	public Long getChapterNum() {
+		return chapterNum;
+	}
+
+	public void setChapterNum(Long chapterNum) {
+		this.chapterNum = chapterNum;
+	}
+
+	public Course getCourse() {
+		return course;
+	}
+
+	public void setCourse(Course course) {
+		this.course = course;
+	}
+
+	public Long getCreatedBy() {
+		return createdBy;
+	}
+
+	public void setCreatedBy(Long createdBy) {
+		this.createdBy = createdBy;
+	}
+
+	public LocalDateTime getCreatedDt() {
+		return createdDt;
+	}
+
+	public void setCreatedDt(LocalDateTime createdDt) {
+		this.createdDt = createdDt;
+	}
+
+	public Long getUpdatedBy() {
+		return updatedBy;
+	}
+
+	public void setUpdatedBy(Long updatedBy) {
+		this.updatedBy = updatedBy;
+	}
+
+	public LocalDateTime getUpdatedDt() {
+		return updatedDt;
+	}
+
+	public void setUpdatedDt(LocalDateTime updatedDt) {
+		this.updatedDt = updatedDt;
+	}
+
+	@Override
+	public String toString() {
+		return "Chapter [id=" + id + ", chapterNm=" + chapterNm + ", chapterDesc=" + chapterDesc + ", chapterNum="
+				+ chapterNum + ", course=" + course + ", createdBy=" + createdBy + ", createdDt=" + createdDt
+				+ ", updatedBy=" + updatedBy + ", updatedDt=" + updatedDt + "]";
+	}
 
 }
-
-
-
-
-
-
-
-
-
-
