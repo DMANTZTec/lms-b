@@ -41,7 +41,20 @@
       "name": "view students API",
       "request": {
         "method": "GET",
-        "header": []
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/student/view-students\n",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "student",
+            "view-students\n"
+          ]
+        }
       },
       "response": []
     },
@@ -96,7 +109,7 @@
       "response": []
     },
     {
-      "name": "Forgot password API",
+      "name": "Student Forgot password API",
       "request": {
         "method": "POST",
         "header": [],
@@ -126,7 +139,7 @@
       "response": []
     },
     {
-      "name": "Reset password API",
+      "name": "Student Reset password API",
       "request": {
         "method": "POST",
         "header": [],
@@ -138,6 +151,19 @@
               "language": "json"
             }
           }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/student/reset-password",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "student",
+            "reset-password"
+          ]
         }
       },
       "response": []

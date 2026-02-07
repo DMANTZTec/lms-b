@@ -1,0 +1,220 @@
+{
+  "info": {
+    "_postman_id": "fc61fcef-14f1-4178-8ed1-3368771cd231",
+    "name": "Staff",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "52185468",
+    "_collection_link": "https://go.postman.co/collection/52185468-fc61fcef-14f1-4178-8ed1-3368771cd231?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Admin Staff registration API",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"firstNm\": \"Tom\",\r\n  \"lastNm\": \"john\",\r\n  \"addr1\": \"hyd\",\r\n  \"addr2\": \"hyd\",\r\n  \"city\": \"hyd\",\r\n  \"state\": \"tg\",\r\n  \"country\": \"india\",\r\n  \"pin\": \"508001\",\r\n  \"emailId\": \"tomjohn@gmail.com\",\r\n  \"mobileNum\": \"8855221144\",\r\n  \"password\": \"tomjohn@123\",\r\n  \"designation\": \"admin\",\r\n  \"emergencyContactNm\": \"ricky\",\r\n  \"emergencyContactNum\": \"5522998822\",\r\n  \"dob\": \"2026-02-07\",\r\n  \"profileImgBase64\": \"string\",\r\n  \"roles\": [\r\n    \"ADMIN\"\r\n  ]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/staff/admin-register",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "staff",
+            "admin-register"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Staff Register API",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"firstNm\": \"Tom\",\r\n  \"lastNm\": \"john\",\r\n  \"addr1\": \"hyd\",\r\n  \"addr2\": \"hyd\",\r\n  \"city\": \"hyd\",\r\n  \"state\": \"tg\",\r\n  \"country\": \"india\",\r\n  \"pin\": \"508001\",\r\n  \"emailId\": \"tomjohn@gmail.com\",\r\n  \"mobileNum\": \"8855221144\",\r\n  \"password\": \"tomjohn@123\",\r\n  \"designation\": \"admin\",\r\n  \"emergencyContactNm\": \"ricky\",\r\n  \"emergencyContactNum\": \"5522998822\",\r\n  \"dob\": \"2026-02-07\",\r\n  \"profileImgBase64\": \"string\",\r\n  \"roles\": [\r\n    \"STAFF\",\"MENTOR\"\r\n  ]\r\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/staff/register?loggedInStaffId=SF00001",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "staff",
+            "register"
+          ],
+          "query": [
+            {
+              "key": "loggedInStaffId",
+              "value": "SF00001",
+              "type": "text"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Staff Login API",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"loginId\": \"SF00001\",\r\n  \"password\": \"tomjohn@123\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/staff/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "staff",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Staff otp verify API",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"staffId\": \"SF00001\",\r\n  \"otp\": \"562985\"\r\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/staff/verify-otp",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "staff",
+            "verify-otp"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Staff forgot password API",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"email\": \"tomjohn@gmail.com\"\r\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/staff/forgot-password",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "staff",
+            "forgot-password"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Staff Reset password API",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"staffId\": \"SF00001\",\r\n  \"otp\": \"526852\",\r\n  \"newPassword\": \"tomjohn@12345\"\r\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/staff/reset-password",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "staff",
+            "reset-password"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "View all staff API",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/staff/view-staff\n",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "staff",
+            "view-staff\n"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Staff get by ID API",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/staff/SF00001",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "staff",
+            "SF00001"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
