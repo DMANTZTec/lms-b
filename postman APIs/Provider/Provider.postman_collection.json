@@ -22,6 +22,44 @@
           }
         },
         "url": {
+          "raw": "http://localhost:8080/api/providers?staffId=2",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "providers"
+          ],
+          "query": [
+            {
+              "key": "staffId",
+              "value": "2"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get by Id API for provider",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
           "raw": "http://localhost:8080/api/providers/6?staffId=2",
           "protocol": "http",
           "host": [
@@ -40,14 +78,6 @@
             }
           ]
         }
-      },
-      "response": []
-    },
-    {
-      "name": "Get by Id API for provider",
-      "request": {
-        "method": "GET",
-        "header": []
       },
       "response": []
     },
@@ -86,7 +116,7 @@
           }
         },
         "url": {
-          "raw": "http://localhost:8080/api/providers/7?staffId=2",
+          "raw": "http://localhost:8080/api/providers/8?staffId=2",
           "protocol": "http",
           "host": [
             "localhost"
@@ -95,7 +125,7 @@
           "path": [
             "api",
             "providers",
-            "7"
+            "8"
           ],
           "query": [
             {
@@ -117,7 +147,7 @@
           "raw": "\r\n    {\r\n  \"providerName\": \"Techies\",\r\n  \"providerOrgName\": \"Techie Solutions Private Limited\"\r\n}\r\n\r\n"
         },
         "url": {
-          "raw": "http://localhost:8080/api/providers/7?staffId=2",
+          "raw": "http://localhost:8080/api/providers/9?staffId=2",
           "protocol": "http",
           "host": [
             "localhost"
@@ -126,7 +156,7 @@
           "path": [
             "api",
             "providers",
-            "7"
+            "9"
           ],
           "query": [
             {
