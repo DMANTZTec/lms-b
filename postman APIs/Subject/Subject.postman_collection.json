@@ -1,0 +1,136 @@
+{
+  "info": {
+    "_postman_id": "96ce7d33-55f0-4f25-970f-0c940db0b981",
+    "name": "Subject",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "49260644",
+    "_collection_link": "https://go.postman.co/collection/49260644-96ce7d33-55f0-4f25-970f-0c940db0b981?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Create Subject API",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"subjectNm\": \"Data Structures and Algorithms\",\r\n  \"subjectShortCd\": \"DA\",\r\n  \"subjectCategory\": \"Computer Science\",\r\n  \"description\": \"Covers arrays, linked lists, stacks, queues, trees, graphs, and algorithms.\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/subject/create?staffId=1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "subject",
+            "create"
+          ],
+          "query": [
+            {
+              "key": "staffId",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update SubjectAPI",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"subjectNm\": \"Database Management Systems\",\r\n  \"subjectShortCd\": \"DB\",\r\n  \"subjectCategory\": \"Databases\",\r\n  \"description\": \"Relational databases, SQL, normalization, indexing, and transactions.\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/subject/update/23?staffId=1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "subject",
+            "update",
+            "23"
+          ],
+          "query": [
+            {
+              "key": "staffId",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Subject API",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/subject/delete/23?staffId=1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "subject",
+            "delete",
+            "23"
+          ],
+          "query": [
+            {
+              "key": "staffId",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "View subjects API",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/subject/view-subjects",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "subject",
+            "view-subjects"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
