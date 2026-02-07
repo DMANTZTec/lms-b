@@ -57,6 +57,7 @@ public class CourseManagementController {
 
 	@DeleteMapping("/subject/delete/{subjectId}")
 	public ResponseEntity<SubjectResponse> deleteSubject(@PathVariable Long subjectId, @RequestParam Long staffId) {
-		return ResponseEntity.ok(courseManagementService.deleteSubject(subjectId, staffId));
+		courseManagementService.deleteSubject(subjectId, staffId);
+		return ResponseEntity.noContent().build();
 	}
 }

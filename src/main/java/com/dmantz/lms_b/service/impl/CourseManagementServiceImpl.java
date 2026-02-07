@@ -115,30 +115,19 @@ public class CourseManagementServiceImpl implements CourseManagementService {
         return subjectMapper.toDto(updatedSubject);
     }
 
-    // ------------------ DELETE SUBJECT ------------------
-    @Override
-    public SubjectResponse deleteSubject(Long subjectId, Long staffId) {
+ // -------------------------DELETE SUBJECT-----------------------------
+ 	@Override
+ 	public void deleteSubject(Long subjectId, Long staffId) {
 
-        // Validate staff
-        if (!staffRepository.existsById(staffId)) {
-            throw new ResourceNotFoundException(
-                    "Staff with ID " + staffId + " does not exist"
-            );
-        }
+ 		// Validate staff
+ 		staffRepository.findById(staffId)
+ 				.orElseThrow(() -> new ResourceNotFoundException("Staff not found with id: " + staffId));
 
-        Subject subject = subjectRepository.findById(subjectId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Subject not found with id: " + subjectId
-                        )
-                );
+ 		// Validate subject
+ 		Subject subject = subjectRepository.findById(subjectId)
+ 				.orElseThrow(() -> new ResourceNotFoundException("Subject not found with id: " + subjectId));
 
-        // Audit before delete (optional but good)
-        subject.setUpdatedBy(staffId);
-        subject.setUpdatedDt(LocalDateTime.now());
-
-        subjectRepository.delete(subject);
-
-        return subjectMapper.toDto(subject);
-    }
+ 		// Delete
+ 		subjectRepository.delete(subject);
+ 	}
 }
