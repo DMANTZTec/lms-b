@@ -1,0 +1,280 @@
+{
+  "info": {
+    "_postman_id": "96ce7d33-55f0-4f25-970f-0c940db0b981",
+    "name": "CourseManagement",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "49260644",
+    "_collection_link": "https://go.postman.co/collection/49260644-96ce7d33-55f0-4f25-970f-0c940db0b981?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Create Subject API",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"subjectNm\": \"Python Programming\",\r\n  \"subjectShortCd\": \"PY\",\r\n  \"subjectCategory\": \"Programming\",\r\n  \"description\": \"Python programming concepts covering basics, core Python, OOP, scripting, and advanced topics.\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/subject/create?staffId=2",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "subject",
+            "create"
+          ],
+          "query": [
+            {
+              "key": "staffId",
+              "value": "2"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update SubjectAPI",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"subjectNm\": \"Artificial Intelligence\",\r\n  \"subjectShortCd\": \"AI\",\r\n  \"subjectCategory\": \"Computer Science\",\r\n  \"description\": \"Artificial Intelligence concepts including intelligent agents, search algorithms, machine learning basics, and real-world AI applications.\"\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/subject/update/2?staffId=2",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "subject",
+            "update",
+            "2"
+          ],
+          "query": [
+            {
+              "key": "staffId",
+              "value": "2"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Subject API",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/subject/delete/1?staffId=1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "subject",
+            "delete",
+            "1"
+          ],
+          "query": [
+            {
+              "key": "staffId",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "View subjects API",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/subject/view-subjects",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "subject",
+            "view-subjects"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Course API",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"courseTitle\": \"Advanced Java\",\r\n  \"description\": \"Advanced Java concepts including multithreading, JVM internals, streams API, and performance optimization.\",\r\n  \"language\": \"English\",\r\n  \"skills\": [\r\n    \"Java\",\r\n    \"Multithreading\",\r\n    \"JVM\",\r\n    \"Streams API\",\r\n    \"Performance Tuning\"\r\n  ],\r\n  \"subjectId\": 1,\r\n  \"providerId\": 1\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/course/create?staffId=2",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "course",
+            "create"
+          ],
+          "query": [
+            {
+              "key": "staffId",
+              "value": "2"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update Course API",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"courseTitle\": \"Advanced Java Programming\",\r\n  \"description\": \"Master advanced Java concepts such as JVM internals, memory management, concurrency, and performance tuning.\",\r\n  \"language\": \"English\",\r\n  \"skills\": [\r\n    \"Java\",\r\n    \"JVM\",\r\n    \"Concurrency\",\r\n    \"Garbage Collection\"\r\n  ],\r\n  \"subjectId\": 1,\r\n  \"providerId\": 1\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/course/update/2?staffId=2",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "course",
+            "update",
+            "2"
+          ],
+          "query": [
+            {
+              "key": "staffId",
+              "value": "2"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Course API",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/course/delete/2?staffId=1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "course",
+            "delete",
+            "2"
+          ],
+          "query": [
+            {
+              "key": "staffId",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "View Course API",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/course/view-courses",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "course",
+            "view-courses"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "View Courses by Subject API",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/subjects/1/view-courses",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "subjects",
+            "1",
+            "view-courses"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

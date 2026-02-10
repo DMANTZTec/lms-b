@@ -21,8 +21,7 @@ public class SubjectRequest {
 	@Pattern(regexp = "^[A-Za-z]+( [A-Za-z]+)*$", message = "Subject category must contain only letters and single spaces")
 	private String subjectCategory;
 
-	@Size(max = 500, message = "Description must be at most 500 characters")
-
+	@NotBlank(message = "description is required")
 	private String description;
 
 	public String getSubjectNm() {

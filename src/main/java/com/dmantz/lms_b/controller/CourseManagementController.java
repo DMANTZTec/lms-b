@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dmantz.lms_b.dto.request.CourseRequest;
 import com.dmantz.lms_b.dto.request.SubjectRequest;
+import com.dmantz.lms_b.dto.response.CourseResponse;
 import com.dmantz.lms_b.dto.response.SubjectResponse;
 import com.dmantz.lms_b.service.CourseManagementService;
 
@@ -60,4 +62,40 @@ public class CourseManagementController {
 		courseManagementService.deleteSubject(subjectId, staffId);
 		return ResponseEntity.noContent().build();
 	}
+
+	@PostMapping("/course/create")
+	public ResponseEntity<CourseResponse> createCourse(@Valid @RequestBody CourseRequest request,
+			@RequestParam Long staffId) {
+
+		CourseResponse response = courseManagementService.createCourse(request, staffId);
+
+		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+	}
+
+	@GetMapping("/course/view-courses")
+	public ResponseEntity<List<CourseResponse>> viewAllCourses() {
+
+		List<CourseResponse> courses = courseManagementService.viewAllCourses();
+
+		return ResponseEntity.ok(courses);
+	}
+
+	@PutMapping("/course/update/{courseId}")
+	public ResponseEntity<CourseResponse> updateCourse(@PathVariable Long courseId,
+			@Valid @RequestBody CourseRequest request, @RequestParam Long staffId) {
+		return ResponseEntity.ok(courseManagementService.updateCourse(courseId, request, staffId));
+	}
+
+	@DeleteMapping("/course/delete/{courseId}")
+	public ResponseEntity<CourseResponse> deleteCourse(@PathVariable Long courseId, @RequestParam Long staffId) {
+		courseManagementService.deleteCourse(courseId, staffId);
+		return ResponseEntity.noContent().build();
+	}
+
+//	get all courses by subject
+	@GetMapping("/subjects/{subjectId}/view-courses")
+	public ResponseEntity<List<CourseResponse>> viewCoursesBySubject(@PathVariable Long subjectId) {
+		return ResponseEntity.ok(courseManagementService.viewCoursesBySubject(subjectId));
+	}
+
 }
