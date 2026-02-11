@@ -1,10 +1,10 @@
 {
   "info": {
-    "_postman_id": "96ce7d33-55f0-4f25-970f-0c940db0b981",
+    "_postman_id": "f950674e-6849-445c-bf6f-0a06540b6c64",
     "name": "CourseManagement",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "49260644",
-    "_collection_link": "https://go.postman.co/collection/49260644-96ce7d33-55f0-4f25-970f-0c940db0b981?source=collection_link"
+    "_exporter_id": "49454707",
+    "_collection_link": "https://go.postman.co/collection/49454707-f950674e-6849-445c-bf6f-0a06540b6c64?source=collection_link"
   },
   "item": [
     {
@@ -147,7 +147,7 @@
           }
         },
         "url": {
-          "raw": "http://localhost:8080/api/course/create?staffId=2",
+          "raw": "http://localhost:8080/api/course/create?staffId=1",
           "protocol": "http",
           "host": [
             "localhost"
@@ -161,7 +161,7 @@
           "query": [
             {
               "key": "staffId",
-              "value": "2"
+              "value": "1"
             }
           ]
         }
@@ -271,6 +271,151 @@
             "subjects",
             "1",
             "view-courses"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "create chapter API",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "\r\n   {\r\n  \"courseId\": \"PY001\",\r\n  \"chapterNm\": \"Introduction to Java\",\r\n  \"chapterDesc\": \"This chapter covers Java basics, JVM, JDK, and JRE\"\r\n}\r\n\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/chapter/create?staffId=1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "chapter",
+            "create"
+          ],
+          "query": [
+            {
+              "key": "staffId",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update chapter API",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "\r\n{\r\n  \"courseId\": \"PY001\",\r\n  \"chapterNm\": \"Introduction to Java - Updated\",\r\n  \"chapterDesc\": \"Updated content covering JVM architecture and Java workflow\"\r\n}\r\n\r\n\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/update/1?staffId=1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "update",
+            "1"
+          ],
+          "query": [
+            {
+              "key": "staffId",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete chapter API",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "\r\n{\r\n  \"courseId\": \"HG002\",\r\n  \"chapterNm\": \"Introduction to Java - Updated\",\r\n  \"chapterDesc\": \"Updated content covering JVM architecture and Java workflow\"\r\n}\r\n\r\n\r\n"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/delete/1?staffId=1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "delete",
+            "1"
+          ],
+          "query": [
+            {
+              "key": "staffId",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "View all chapters API",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/chapters/getAll",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "chapters",
+            "getAll"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "View chapter by Id API",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/get/1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "get",
+            "1"
           ]
         }
       },

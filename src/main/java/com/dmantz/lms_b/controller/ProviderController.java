@@ -52,10 +52,13 @@ public class ProviderController {
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> deleteProvider(@PathVariable Long id, @RequestParam Long staffId) {
+	public ResponseEntity<String> deleteProvider(
+	        @PathVariable Long id,
+	        @RequestParam Long staffId) {
 
-		providerService.deleteProvider(id, staffId);
-		return ResponseEntity.noContent().build();
+	    providerService.deleteProvider(id, staffId);
+	    return ResponseEntity.ok("Provider deleted successfully");
 	}
+
 
 }

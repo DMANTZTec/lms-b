@@ -6,17 +6,23 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.dmantz.lms_b.dto.request.ChapterRequest;
 import com.dmantz.lms_b.dto.request.CourseRequest;
 import com.dmantz.lms_b.dto.request.SubjectRequest;
+import com.dmantz.lms_b.dto.response.ChapterResponse;
 import com.dmantz.lms_b.dto.response.CourseResponse;
 import com.dmantz.lms_b.dto.response.SubjectResponse;
+import com.dmantz.lms_b.entity.Chapter;
 import com.dmantz.lms_b.entity.Course;
 import com.dmantz.lms_b.entity.Provider;
+import com.dmantz.lms_b.entity.Staff;
 import com.dmantz.lms_b.entity.Subject;
 import com.dmantz.lms_b.exceptions.DuplicateValuesException;
 import com.dmantz.lms_b.exceptions.ResourceNotFoundException;
+import com.dmantz.lms_b.mapper.ChapterMapper;
 import com.dmantz.lms_b.mapper.CourseMapper;
 import com.dmantz.lms_b.mapper.SubjectMapper;
+import com.dmantz.lms_b.repository.ChapterRepository;
 import com.dmantz.lms_b.repository.CourseRepository;
 import com.dmantz.lms_b.repository.ProviderRepository;
 import com.dmantz.lms_b.repository.StaffRepository;
@@ -37,9 +43,12 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 	private final CourseMapper courseMapper;
 	private final ProviderRepository providerRepository;
 
+	private final ChapterRepository chapterRepository;
+	private final ChapterMapper chapterMapper;
+
 	public CourseManagementServiceImpl(SubjectRepository subjectRepository, StaffRepository staffRepository,
 			SubjectMapper subjectMapper, CourseRepository courseRepository, CourseMapper courseMapper,
-			ProviderRepository providerRepository) {
+			ProviderRepository providerRepository, ChapterRepository chapterRepository, ChapterMapper chapterMapper) {
 		super();
 		this.subjectRepository = subjectRepository;
 		this.staffRepository = staffRepository;
@@ -47,6 +56,8 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 		this.courseRepository = courseRepository;
 		this.courseMapper = courseMapper;
 		this.providerRepository = providerRepository;
+		this.chapterRepository = chapterRepository;
+		this.chapterMapper = chapterMapper;
 	}
 
 	// ------------------ CREATE SUBJECT ------------------
@@ -262,6 +273,93 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 
 		return courseRepository.findBySubject_Id(subjectId).stream().map(courseMapper::toDto)
 				.collect(Collectors.toList());
+	}
+
+	// ================= CREATE CHAPTER=================
+	@Override
+	public ChapterResponse createChapter(Long staffId, ChapterRequest request) {
+
+		Staff staff = staffRepository.findById(staffId)
+				.orElseThrow(() -> new ResourceNotFoundException("Staff not found with id: " + staffId));
+
+		Course course = courseRepository.findByCourseId(request.getCourseId())
+				.orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + request.getCourseId()));
+
+		chapterRepository.findByCourse_CourseIdAndChapterNmIgnoreCase(request.getCourseId(), request.getChapterNm())
+				.ifPresent(ch -> {
+					throw new DuplicateValuesException("Chapter name already exists in this course");
+				});
+
+		Long nextChapterNum = chapterRepository.findTopByCourse_CourseIdOrderByChapterNumDesc(request.getCourseId())
+				.map(ch -> ch.getChapterNum() + 1).orElse(1L);
+		Chapter chapter = chapterMapper.toEntity(request);
+		chapter.setCourse(course); // ✅ managed entity
+		chapter.setChapterNum(nextChapterNum);
+		chapter.setCreatedBy(staff.getId());
+		chapter.setCreatedDt(LocalDateTime.now());
+
+		Chapter savedChapter = chapterRepository.save(chapter);
+
+		return chapterMapper.toResponse(savedChapter);
+	}
+
+	// ================= GET CHAPTER BY ID =================
+	@Override
+	public ChapterResponse getChapterById(Long chapterId) {
+		Chapter chapter = chapterRepository.findById(chapterId)
+				.orElseThrow(() -> new ResourceNotFoundException("Chapter not found"));
+
+		return chapterMapper.toResponse(chapter);
+	}
+
+	// ================= GET ALL CHAPTERS =================
+	@Override
+	public List<ChapterResponse> getAllChapters() {
+		return chapterRepository.findAll().stream().map(chapterMapper::toResponse).toList();
+	}
+
+	// ================= UPDATE CHAPTER =================
+	@Override
+	public ChapterResponse updateChapter(Long chapterId, ChapterRequest request, Long staffId) {
+
+		staffRepository.findById(staffId)
+				.orElseThrow(() -> new ResourceNotFoundException("Staff not found with id: " + staffId));
+
+		Chapter chapter = chapterRepository.findById(chapterId)
+				.orElseThrow(() -> new ResourceNotFoundException("Chapter not found with id: " + chapterId));
+
+		Course course = null;
+		if (request.getCourseId() != null) {
+			course = courseRepository.findByCourseId(request.getCourseId()).orElseThrow(
+					() -> new ResourceNotFoundException("Course not found with id: " + request.getCourseId()));
+		}
+
+		String courseIdToCheck = (course != null) ? course.getCourseId() : chapter.getCourse().getCourseId();
+
+		chapterRepository.findByCourse_CourseIdAndChapterNmIgnoreCase(courseIdToCheck, request.getChapterNm())
+				.filter(ch -> !ch.getId().equals(chapterId)).ifPresent(ch -> {
+					throw new DuplicateValuesException("Chapter name already exists in this course");
+				});
+
+		chapterMapper.updateEntityFromRequest(request, chapter);
+		chapter.setUpdatedBy(staffId);
+		chapter.setUpdatedDt(LocalDateTime.now());
+		Chapter updatedChapter = chapterRepository.save(chapter);
+
+		return chapterMapper.toResponse(updatedChapter);
+	}
+
+	// ================= DELETE CHAPTER=================
+	@Override
+	public void deleteChapter(Long chapterId, Long staffId) {
+
+		staffRepository.findById(staffId)
+				.orElseThrow(() -> new ResourceNotFoundException("Staff not found with id: " + staffId));
+
+		Chapter chapter = chapterRepository.findById(chapterId)
+				.orElseThrow(() -> new ResourceNotFoundException("Chapter not found with id: " + chapterId));
+
+		chapterRepository.delete(chapter);
 	}
 
 }

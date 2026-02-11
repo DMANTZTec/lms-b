@@ -1,6 +1,7 @@
 package com.dmantz.lms_b.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -16,4 +17,6 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 	long countBySubject_SubjectShortCd(String subjectShortCd);
 
 	List<Course> findBySubject_Id(Long subjectId);
+
+	Optional<Course> findByCourseId(String courseId);
 }

@@ -3,7 +3,8 @@ package com.dmantz.lms_b.dto.response;
 import java.time.LocalDateTime;
 
 public class SubjectResponse {
-
+	
+	private Long id;
 	private String subjectNm;
 	private String subjectShortCd;
 	private String subjectCategory;
@@ -78,4 +79,12 @@ public class SubjectResponse {
 		this.updatedDt = updatedDt;
 	}
 
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+	
 }

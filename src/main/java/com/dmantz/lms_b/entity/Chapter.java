@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -27,9 +28,14 @@ public class Chapter {
 	@Column(name = "chapter_num")
 	private Long chapterNum;
 
-	@ManyToOne
-	@JoinColumn(name = "course_id")
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(
+	    name = "course_id",
+	    referencedColumnName = "course_id",
+	    nullable = false
+	)
 	private Course course;
+
 
 	@Column(name = "created_by")
 	private Long createdBy;
