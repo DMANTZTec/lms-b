@@ -36,21 +36,20 @@ public interface CourseManagementService {
 
 //	view Courses by subjects 
 	List<CourseResponse> viewCoursesBySubject(Long subjectId);
-	
+
 //	create a course
 	ChapterResponse createChapter(Long staffId, ChapterRequest request);
 
 //	get chapter by Id
-    ChapterResponse getChapterById(Long chapterId);
+	ChapterResponse getChapterById(Long chapterId);
 
 //    get all chapters
-    List<ChapterResponse> getAllChapters();
+	List<ChapterResponse> getAllChapters();
 
 //    update a chapter
-    ChapterResponse updateChapter(Long chapterId, ChapterRequest request, Long staffId);
-    
-//    delete a chapter
-    void deleteChapter(Long chapterId, Long staffId);
+	ChapterResponse updateChapter(Long chapterId, ChapterRequest request, Long staffId);
 
+//    delete a chapter
+	void deleteChapter(Long chapterId, Long staffId);
 
 }

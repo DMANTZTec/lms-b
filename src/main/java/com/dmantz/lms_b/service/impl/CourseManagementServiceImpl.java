@@ -131,10 +131,6 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 		// Fetch subject
 		Subject subject = subjectRepository.findById(subjectId)
 				.orElseThrow(() -> new ResourceNotFoundException("Subject not found with id: " + subjectId));
-
-		// This will delete:
-		// 1. Subject
-		// 2. ALL related courses automatically
 		subjectRepository.delete(subject);
 	}
 
