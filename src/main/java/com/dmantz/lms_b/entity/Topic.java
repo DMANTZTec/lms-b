@@ -1,7 +1,10 @@
 package com.dmantz.lms_b.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -9,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -34,7 +38,13 @@ public class Topic {
 	@ManyToOne
 	@JoinColumn(name = "chapter_id")
 	private Chapter chapter;
-
+	
+	@OneToMany(
+	        mappedBy = "topic",
+	        cascade = CascadeType.ALL,
+	        orphanRemoval = true
+	)
+	private List<TopicReference> references = new ArrayList<>();
 	@Column(name = "created_by")
 	private Long createdBy;
 
@@ -125,6 +135,14 @@ public class Topic {
 
 	public void setUpdatedDt(LocalDateTime updatedDt) {
 		this.updatedDt = updatedDt;
+	}
+
+	public List<TopicReference> getReferences() {
+		return references;
+	}
+
+	public void setReferences(List<TopicReference> references) {
+		this.references = references;
 	}
 
 	@Override
