@@ -1,10 +1,10 @@
 {
   "info": {
-    "_postman_id": "8f5b74a6-d1c7-484c-8486-a0b73d7ed577",
+    "_postman_id": "a685f7fc-fc03-49a8-94e9-c1b0a5b2cb8d",
     "name": "Student",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "52185468",
-    "_collection_link": "https://go.postman.co/collection/52185468-8f5b74a6-d1c7-484c-8486-a0b73d7ed577?source=collection_link"
+    "_exporter_id": "49454707",
+    "_collection_link": "https://go.postman.co/collection/49454707-a685f7fc-fc03-49a8-94e9-c1b0a5b2cb8d?source=collection_link"
   },
   "item": [
     {
@@ -43,7 +43,7 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "http://localhost:8080/api/student/view-students\n",
+          "raw": "http://localhost:8080/api/student/view-students",
           "protocol": "http",
           "host": [
             "localhost"
@@ -52,7 +52,7 @@
           "path": [
             "api",
             "student",
-            "view-students\n"
+            "view-students"
           ]
         }
       },
@@ -163,6 +163,37 @@
             "api",
             "student",
             "reset-password"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Student update API",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"firstNm\": \"Shivaaa\",\r\n  \"lastNm\": \"Shankar\",\r\n  \"gender\": \"MALE\",\r\n  \"addr1\": \"12, MG Road\",\r\n  \"addr2\": \"Near Bus Stand\",\r\n  \"city\": \"Chennai\",\r\n  \"state\": \"Tamil Nadu\",\r\n  \"country\": \"India\",\r\n  \"pin\": \"508005\",\r\n  \"mobileNum\": \"9550108787\",\r\n  \"emergencyContactNm\": \"Ramesh\",\r\n  \"emergencyContactNum\": \"9840012345\"\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/student/update/S000001",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "student",
+            "update",
+            "S000001"
           ]
         }
       },

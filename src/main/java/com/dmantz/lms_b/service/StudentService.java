@@ -20,4 +20,7 @@ public interface StudentService {
     void forgotPassword(ForgotPasswordRequest request);
 
     void resetPassword(ResetPasswordRequest request);
+    
+	StudentResponse updateStudentProfile(String studentId, StudentUpdateRequest request);
+
 }

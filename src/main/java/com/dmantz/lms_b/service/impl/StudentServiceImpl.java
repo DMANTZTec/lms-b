@@ -28,260 +28,246 @@ import java.util.stream.Collectors;
 @Service
 public class StudentServiceImpl implements StudentService {
 
-    private final StudentRepository studentRepository;
-    private final StudentOtpRepository otpRepository;
-    private final StudentMapper studentMapper;
-    private final BCryptPasswordEncoder passwordEncoder;
-    private final EmailService emailService;
-    private final StudentOtpRepository studentOtpRepository;
+	private final StudentRepository studentRepository;
+	private final StudentOtpRepository otpRepository;
+	private final StudentMapper studentMapper;
+	private final BCryptPasswordEncoder passwordEncoder;
+	private final EmailService emailService;
+	private final StudentOtpRepository studentOtpRepository;
 
-    public StudentServiceImpl(StudentRepository studentRepository,
-                              StudentOtpRepository otpRepository,
-                              StudentMapper studentMapper,
-                              BCryptPasswordEncoder passwordEncoder, EmailService emailService, StudentOtpRepository studentOtpRepository) {
-        this.studentRepository = studentRepository;
-        this.otpRepository = otpRepository;
-        this.studentMapper = studentMapper;
-        this.passwordEncoder = passwordEncoder;
-        this.emailService = emailService;
-        this.studentOtpRepository = studentOtpRepository;
-    }
+	public StudentServiceImpl(StudentRepository studentRepository, StudentOtpRepository otpRepository,
+			StudentMapper studentMapper, BCryptPasswordEncoder passwordEncoder, EmailService emailService,
+			StudentOtpRepository studentOtpRepository) {
+		this.studentRepository = studentRepository;
+		this.otpRepository = otpRepository;
+		this.studentMapper = studentMapper;
+		this.passwordEncoder = passwordEncoder;
+		this.emailService = emailService;
+		this.studentOtpRepository = studentOtpRepository;
+	}
 
-    @Override
-    public StudentResponse register(StudentRegistrationRequest request) {
+	@Override
+	public StudentResponse register(StudentRegistrationRequest request) {
 
-        if (studentRepository.existsByEmailId(request.getEmailId())) {
-            throw new RuntimeException("email already exists");
-        }
-        if (studentRepository.existsByMobileNum(request.getMobileNum())) {
-            throw new RuntimeException("mobile number already exists");
-        }
+		if (studentRepository.existsByEmailId(request.getEmailId())) {
+			throw new RuntimeException("email already exists");
+		}
+		if (studentRepository.existsByMobileNum(request.getMobileNum())) {
+			throw new RuntimeException("mobile number already exists");
+		}
 
-        // DTO → Entity
-        Student student = studentMapper.toEntity(request);
+		// DTO → Entity
+		Student student = studentMapper.toEntity(request);
 
-        student.setStudentId(generateStudentId());
-        student.setLoginId(request.getEmailId());
+		student.setStudentId(generateStudentId());
+		student.setLoginId(request.getEmailId());
 
-        student.setPassword(passwordEncoder.encode(request.getPassword()));    //  Encrypt password
+		student.setPassword(passwordEncoder.encode(request.getPassword())); // Encrypt password
 
-        //  System fields
-        student.setStatus("ACTIVE");
-        student.setEnabled("Y");
-        student.setCreatedDt(LocalDateTime.now());
+		// System fields
+		student.setStatus("ACTIVE");
+		student.setEnabled("Y");
+		student.setCreatedDt(LocalDateTime.now());
 
-        Student savedStudent = studentRepository.save(student);  // Save
-        generateOtp(savedStudent);
-        return studentMapper.toResponse(savedStudent);
-    }
+		Student savedStudent = studentRepository.save(student); // Save
+		generateOtp(savedStudent);
+		return studentMapper.toResponse(savedStudent);
+	}
 
-    private String generateStudentId() {
+	private String generateStudentId() {
 
-        Long count = studentRepository.count() + 1; // Get total count of students
-        return String.format("S%06d", count); // Format as S + 6-digit number → always 7 characters
-    }
+		Long count = studentRepository.count() + 1; // Get total count of students
+		return String.format("S%06d", count); // Format as S + 6-digit number → always 7 characters
+	}
 
+	private StudentOtp generateOtp(Student student) {
 
-    private StudentOtp generateOtp(Student student) {
+		StudentOtp otp = new StudentOtp();
 
-        StudentOtp otp = new StudentOtp();
+		otp.setStudent(student);
+		otp.setOtp(String.valueOf(new Random().nextInt(900000) + 100000)); // 6-digit OTP
+		otp.setStatus(OtpStatus.valueOf(String.valueOf(OtpStatus.NEW)));
+		otp.setAttemptsNum(0);
+		otp.setCreatedDt(LocalDateTime.now());
 
-        otp.setStudent(student);
-        otp.setOtp(String.valueOf(new Random().nextInt(900000) + 100000)); // 6-digit OTP
-        otp.setStatus(OtpStatus.valueOf(String.valueOf(OtpStatus.NEW)));
-        otp.setAttemptsNum(0);
-        otp.setCreatedDt(LocalDateTime.now());
+		return otpRepository.save(otp);
+	}
 
-        return otpRepository.save(otp);
-    }
+	@Override
+	public StudentLoginResponse login(StudentLoginRequest request) {
 
-    @Override
-    public StudentLoginResponse login(StudentLoginRequest request) {
+		// Extract username from request
+		String username = request.getUsername();
 
-        // Extract username from request
-        String username = request.getUsername();
+		// Find student by email, mobile, or login ID
+		Student student = studentRepository.findByEmailIdOrMobileNumOrLoginId(username, username, username);
 
-        // Find student by email, mobile, or login ID
-        Student student = studentRepository
-                .findByEmailIdOrMobileNumOrLoginId(username, username, username);
+		if (student == null) {
+			throw new RuntimeException("Invalid login credentials");
+		}
 
-        if (student == null) {
-            throw new RuntimeException("Invalid login credentials");
-        }
+		// Check enabled
+		if (!"Y".equals(student.getEnabled())) {
+			throw new RuntimeException("Account disabled");
+		}
 
-        //  Check enabled
-        if (!"Y".equals(student.getEnabled())) {
-            throw new RuntimeException("Account disabled");
-        }
+		// Verify password
+		if (!passwordEncoder.matches(request.getPassword(), student.getPassword())) {
+			throw new RuntimeException("Invalid login credentials");
+		}
 
-        // Verify password
-        if (!passwordEncoder.matches(request.getPassword(), student.getPassword())) {
-            throw new RuntimeException("Invalid login credentials");
-        }
+		// Generate OTP
+		StudentOtp otp = generateOtp(student);
 
-        //  Generate OTP
-        StudentOtp otp = generateOtp(student);
+		// Send OTP email
+		try {
+			emailService.sendOtpEmail(student.getEmailId(), otp.getOtp(), OtpPurpose.LOGIN);
+			otp.setStatus(OtpStatus.SENT);
+			otp.setUpdatedDt(LocalDateTime.now());
+			otpRepository.save(otp);
 
-        // Send OTP email
-        try {
-            emailService.sendOtpEmail(
-                    student.getEmailId(),
-                    otp.getOtp(),
-                    OtpPurpose.LOGIN
-            );
-            otp.setStatus(OtpStatus.SENT);
-            otp.setUpdatedDt(LocalDateTime.now());
-            otpRepository.save(otp);
+		} catch (Exception e) {
+			System.out.println("OTP email failed");
+			// optional
+			otp.setStatus(OtpStatus.FAILED);
+			otpRepository.save(otp);
+		}
+		// Response
+		StudentLoginResponse response = studentMapper.toLoginResponse(student);
+		response.setMessage("OTP sent to your registered email");
 
-        } catch (Exception e) {
-            System.out.println("OTP email failed");
-            // optional
-            otp.setStatus(OtpStatus.FAILED);
-            otpRepository.save(otp);
-        }
-        //  Response
-        StudentLoginResponse response = studentMapper.toLoginResponse(student);
-        response.setMessage("OTP sent to your registered email");
+		return response;
+	}
 
-        return response;
-    }
+	@Override
+	public OtpVerifyResponse verifyOtp(OtpVerifyRequest request) {
 
+		StudentOtp otp = studentOtpRepository.findByStudent_StudentIdOrderByCreatedDtDesc(request.getStudentId())
+				.stream().findFirst().orElseThrow(() -> new OtpNotFoundException("OTP not found"));
 
-    @Override
-    public OtpVerifyResponse verifyOtp(OtpVerifyRequest request) {
+		// Only SENT OTPs are valid
+		if (otp.getStatus() != OtpStatus.SENT) {
+			throw new OtpInvalidException("OTP is not valid");
+		}
 
-        StudentOtp otp = studentOtpRepository
-                .findByStudent_StudentIdOrderByCreatedDtDesc(request.getStudentId())
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new OtpNotFoundException("OTP not found"));
+		// Expiry check (5 mins)
+		if (otp.getCreatedDt().isBefore(LocalDateTime.now().minusMinutes(5))) {
+			otp.setStatus(OtpStatus.EXPIRED);
+			otp.setUpdatedDt(LocalDateTime.now());
+			studentOtpRepository.save(otp);
+			throw new OtpExpiredException("OTP expired");
+		}
 
-        // Only SENT OTPs are valid
-        if (otp.getStatus() != OtpStatus.SENT) {
-            throw new OtpInvalidException("OTP is not valid");
-        }
+		// Match OTP
+		if (!otp.getOtp().equals(request.getOtp())) {
+			otp.setAttemptsNum(otp.getAttemptsNum() + 1);
+			otp.setUpdatedDt(LocalDateTime.now());
+			studentOtpRepository.save(otp);
+			throw new OtpInvalidException("Invalid OTP");
+		}
 
-        // Expiry check (5 mins)
-        if (otp.getCreatedDt().isBefore(LocalDateTime.now().minusMinutes(5))) {
-            otp.setStatus(OtpStatus.EXPIRED);
-            otp.setUpdatedDt(LocalDateTime.now());
-            studentOtpRepository.save(otp);
-            throw new OtpExpiredException("OTP expired");
-        }
+		// Success
+		otp.setStatus(OtpStatus.VERIFIED);
+		otp.setUpdatedDt(LocalDateTime.now());
+		studentOtpRepository.save(otp);
 
-        // Match OTP
-        if (!otp.getOtp().equals(request.getOtp())) {
-            otp.setAttemptsNum(otp.getAttemptsNum() + 1);
-            otp.setUpdatedDt(LocalDateTime.now());
-            studentOtpRepository.save(otp);
-            throw new OtpInvalidException("Invalid OTP");
-        }
+		OtpVerifyResponse response = new OtpVerifyResponse();
+		response.setVerified(true);
+		response.setMessage("OTP verified successfully");
 
-        // Success
-        otp.setStatus(OtpStatus.VERIFIED);
-        otp.setUpdatedDt(LocalDateTime.now());
-        studentOtpRepository.save(otp);
+		return response;
+	}
 
-        OtpVerifyResponse response = new OtpVerifyResponse();
-        response.setVerified(true);
-        response.setMessage("OTP verified successfully");
+	@Override
+	public List<StudentResponse> getAllStudents() {
+		return studentRepository.findAll().stream().map(studentMapper::toResponse) // map entity to DTO
+				.collect(Collectors.toList());
+	}
 
-        return response;
-    }
+	@Override
+	public void forgotPassword(ForgotPasswordRequest request) {
 
-    @Override
-    public List<StudentResponse> getAllStudents() {
-        return studentRepository.findAll()
-                .stream()
-                .map(studentMapper::toResponse) // map entity to DTO
-                .collect(Collectors.toList());
-    }
+		// Make sure we use student_id here
+		Student student = studentRepository.findByEmailId(request.getEmail())
+				.orElseThrow(() -> new RuntimeException("Student not found"));
 
-    @Override
-    public void forgotPassword(ForgotPasswordRequest request) {
+		// Generate OTP
+		StudentOtp otp = generateOtp(student);
 
-        // Make sure we use student_id here
-        Student student = studentRepository.findByEmailId(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+		try {
+			emailService.sendOtpEmail(student.getLoginId(), // assuming login_id is the email
+					otp.getOtp(), OtpPurpose.FORGOT_PASSWORD);
 
-        // Generate OTP
-        StudentOtp otp = generateOtp(student);
+			otp.setStatus(OtpStatus.SENT);
+			otp.setUpdatedDt(LocalDateTime.now());
+			otpRepository.save(otp);
 
-        try {
-            emailService.sendOtpEmail(
-                    student.getLoginId(), // assuming login_id is the email
-                    otp.getOtp(),
-                    OtpPurpose.FORGOT_PASSWORD
-            );
+		} catch (Exception e) {
+			otp.setStatus(OtpStatus.FAILED);
+			otpRepository.save(otp);
+			throw new RuntimeException("Failed to send OTP");
+		}
+	}
 
-            otp.setStatus(OtpStatus.SENT);
-            otp.setUpdatedDt(LocalDateTime.now());
-            otpRepository.save(otp);
+	@Override
+	@Transactional
+	public void resetPassword(ResetPasswordRequest request) {
 
-        } catch (Exception e) {
-            otp.setStatus(OtpStatus.FAILED);
-            otpRepository.save(otp);
-            throw new RuntimeException("Failed to send OTP");
-        }
-    }
+		// Extract studentId from request
+		String studentId = request.getStudentId(); // e.g. S000002
 
-    @Override
-    @Transactional
-    public void resetPassword(ResetPasswordRequest request) {
+		// Get latest OTP for student
+		StudentOtp studentOtp = otpRepository.findLatestOtpByStudentId(studentId).stream().findFirst()
+				.orElseThrow(() -> new RuntimeException("OTP not found"));
 
-        //  Extract studentId from request
-        String studentId = request.getStudentId(); // e.g. S000002
+		// OTP already used
+		if (studentOtp.getStatus() == OtpStatus.VERIFIED) {
+			throw new RuntimeException("OTP already used");
+		}
 
-        // Get latest OTP for student
-        StudentOtp studentOtp = otpRepository
-                .findLatestOtpByStudentId(studentId)
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("OTP not found"));
+		// OTP expired (10 minutes)
+		if (studentOtp.getCreatedDt().isBefore(LocalDateTime.now().minusMinutes(10))) {
 
-        // OTP already used
-        if (studentOtp.getStatus() == OtpStatus.VERIFIED) {
-            throw new RuntimeException("OTP already used");
-        }
+			studentOtp.setStatus(OtpStatus.EXPIRED);
+			otpRepository.save(studentOtp);
+			throw new RuntimeException("OTP expired");
+		}
 
-        // OTP expired (10 minutes)
-        if (studentOtp.getCreatedDt()
-                .isBefore(LocalDateTime.now().minusMinutes(10))) {
+		// OTP mismatch
+		if (!studentOtp.getOtp().equals(request.getOtp())) {
+			throw new RuntimeException("Invalid OTP");
+		}
 
-            studentOtp.setStatus(OtpStatus.EXPIRED);
-            otpRepository.save(studentOtp);
-            throw new RuntimeException("OTP expired");
-        }
+		// Get student (UNIQUE by student_id)
+		Student student = studentRepository.findByStudentId(studentId)
+				.orElseThrow(() -> new RuntimeException("Student not found"));
 
-        //  OTP mismatch
-        if (!studentOtp.getOtp().equals(request.getOtp())) {
-            throw new RuntimeException("Invalid OTP");
-        }
+		// Update password
+		student.setPassword(passwordEncoder.encode(request.getNewPassword()));
+		student.setUpdatedDt(LocalDateTime.now());
+		studentRepository.save(student);
 
-        //  Get student (UNIQUE by student_id)
-        Student student = studentRepository
-                .findByStudentId(studentId)
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+		studentOtp.setStatus(OtpStatus.VERIFIED);
+		studentOtp.setUpdatedDt(LocalDateTime.now());
+		otpRepository.save(studentOtp);
 
-        //  Update password
-        student.setPassword(passwordEncoder.encode(request.getNewPassword()));
-        student.setUpdatedDt(LocalDateTime.now());
-        studentRepository.save(student);
+		// Send confirmation email
+		emailService.sendOtpEmail(student.getEmailId(), null, OtpPurpose.PASSWORD_RESET_SUCCESS);
+	}
 
-        studentOtp.setStatus(OtpStatus.VERIFIED);
-        studentOtp.setUpdatedDt(LocalDateTime.now());
-        otpRepository.save(studentOtp);
+	@Override
+	public StudentResponse updateStudentProfile(String studentId, StudentUpdateRequest request) {
 
-        // Send confirmation email
-        emailService.sendOtpEmail(
-                student.getEmailId(),
-                null,
-                OtpPurpose.PASSWORD_RESET_SUCCESS
-        );
-    }
+		Student student = studentRepository.findByStudentId(studentId)
+				.orElseThrow(() -> new RuntimeException("Student not found"));
+
+		studentMapper.updateStudentFromDto(request, student);
+		student.setUpdatedBy(student.getId());
+		student.setUpdatedDt(LocalDateTime.now());
+
+		studentRepository.save(student);
+
+		return studentMapper.toResponse(student);
+	}
 
 }
-
-
-
-
