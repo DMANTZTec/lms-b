@@ -1,5 +1,6 @@
 package com.dmantz.lms_b.entity;
 
+import com.dmantz.lms_b.entity.base.AuditFields;
 import jakarta.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -10,7 +11,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name ="student_otp")
-public class StudentOtp {
+public class StudentOtp extends AuditFields {
 
     @Id
     @GeneratedValue(generator = "UUID")
@@ -37,18 +38,6 @@ public class StudentOtp {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
     private OtpStatus status = OtpStatus.NEW;        // default
-
-    @Column(name = "created_by")
-    private Long createdBy;
-
-    @Column(name = "created_dt", nullable = false)
-    private LocalDateTime createdDt;
-
-    @Column(name = "updated_by")
-    private Long updatedBy;
-
-    @Column(name = "updated_dt")
-    private LocalDateTime updatedDt;
 
     public UUID getId() {
         return id;
@@ -90,50 +79,14 @@ public class StudentOtp {
         this.status = status;
     }
 
-    public Long getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(Long createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    public LocalDateTime getCreatedDt() {
-        return createdDt;
-    }
-
-    public void setCreatedDt(LocalDateTime createdDt) {
-        this.createdDt = createdDt;
-    }
-
-    public Long getUpdatedBy() {
-        return updatedBy;
-    }
-
-    public void setUpdatedBy(Long updatedBy) {
-        this.updatedBy = updatedBy;
-    }
-
-    public LocalDateTime getUpdatedDt() {
-        return updatedDt;
-    }
-
-    public void setUpdatedDt(LocalDateTime updatedDt) {
-        this.updatedDt = updatedDt;
-    }
-
     @Override
     public String toString() {
-        return "Student_otp{" +
+        return "StudentOtp{" +
                 "id=" + id +
                 ", student=" + student +
                 ", otp='" + otp + '\'' +
                 ", attemptsNum=" + attemptsNum +
                 ", status=" + status +
-                ", createdBy=" + createdBy +
-                ", createdDt=" + createdDt +
-                ", updatedBy=" + updatedBy +
-                ", updatedDt=" + updatedDt +
                 '}';
     }
 }

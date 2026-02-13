@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.dmantz.lms_b.entity.base.AuditFields;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -19,11 +20,10 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "staff")
-public class Staff {
+public class Staff extends AuditFields {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-
 
 	private String staffId;
 
@@ -81,18 +81,6 @@ public class Staff {
 
 	@Column(name = "dob")
 	private LocalDate dob;
-
-	@Column(name = "created_by")
-	private Long createdBy;
-
-	@Column(name = "created_dt")
-	private LocalDateTime createdDt;
-
-	@Column(name = "updated_by")
-	private Long updatedBy;
-
-	@Column(name = "updated_dt")
-	private LocalDateTime updatedDt;
 
 	@ManyToMany
 	@JoinTable(name = "staff_role", joinColumns = @JoinColumn(name = "staff_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
@@ -258,38 +246,6 @@ public class Staff {
 		this.dob = dob;
 	}
 
-	public Long getCreatedBy() {
-		return createdBy;
-	}
-
-	public void setCreatedBy(Long createdBy) {
-		this.createdBy = createdBy;
-	}
-
-	public LocalDateTime getCreatedDt() {
-		return createdDt;
-	}
-
-	public void setCreatedDt(LocalDateTime createdDt) {
-		this.createdDt = createdDt;
-	}
-
-	public Long getUpdatedBy() {
-		return updatedBy;
-	}
-
-	public void setUpdatedBy(Long updatedBy) {
-		this.updatedBy = updatedBy;
-	}
-
-	public LocalDateTime getUpdatedDt() {
-		return updatedDt;
-	}
-
-	public void setUpdatedDt(LocalDateTime updatedDt) {
-		this.updatedDt = updatedDt;
-	}
-
 	public Set<Role> getRoles() {
 		return roles;
 	}
@@ -300,14 +256,29 @@ public class Staff {
 
 	@Override
 	public String toString() {
-		return "Staff{" + "id=" + id + ", staffId='" + staffId + '\'' + ", firstNm='" + firstNm + '\'' + ", lastNm='"
-				+ lastNm + '\'' + ", addr1='" + addr1 + '\'' + ", addr2='" + addr2 + '\'' + ", city='" + city + '\''
-				+ ", state='" + state + '\'' + ", country='" + country + '\'' + ", pin='" + pin + '\'' + ", emailId='"
-				+ emailId + '\'' + ", mobileNum='" + mobileNum + '\'' + ", password='" + password + '\'' + ", status='"
-				+ status + '\'' + ", enabled='" + enabled + '\'' + ", designation='" + designation + '\''
-				+ ", emergencyContactNm='" + emergencyContactNm + '\'' + ", emergencyContactNum='" + emergencyContactNum
-				+ '\'' + ", profileImg=" + Arrays.toString(profileImg) + ", dob=" + dob + ", createdBy=" + createdBy
-				+ ", createdDt=" + createdDt + ", updatedBy=" + updatedBy + ", updatedDt=" + updatedDt + ", roles="
-				+ roles + '}';
+		return "Staff{" +
+				"id=" + id +
+				", staffId='" + staffId + '\'' +
+				", firstNm='" + firstNm + '\'' +
+				", lastNm='" + lastNm + '\'' +
+				", addr1='" + addr1 + '\'' +
+				", addr2='" + addr2 + '\'' +
+				", city='" + city + '\'' +
+				", state='" + state + '\'' +
+				", country='" + country + '\'' +
+				", pin='" + pin + '\'' +
+				", emailId='" + emailId + '\'' +
+				", mobileNum='" + mobileNum + '\'' +
+				", password='" + password + '\'' +
+				", status='" + status + '\'' +
+				", enabled='" + enabled + '\'' +
+				", designation='" + designation + '\'' +
+				", emergencyContactNm='" + emergencyContactNm + '\'' +
+				", emergencyContactNum='" + emergencyContactNum + '\'' +
+				", profileImg=" + Arrays.toString(profileImg) +
+				", dob=" + dob +
+				", roles=" + roles +
+				'}';
 	}
+
 }

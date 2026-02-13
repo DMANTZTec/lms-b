@@ -23,10 +23,6 @@ public interface StudentMapper {
     // ================= CREATE =================
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "password", ignore = true)
-    @Mapping(target = "createdBy", ignore = true)
-    @Mapping(target = "createdDt", ignore = true)
-    @Mapping(target = "updatedBy", ignore = true)
-    @Mapping(target = "updatedDt", ignore = true)
     Student toEntity(StudentRegistrationRequest request);
 
     // ================= UPDATE PROFILE =================

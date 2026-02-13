@@ -361,7 +361,6 @@ public class StaffServiceImpl implements StaffService {
         staff.setPassword(passwordEncoder.encode(request.getPassword()));
         staff.setStatus("ACTIVE");
         staff.setEnabled("Y");
-        staff.setCreatedDt(LocalDateTime.now());
         staff.setCreatedBy(null); // system created
 
         //  Profile image (optional)

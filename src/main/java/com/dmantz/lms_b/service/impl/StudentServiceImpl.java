@@ -67,7 +67,6 @@ public class StudentServiceImpl implements StudentService {
 		// System fields
 		student.setStatus("ACTIVE");
 		student.setEnabled("Y");
-		student.setCreatedDt(LocalDateTime.now());
 
 		Student savedStudent = studentRepository.save(student); // Save
 		generateOtp(savedStudent);
@@ -244,7 +243,6 @@ public class StudentServiceImpl implements StudentService {
 
 		// Update password
 		student.setPassword(passwordEncoder.encode(request.getNewPassword()));
-		student.setUpdatedDt(LocalDateTime.now());
 		studentRepository.save(student);
 
 		studentOtp.setStatus(OtpStatus.VERIFIED);
@@ -262,8 +260,6 @@ public class StudentServiceImpl implements StudentService {
 				.orElseThrow(() -> new RuntimeException("Student not found"));
 
 		studentMapper.updateStudentFromDto(request, student);
-		student.setUpdatedBy(student.getId());
-		student.setUpdatedDt(LocalDateTime.now());
 
 		studentRepository.save(student);
 

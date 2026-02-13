@@ -1,9 +1,9 @@
 package com.dmantz.lms_b.entity;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 
+import com.dmantz.lms_b.entity.base.AuditFields;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -14,7 +14,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "student")
-public class Student {
+public class Student extends AuditFields {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -79,18 +79,6 @@ public class Student {
 	@Lob
 	@Column(name = "profile_img")
 	private byte[] profileImg;
-
-	@Column(name = "created_by")
-	private Long createdBy;
-
-	@Column(name = "created_dt")
-	private LocalDateTime createdDt;
-
-	@Column(name = "updated_by")
-	private Long updatedBy;
-
-	@Column(name = "updated_dt")
-	private LocalDateTime updatedDt;
 
 	public Long getId() {
 		return id;
@@ -260,49 +248,30 @@ public class Student {
 		this.profileImg = profileImg;
 	}
 
-	public Long getCreatedBy() {
-		return createdBy;
-	}
-
-	public void setCreatedBy(Long createdBy) {
-		this.createdBy = createdBy;
-	}
-
-	public LocalDateTime getCreatedDt() {
-		return createdDt;
-	}
-
-	public void setCreatedDt(LocalDateTime createdDt) {
-		this.createdDt = createdDt;
-	}
-
-	public Long getUpdatedBy() {
-		return updatedBy;
-	}
-
-	public void setUpdatedBy(Long updatedBy) {
-		this.updatedBy = updatedBy;
-	}
-
-	public LocalDateTime getUpdatedDt() {
-		return updatedDt;
-	}
-
-	public void setUpdatedDt(LocalDateTime updatedDt) {
-		this.updatedDt = updatedDt;
-	}
-
 	@Override
 	public String toString() {
-		return "Student{" + "id=" + id + ", studentId='" + studentId + '\'' + ", loginId='" + loginId + '\''
-				+ ", firstNm='" + firstNm + '\'' + ", lastNm='" + lastNm + '\'' + ", gender='" + gender + '\''
-				+ ", dob=" + dob + ", addr1='" + addr1 + '\'' + ", addr2='" + addr2 + '\'' + ", city='" + city + '\''
-				+ ", state='" + state + '\'' + ", country='" + country + '\'' + ", pin='" + pin + '\'' + ", emailId='"
-				+ emailId + '\'' + ", mobileNum='" + mobileNum + '\'' + ", password='" + password + '\'' + ", status='"
-				+ status + '\'' + ", enabled='" + enabled + '\'' + ", emergencyContactNm='" + emergencyContactNm + '\''
-				+ ", emergencyContactNum='" + emergencyContactNum + '\'' + ", profileImg=" + Arrays.toString(profileImg)
-				+ ", createdBy=" + createdBy + ", createdDt=" + createdDt + ", updatedBy=" + updatedBy + ", updatedDt="
-				+ updatedDt + '}';
+		return "Student{" +
+				"id=" + id +
+				", studentId='" + studentId + '\'' +
+				", loginId='" + loginId + '\'' +
+				", firstNm='" + firstNm + '\'' +
+				", lastNm='" + lastNm + '\'' +
+				", gender='" + gender + '\'' +
+				", dob=" + dob +
+				", addr1='" + addr1 + '\'' +
+				", addr2='" + addr2 + '\'' +
+				", city='" + city + '\'' +
+				", state='" + state + '\'' +
+				", country='" + country + '\'' +
+				", pin='" + pin + '\'' +
+				", emailId='" + emailId + '\'' +
+				", mobileNum='" + mobileNum + '\'' +
+				", password='" + password + '\'' +
+				", status='" + status + '\'' +
+				", enabled='" + enabled + '\'' +
+				", emergencyContactNm='" + emergencyContactNm + '\'' +
+				", emergencyContactNum='" + emergencyContactNum + '\'' +
+				", profileImg=" + Arrays.toString(profileImg) +
+				'}';
 	}
-
 }
