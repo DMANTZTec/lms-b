@@ -4,6 +4,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.dmantz.lms_b.dto.request.TopicRequestDto;
+import com.dmantz.lms_b.dto.response.TopicResponseDto;
+import com.dmantz.lms_b.entity.*;
+import com.dmantz.lms_b.mapper.TopicMapper;
+import com.dmantz.lms_b.repository.*;
 import org.springframework.stereotype.Service;
 
 import com.dmantz.lms_b.dto.request.ChapterRequest;
@@ -12,21 +17,11 @@ import com.dmantz.lms_b.dto.request.SubjectRequest;
 import com.dmantz.lms_b.dto.response.ChapterResponse;
 import com.dmantz.lms_b.dto.response.CourseResponse;
 import com.dmantz.lms_b.dto.response.SubjectResponse;
-import com.dmantz.lms_b.entity.Chapter;
-import com.dmantz.lms_b.entity.Course;
-import com.dmantz.lms_b.entity.Provider;
-import com.dmantz.lms_b.entity.Staff;
-import com.dmantz.lms_b.entity.Subject;
 import com.dmantz.lms_b.exceptions.DuplicateValuesException;
 import com.dmantz.lms_b.exceptions.ResourceNotFoundException;
 import com.dmantz.lms_b.mapper.ChapterMapper;
 import com.dmantz.lms_b.mapper.CourseMapper;
 import com.dmantz.lms_b.mapper.SubjectMapper;
-import com.dmantz.lms_b.repository.ChapterRepository;
-import com.dmantz.lms_b.repository.CourseRepository;
-import com.dmantz.lms_b.repository.ProviderRepository;
-import com.dmantz.lms_b.repository.StaffRepository;
-import com.dmantz.lms_b.repository.SubjectRepository;
 import com.dmantz.lms_b.service.CourseManagementService;
 
 import jakarta.transaction.Transactional;
@@ -46,9 +41,14 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 	private final ChapterRepository chapterRepository;
 	private final ChapterMapper chapterMapper;
 
-	public CourseManagementServiceImpl(SubjectRepository subjectRepository, StaffRepository staffRepository,
+	private final TopicRepository topicRepository;
+	private final  TopicMapper topicMapper;
+
+	public CourseManagementServiceImpl(
+			SubjectRepository subjectRepository, StaffRepository staffRepository,
 			SubjectMapper subjectMapper, CourseRepository courseRepository, CourseMapper courseMapper,
-			ProviderRepository providerRepository, ChapterRepository chapterRepository, ChapterMapper chapterMapper) {
+			ProviderRepository providerRepository, ChapterRepository chapterRepository, ChapterMapper chapterMapper,
+			TopicRepository topicRepository, TopicMapper topicMapper) {
 		super();
 		this.subjectRepository = subjectRepository;
 		this.staffRepository = staffRepository;
@@ -58,6 +58,8 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 		this.providerRepository = providerRepository;
 		this.chapterRepository = chapterRepository;
 		this.chapterMapper = chapterMapper;
+		this.topicRepository = topicRepository;
+		this.topicMapper = topicMapper;
 	}
 
 	// ------------------ CREATE SUBJECT ------------------
@@ -356,6 +358,109 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 				.orElseThrow(() -> new ResourceNotFoundException("Chapter not found with id: " + chapterId));
 
 		chapterRepository.delete(chapter);
+	}
+
+	// ================== CREATE A TOPIC ===================
+
+	@Override
+	public TopicResponseDto createTopic(TopicRequestDto request) {
+
+		Chapter chapter = chapterRepository.findById(request.getChapterId())
+				.orElseThrow(() ->
+						new ResourceNotFoundException(
+								"Chapter not found with id: " + request.getChapterId()));
+
+		Staff staff = staffRepository.findById(request.getStaffId())
+				.orElseThrow(() ->
+						new ResourceNotFoundException(
+								"Staff not found with id: " + request.getStaffId()));
+
+		Long maxTopicNum =
+				topicRepository.findMaxTopicNumByChapterId(request.getChapterId());
+
+		Long nextTopicNum = (maxTopicNum == null ? 1L : maxTopicNum + 1);
+
+		Topic topic = topicMapper.toEntity(request);
+
+		topic.setChapter(chapter);
+		topic.setTopicNum(nextTopicNum);
+		topic.setCreatedBy(staff.getId());
+		topic.setCreatedDt(LocalDateTime.now());
+
+		Topic savedTopic = topicRepository.save(topic);
+
+		return topicMapper.toResponseDto(savedTopic);
+	}
+
+	// ================= Get all Topics by ChapterId ============================
+
+	@Override
+	public List<TopicResponseDto> getTopicsByChapterId(Long chapterId) {
+
+		chapterRepository.findById(chapterId)
+				.orElseThrow(() ->
+						new ResourceNotFoundException(
+								"Chapter not found with id: " + chapterId));
+
+		List<Topic> topics =
+				topicRepository.findByChapterIdOrderByTopicNumAsc(chapterId);
+
+		return topics.stream()
+				.map(topicMapper::toResponseDto)
+				.collect(Collectors.toList());
+	}
+
+	//====================== Get Topic by Id and Chapter Id =========================
+
+	@Override
+	public TopicResponseDto getTopicByIdAndChapterId(Long topicId, Long chapterId) {
+
+		Topic topic = topicRepository
+				.findByIdAndChapterId(topicId, chapterId)
+				.orElseThrow(() ->
+						new ResourceNotFoundException(
+								"Topic not found in this chapter"));
+
+		return topicMapper.toResponseDto(topic);
+	}
+
+	// ======================== Update Topic ==================================
+
+	@Override
+	public TopicResponseDto updateTopic(Long id, TopicRequestDto requestDto) {
+
+		Topic topic = topicRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("Topic not found"));
+
+		Chapter chapter = chapterRepository.findById(requestDto.getChapterId())
+				.orElseThrow(() -> new RuntimeException("Chapter not found"));
+
+		Staff staff = staffRepository.findById(requestDto.getStaffId())
+				.orElseThrow(() -> new RuntimeException("Staff not found"));
+
+		topic.setTopicNm(requestDto.getTopicName());
+		topic.setDescription(requestDto.getDescription());
+		topic.setExpectedTimeMin(requestDto.getExpectedTimeMin());
+		topic.setChapter(chapter);
+		topic.setUpdatedBy(requestDto.getStaffId());
+		topic.setUpdatedDt(LocalDateTime.now());
+
+		Topic updatedTopic = topicRepository.save(topic);
+
+		return topicMapper.toResponseDto(updatedTopic);
+	}
+
+	// ============================= Delete Topic ===================================
+
+	@Override
+	public void deleteTopic(Long id) {
+
+		Topic topic = topicRepository.findById(id)
+				.orElseThrow(() ->
+						new ResourceNotFoundException(
+								"Topic not found with id: " + id));
+
+		topicRepository.delete(topic);
 	}
 
 }

@@ -2,7 +2,8 @@ package com.dmantz.lms_b.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.dmantz.lms_b.dto.request.TopicRequestDto;
+import com.dmantz.lms_b.dto.response.TopicResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -142,6 +143,62 @@ public class CourseManagementController {
 	public ResponseEntity<String> deleteChapter(@PathVariable Long chapterId, @RequestParam Long staffId) {
 		courseManagementService.deleteChapter(chapterId, staffId);
 		return ResponseEntity.ok("Chapter deleted successfully");
+	}
+
+	// =============== CREATE TOPIC====================
+
+	@PostMapping("/topics")
+	public ResponseEntity<TopicResponseDto> createTopic(
+			@Valid @RequestBody TopicRequestDto request) {
+
+		TopicResponseDto response = courseManagementService.createTopic(request);
+		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+	}
+
+	// ================ Get All Topics by Chapter Id=====================
+
+	@GetMapping("/topics")
+	public ResponseEntity<List<TopicResponseDto>> getTopicsByChapterId(
+			@RequestParam Long chapterId) {
+
+		List<TopicResponseDto> topics =
+				courseManagementService.getTopicsByChapterId(chapterId);
+
+		return ResponseEntity.ok(topics);
+	}
+
+	//====================== Get Topic by Id and Chapter Id =========================
+
+	@GetMapping("topics/{topicId}")
+	public ResponseEntity<TopicResponseDto> getTopicByIdAndChapterId(
+			@PathVariable Long topicId,
+			@RequestParam Long chapterId) {
+
+		TopicResponseDto response =
+				courseManagementService.getTopicByIdAndChapterId(topicId, chapterId);
+
+		return ResponseEntity.ok(response);
+	}
+
+	// =============== UPDATE TOPIC =============================
+
+	@PutMapping("topics/{id}")
+	public ResponseEntity<TopicResponseDto> updateTopic(
+			@PathVariable Long id,
+			@Valid @RequestBody TopicRequestDto requestDto) {
+
+		TopicResponseDto response = courseManagementService.updateTopic(id, requestDto);
+		return ResponseEntity.ok(response);
+	}
+
+	// ====================== DELETE TOPIC =================================
+
+	@DeleteMapping("topics/{id}")
+	public ResponseEntity<Void> deleteTopic(@PathVariable Long id) {
+
+		courseManagementService.deleteTopic(id);
+
+		return ResponseEntity.noContent().build();
 	}
 
 }

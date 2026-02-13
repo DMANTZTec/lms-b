@@ -4,17 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "chapter")
@@ -31,10 +21,6 @@ public class Chapter {
 
 	@Column(name = "chapter_num")
 	private Long chapterNum;
-	
-	@OneToMany(mappedBy = "chapter", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Topic> topics = new ArrayList<>();
-	
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(
@@ -43,6 +29,9 @@ public class Chapter {
 	    nullable = false
 	)
 	private Course course;
+
+	@OneToMany(mappedBy = "chapter", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Topic> topics = new ArrayList<>();
 
 	@Column(name = "created_by")
 	private Long createdBy;
@@ -96,6 +85,14 @@ public class Chapter {
 		this.course = course;
 	}
 
+	public List<Topic> getTopics() {
+		return topics;
+	}
+
+	public void setTopics(List<Topic> topics) {
+		this.topics = topics;
+	}
+
 	public Long getCreatedBy() {
 		return createdBy;
 	}
@@ -126,14 +123,6 @@ public class Chapter {
 
 	public void setUpdatedDt(LocalDateTime updatedDt) {
 		this.updatedDt = updatedDt;
-	}
-
-	public List<Topic> getTopics() {
-		return topics;
-	}
-
-	public void setTopics(List<Topic> topics) {
-		this.topics = topics;
 	}
 
 	@Override

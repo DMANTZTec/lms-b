@@ -5,9 +5,11 @@ import java.util.List;
 import com.dmantz.lms_b.dto.request.ChapterRequest;
 import com.dmantz.lms_b.dto.request.CourseRequest;
 import com.dmantz.lms_b.dto.request.SubjectRequest;
+import com.dmantz.lms_b.dto.request.TopicRequestDto;
 import com.dmantz.lms_b.dto.response.ChapterResponse;
 import com.dmantz.lms_b.dto.response.CourseResponse;
 import com.dmantz.lms_b.dto.response.SubjectResponse;
+import com.dmantz.lms_b.dto.response.TopicResponseDto;
 
 public interface CourseManagementService {
 //	create a subject
@@ -51,5 +53,20 @@ public interface CourseManagementService {
 
 //    delete a chapter
 	void deleteChapter(Long chapterId, Long staffId);
+
+//	create a topic
+	TopicResponseDto createTopic(TopicRequestDto request);
+
+//	get all topics in a chapter
+	List<TopicResponseDto> getTopicsByChapterId(Long chapterId);
+
+//	get topic by id and chapterId
+	TopicResponseDto getTopicByIdAndChapterId(Long topicId, Long chapterId);
+
+//	update a topic
+	TopicResponseDto updateTopic(Long id, TopicRequestDto requestDto);
+
+//	delete a topic
+	void deleteTopic(Long id);
 
 }
