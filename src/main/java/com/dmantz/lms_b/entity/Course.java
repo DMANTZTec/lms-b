@@ -7,6 +7,8 @@ import java.util.List;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import com.dmantz.lms_b.entity.base.AuditFields;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,7 +23,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "course")
-public class Course {
+public class Course extends AuditFields{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -52,18 +54,6 @@ public class Course {
 	@ManyToOne
 	@JoinColumn(name = "provider_id")
 	private Provider provider;
-
-	@Column(name = "created_by")
-	private Long createdBy;
-
-	@Column(name = "created_dt")
-	private LocalDateTime createdDt;
-
-	@Column(name = "updated_by")
-	private Long updatedBy;
-
-	@Column(name = "updated_dt")
-	private LocalDateTime updatedDt;
 
 	public Long getId() {
 		return id;
@@ -129,38 +119,6 @@ public class Course {
 		this.provider = provider;
 	}
 
-	public Long getCreatedBy() {
-		return createdBy;
-	}
-
-	public void setCreatedBy(Long createdBy) {
-		this.createdBy = createdBy;
-	}
-
-	public LocalDateTime getCreatedDt() {
-		return createdDt;
-	}
-
-	public void setCreatedDt(LocalDateTime createdDt) {
-		this.createdDt = createdDt;
-	}
-
-	public Long getUpdatedBy() {
-		return updatedBy;
-	}
-
-	public void setUpdatedBy(Long updatedBy) {
-		this.updatedBy = updatedBy;
-	}
-
-	public LocalDateTime getUpdatedDt() {
-		return updatedDt;
-	}
-
-	public void setUpdatedDt(LocalDateTime updatedDt) {
-		this.updatedDt = updatedDt;
-	}
-	
 
 	public List<Chapter> getChapters() {
 		return chapters;
@@ -173,8 +131,9 @@ public class Course {
 	@Override
 	public String toString() {
 		return "Course [id=" + id + ", courseId=" + courseId + ", courseTitle=" + courseTitle + ", description="
-				+ description + ", language=" + language + ", skills=" + skills + ", createdBy=" + createdBy
-				+ ", createdDt=" + createdDt + ", updatedBy=" + updatedBy + ", updatedDt=" + updatedDt + "]";
+				+ description + ", language=" + language + ", skills=" + skills + ", chapters=" + chapters
+				+ ", subject=" + subject + ", provider=" + provider + "]";
 	}
 
+	
 }

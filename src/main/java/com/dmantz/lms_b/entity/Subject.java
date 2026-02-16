@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.dmantz.lms_b.entity.base.AuditFields;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,7 +17,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "subject")
-public class Subject {
+public class Subject extends AuditFields{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -31,18 +33,6 @@ public class Subject {
 
 	@Column(name = "description")
 	private String description;
-
-	@Column(name = "created_by")
-	private Long createdBy;
-
-	@Column(name = "created_dt")
-	private LocalDateTime createdDt;
-
-	@Column(name = "updated_by")
-	private Long updatedBy;
-
-	@Column(name = "updated_dt")
-	private LocalDateTime updatedDt;
 
 	@OneToMany(mappedBy = "subject", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Course> courses = new ArrayList<>();
@@ -87,38 +77,6 @@ public class Subject {
 		this.description = description;
 	}
 
-	public Long getCreatedBy() {
-		return createdBy;
-	}
-
-	public void setCreatedBy(Long createdBy) {
-		this.createdBy = createdBy;
-	}
-
-	public LocalDateTime getCreatedDt() {
-		return createdDt;
-	}
-
-	public void setCreatedDt(LocalDateTime createdDt) {
-		this.createdDt = createdDt;
-	}
-
-	public Long getUpdatedBy() {
-		return updatedBy;
-	}
-
-	public void setUpdatedBy(Long updatedBy) {
-		this.updatedBy = updatedBy;
-	}
-
-	public LocalDateTime getUpdatedDt() {
-		return updatedDt;
-	}
-
-	public void setUpdatedDt(LocalDateTime updatedDt) {
-		this.updatedDt = updatedDt;
-	}
-
 	public List<Course> getCourses() {
 		return courses;
 	}
@@ -130,9 +88,8 @@ public class Subject {
 	@Override
 	public String toString() {
 		return "Subject [id=" + id + ", subjectNm=" + subjectNm + ", subjectShortCd=" + subjectShortCd
-				+ ", subjectCategory=" + subjectCategory + ", description=" + description + ", createdBy=" + createdBy
-				+ ", createdDt=" + createdDt + ", updatedBy=" + updatedBy + ", updatedDt=" + updatedDt + ", courses="
-				+ courses + "]";
+				+ ", subjectCategory=" + subjectCategory + ", description=" + description + ", courses=" + courses
+				+ "]";
 	}
 
 }

@@ -77,8 +77,6 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 		});
 
 		Subject subject = subjectMapper.toEntity(requestDto);
-		subject.setCreatedBy(staffId);
-		subject.setCreatedDt(LocalDateTime.now());
 
 		Subject savedSubject = subjectRepository.save(subject);
 		return subjectMapper.toDto(savedSubject);
@@ -113,10 +111,6 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 
 		// Update fields using MapStruct
 		subjectMapper.updateSubjectFromRequest(requestDto, subject);
-
-		subject.setUpdatedBy(staffId);
-		subject.setUpdatedDt(LocalDateTime.now());
-
 		Subject updatedSubject = subjectRepository.save(subject);
 		return subjectMapper.toDto(updatedSubject);
 	}
@@ -169,10 +163,6 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 		course.setCourseId(courseId);
 		course.setSubject(subject);
 		course.setProvider(provider);
-
-		// Set audit fields
-		course.setCreatedBy(staffId);
-		course.setCreatedDt(LocalDateTime.now());
 
 		// Save
 		Course savedCourse = courseRepository.save(course);
@@ -240,10 +230,6 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 		course.setSubject(subject);
 		course.setProvider(provider);
 
-		// Audit fields
-		course.setUpdatedBy(staffId);
-		course.setUpdatedDt(LocalDateTime.now());
-
 		Course updatedCourse = courseRepository.save(course);
 		return courseMapper.toDto(updatedCourse);
 	}
@@ -293,9 +279,6 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 		Chapter chapter = chapterMapper.toEntity(request);
 		chapter.setCourse(course); // ✅ managed entity
 		chapter.setChapterNum(nextChapterNum);
-		chapter.setCreatedBy(staff.getId());
-		chapter.setCreatedDt(LocalDateTime.now());
-
 		Chapter savedChapter = chapterRepository.save(chapter);
 
 		return chapterMapper.toResponse(savedChapter);
@@ -340,8 +323,6 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 				});
 
 		chapterMapper.updateEntityFromRequest(request, chapter);
-		chapter.setUpdatedBy(staffId);
-		chapter.setUpdatedDt(LocalDateTime.now());
 		Chapter updatedChapter = chapterRepository.save(chapter);
 
 		return chapterMapper.toResponse(updatedChapter);
@@ -384,9 +365,6 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 
 		topic.setChapter(chapter);
 		topic.setTopicNum(nextTopicNum);
-		topic.setCreatedBy(staff.getId());
-		topic.setCreatedDt(LocalDateTime.now());
-
 		Topic savedTopic = topicRepository.save(topic);
 
 		return topicMapper.toResponseDto(savedTopic);
@@ -442,8 +420,6 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 		topic.setDescription(requestDto.getDescription());
 		topic.setExpectedTimeMin(requestDto.getExpectedTimeMin());
 		topic.setChapter(chapter);
-		topic.setUpdatedBy(requestDto.getStaffId());
-		topic.setUpdatedDt(LocalDateTime.now());
 
 		Topic updatedTopic = topicRepository.save(topic);
 

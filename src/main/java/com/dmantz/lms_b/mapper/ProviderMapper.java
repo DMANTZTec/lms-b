@@ -21,10 +21,6 @@ public interface ProviderMapper {
 	// ================= RESPONSE =================
 	@Mapping(source = "providerName", target = "providerName")
 	@Mapping(source = "providerOrgName", target = "providerOrgName")
-	@Mapping(source = "createdBy", target = "createdBy")
-	@Mapping(source = "createdDt", target = "createdDt")
-	@Mapping(source = "updatedBy", target = "updatedBy")
-	@Mapping(source = "updatedDt", target = "updatedDt")
 	ProviderResponse toResponse(Provider provider);
 
 	// ================= UPDATE =================

@@ -44,8 +44,6 @@ public class ProviderServiceImpl implements ProviderService {
 		}
 
 		Provider provider = providerMapper.toEntity(request);
-		provider.setCreatedBy(staffId);
-		provider.setCreatedDt(LocalDateTime.now());
 
 		Provider saved = providerRepository.save(provider);
 		return providerMapper.toResponse(saved);
@@ -81,9 +79,6 @@ public class ProviderServiceImpl implements ProviderService {
 		}
 
 		providerMapper.updateEntityFromRequest(request, provider);
-		provider.setUpdatedBy(staffId);
-		provider.setUpdatedDt(LocalDateTime.now());
-
 		Provider updated = providerRepository.save(provider);
 		return providerMapper.toResponse(updated);
 	}

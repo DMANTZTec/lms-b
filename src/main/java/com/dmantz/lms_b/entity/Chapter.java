@@ -4,11 +4,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.dmantz.lms_b.entity.base.AuditFields;
+
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "chapter")
-public class Chapter {
+public class Chapter extends AuditFields{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -32,18 +34,6 @@ public class Chapter {
 
 	@OneToMany(mappedBy = "chapter", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Topic> topics = new ArrayList<>();
-
-	@Column(name = "created_by")
-	private Long createdBy;
-
-	@Column(name = "created_dt")
-	private LocalDateTime createdDt;
-
-	@Column(name = "updated_by")
-	private Long updatedBy;
-
-	@Column(name = "updated_dt")
-	private LocalDateTime updatedDt;
 
 	public Long getId() {
 		return id;
@@ -93,43 +83,11 @@ public class Chapter {
 		this.topics = topics;
 	}
 
-	public Long getCreatedBy() {
-		return createdBy;
-	}
-
-	public void setCreatedBy(Long createdBy) {
-		this.createdBy = createdBy;
-	}
-
-	public LocalDateTime getCreatedDt() {
-		return createdDt;
-	}
-
-	public void setCreatedDt(LocalDateTime createdDt) {
-		this.createdDt = createdDt;
-	}
-
-	public Long getUpdatedBy() {
-		return updatedBy;
-	}
-
-	public void setUpdatedBy(Long updatedBy) {
-		this.updatedBy = updatedBy;
-	}
-
-	public LocalDateTime getUpdatedDt() {
-		return updatedDt;
-	}
-
-	public void setUpdatedDt(LocalDateTime updatedDt) {
-		this.updatedDt = updatedDt;
-	}
-
 	@Override
 	public String toString() {
 		return "Chapter [id=" + id + ", chapterNm=" + chapterNm + ", chapterDesc=" + chapterDesc + ", chapterNum="
-				+ chapterNum + ", course=" + course + ", createdBy=" + createdBy + ", createdDt=" + createdDt
-				+ ", updatedBy=" + updatedBy + ", updatedDt=" + updatedDt + "]";
+				+ chapterNum + ", course=" + course + ", topics=" + topics + "]";
 	}
 
+	
 }

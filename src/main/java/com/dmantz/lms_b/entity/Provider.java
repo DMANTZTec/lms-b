@@ -2,6 +2,8 @@ package com.dmantz.lms_b.entity;
 
 import java.time.LocalDateTime;
 
+import com.dmantz.lms_b.entity.base.AuditFields;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,7 +13,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "provider")
-public class Provider {
+public class Provider extends AuditFields{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,18 +24,6 @@ public class Provider {
 
     @Column(name = "provider_org_nm")
     private String providerOrgName;
-
-    @Column(name = "created_by")
-    private Long createdBy;  
-
-    @Column(name = "created_dt")
-    private LocalDateTime createdDt;
-
-    @Column(name = "updated_by")
-    private Long updatedBy;
-
-    @Column(name = "updated_dt")
-    private LocalDateTime updatedDt;
 
 	public Long getId() {
 		return id;
@@ -59,36 +49,4 @@ public class Provider {
 		this.providerOrgName = providerOrgName;
 	}
 
-	public Long getCreatedBy() {
-		return createdBy;
-	}
-
-	public void setCreatedBy(Long createdBy) {
-		this.createdBy = createdBy;
-	}
-
-	public LocalDateTime getCreatedDt() {
-		return createdDt;
-	}
-
-	public void setCreatedDt(LocalDateTime createdDt) {
-		this.createdDt = createdDt;
-	}
-
-	public Long getUpdatedBy() {
-		return updatedBy;
-	}
-
-	public void setUpdatedBy(Long updatedBy) {
-		this.updatedBy = updatedBy;
-	}
-
-	public LocalDateTime getUpdatedDt() {
-		return updatedDt;
-	}
-
-	public void setUpdatedDt(LocalDateTime updatedDt) {
-		this.updatedDt = updatedDt;
-	}
-    
 }

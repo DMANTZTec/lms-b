@@ -4,11 +4,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.dmantz.lms_b.entity.base.AuditFields;
+
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "topic")
-public class Topic {
+public class Topic extends AuditFields{
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,18 +38,6 @@ public class Topic {
 	        orphanRemoval = true
 	)
 	private List<TopicReference> references = new ArrayList<>();
-
-	@Column(name = "created_by")
-	private Long createdBy;
-
-	@Column(name = "created_dt")
-	private LocalDateTime createdDt;
-
-	@Column(name = "updated_by")
-	private Long updatedBy;
-
-	@Column(name = "updated_dt")
-	private LocalDateTime updatedDt;
 
 	public Long getId() {
 		return id;
@@ -97,38 +87,6 @@ public class Topic {
 		this.chapter = chapter;
 	}
 
-	public Long getCreatedBy() {
-		return createdBy;
-	}
-
-	public void setCreatedBy(Long createdBy) {
-		this.createdBy = createdBy;
-	}
-
-	public LocalDateTime getCreatedDt() {
-		return createdDt;
-	}
-
-	public void setCreatedDt(LocalDateTime createdDt) {
-		this.createdDt = createdDt;
-	}
-
-	public Long getUpdatedBy() {
-		return updatedBy;
-	}
-
-	public void setUpdatedBy(Long updatedBy) {
-		this.updatedBy = updatedBy;
-	}
-
-	public LocalDateTime getUpdatedDt() {
-		return updatedDt;
-	}
-
-	public void setUpdatedDt(LocalDateTime updatedDt) {
-		this.updatedDt = updatedDt;
-	}
-
 	public List<TopicReference> getReferences() {
 		return references;
 	}
@@ -140,8 +98,9 @@ public class Topic {
 	@Override
 	public String toString() {
 		return "Topic [id=" + id + ", topicNm=" + topicNm + ", topicNum=" + topicNum + ", description=" + description
-				+ ", expectedTimeMin=" + expectedTimeMin + ", chapter=" + chapter + ", createdBy=" + createdBy
-				+ ", createdDt=" + createdDt + ", updatedBy=" + updatedBy + ", updatedDt=" + updatedDt + "]";
+				+ ", expectedTimeMin=" + expectedTimeMin + ", chapter=" + chapter + ", references=" + references + "]";
 	}
+
+	
 
 }
