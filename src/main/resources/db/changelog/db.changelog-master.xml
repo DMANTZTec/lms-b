@@ -42,5 +42,6 @@
     <!-- Staff role table -->
     <include file="db/changelog/changelogs/202601291209-create-staff_role-table.xml"/>
 
-
+    <!-- Student-course table -->
+    <include file="db/changelog/changelogs/202602141226-create-student_course-table.xml"/>
 </databaseChangeLog>
