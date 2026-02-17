@@ -22,7 +22,7 @@ public class Chapter extends AuditFields{
 	private String chapterDesc;
 
 	@Column(name = "chapter_num")
-	private Long chapterNum;
+	private int chapterNum;
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(
@@ -59,11 +59,11 @@ public class Chapter extends AuditFields{
 		this.chapterDesc = chapterDesc;
 	}
 
-	public Long getChapterNum() {
+	public int getChapterNum() {
 		return chapterNum;
 	}
 
-	public void setChapterNum(Long chapterNum) {
+	public void setChapterNum(int chapterNum) {
 		this.chapterNum = chapterNum;
 	}
 

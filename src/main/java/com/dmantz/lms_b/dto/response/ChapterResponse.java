@@ -7,7 +7,7 @@ public class ChapterResponse {
 	private Long id;
 	private String chapterNm;
 	private String chapterDesc;
-	private Long chapterNum;
+	private int chapterNum;
 	private String courseId;
 	private Long createdBy;
 	private LocalDateTime createdDt;
@@ -38,11 +38,11 @@ public class ChapterResponse {
 		this.chapterDesc = chapterDesc;
 	}
 
-	public Long getChapterNum() {
+	public int getChapterNum() {
 		return chapterNum;
 	}
 
-	public void setChapterNum(Long chapterNum) {
+	public void setChapterNum(int chapterNum) {
 		this.chapterNum = chapterNum;
 	}
 

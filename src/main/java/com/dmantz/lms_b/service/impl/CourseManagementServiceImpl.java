@@ -274,8 +274,8 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 					throw new DuplicateValuesException("Chapter name already exists in this course");
 				});
 
-		Long nextChapterNum = chapterRepository.findTopByCourse_CourseIdOrderByChapterNumDesc(request.getCourseId())
-				.map(ch -> ch.getChapterNum() + 1).orElse(1L);
+		int nextChapterNum = chapterRepository.findTopByCourse_CourseIdOrderByChapterNumDesc(request.getCourseId())
+				.map(ch -> ch.getChapterNum() + 1).orElse(1);
 		Chapter chapter = chapterMapper.toEntity(request);
 		chapter.setCourse(course); // ✅ managed entity
 		chapter.setChapterNum(nextChapterNum);
