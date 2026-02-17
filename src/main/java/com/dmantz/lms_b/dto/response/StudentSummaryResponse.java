@@ -3,6 +3,7 @@ package com.dmantz.lms_b.dto.response;
 public class StudentSummaryResponse {
 
     private long totalEnrolled;
+    private long planned;
     private long ongoing;
     private long completed;
     private double averageProgress;
@@ -13,6 +14,14 @@ public class StudentSummaryResponse {
 
     public void setTotalEnrolled(long totalEnrolled) {
         this.totalEnrolled = totalEnrolled;
+    }
+
+    public long getPlanned() {
+        return planned;
+    }
+
+    public void setPlanned(long planned) {
+        this.planned = planned;
     }
 
     public long getOngoing() {
@@ -43,6 +52,7 @@ public class StudentSummaryResponse {
     public String toString() {
         return "StudentSummaryResponse{" +
                 "totalEnrolled=" + totalEnrolled +
+                ", planned=" + planned +
                 ", ongoing=" + ongoing +
                 ", completed=" + completed +
                 ", averageProgress=" + averageProgress +

@@ -12,6 +12,5 @@ public interface StudentCourseService {
 
     List<StudentCourseResponse> getStudentCourses(String studentId);
 
-    StudentDashboardResponse getDashboard(String studentId);
 
 }

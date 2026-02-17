@@ -29,6 +29,9 @@ public interface StudentCourseMapper {
     default StudentSummaryResponse toSummary(List<StudentCourse> courses) {
         StudentSummaryResponse summary = new StudentSummaryResponse();
         summary.setTotalEnrolled(courses.size());
+        summary.setPlanned(courses.stream()
+                .filter(c -> c.getStatus() != null && c.getStatus().name().equals("PLANNED"))
+                .count());
         summary.setOngoing(courses.stream()
                 .filter(c -> c.getStatus() != null && c.getStatus().name().equals("ONGOING"))
                 .count());

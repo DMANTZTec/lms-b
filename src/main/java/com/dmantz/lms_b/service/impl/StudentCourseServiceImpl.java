@@ -73,10 +73,5 @@ public class StudentCourseServiceImpl implements StudentCourseService {
                 .toList();
     }
 
-    @Override
-    public StudentDashboardResponse getDashboard(String studentId) {
-        List<StudentCourse> studentCourses = studentCourseRepository.findByStudent_StudentId(studentId);
-        return studentCourseMapper.toDashboard(studentCourses);
-    }
 
 }

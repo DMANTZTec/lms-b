@@ -36,10 +36,4 @@ public class StudentCourseController {
                 studentCourseService.getStudentCourses(studentId));
     }
 
-    @GetMapping("/{studentId}/dashboard")
-    public ResponseEntity<StudentDashboardResponse> getDashboard(@PathVariable String studentId) {
-        StudentDashboardResponse dashboard = studentCourseService.getDashboard(studentId);
-        return ResponseEntity.ok(dashboard);
-    }
-
 }
