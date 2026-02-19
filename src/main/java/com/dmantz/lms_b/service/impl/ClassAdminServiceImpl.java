@@ -1,6 +1,7 @@
 package com.dmantz.lms_b.service.impl;
 
 import com.dmantz.lms_b.dto.request.CreateClassRequest;
+import com.dmantz.lms_b.dto.request.UpdateClassRequest;
 import com.dmantz.lms_b.dto.response.ClassResponse;
 import com.dmantz.lms_b.entity.ClassBatch;
 import com.dmantz.lms_b.entity.Course;
@@ -15,39 +16,60 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 
     private final CourseRepository courseRepository;
     private final ClassBatchRepository classBatchRepository;
-    private final ClassBatchMapper mapper;
+    private final ClassBatchMapper classBatchMapper;
 
-    public ClassAdminServiceImpl(CourseRepository courseRepository, ClassBatchRepository classBatchRepository, ClassBatchMapper mapper) {
+    public ClassAdminServiceImpl(CourseRepository courseRepository, ClassBatchRepository classBatchRepository, ClassBatchMapper classBatchMapper) {
         this.courseRepository = courseRepository;
         this.classBatchRepository = classBatchRepository;
-        this.mapper = mapper;
+        this.classBatchMapper = classBatchMapper;
+    }
+
+
+    public ClassResponse addClass(String courseId, CreateClassRequest request) {
+
+        // 🔥 Fetch course using business ID (SE001)
+        Course course = courseRepository.findByCourseId(courseId)
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+
+        // Map request to entity
+        ClassBatch classBatch = classBatchMapper.toEntity(request);
+
+        // Set relation (VERY IMPORTANT)
+        classBatch.setCourse(course);
+
+        // Save
+        classBatch = classBatchRepository.save(classBatch);
+
+        return classBatchMapper.toResponse(classBatch);
     }
 
     @Override
-    public ClassResponse addClass(Long courseId, CreateClassRequest request) {
+    public ClassResponse modifyClass(Long batchId, UpdateClassRequest request) {
 
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new RuntimeException("Course not found"));
+        ClassBatch classBatch = classBatchRepository.findById(batchId)
+                .orElseThrow(() -> new RuntimeException("Class not found"));
 
-        // Validate dates
-        if (request.getStartDate() == null || request.getEndDate() == null) {
-            throw new IllegalArgumentException("Start date and end date are required");
-        }
+        // Update only allowed fields
+        classBatchMapper.updateClassFromDto(request, classBatch);
 
-        if (request.getEndDate().isBefore(request.getStartDate())) {
-            throw new IllegalArgumentException("End date must be after start date");
-        }
+        classBatch = classBatchRepository.save(classBatch);
 
-        // Convert Request → Entity
-        ClassBatch batch = mapper.toEntity(request);
-        batch.setCourse(course);
-
-        // Save
-        classBatchRepository.save(batch);
-
-        // Convert Entity → Response
-        return mapper.toResponse(batch);
+        return classBatchMapper.toResponse(classBatch);
     }
+
+    @Override
+    public ClassResponse cancelClass(Long batchId) {
+
+        ClassBatch classBatch = classBatchRepository.findById(batchId)
+                .orElseThrow(() -> new RuntimeException("Class not found"));
+
+        classBatch.setStatus("CANCELLED");
+
+        classBatch = classBatchRepository.save(classBatch);
+
+        return classBatchMapper.toResponse(classBatch);
+    }
+
 }
 
 

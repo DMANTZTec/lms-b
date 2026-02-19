@@ -49,4 +49,15 @@
 
     </changeSet>
 
+    <changeSet id="202602191523" author="shiva">
+
+        <!-- Add status column -->
+        <addColumn tableName="class_batch">
+            <column name="status" type="VARCHAR(20)" defaultValue="ACTIVE">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+    </changeSet>
+
 </databaseChangeLog>

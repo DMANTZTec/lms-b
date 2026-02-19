@@ -15,7 +15,7 @@ public class ClassBatch extends AuditFields {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id", nullable = false)
-    private Course course;   // References course
+    private Course course;
 
     @Column(name = "class_name", length = 100, nullable = false)
     private String className;   // Batch name
@@ -25,6 +25,9 @@ public class ClassBatch extends AuditFields {
 
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
+
+    @Column(name = "status")
+    private String status;  // ACTIVE, CANCELLED
 
     @Column(name = "capacity")
     private Integer capacity;   // Maximum students (nullable)
@@ -77,6 +80,14 @@ public class ClassBatch extends AuditFields {
         this.capacity = capacity;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     @Override
     public String toString() {
         return "ClassBatch{" +
@@ -85,6 +96,7 @@ public class ClassBatch extends AuditFields {
                 ", className='" + className + '\'' +
                 ", startDate=" + startDate +
                 ", endDate=" + endDate +
+                ", status='" + status + '\'' +
                 ", capacity=" + capacity +
                 '}';
     }

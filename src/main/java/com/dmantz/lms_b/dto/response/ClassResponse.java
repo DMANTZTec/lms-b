@@ -9,7 +9,6 @@ import java.time.LocalTime;
 public class ClassResponse {
 
     private Long batchId;
-    private Long classId;   // ✅ must match mapper
     private Long courseId;
     private String courseName;
 
@@ -54,13 +53,7 @@ public class ClassResponse {
         return startDate;
     }
 
-    public Long getClassId() {
-        return classId;
-    }
 
-    public void setClassId(Long classId) {
-        this.classId = classId;
-    }
 
     public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
@@ -86,7 +79,6 @@ public class ClassResponse {
     public String toString() {
         return "ClassResponse{" +
                 "batchId=" + batchId +
-                ", classId=" + classId +
                 ", courseId=" + courseId +
                 ", courseName='" + courseName + '\'' +
                 ", className='" + className + '\'' +
