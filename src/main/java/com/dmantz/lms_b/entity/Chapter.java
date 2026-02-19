@@ -22,7 +22,7 @@ public class Chapter extends AuditFields{
 	private String chapterDesc;
 
 	@Column(name = "chapter_num")
-	private int chapterNum;
+	private Long chapterNum;
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(
@@ -59,11 +59,11 @@ public class Chapter extends AuditFields{
 		this.chapterDesc = chapterDesc;
 	}
 
-	public int getChapterNum() {
+	public Long getChapterNum() {
 		return chapterNum;
 	}
 
-	public void setChapterNum(int chapterNum) {
+	public void setChapterNum(Long chapterNum) {
 		this.chapterNum = chapterNum;
 	}
 
@@ -85,9 +85,13 @@ public class Chapter extends AuditFields{
 
 	@Override
 	public String toString() {
-		return "Chapter [id=" + id + ", chapterNm=" + chapterNm + ", chapterDesc=" + chapterDesc + ", chapterNum="
-				+ chapterNum + ", course=" + course + ", topics=" + topics + "]";
+		return "Chapter{" +
+				"id=" + id +
+				", chapterNm='" + chapterNm + '\'' +
+				", chapterDesc='" + chapterDesc + '\'' +
+				", chapterNum=" + chapterNum +
+				", course=" + course +
+				", topics=" + topics +
+				'}';
 	}
-
-	
 }

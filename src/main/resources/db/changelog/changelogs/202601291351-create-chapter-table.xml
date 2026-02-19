@@ -62,4 +62,13 @@
 
     </changeSet>
 
+    <changeSet id="202602191221" author="shiva">
+
+        <modifyDataType
+                tableName="chapter"
+                columnName="chapter_num"
+                newDataType="BIGINT"/>
+
+    </changeSet>
+
 </databaseChangeLog>

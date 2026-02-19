@@ -51,8 +51,10 @@
     <!-- Class Schedule table -->
     <include file="db/changelog/changelogs/202602191036-create-class_schedule-table.xml"/>
 
+    <!-- Program table -->
+    <include file="db/changelog/changelogs/202602191207-create-program-table.xml"/>
 
-<!--    &lt;!&ndash; FK: Schedule → Class Batch &ndash;&gt;-->
-<!--    <include file="db/changelog/changelogs/202602191039-add-fk-schedule-class.xml"/>-->
+    <!-- Program Course table -->
+    <include file="db/changelog/changelogs/202602191214-create-program_course-table.xml"/>
 
 </databaseChangeLog>

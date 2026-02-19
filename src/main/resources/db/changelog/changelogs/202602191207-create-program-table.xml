@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+           http://www.liquibase.org/xml/ns/dbchangelog
+           http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.15.xsd">
+
+    <changeSet id="202602191207" author="shiva">
+
+        <!-- Create program table -->
+        <createTable tableName="program">
+
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="program_id" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+
+            <column name="program_title" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="description" type="TEXT"/>
+
+            <column name="status" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="duration_in_months" type="INT"/>
+
+            <column name="provider_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_by" type="BIGINT"/>
+            <column name="created_dt" type="TIMESTAMP"/>
+            <column name="updated_by" type="BIGINT"/>
+            <column name="updated_dt" type="TIMESTAMP"/>
+
+        </createTable>
+
+        <!-- Foreign Key: program → provider -->
+        <addForeignKeyConstraint
+                baseTableName="program"
+                baseColumnNames="provider_id"
+                referencedTableName="provider"
+                referencedColumnNames="id"
+                constraintName="fk_program_provider"
+                onDelete="RESTRICT"
+                onUpdate="CASCADE"/>
+
+        <!-- Optional: Index for provider_id (recommended for performance) -->
+        <createIndex tableName="program" indexName="idx_program_provider">
+            <column name="provider_id"/>
+        </createIndex>
+
+    </changeSet>
+
+</databaseChangeLog>
