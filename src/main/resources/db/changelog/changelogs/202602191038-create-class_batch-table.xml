@@ -7,7 +7,7 @@
         http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
-    <changeSet id="202602191019" author="Shivashankar">
+    <changeSet id="202602191038" author="Shivashankar">
 
         <createTable tableName="class_batch">
             <column name="id" type="BIGINT" autoIncrement="true">

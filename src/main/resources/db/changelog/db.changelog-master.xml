@@ -45,10 +45,14 @@
     <!-- Student-course table -->
     <include file="db/changelog/changelogs/202602141226-create-student_course-table.xml"/>
 
-    <!-- Class Schedule table -->
-    <include file="db/changelog/changelogs/202602191017-create-class_schedule-table.xml"/>
-
     <!--Class Batch table -->
-    <include file="db/changelog/changelogs/202602191019-create-class_batch-table.xml"/>
+    <include file="db/changelog/changelogs/202602191038-create-class_batch-table.xml"/>
+
+    <!-- Class Schedule table -->
+    <include file="db/changelog/changelogs/202602191036-create-class_schedule-table.xml"/>
+
+
+<!--    &lt;!&ndash; FK: Schedule → Class Batch &ndash;&gt;-->
+<!--    <include file="db/changelog/changelogs/202602191039-add-fk-schedule-class.xml"/>-->
 
 </databaseChangeLog>
