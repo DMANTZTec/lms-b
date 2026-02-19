@@ -10,10 +10,10 @@ import java.util.List;
 
 @Repository
 public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Long> {
-
-    List<ClassSchedule> findByCourseIdInAndClassDateBetweenAndStatusNotOrderByClassDateAscStartTimeAsc(
-            List<Long> courseIds, LocalDate startDate,
-            LocalDate endDate, ClassStatus status);
-
+//
+//    List<ClassSchedule> findByCourseIdInAndClassDateBetweenAndStatusNotOrderByClassDateAscStartTimeAsc(
+//            List<Long> courseIds, LocalDate startDate,
+//            LocalDate endDate, ClassStatus status);
+//
 
 }

@@ -15,8 +15,8 @@ public class ClassSchedule extends AuditFields {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id", nullable = false)
-    private Course course;
+    @JoinColumn(name = "class_id", nullable = false)
+    private ClassBatch classBatch;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "staff_id", nullable = false)
@@ -53,12 +53,12 @@ public class ClassSchedule extends AuditFields {
         this.id = id;
     }
 
-    public Course getCourse() {
-        return course;
+    public ClassBatch getClassBatch() {
+        return classBatch;
     }
 
-    public void setCourse(Course course) {
-        this.course = course;
+    public void setClassBatch(ClassBatch classBatch) {
+        this.classBatch = classBatch;
     }
 
     public Staff getStaff() {
@@ -129,7 +129,7 @@ public class ClassSchedule extends AuditFields {
     public String toString() {
         return "ClassSchedule{" +
                 "id=" + id +
-                ", course=" + course +
+                ", classBatch=" + classBatch +
                 ", staff=" + staff +
                 ", classDate=" + classDate +
                 ", startTime=" + startTime +

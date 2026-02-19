@@ -7,26 +7,19 @@
         http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
-    <changeSet id="202602161436" author="shiva">
+    <changeSet id="202602181227" author="shiva">
 
         <createTable tableName="class_schedule">
-
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
 
-            <column name="course_id" type="BIGINT">
-                <constraints nullable="false"
-                             foreignKeyName="fk_class_schedule_course"
-                             referencedTableName="course"
-                             referencedColumnNames="id"/>
+            <column name="class_id" type="BIGINT">
+                <constraints nullable="false"/>
             </column>
 
             <column name="staff_id" type="BIGINT">
-                <constraints nullable="false"
-                             foreignKeyName="fk_class_schedule_staff"
-                             referencedTableName="staff"
-                             referencedColumnNames="id"/>
+                <constraints nullable="false"/>
             </column>
 
             <column name="class_date" type="DATE">
@@ -42,7 +35,6 @@
             </column>
 
             <column name="meeting_link" type="VARCHAR(500)"/>
-
             <column name="location" type="VARCHAR(500)"/>
 
             <column name="mode" type="VARCHAR(20)">
@@ -53,12 +45,28 @@
                 <constraints nullable="false"/>
             </column>
 
-            <column name="created_by" type="BIGINT"/>
-            <column name="created_dt" type="TIMESTAMP"/>
+            <!-- Audit Fields -->
+            <column name="created_by" type="BIGINT" />
+            <column name="created_dt" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
             <column name="updated_by" type="BIGINT"/>
-            <column name="updated_dt" type="TIMESTAMP"/>
-
+            <column name="updated_dt" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
         </createTable>
+
+        <!-- FK: schedule → class -->
+        <addForeignKeyConstraint
+                baseTableName="class_schedule"
+                baseColumnNames="class_id"
+                referencedTableName="class_batch"
+                referencedColumnNames="id"
+                constraintName="fk_schedule_class"/>
+
+        <!-- FK: schedule → staff -->
+        <addForeignKeyConstraint
+                baseTableName="class_schedule"
+                baseColumnNames="staff_id"
+                referencedTableName="staff"
+                referencedColumnNames="id"
+                constraintName="fk_schedule_staff"/>
 
     </changeSet>
 

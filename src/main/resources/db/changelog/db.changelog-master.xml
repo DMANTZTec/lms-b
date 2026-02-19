@@ -46,6 +46,9 @@
     <include file="db/changelog/changelogs/202602141226-create-student_course-table.xml"/>
 
     <!-- Class Schedule table -->
-    <include file="db/changelog/changelogs/202602161436-create-class_schedule-table.xml"/>
+    <include file="db/changelog/changelogs/202602181227-create-class_schedule-table.xml"/>
+
+    <!--Class Batch table -->
+    <include file="db/changelog/changelogs/202602181222-create-class_batch-table.xml"/>
 
 </databaseChangeLog>
