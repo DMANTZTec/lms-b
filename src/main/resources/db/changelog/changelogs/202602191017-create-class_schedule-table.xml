@@ -7,7 +7,7 @@
         http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
-    <changeSet id="202602181227" author="shiva">
+    <changeSet id="202602191017" author="shiva">
 
         <createTable tableName="class_schedule">
             <column name="id" type="BIGINT" autoIncrement="true">
@@ -52,13 +52,13 @@
             <column name="updated_dt" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
         </createTable>
 
-        <!-- FK: schedule → class -->
-        <addForeignKeyConstraint
-                baseTableName="class_schedule"
-                baseColumnNames="class_id"
-                referencedTableName="class_batch"
-                referencedColumnNames="id"
-                constraintName="fk_schedule_class"/>
+<!--        &lt;!&ndash; FK: schedule → class &ndash;&gt;-->
+<!--        <addForeignKeyConstraint-->
+<!--                baseTableName="class_schedule"-->
+<!--                baseColumnNames="class_id"-->
+<!--                referencedTableName="class_batch"-->
+<!--                referencedColumnNames="id"-->
+<!--                constraintName="fk_schedule_class"/>-->
 
         <!-- FK: schedule → staff -->
         <addForeignKeyConstraint
@@ -67,6 +67,19 @@
                 referencedTableName="staff"
                 referencedColumnNames="id"
                 constraintName="fk_schedule_staff"/>
+
+    </changeSet>
+
+    <changeSet id="202602191020" author="shiva">
+
+        <addForeignKeyConstraint
+                baseTableName="class_schedule"
+                baseColumnNames="class_id"
+                referencedTableName="class_batch"
+                referencedColumnNames="id"
+                constraintName="fk_schedule_class"
+                onDelete="CASCADE"
+                onUpdate="CASCADE"/>
 
     </changeSet>
 
