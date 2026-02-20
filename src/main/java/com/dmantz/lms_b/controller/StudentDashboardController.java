@@ -1,8 +1,11 @@
 package com.dmantz.lms_b.controller;
 
+import com.dmantz.lms_b.dto.request.ClassScheduleRequest;
 import com.dmantz.lms_b.dto.response.StudentDashboardResponse;
 import com.dmantz.lms_b.dto.response.ClassScheduleResponse;
+import com.dmantz.lms_b.dto.response.WeeklyScheduleResponse;
 import com.dmantz.lms_b.service.StudentDashboardService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,23 +15,28 @@ import java.util.List;
 @RequestMapping("/api/student-dashboard")
 public class StudentDashboardController {
 
-//    private final StudentDashboardService dashboardService;
-//
-//    public StudentDashboardController(StudentDashboardService dashboardService) {
-//        this.dashboardService = dashboardService;
-//    }
-//
-//    @GetMapping("/my-schedule/this-week")
-//    public ResponseEntity<List<ClassScheduleResponse>> myScheduleThisWeek(
-//            @RequestParam String studentId) {
-//
-//        return ResponseEntity.ok(
-//                dashboardService.getMyClassScheduleThisWeek(studentId));
-//    }
-//
+    private final StudentDashboardService dashboardService;
+
+    public StudentDashboardController(StudentDashboardService dashboardService) {
+        this.dashboardService = dashboardService;
+    }
+
+
+    @GetMapping("/weekly-schedule/{studentId}")
+    public ResponseEntity<WeeklyScheduleResponse> getWeeklySchedule(
+            @PathVariable String studentId) {
+
+        return ResponseEntity.ok(
+                dashboardService.getWeeklySchedule(studentId));
+    }
+
+}
+
+
+
 //    @GetMapping("/{studentId}/dashboard")
 //    public ResponseEntity<StudentDashboardResponse> getDashboard(@PathVariable String studentId) {
 //        StudentDashboardResponse dashboard = dashboardService.getDashboard(studentId);
 //        return ResponseEntity.ok(dashboard);
 //    }
-}
+

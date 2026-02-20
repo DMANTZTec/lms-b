@@ -6,18 +6,11 @@ import com.dmantz.lms_b.dto.response.StudentLoginResponse;
 import com.dmantz.lms_b.dto.response.StudentResponse;
 import com.dmantz.lms_b.entity.Student;
 
-import org.mapstruct.BeanMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.Mappings;
-import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(
-        componentModel = "spring",
-        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
-)
+@Mapper(componentModel = "spring",
+        unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface StudentMapper {
 
     // ================= CREATE =================

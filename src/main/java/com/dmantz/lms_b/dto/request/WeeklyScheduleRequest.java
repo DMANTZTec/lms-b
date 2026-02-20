@@ -1,0 +1,14 @@
+package com.dmantz.lms_b.dto.request;
+
+public class WeeklyScheduleRequest {
+
+    private String studentId;
+
+    public String getStudentId() {
+        return studentId;
+    }
+
+    public void setStudentId(String studentId) {
+        this.studentId = studentId;
+    }
+}
