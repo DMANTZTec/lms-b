@@ -68,5 +68,12 @@ public interface CourseManagementService {
 
 //	delete a topic
 	void deleteTopic(Long id);
+	
+	
+//	move chapter
+	void moveChapter(Long chapterId, int targetPosition);
+
+//	move topic
+	void moveTopic(Long topicId, int targetPosition);
 
 }

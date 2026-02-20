@@ -200,5 +200,30 @@ public class CourseManagementController {
 
 		return ResponseEntity.noContent().build();
 	}
+	
+	// Move chapter to specific position
+    @PutMapping("/{chapterId}/movechapter")
+    public ResponseEntity<String> moveChapter(
+            @PathVariable Long chapterId,
+            @RequestParam int targetPosition) {
+
+    	courseManagementService.moveChapter(chapterId, targetPosition);
+
+        return ResponseEntity.ok("Chapter moved successfully");
+    }
+    
+//    move topic to specific position
+    @PutMapping("/{topicId}/movetopic")
+    public ResponseEntity<String> moveTopic(
+            @PathVariable Long topicId,
+            @RequestParam int targetPosition) {
+
+    	courseManagementService.moveTopic(topicId, targetPosition);
+        return ResponseEntity.ok("Topic moved successfully");
+    }
+
+
+
+	
 
 }

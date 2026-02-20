@@ -1,10 +1,10 @@
 {
   "info": {
-    "_postman_id": "f950674e-6849-445c-bf6f-0a06540b6c64",
+    "_postman_id": "cc5d30b2-f1d5-43c3-aec6-73428ec39266",
     "name": "CourseManagement",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "49454707",
-    "_collection_link": "https://go.postman.co/collection/49454707-f950674e-6849-445c-bf6f-0a06540b6c64?source=collection_link"
+    "_exporter_id": "49260644",
+    "_collection_link": "https://go.postman.co/collection/49260644-cc5d30b2-f1d5-43c3-aec6-73428ec39266?source=collection_link"
   },
   "item": [
     {
@@ -416,6 +416,60 @@
             "api",
             "get",
             "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Move a Chapter",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/1/movechapter?targetPosition=3",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "1",
+            "movechapter"
+          ],
+          "query": [
+            {
+              "key": "targetPosition",
+              "value": "3"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Move a Topic",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/1/movetopic?targetPosition=4",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "1",
+            "movetopic"
+          ],
+          "query": [
+            {
+              "key": "targetPosition",
+              "value": "4"
+            }
           ]
         }
       },

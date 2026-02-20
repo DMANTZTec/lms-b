@@ -438,5 +438,91 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 
 		topicRepository.delete(topic);
 	}
+//      =====================  Move chapter ========================================
+	
+
+	@Override
+	public void moveChapter(Long chapterId, int targetPosition) {
+
+	    Chapter chapter = chapterRepository.findById(chapterId)
+	            .orElseThrow(() -> new RuntimeException("Chapter not found"));
+
+	    Long courseId = chapter.getCourse().getId();
+
+	    List<Chapter> chapters =
+	            chapterRepository.findByCourseIdOrderByChapterNumAsc(courseId);
+
+	    int size = chapters.size();
+
+	    if (targetPosition < 1 || targetPosition > size) {
+	        throw new RuntimeException("Invalid target position");
+	    }
+
+	    // Remove old position
+	    chapters.removeIf(ch -> ch.getId().equals(chapterId));
+
+	    // Insert at new position
+	    chapters.add(targetPosition - 1, chapter);
+
+	    // 🔥 STEP 1 — Shift all values temporarily
+	    for (Chapter ch : chapters) {
+	        ch.setChapterNum(ch.getChapterNum() + 1000);
+	    }
+
+	    chapterRepository.saveAll(chapters);
+	    chapterRepository.flush();
+
+	    // 🔥 STEP 2 — Reassign correct order
+	    for (int i = 0; i < chapters.size(); i++) {
+	        chapters.get(i).setChapterNum((long) (i + 1));
+	    }
+
+	    chapterRepository.saveAll(chapters);
+	}
+//  =====================  Move topic ========================================
+	
+	@Override
+	public void moveTopic(Long topicId, int targetPosition) {
+
+	    // 1️⃣ Fetch topic
+	    Topic topic = topicRepository.findById(topicId)
+	            .orElseThrow(() -> new RuntimeException("Topic not found"));
+
+	    Long chapterId = topic.getChapter().getId();
+
+	    // 2️⃣ Fetch all topics ordered
+	    List<Topic> topics =
+	            topicRepository.findByChapterIdOrderByTopicNumAsc(chapterId);
+
+	    int size = topics.size();
+
+	    if (targetPosition < 1 || targetPosition > size) {
+	        throw new RuntimeException("Invalid target position");
+	    }
+
+	    // 3️⃣ Remove current topic
+	    topics.removeIf(t -> t.getId().equals(topicId));
+
+	    // 4️⃣ Insert at new position
+	    topics.add(targetPosition - 1, topic);
+
+	    // 🔥 STEP 1: Temporary shift to avoid UNIQUE conflict
+	    for (Topic t : topics) {
+	        t.setTopicNum(t.getTopicNum() + 1000);
+	    }
+
+	    topicRepository.saveAll(topics);
+	    topicRepository.flush();
+
+	    // 🔥 STEP 2: Reassign correct order
+	    for (int i = 0; i < topics.size(); i++) {
+	        topics.get(i).setTopicNum((long) (i + 1));
+	    }
+
+	    topicRepository.saveAll(topics);
+	}
+
+		
+	
 
 }
