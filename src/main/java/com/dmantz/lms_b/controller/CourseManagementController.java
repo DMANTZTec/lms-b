@@ -2,8 +2,8 @@ package com.dmantz.lms_b.controller;
 
 import java.util.List;
 
-import com.dmantz.lms_b.dto.request.TopicRequestDto;
-import com.dmantz.lms_b.dto.response.TopicResponseDto;
+import com.dmantz.lms_b.dto.request.*;
+import com.dmantz.lms_b.dto.response.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,12 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.dmantz.lms_b.dto.request.ChapterRequest;
-import com.dmantz.lms_b.dto.request.CourseRequest;
-import com.dmantz.lms_b.dto.request.SubjectRequest;
-import com.dmantz.lms_b.dto.response.ChapterResponse;
-import com.dmantz.lms_b.dto.response.CourseResponse;
-import com.dmantz.lms_b.dto.response.SubjectResponse;
 import com.dmantz.lms_b.service.CourseManagementService;
 
 import jakarta.validation.Valid;
@@ -225,5 +219,39 @@ public class CourseManagementController {
 
 
 	
+
+	// ========================== Add URL Reference =============================
+
+	@PostMapping("topics/{topicId}/references/url")
+	public ResponseEntity<TopicReferenceResponseDto> addUrl(
+			@PathVariable Long topicId,
+			@RequestBody TopicReferenceRequestDto dto) {
+
+		return ResponseEntity.ok(
+				courseManagementService.addUrlReference(topicId, dto));
+	}
+
+	// ========================= Add Video Reference =============================
+
+	@PostMapping("topics/{topicId}/references/video")
+	public ResponseEntity<TopicReferenceResponseDto> addVideo(
+			@PathVariable Long topicId,
+			@RequestBody TopicReferenceRequestDto dto) {
+
+		return ResponseEntity.ok(
+				courseManagementService.addVideoReference(topicId, dto));
+	}
+
+	// ========================= Add Document Reference =============================
+
+	@PostMapping("topics/{topicId}/references/document")
+	public ResponseEntity<TopicReferenceResponseDto> addDocument(
+			@PathVariable Long topicId,
+			@RequestBody TopicReferenceRequestDto dto) {
+
+		return ResponseEntity.ok(
+				courseManagementService.addDocumentReference(topicId, dto));
+	}
+
 
 }

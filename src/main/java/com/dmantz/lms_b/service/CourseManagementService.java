@@ -2,14 +2,8 @@ package com.dmantz.lms_b.service;
 
 import java.util.List;
 
-import com.dmantz.lms_b.dto.request.ChapterRequest;
-import com.dmantz.lms_b.dto.request.CourseRequest;
-import com.dmantz.lms_b.dto.request.SubjectRequest;
-import com.dmantz.lms_b.dto.request.TopicRequestDto;
-import com.dmantz.lms_b.dto.response.ChapterResponse;
-import com.dmantz.lms_b.dto.response.CourseResponse;
-import com.dmantz.lms_b.dto.response.SubjectResponse;
-import com.dmantz.lms_b.dto.response.TopicResponseDto;
+import com.dmantz.lms_b.dto.request.*;
+import com.dmantz.lms_b.dto.response.*;
 
 public interface CourseManagementService {
 //	create a subject
@@ -75,5 +69,17 @@ public interface CourseManagementService {
 
 //	move topic
 	void moveTopic(Long topicId, int targetPosition);
+
+	TopicReferenceResponseDto addUrlReference(
+			Long topicId,
+			TopicReferenceRequestDto dto);
+
+	TopicReferenceResponseDto addVideoReference(
+			Long topicId,
+			TopicReferenceRequestDto dto);
+
+	TopicReferenceResponseDto addDocumentReference(
+			Long topicId,
+			TopicReferenceRequestDto dto);
 
 }

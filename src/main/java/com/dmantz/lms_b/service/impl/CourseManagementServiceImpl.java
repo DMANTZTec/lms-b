@@ -4,24 +4,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.dmantz.lms_b.dto.request.TopicRequestDto;
-import com.dmantz.lms_b.dto.response.TopicResponseDto;
+import com.dmantz.lms_b.dto.request.*;
+import com.dmantz.lms_b.dto.response.*;
 import com.dmantz.lms_b.entity.*;
-import com.dmantz.lms_b.mapper.TopicMapper;
+import com.dmantz.lms_b.mapper.*;
 import com.dmantz.lms_b.repository.*;
 import org.springframework.stereotype.Service;
 
-import com.dmantz.lms_b.dto.request.ChapterRequest;
-import com.dmantz.lms_b.dto.request.CourseRequest;
-import com.dmantz.lms_b.dto.request.SubjectRequest;
-import com.dmantz.lms_b.dto.response.ChapterResponse;
-import com.dmantz.lms_b.dto.response.CourseResponse;
-import com.dmantz.lms_b.dto.response.SubjectResponse;
 import com.dmantz.lms_b.exceptions.DuplicateValuesException;
 import com.dmantz.lms_b.exceptions.ResourceNotFoundException;
-import com.dmantz.lms_b.mapper.ChapterMapper;
-import com.dmantz.lms_b.mapper.CourseMapper;
-import com.dmantz.lms_b.mapper.SubjectMapper;
 import com.dmantz.lms_b.service.CourseManagementService;
 
 import jakarta.transaction.Transactional;
@@ -44,11 +35,15 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 	private final TopicRepository topicRepository;
 	private final  TopicMapper topicMapper;
 
+	private final TopicReferenceRepository topicReferenceRepository;
+	private final TopicReferenceMapper topicReferenceMapper;
+
 	public CourseManagementServiceImpl(
-			SubjectRepository subjectRepository, StaffRepository staffRepository,
-			SubjectMapper subjectMapper, CourseRepository courseRepository, CourseMapper courseMapper,
-			ProviderRepository providerRepository, ChapterRepository chapterRepository, ChapterMapper chapterMapper,
-			TopicRepository topicRepository, TopicMapper topicMapper) {
+            SubjectRepository subjectRepository, StaffRepository staffRepository,
+            SubjectMapper subjectMapper, CourseRepository courseRepository, CourseMapper courseMapper,
+            ProviderRepository providerRepository, ChapterRepository chapterRepository, ChapterMapper chapterMapper,
+            TopicRepository topicRepository, TopicMapper topicMapper,
+			TopicReferenceRepository topicReferenceRepository, TopicReferenceMapper topicReferenceMapper) {
 		super();
 		this.subjectRepository = subjectRepository;
 		this.staffRepository = staffRepository;
@@ -60,7 +55,9 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 		this.chapterMapper = chapterMapper;
 		this.topicRepository = topicRepository;
 		this.topicMapper = topicMapper;
-	}
+        this.topicReferenceRepository = topicReferenceRepository;
+        this.topicReferenceMapper = topicReferenceMapper;
+    }
 
 	// ------------------ CREATE SUBJECT ------------------
 	@Override
@@ -524,5 +521,50 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 
 		
 	
+
+// =============================== Add Topic References ======================================
+	@Override
+	public TopicReferenceResponseDto addUrlReference(
+			Long topicId,
+			TopicReferenceRequestDto dto) {
+
+		return saveReference(topicId, dto, "URL");
+	}
+
+	@Override
+	public TopicReferenceResponseDto addVideoReference(
+			Long topicId,
+			TopicReferenceRequestDto dto) {
+
+		return saveReference(topicId, dto, "VIDEO");
+	}
+
+	@Override
+	public TopicReferenceResponseDto addDocumentReference(
+			Long topicId,
+			TopicReferenceRequestDto dto) {
+
+		return saveReference(topicId, dto, "DOCUMENT");
+	}
+
+	private TopicReferenceResponseDto saveReference(
+			Long topicId,
+			TopicReferenceRequestDto dto,
+			String type) {
+
+		Topic topic = topicRepository.findById(topicId)
+				.orElseThrow(() ->
+						new ResourceNotFoundException(
+								"Topic not found"));
+
+		TopicReference entity = topicReferenceMapper.toEntity(dto);
+		entity.setRefType(type);
+		entity.setTopic(topic);
+
+		TopicReference saved =
+				topicReferenceRepository.save(entity);
+
+		return topicReferenceMapper.toDto(saved);
+	}
 
 }

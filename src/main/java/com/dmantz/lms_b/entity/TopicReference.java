@@ -8,6 +8,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import java.util.Map;
 
 @Entity
 @Table(name = "topic_reference")
@@ -20,8 +24,9 @@ public class TopicReference {
 	@Column(name = "ref_type")
 	private String refType;
 
-	@Column(name = "ref_value")
-	private String refValue;
+	@Column(name = "ref_value", columnDefinition = "json")
+	@JdbcTypeCode(SqlTypes.JSON)
+	private Map<String, Object> refValue;
 
 	@Column(name = "ref_by")
 	private String refBy;
@@ -49,11 +54,11 @@ public class TopicReference {
 		this.refType = refType;
 	}
 
-	public String getRefValue() {
+	public Map<String, Object> getRefValue() {
 		return refValue;
 	}
 
-	public void setRefValue(String refValue) {
+	public void setRefValue(Map<String, Object> refValue) {
 		this.refValue = refValue;
 	}
 
