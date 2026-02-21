@@ -3,7 +3,9 @@ package com.dmantz.lms_b.controller;
 import com.dmantz.lms_b.dto.request.ClassScheduleRequest;
 import com.dmantz.lms_b.dto.response.StudentDashboardResponse;
 import com.dmantz.lms_b.dto.response.ClassScheduleResponse;
+import com.dmantz.lms_b.dto.response.StudentMyCoursesResponse;
 import com.dmantz.lms_b.dto.response.WeeklyScheduleResponse;
+import com.dmantz.lms_b.entity.CourseStatus;
 import com.dmantz.lms_b.service.StudentDashboardService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +30,15 @@ public class StudentDashboardController {
 
         return ResponseEntity.ok(
                 dashboardService.getWeeklySchedule(studentId));
+    }
+
+    @GetMapping("/my-coursesprogress")
+    public ResponseEntity<StudentMyCoursesResponse> getMyCourses(
+            @RequestParam String studentId,
+            @RequestParam(required = false) CourseStatus status) {
+
+        return ResponseEntity.ok(
+                dashboardService.getMyCourses(studentId, status));
     }
 
 }

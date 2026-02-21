@@ -2,12 +2,15 @@ package com.dmantz.lms_b.service.impl;
 
 import com.dmantz.lms_b.dto.request.ClassScheduleRequest;
 import com.dmantz.lms_b.dto.response.ClassScheduleResponse;
+import com.dmantz.lms_b.dto.response.StudentMyCoursesResponse;
 import com.dmantz.lms_b.dto.response.WeeklyScheduleResponse;
 import com.dmantz.lms_b.entity.*;
 import com.dmantz.lms_b.mapper.ClassScheduleMapper;
+import com.dmantz.lms_b.mapper.StudentCourseMapper;
 import com.dmantz.lms_b.repository.ClassBatchRepository;
 import com.dmantz.lms_b.repository.ClassScheduleRepository;
 import com.dmantz.lms_b.repository.StaffRepository;
+import com.dmantz.lms_b.repository.StudentCourseRepository;
 import com.dmantz.lms_b.service.StudentDashboardService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -24,12 +27,16 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
     private final ClassScheduleMapper classScheduleMapper;
     private final ClassBatchRepository classBatchRepository;
     private final StaffRepository staffRepository;
+    private final StudentCourseRepository studentCourseRepository;
+    private final StudentCourseMapper studentCourseMapper;
 
-    public StudentDashboardServiceImpl(ClassScheduleRepository classScheduleRepository, ClassScheduleMapper classScheduleMapper, ClassBatchRepository classBatchRepository, StaffRepository staffRepository) {
+    public StudentDashboardServiceImpl(ClassScheduleRepository classScheduleRepository, ClassScheduleMapper classScheduleMapper, ClassBatchRepository classBatchRepository, StaffRepository staffRepository, StudentCourseRepository studentCourseRepository, StudentCourseMapper studentCourseMapper) {
         this.classScheduleRepository = classScheduleRepository;
         this.classScheduleMapper = classScheduleMapper;
         this.classBatchRepository = classBatchRepository;
         this.staffRepository = staffRepository;
+        this.studentCourseRepository = studentCourseRepository;
+        this.studentCourseMapper = studentCourseMapper;
     }
 
 
@@ -86,6 +93,47 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
     }
 
 
+    @Override
+    public StudentMyCoursesResponse getMyCourses(
+            String studentId,
+            CourseStatus status) {
+
+        // 🔹 fetch all for counts
+        List<StudentCourse> allCourses =
+                studentCourseRepository.findByStudentStudentId(studentId);
+
+        // 🔹 fetch filtered list for tab
+        List<StudentCourse> filteredCourses =
+                (status == null)
+                        ? allCourses
+                        : studentCourseRepository.findByStudentStudentIdAndStatus(studentId, status);
+
+        StudentMyCoursesResponse response = new StudentMyCoursesResponse();
+
+        // ===== counts =====
+        response.setTotalCourses(allCourses.size());
+        response.setOngoing(countByStatus(allCourses, CourseStatus.ONGOING));
+        response.setPlanned(countByStatus(allCourses, CourseStatus.PLANNED));
+        response.setCompleted(countByStatus(allCourses, CourseStatus.COMPLETED));
+
+        // ===== course list =====
+        response.setCourses(
+                filteredCourses.stream()
+                        .map(studentCourseMapper::toDto)
+                        .toList()
+        );
+
+        return response;
+    }
+
+    private long countByStatus(List<StudentCourse> list, CourseStatus status) {
+        return list.stream()
+                .filter(c -> c.getStatus() == status)
+                .count();
+    }
+}
+
+
 
 
 //    @Override
@@ -93,4 +141,4 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 //        List<StudentCourse> studentCourses = studentCourseRepository.findByStudent_StudentId(studentId);
 //        return studentCourseMapper.toDashboard(studentCourses);
 //    }
-}
+

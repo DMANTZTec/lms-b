@@ -1,9 +1,9 @@
 package com.dmantz.lms_b.mapper;
 
 import com.dmantz.lms_b.dto.request.StudentCourseEnrollRequest;
+import com.dmantz.lms_b.dto.response.MyCourseResponse;
 import com.dmantz.lms_b.dto.response.StudentCourseResponse;
-import com.dmantz.lms_b.dto.response.StudentDashboardResponse;
-import com.dmantz.lms_b.dto.response.StudentSummaryResponse;
+import com.dmantz.lms_b.entity.CourseStatus;
 import com.dmantz.lms_b.entity.StudentCourse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -27,31 +27,31 @@ public interface StudentCourseMapper {
 
     List<StudentCourseResponse> toResponseList(List<StudentCourse> courses);
 
-    // Build summary DTO
-    default StudentSummaryResponse toSummary(List<StudentCourse> courses) {
-        StudentSummaryResponse summary = new StudentSummaryResponse();
-        summary.setTotalEnrolled(courses.size());
-        summary.setPlanned(courses.stream()
-                .filter(c -> c.getStatus() != null && c.getStatus().name().equals("PLANNED"))
-                .count());
-        summary.setOngoing(courses.stream()
-                .filter(c -> c.getStatus() != null && c.getStatus().name().equals("ONGOING"))
-                .count());
-        summary.setCompleted(courses.stream()
-                .filter(c -> c.getStatus() != null && c.getStatus().name().equals("COMPLETED"))
-                .count());
-        summary.setAverageProgress(courses.stream()
-                .mapToDouble(StudentCourse::getProgressPercentage)
-                .average().orElse(0));
-        return summary;
+    @Mapping(source = "course.courseId", target = "courseId")
+    @Mapping(source = "course.courseTitle", target = "courseName")
+    @Mapping(source = "start_dt", target = "startDate")
+    @Mapping(source = "completedDt", target = "endDate")
+    @Mapping(target = "progress", expression = "java(calculateProgress(entity))")
+    @Mapping(source = "status", target = "status")
+    MyCourseResponse toDto(StudentCourse entity);
+
+    default Integer map(Double progress) {
+        return progress == null ? 0 : progress.intValue();
     }
 
-    // Build full dashboard DTO
-    default StudentDashboardResponse toDashboard(List<StudentCourse> courses) {
-        StudentDashboardResponse dashboard = new StudentDashboardResponse();
-        dashboard.setCourses(toResponseList(courses));
-        dashboard.setSummary(toSummary(courses));
-        return dashboard;
+    default String map(CourseStatus status) {
+        return status != null ? status.name() : null;
+    }
+
+    default Integer calculateProgress(StudentCourse entity) {
+
+        if (entity.getStatus() == null) return 0;
+
+        return switch (entity.getStatus()) {
+            case COMPLETED -> 100;
+            case ONGOING -> 50; // temporary logic
+            case PLANNED -> 0;
+        };
     }
 
 }

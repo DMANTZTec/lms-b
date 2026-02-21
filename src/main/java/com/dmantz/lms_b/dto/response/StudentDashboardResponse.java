@@ -4,14 +4,14 @@ import java.util.List;
 
 public class StudentDashboardResponse {
 
-    private StudentSummaryResponse summary;
+    private StudentMyCoursesResponse summary;
     private List<StudentCourseResponse> courses;
 
-    public StudentSummaryResponse getSummary() {
+    public StudentMyCoursesResponse getSummary() {
         return summary;
     }
 
-    public void setSummary(StudentSummaryResponse summary) {
+    public void setSummary(StudentMyCoursesResponse summary) {
         this.summary = summary;
     }
 

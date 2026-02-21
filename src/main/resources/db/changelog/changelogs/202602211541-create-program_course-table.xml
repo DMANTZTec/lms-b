@@ -6,52 +6,48 @@
            http://www.liquibase.org/xml/ns/dbchangelog
            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.15.xsd">
 
-    <changeSet id="202602191214" author="shiva">
+    <changeSet id="202602211541" author="shiva">
 
-        <!-- Create program_course table -->
         <createTable tableName="program_course">
 
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
 
-            <column name="program_id" type="BIGINT">
+            <column name="program_id" type="VARCHAR(50)">
                 <constraints nullable="false"/>
             </column>
 
-            <column name="course_id" type="BIGINT">
+            <column name="course_id" type="VARCHAR(50)">
                 <constraints nullable="false"/>
             </column>
 
         </createTable>
 
-        <!-- Unique Constraint (program_id + course_id) -->
         <addUniqueConstraint
                 tableName="program_course"
                 columnNames="program_id, course_id"
                 constraintName="uk_program_course"/>
 
-        <!-- FK: program_course → program -->
+        <!-- FK to PROGRAM -->
         <addForeignKeyConstraint
                 baseTableName="program_course"
                 baseColumnNames="program_id"
-                referencedTableName="program"
-                referencedColumnNames="id"
                 constraintName="fk_program_course_program"
+                referencedTableName="program"
+                referencedColumnNames="program_id"
                 onDelete="CASCADE"
                 onUpdate="CASCADE"/>
 
-        <!-- FK: program_course → course -->
+        <!-- FK to COURSE -->
         <addForeignKeyConstraint
                 baseTableName="program_course"
                 baseColumnNames="course_id"
-                referencedTableName="course"
-                referencedColumnNames="id"
                 constraintName="fk_program_course_course"
+                referencedTableName="course"
+                referencedColumnNames="course_id"
                 onDelete="CASCADE"
                 onUpdate="CASCADE"/>
-
-
 
     </changeSet>
 

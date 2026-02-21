@@ -1,11 +1,8 @@
 package com.dmantz.lms_b.repository;
 
-import com.dmantz.lms_b.dto.response.StudentCourseResponse;
-import com.dmantz.lms_b.dto.response.StudentSummaryResponse;
+import com.dmantz.lms_b.entity.CourseStatus;
 import com.dmantz.lms_b.entity.StudentCourse;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -18,5 +15,10 @@ public interface StudentCourseRepository extends JpaRepository<StudentCourse, Lo
 
     List<StudentCourse> findByStudent_StudentId(String studentId);
 
+    List<StudentCourse> findByStudentStudentId(String studentId);
+
+    List<StudentCourse> findByStudentStudentIdAndStatus(
+            String studentId,
+            CourseStatus status);
 
 }

@@ -1,19 +1,23 @@
 package com.dmantz.lms_b.dto.response;
 
-public class StudentSummaryResponse {
+import java.util.List;
 
-    private long totalEnrolled;
+public class StudentMyCoursesResponse {
+
+    private long totalCourses;
     private long planned;
     private long ongoing;
     private long completed;
-    private double averageProgress;
 
-    public long getTotalEnrolled() {
-        return totalEnrolled;
+    private List<MyCourseResponse> courses;
+
+
+    public long getTotalCourses() {
+        return totalCourses;
     }
 
-    public void setTotalEnrolled(long totalEnrolled) {
-        this.totalEnrolled = totalEnrolled;
+    public void setTotalCourses(long totalCourses) {
+        this.totalCourses = totalCourses;
     }
 
     public long getPlanned() {
@@ -40,22 +44,22 @@ public class StudentSummaryResponse {
         this.completed = completed;
     }
 
-    public double getAverageProgress() {
-        return averageProgress;
+    public List<MyCourseResponse> getCourses() {
+        return courses;
     }
 
-    public void setAverageProgress(double averageProgress) {
-        this.averageProgress = averageProgress;
+    public void setCourses(List<MyCourseResponse> courses) {
+        this.courses = courses;
     }
 
     @Override
     public String toString() {
-        return "StudentSummaryResponse{" +
-                "totalEnrolled=" + totalEnrolled +
+        return "StudentMyCoursesResponse{" +
+                "totalCourses=" + totalCourses +
                 ", planned=" + planned +
                 ", ongoing=" + ongoing +
                 ", completed=" + completed +
-                ", averageProgress=" + averageProgress +
+                ", courses=" + courses +
                 '}';
     }
 }

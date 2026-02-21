@@ -27,7 +27,7 @@ public class StudentCourse extends AuditFields {
     @Column(nullable = false)
     private CourseStatus status;   // PLANNED, ONGOING, COMPLETED
 
-    private Double progressPercentage;
+    private LocalDateTime start_dt;
 
     private LocalDateTime enrolledDt;
 
@@ -65,12 +65,12 @@ public class StudentCourse extends AuditFields {
         this.status = status;
     }
 
-    public Double getProgressPercentage() {
-        return progressPercentage;
+    public LocalDateTime getStart_dt() {
+        return start_dt;
     }
 
-    public void setProgressPercentage(Double progressPercentage) {
-        this.progressPercentage = progressPercentage;
+    public void setStart_dt(LocalDateTime start_dt) {
+        this.start_dt = start_dt;
     }
 
     public LocalDateTime getEnrolledDt() {
@@ -96,7 +96,7 @@ public class StudentCourse extends AuditFields {
                 ", student=" + student +
                 ", course=" + course +
                 ", status=" + status +
-                ", progressPercentage=" + progressPercentage +
+                ", start_dt=" + start_dt +
                 ", enrolledDt=" + enrolledDt +
                 ", completedDt=" + completedDt +
                 '}';

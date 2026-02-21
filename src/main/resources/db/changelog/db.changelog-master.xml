@@ -43,7 +43,7 @@
     <include file="db/changelog/changelogs/202601291209-create-staff_role-table.xml"/>
 
     <!-- Student-course table -->
-    <include file="db/changelog/changelogs/202602141226-create-student_course-table.xml"/>
+    <include file="db/changelog/changelogs/202602211020-create-student_course-table.xml"/>
 
     <!--Class Batch table -->
     <include file="db/changelog/changelogs/202602191038-create-class_batch-table.xml"/>
@@ -55,6 +55,6 @@
     <include file="db/changelog/changelogs/202602191207-create-program-table.xml"/>
 
     <!-- Program Course table -->
-    <include file="db/changelog/changelogs/202602191214-create-program_course-table.xml"/>
+    <include file="db/changelog/changelogs/202602211541-create-program_course-table.xml"/>
 
 </databaseChangeLog>

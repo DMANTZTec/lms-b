@@ -3,8 +3,6 @@ package com.dmantz.lms_b.service.impl;
 
 import com.dmantz.lms_b.dto.request.StudentCourseEnrollRequest;
 import com.dmantz.lms_b.dto.response.StudentCourseResponse;
-import com.dmantz.lms_b.dto.response.StudentDashboardResponse;
-import com.dmantz.lms_b.dto.response.StudentSummaryResponse;
 import com.dmantz.lms_b.entity.Course;
 import com.dmantz.lms_b.entity.CourseStatus;
 import com.dmantz.lms_b.entity.Student;
@@ -54,7 +52,7 @@ public class StudentCourseServiceImpl implements StudentCourseService {
         entity.setStudent(student);
         entity.setCourse(course);
         entity.setStatus(CourseStatus.PLANNED);
-        entity.setProgressPercentage(0.0);
+        entity.setStart_dt(LocalDateTime.now());
         entity.setEnrolledDt(LocalDateTime.now());
 
         StudentCourse saved = studentCourseRepository.save(entity);
