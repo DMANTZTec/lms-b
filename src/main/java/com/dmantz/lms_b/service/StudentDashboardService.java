@@ -11,22 +11,8 @@ import java.util.List;
 
 public interface StudentDashboardService {
 
-//    List<ClassScheduleResponse> getMyClassScheduleThisWeek(String studentId);
-//
-//    StudentDashboardResponse getDashboard(String studentId);
-
     WeeklyScheduleResponse getWeeklySchedule(String studentId);
 
-    ClassScheduleResponse addScheduleToClass(ClassScheduleRequest request);
-
-
-//    StudentMyCoursesResponse getMyCourses(
-//            String studentId,
-//            CourseStatus status);
-
-//    StudentMyCoursesResponse getMyCourses(String studentId);
-
-    StudentMyCoursesResponse getMyCourses(
-            String studentId,
+    StudentMyCoursesResponse getMyCourses(String studentId,
             CourseStatus status);
 }

@@ -41,30 +41,6 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 
 
     @Override
-    @Transactional
-    public ClassScheduleResponse addScheduleToClass(ClassScheduleRequest request) {
-
-        ClassSchedule schedule = classScheduleMapper.toEntity(request);
-
-        if (schedule.getStatus() == null) {
-            schedule.setStatus(ClassStatus.SCHEDULED);
-        }
-
-        ClassBatch batch = classBatchRepository.findById(request.getClassId())
-                .orElseThrow(() -> new RuntimeException("Class not found"));
-
-        Staff staff = staffRepository.findById(request.getStaffId())
-                .orElseThrow(() -> new RuntimeException("Staff not found"));
-
-        schedule.setClassBatch(batch);
-        schedule.setStaff(staff);
-
-        ClassSchedule saved = classScheduleRepository.save(schedule);
-        return classScheduleMapper.toResponse(saved);
-    }
-
-
-    @Override
     public WeeklyScheduleResponse getWeeklySchedule(String studentId) {
 
         LocalDate today = LocalDate.now();
@@ -94,15 +70,13 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 
 
     @Override
-    public StudentMyCoursesResponse getMyCourses(
-            String studentId,
-            CourseStatus status) {
+    public StudentMyCoursesResponse getMyCourses(String studentId, CourseStatus status) {
 
-        // 🔹 fetch all for counts
+        //  fetch all for counts
         List<StudentCourse> allCourses =
                 studentCourseRepository.findByStudentStudentId(studentId);
 
-        // 🔹 fetch filtered list for tab
+        //  fetch filtered list for tab
         List<StudentCourse> filteredCourses =
                 (status == null)
                         ? allCourses
@@ -110,13 +84,13 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 
         StudentMyCoursesResponse response = new StudentMyCoursesResponse();
 
-        // ===== counts =====
+        // counts
         response.setTotalCourses(allCourses.size());
         response.setOngoing(countByStatus(allCourses, CourseStatus.ONGOING));
         response.setPlanned(countByStatus(allCourses, CourseStatus.PLANNED));
         response.setCompleted(countByStatus(allCourses, CourseStatus.COMPLETED));
 
-        // ===== course list =====
+        // course list
         response.setCourses(
                 filteredCourses.stream()
                         .map(studentCourseMapper::toDto)

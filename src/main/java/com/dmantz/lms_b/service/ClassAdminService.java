@@ -1,8 +1,11 @@
 package com.dmantz.lms_b.service;
 
+import com.dmantz.lms_b.dto.request.ClassScheduleRequest;
 import com.dmantz.lms_b.dto.request.CreateClassRequest;
 import com.dmantz.lms_b.dto.request.UpdateClassRequest;
 import com.dmantz.lms_b.dto.response.ClassResponse;
+import com.dmantz.lms_b.dto.response.ClassScheduleResponse;
+import jakarta.transaction.Transactional;
 
 public interface ClassAdminService {
 
@@ -11,4 +14,10 @@ public interface ClassAdminService {
    ClassResponse modifyClass(Long batchId, UpdateClassRequest request);
 
    ClassResponse cancelClass(Long batchId);
+
+   ClassScheduleResponse addScheduleToClass(ClassScheduleRequest request);
+
+   ClassScheduleResponse modifySchedule(Long scheduleId, ClassScheduleRequest request);
+
+   ClassScheduleResponse cancelSchedule(Long scheduleId);
 }
