@@ -1,7 +1,9 @@
 package com.dmantz.lms_b.service.impl;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.dmantz.lms_b.dto.request.*;
@@ -33,17 +35,23 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 	private final ChapterMapper chapterMapper;
 
 	private final TopicRepository topicRepository;
-	private final  TopicMapper topicMapper;
+	private final TopicMapper topicMapper;
 
 	private final TopicReferenceRepository topicReferenceRepository;
 	private final TopicReferenceMapper topicReferenceMapper;
 
-	public CourseManagementServiceImpl(
-            SubjectRepository subjectRepository, StaffRepository staffRepository,
-            SubjectMapper subjectMapper, CourseRepository courseRepository, CourseMapper courseMapper,
-            ProviderRepository providerRepository, ChapterRepository chapterRepository, ChapterMapper chapterMapper,
-            TopicRepository topicRepository, TopicMapper topicMapper,
-			TopicReferenceRepository topicReferenceRepository, TopicReferenceMapper topicReferenceMapper) {
+	private final ProgramRepository programRepository;
+	private final ProgramCourseRepository programCourseRepository;
+	private final ProgramCourseMapper programcourseMapper;
+	private final ProgramMapper programMapper;
+
+	public CourseManagementServiceImpl(SubjectRepository subjectRepository, StaffRepository staffRepository,
+			SubjectMapper subjectMapper, CourseRepository courseRepository, CourseMapper courseMapper,
+			ProviderRepository providerRepository, ChapterRepository chapterRepository, ChapterMapper chapterMapper,
+			TopicRepository topicRepository, TopicMapper topicMapper, TopicReferenceRepository topicReferenceRepository,
+			TopicReferenceMapper topicReferenceMapper, ProgramRepository programRepository,
+			ProgramCourseRepository programCourseRepository, ProgramCourseMapper programcourseMapper,
+			ProgramMapper programMapper) {
 		super();
 		this.subjectRepository = subjectRepository;
 		this.staffRepository = staffRepository;
@@ -55,9 +63,13 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 		this.chapterMapper = chapterMapper;
 		this.topicRepository = topicRepository;
 		this.topicMapper = topicMapper;
-        this.topicReferenceRepository = topicReferenceRepository;
-        this.topicReferenceMapper = topicReferenceMapper;
-    }
+		this.topicReferenceRepository = topicReferenceRepository;
+		this.topicReferenceMapper = topicReferenceMapper;
+		this.programRepository = programRepository;
+		this.programCourseRepository = programCourseRepository;
+		this.programcourseMapper = programcourseMapper;
+		this.programMapper = programMapper;
+	}
 
 	// ------------------ CREATE SUBJECT ------------------
 	@Override
@@ -343,18 +355,13 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 	@Override
 	public TopicResponseDto createTopic(TopicRequestDto request) {
 
-		Chapter chapter = chapterRepository.findById(request.getChapterId())
-				.orElseThrow(() ->
-						new ResourceNotFoundException(
-								"Chapter not found with id: " + request.getChapterId()));
+		Chapter chapter = chapterRepository.findById(request.getChapterId()).orElseThrow(
+				() -> new ResourceNotFoundException("Chapter not found with id: " + request.getChapterId()));
 
 		Staff staff = staffRepository.findById(request.getStaffId())
-				.orElseThrow(() ->
-						new ResourceNotFoundException(
-								"Staff not found with id: " + request.getStaffId()));
+				.orElseThrow(() -> new ResourceNotFoundException("Staff not found with id: " + request.getStaffId()));
 
-		Long maxTopicNum =
-				topicRepository.findMaxTopicNumByChapterId(request.getChapterId());
+		Long maxTopicNum = topicRepository.findMaxTopicNumByChapterId(request.getChapterId());
 
 		Long nextTopicNum = (maxTopicNum == null ? 1L : maxTopicNum + 1);
 
@@ -373,28 +380,21 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 	public List<TopicResponseDto> getTopicsByChapterId(Long chapterId) {
 
 		chapterRepository.findById(chapterId)
-				.orElseThrow(() ->
-						new ResourceNotFoundException(
-								"Chapter not found with id: " + chapterId));
+				.orElseThrow(() -> new ResourceNotFoundException("Chapter not found with id: " + chapterId));
 
-		List<Topic> topics =
-				topicRepository.findByChapterIdOrderByTopicNumAsc(chapterId);
+		List<Topic> topics = topicRepository.findByChapterIdOrderByTopicNumAsc(chapterId);
 
-		return topics.stream()
-				.map(topicMapper::toResponseDto)
-				.collect(Collectors.toList());
+		return topics.stream().map(topicMapper::toResponseDto).collect(Collectors.toList());
 	}
 
-	//====================== Get Topic by Id and Chapter Id =========================
+	// ====================== Get Topic by Id and Chapter Id
+	// =========================
 
 	@Override
 	public TopicResponseDto getTopicByIdAndChapterId(Long topicId, Long chapterId) {
 
-		Topic topic = topicRepository
-				.findByIdAndChapterId(topicId, chapterId)
-				.orElseThrow(() ->
-						new ResourceNotFoundException(
-								"Topic not found in this chapter"));
+		Topic topic = topicRepository.findByIdAndChapterId(topicId, chapterId)
+				.orElseThrow(() -> new ResourceNotFoundException("Topic not found in this chapter"));
 
 		return topicMapper.toResponseDto(topic);
 	}
@@ -404,8 +404,7 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 	@Override
 	public TopicResponseDto updateTopic(Long id, TopicRequestDto requestDto) {
 
-		Topic topic = topicRepository.findById(id)
-				.orElseThrow(() -> new RuntimeException("Topic not found"));
+		Topic topic = topicRepository.findById(id).orElseThrow(() -> new RuntimeException("Topic not found"));
 
 		Chapter chapter = chapterRepository.findById(requestDto.getChapterId())
 				.orElseThrow(() -> new RuntimeException("Chapter not found"));
@@ -423,148 +422,267 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 		return topicMapper.toResponseDto(updatedTopic);
 	}
 
-	// ============================= Delete Topic ===================================
+	// ============================= Delete Topic
+	// ===================================
 
 	@Override
 	public void deleteTopic(Long id) {
 
 		Topic topic = topicRepository.findById(id)
-				.orElseThrow(() ->
-						new ResourceNotFoundException(
-								"Topic not found with id: " + id));
+				.orElseThrow(() -> new ResourceNotFoundException("Topic not found with id: " + id));
 
 		topicRepository.delete(topic);
 	}
 //      =====================  Move chapter ========================================
-	
 
 	@Override
 	public void moveChapter(Long chapterId, int targetPosition) {
 
-	    Chapter chapter = chapterRepository.findById(chapterId)
-	            .orElseThrow(() -> new RuntimeException("Chapter not found"));
+		Chapter chapter = chapterRepository.findById(chapterId)
+				.orElseThrow(() -> new RuntimeException("Chapter not found"));
 
-	    Long courseId = chapter.getCourse().getId();
+		Long courseId = chapter.getCourse().getId();
 
-	    List<Chapter> chapters =
-	            chapterRepository.findByCourseIdOrderByChapterNumAsc(courseId);
+		List<Chapter> chapters = chapterRepository.findByCourseIdOrderByChapterNumAsc(courseId);
 
-	    int size = chapters.size();
+		int size = chapters.size();
 
-	    if (targetPosition < 1 || targetPosition > size) {
-	        throw new RuntimeException("Invalid target position");
-	    }
+		if (targetPosition < 1 || targetPosition > size) {
+			throw new RuntimeException("Invalid target position");
+		}
 
-	    // Remove old position
-	    chapters.removeIf(ch -> ch.getId().equals(chapterId));
+		// Remove old position
+		chapters.removeIf(ch -> ch.getId().equals(chapterId));
 
-	    // Insert at new position
-	    chapters.add(targetPosition - 1, chapter);
+		// Insert at new position
+		chapters.add(targetPosition - 1, chapter);
 
-	    // 🔥 STEP 1 — Shift all values temporarily
-	    for (Chapter ch : chapters) {
-	        ch.setChapterNum(ch.getChapterNum() + 1000);
-	    }
+		// 🔥 STEP 1 — Shift all values temporarily
+		for (Chapter ch : chapters) {
+			ch.setChapterNum(ch.getChapterNum() + 1000);
+		}
 
-	    chapterRepository.saveAll(chapters);
-	    chapterRepository.flush();
+		chapterRepository.saveAll(chapters);
+		chapterRepository.flush();
 
-	    // 🔥 STEP 2 — Reassign correct order
-	    for (int i = 0; i < chapters.size(); i++) {
-	        chapters.get(i).setChapterNum((long) (i + 1));
-	    }
+		// 🔥 STEP 2 — Reassign correct order
+		for (int i = 0; i < chapters.size(); i++) {
+			chapters.get(i).setChapterNum((long) (i + 1));
+		}
 
-	    chapterRepository.saveAll(chapters);
+		chapterRepository.saveAll(chapters);
 	}
 //  =====================  Move topic ========================================
-	
+
 	@Override
 	public void moveTopic(Long topicId, int targetPosition) {
 
-	    // 1️⃣ Fetch topic
-	    Topic topic = topicRepository.findById(topicId)
-	            .orElseThrow(() -> new RuntimeException("Topic not found"));
+		// 1️⃣ Fetch topic
+		Topic topic = topicRepository.findById(topicId).orElseThrow(() -> new RuntimeException("Topic not found"));
 
-	    Long chapterId = topic.getChapter().getId();
+		Long chapterId = topic.getChapter().getId();
 
-	    // 2️⃣ Fetch all topics ordered
-	    List<Topic> topics =
-	            topicRepository.findByChapterIdOrderByTopicNumAsc(chapterId);
+		// 2️⃣ Fetch all topics ordered
+		List<Topic> topics = topicRepository.findByChapterIdOrderByTopicNumAsc(chapterId);
 
-	    int size = topics.size();
+		int size = topics.size();
 
-	    if (targetPosition < 1 || targetPosition > size) {
-	        throw new RuntimeException("Invalid target position");
-	    }
+		if (targetPosition < 1 || targetPosition > size) {
+			throw new RuntimeException("Invalid target position");
+		}
 
-	    // 3️⃣ Remove current topic
-	    topics.removeIf(t -> t.getId().equals(topicId));
+		// 3️⃣ Remove current topic
+		topics.removeIf(t -> t.getId().equals(topicId));
 
-	    // 4️⃣ Insert at new position
-	    topics.add(targetPosition - 1, topic);
+		// 4️⃣ Insert at new position
+		topics.add(targetPosition - 1, topic);
 
-	    // 🔥 STEP 1: Temporary shift to avoid UNIQUE conflict
-	    for (Topic t : topics) {
-	        t.setTopicNum(t.getTopicNum() + 1000);
-	    }
+		// 🔥 STEP 1: Temporary shift to avoid UNIQUE conflict
+		for (Topic t : topics) {
+			t.setTopicNum(t.getTopicNum() + 1000);
+		}
 
-	    topicRepository.saveAll(topics);
-	    topicRepository.flush();
+		topicRepository.saveAll(topics);
+		topicRepository.flush();
 
-	    // 🔥 STEP 2: Reassign correct order
-	    for (int i = 0; i < topics.size(); i++) {
-	        topics.get(i).setTopicNum((long) (i + 1));
-	    }
+		// 🔥 STEP 2: Reassign correct order
+		for (int i = 0; i < topics.size(); i++) {
+			topics.get(i).setTopicNum((long) (i + 1));
+		}
 
-	    topicRepository.saveAll(topics);
+		topicRepository.saveAll(topics);
 	}
-
-		
-	
 
 // =============================== Add Topic References ======================================
 	@Override
-	public TopicReferenceResponseDto addUrlReference(
-			Long topicId,
-			TopicReferenceRequestDto dto) {
+	public TopicReferenceResponseDto addUrlReference(Long topicId, TopicReferenceRequestDto dto) {
 
 		return saveReference(topicId, dto, "URL");
 	}
 
 	@Override
-	public TopicReferenceResponseDto addVideoReference(
-			Long topicId,
-			TopicReferenceRequestDto dto) {
+	public TopicReferenceResponseDto addVideoReference(Long topicId, TopicReferenceRequestDto dto) {
 
 		return saveReference(topicId, dto, "VIDEO");
 	}
 
 	@Override
-	public TopicReferenceResponseDto addDocumentReference(
-			Long topicId,
-			TopicReferenceRequestDto dto) {
+	public TopicReferenceResponseDto addDocumentReference(Long topicId, TopicReferenceRequestDto dto) {
 
 		return saveReference(topicId, dto, "DOCUMENT");
 	}
 
-	private TopicReferenceResponseDto saveReference(
-			Long topicId,
-			TopicReferenceRequestDto dto,
-			String type) {
+	private TopicReferenceResponseDto saveReference(Long topicId, TopicReferenceRequestDto dto, String type) {
 
 		Topic topic = topicRepository.findById(topicId)
-				.orElseThrow(() ->
-						new ResourceNotFoundException(
-								"Topic not found"));
+				.orElseThrow(() -> new ResourceNotFoundException("Topic not found"));
 
 		TopicReference entity = topicReferenceMapper.toEntity(dto);
 		entity.setRefType(type);
 		entity.setTopic(topic);
 
-		TopicReference saved =
-				topicReferenceRepository.save(entity);
+		TopicReference saved = topicReferenceRepository.save(entity);
 
 		return topicReferenceMapper.toDto(saved);
+	}
+
+//	  create program
+	@Override
+	public ProgramResponse createProgram(ProgramRequest request) {
+
+		Provider provider = providerRepository.findById(request.getProviderId())
+				.orElseThrow(() -> new RuntimeException("Provider not found"));
+		if (programRepository.existsByProgramTitleAndProvider_Id(request.getProgramTitle(), request.getProviderId())) {
+			throw new DuplicateValuesException("Program already exists for this provider");
+		}
+
+		Program program = programMapper.toEntity(request);
+
+		program.setProvider(provider);
+
+		program.setProgramId(generateProgramId());
+
+		program.setStatus(ProgramStatus.ACTIVE);
+
+		Program savedProgram = programRepository.save(program);
+
+		return programMapper.toResponse(savedProgram);
+	}
+
+	private String generateProgramId() {
+
+		Optional<Program> lastProgram = programRepository.findTopByOrderByIdDesc();
+
+		int nextNumber = 1;
+
+		if (lastProgram.isPresent() && lastProgram.get().getProgramId() != null) {
+			String lastId = lastProgram.get().getProgramId();
+			nextNumber = Integer.parseInt(lastId.substring(3)) + 1;
+		}
+
+		String generatedId;
+
+		do {
+			generatedId = String.format("PRG%03d", nextNumber++);
+		} while (programRepository.existsByProgramId(generatedId));
+
+		return generatedId;
+	}
+
+	// ================= GET BY ID =================
+	@Override
+	public ProgramResponse getProgramById(Long id) {
+
+		Program program = programRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Program not found with id: " + id));
+
+		return programMapper.toResponse(program);
+	}
+
+	// ================= GET ALL =================
+	@Override
+	public List<ProgramResponse> getAllPrograms() {
+
+		return programRepository.findAll().stream().map(programMapper::toResponse).toList();
+	}
+
+	// ================= UPDATE =================
+	@Override
+	public ProgramResponse updateProgram(Long programId, ProgramRequest request) {
+
+		// Validate Program
+		Program program = programRepository.findById(programId)
+				.orElseThrow(() -> new ResourceNotFoundException("Program not found with id: " + programId));
+
+		// Validate Provider
+		Provider provider = providerRepository.findById(request.getProviderId()).orElseThrow(
+				() -> new ResourceNotFoundException("Provider not found with id: " + request.getProviderId()));
+
+		// Duplicate check
+		if (programRepository.existsByProgramTitleAndProvider_IdAndIdNot(request.getProgramTitle(),
+				request.getProviderId(), programId)) {
+			throw new DuplicateValuesException("Program already exists for this provider");
+		}
+
+		// Update entity (excluding programId)
+		programMapper.updateEntityFromRequest(request, program);
+		program.setProvider(provider);
+
+		Program updatedProgram = programRepository.save(program);
+
+		return programMapper.toResponse(updatedProgram);
+	}
+
+	// ================= DELETE =================
+	@Override
+	public void deleteProgram(Long programId) {
+		Program program = programRepository.findById(programId)
+				.orElseThrow(() -> new ResourceNotFoundException("Program not found with id: " + programId));
+
+		programRepository.delete(program);
+	}
+
+//	========================= Add course to program =============================
+	@Override
+	public List<ProgramCourseResponse> addCoursesToProgram(ProgramCourseRequest request) {
+
+		String programId = request.getProgramId();
+		List<String> courseIds = request.getCourseIds();
+
+		Program program = programRepository.findByProgramId(programId)
+				.orElseThrow(() -> new ResourceNotFoundException("Program not found with ID: " + programId));
+
+		List<ProgramCourse> savedList = new ArrayList<>();
+
+		for (String courseId : courseIds) {
+
+			Course course = courseRepository.findByCourseId(courseId)
+					.orElseThrow(() -> new ResourceNotFoundException("Course not found with ID: " + courseId));
+
+			boolean exists = programCourseRepository.existsByProgram_ProgramIdAndCourse_CourseId(programId, courseId);
+
+			if (exists) {
+				throw new DuplicateValuesException("Course " + courseId + " is already mapped to Program " + programId);
+			}
+
+			ProgramCourse programCourse = new ProgramCourse();
+			programCourse.setProgram(program);
+			programCourse.setCourse(course);
+
+			savedList.add(programCourseRepository.save(programCourse));
+		}
+
+		return programcourseMapper.toResponseList(savedList);
+	}
+
+	// ========================= delete course from program
+	@Override
+	public void deleteProgramCourse(Long programCourseId) {
+
+		ProgramCourse programCourse = programCourseRepository.findById(programCourseId).orElseThrow(
+				() -> new ResourceNotFoundException("ProgramCourse not found with id: " + programCourseId));
+
+		programCourseRepository.delete(programCourse);
 	}
 
 }

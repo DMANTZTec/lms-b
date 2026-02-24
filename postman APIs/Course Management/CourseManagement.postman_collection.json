@@ -1,10 +1,10 @@
 {
   "info": {
-    "_postman_id": "cc5d30b2-f1d5-43c3-aec6-73428ec39266",
+    "_postman_id": "11c3a2a8-5f5e-42c3-93b5-a1035524d50e",
     "name": "CourseManagement",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "49260644",
-    "_collection_link": "https://go.postman.co/collection/49260644-cc5d30b2-f1d5-43c3-aec6-73428ec39266?source=collection_link"
+    "_exporter_id": "49454707",
+    "_collection_link": "https://go.postman.co/collection/49454707-11c3a2a8-5f5e-42c3-93b5-a1035524d50e?source=collection_link"
   },
   "item": [
     {
@@ -470,6 +470,185 @@
               "key": "targetPosition",
               "value": "4"
             }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "create program API",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"programTitle\": \"Full Stack Development\",\r\n  \"description\": \"Complete full stack development program\",\r\n  \"durationInMonths\": 12,\r\n  \"providerId\": 1\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/add/program",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "add",
+            "program"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get program by id API",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/getById/program/1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "getById",
+            "program",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "update API for program",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"programTitle\": \"Advanced Full Stack Development\",\r\n  \"description\": \"Updated description\",\r\n  \"durationInMonths\": 6,\r\n  \"providerId\": 2\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/update/program/3",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "update",
+            "program",
+            "3"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get all API for program",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/getAll/program",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "getAll",
+            "program"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Add course to program",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"programId\": \"PRG001\",\r\n  \"courseIds\": [\r\n    \"PY001\",\r\n    \"PY002\"\r\n  ]\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/add/course/program",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "add",
+            "course",
+            "program"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "delete course from program",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/remove/course/1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "remove",
+            "course",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete API for program",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/delete/program/2",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "delete",
+            "program",
+            "2"
           ]
         }
       },

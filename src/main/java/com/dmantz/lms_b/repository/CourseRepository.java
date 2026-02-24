@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.dmantz.lms_b.entity.Course;
+import com.dmantz.lms_b.entity.Program;
 
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Long> {
@@ -19,5 +20,6 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 	List<Course> findBySubject_Id(Long subjectId);
 
 	Optional<Course> findByCourseId(String courseId);
+
 	
 }

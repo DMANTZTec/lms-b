@@ -142,8 +142,7 @@ public class CourseManagementController {
 	// =============== CREATE TOPIC====================
 
 	@PostMapping("/topics")
-	public ResponseEntity<TopicResponseDto> createTopic(
-			@Valid @RequestBody TopicRequestDto request) {
+	public ResponseEntity<TopicResponseDto> createTopic(@Valid @RequestBody TopicRequestDto request) {
 
 		TopicResponseDto response = courseManagementService.createTopic(request);
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -152,24 +151,21 @@ public class CourseManagementController {
 	// ================ Get All Topics by Chapter Id=====================
 
 	@GetMapping("/topics")
-	public ResponseEntity<List<TopicResponseDto>> getTopicsByChapterId(
-			@RequestParam Long chapterId) {
+	public ResponseEntity<List<TopicResponseDto>> getTopicsByChapterId(@RequestParam Long chapterId) {
 
-		List<TopicResponseDto> topics =
-				courseManagementService.getTopicsByChapterId(chapterId);
+		List<TopicResponseDto> topics = courseManagementService.getTopicsByChapterId(chapterId);
 
 		return ResponseEntity.ok(topics);
 	}
 
-	//====================== Get Topic by Id and Chapter Id =========================
+	// ====================== Get Topic by Id and Chapter Id
+	// =========================
 
 	@GetMapping("topics/{topicId}")
-	public ResponseEntity<TopicResponseDto> getTopicByIdAndChapterId(
-			@PathVariable Long topicId,
+	public ResponseEntity<TopicResponseDto> getTopicByIdAndChapterId(@PathVariable Long topicId,
 			@RequestParam Long chapterId) {
 
-		TopicResponseDto response =
-				courseManagementService.getTopicByIdAndChapterId(topicId, chapterId);
+		TopicResponseDto response = courseManagementService.getTopicByIdAndChapterId(topicId, chapterId);
 
 		return ResponseEntity.ok(response);
 	}
@@ -177,8 +173,7 @@ public class CourseManagementController {
 	// =============== UPDATE TOPIC =============================
 
 	@PutMapping("topics/{id}")
-	public ResponseEntity<TopicResponseDto> updateTopic(
-			@PathVariable Long id,
+	public ResponseEntity<TopicResponseDto> updateTopic(@PathVariable Long id,
 			@Valid @RequestBody TopicRequestDto requestDto) {
 
 		TopicResponseDto response = courseManagementService.updateTopic(id, requestDto);
@@ -194,64 +189,105 @@ public class CourseManagementController {
 
 		return ResponseEntity.noContent().build();
 	}
-	
+
 	// Move chapter to specific position
-    @PutMapping("/{chapterId}/movechapter")
-    public ResponseEntity<String> moveChapter(
-            @PathVariable Long chapterId,
-            @RequestParam int targetPosition) {
+	@PutMapping("/{chapterId}/movechapter")
+	public ResponseEntity<String> moveChapter(@PathVariable Long chapterId, @RequestParam int targetPosition) {
 
-    	courseManagementService.moveChapter(chapterId, targetPosition);
+		courseManagementService.moveChapter(chapterId, targetPosition);
 
-        return ResponseEntity.ok("Chapter moved successfully");
-    }
-    
+		return ResponseEntity.ok("Chapter moved successfully");
+	}
+
 //    move topic to specific position
-    @PutMapping("/{topicId}/movetopic")
-    public ResponseEntity<String> moveTopic(
-            @PathVariable Long topicId,
-            @RequestParam int targetPosition) {
+	@PutMapping("/{topicId}/movetopic")
+	public ResponseEntity<String> moveTopic(@PathVariable Long topicId, @RequestParam int targetPosition) {
 
-    	courseManagementService.moveTopic(topicId, targetPosition);
-        return ResponseEntity.ok("Topic moved successfully");
-    }
-
-
-
-	
+		courseManagementService.moveTopic(topicId, targetPosition);
+		return ResponseEntity.ok("Topic moved successfully");
+	}
 
 	// ========================== Add URL Reference =============================
 
 	@PostMapping("topics/{topicId}/references/url")
-	public ResponseEntity<TopicReferenceResponseDto> addUrl(
-			@PathVariable Long topicId,
+	public ResponseEntity<TopicReferenceResponseDto> addUrl(@PathVariable Long topicId,
 			@RequestBody TopicReferenceRequestDto dto) {
 
-		return ResponseEntity.ok(
-				courseManagementService.addUrlReference(topicId, dto));
+		return ResponseEntity.ok(courseManagementService.addUrlReference(topicId, dto));
 	}
 
 	// ========================= Add Video Reference =============================
 
 	@PostMapping("topics/{topicId}/references/video")
-	public ResponseEntity<TopicReferenceResponseDto> addVideo(
-			@PathVariable Long topicId,
+	public ResponseEntity<TopicReferenceResponseDto> addVideo(@PathVariable Long topicId,
 			@RequestBody TopicReferenceRequestDto dto) {
 
-		return ResponseEntity.ok(
-				courseManagementService.addVideoReference(topicId, dto));
+		return ResponseEntity.ok(courseManagementService.addVideoReference(topicId, dto));
 	}
 
-	// ========================= Add Document Reference =============================
+	// ========================= Add Document Reference
 
 	@PostMapping("topics/{topicId}/references/document")
-	public ResponseEntity<TopicReferenceResponseDto> addDocument(
-			@PathVariable Long topicId,
+	public ResponseEntity<TopicReferenceResponseDto> addDocument(@PathVariable Long topicId,
 			@RequestBody TopicReferenceRequestDto dto) {
 
-		return ResponseEntity.ok(
-				courseManagementService.addDocumentReference(topicId, dto));
+		return ResponseEntity.ok(courseManagementService.addDocumentReference(topicId, dto));
 	}
 
+//	========================= Add course to program =============================
+	@PostMapping("/add/course/program")
+	public ResponseEntity<List<ProgramCourseResponse>> addCourses(@Valid @RequestBody ProgramCourseRequest request) {
 
+		return ResponseEntity.ok(courseManagementService.addCoursesToProgram(request));
+	}
+
+//========================= delete course from program =============================
+	@DeleteMapping("/remove/course/{id}")
+	public ResponseEntity<String> removeCourse(@PathVariable Long id) {
+
+		courseManagementService.deleteProgramCourse(id);
+		return ResponseEntity.ok("Program-Course mapping removed successfully");
+	}
+
+	// ================= CREATE =================
+	@PostMapping("/add/program")
+	public ResponseEntity<ProgramResponse> createProgram(@RequestBody ProgramRequest request) {
+
+		ProgramResponse response = courseManagementService.createProgram(request);
+		return new ResponseEntity<>(response, HttpStatus.CREATED);
+	}
+
+	// ================= GET BY ID =================
+	@GetMapping("/getById/program/{id}")
+	public ResponseEntity<ProgramResponse> getProgramById(@PathVariable Long id) {
+
+		ProgramResponse response = courseManagementService.getProgramById(id);
+		return ResponseEntity.ok(response);
+	}
+
+	// ================= GET ALL =================
+	@GetMapping("/getAll/program")
+	public ResponseEntity<List<ProgramResponse>> getAllPrograms() {
+
+	    List<ProgramResponse> response = courseManagementService.getAllPrograms();
+	    return ResponseEntity.ok(response);
+	}
+	
+	// ================= UPDATE =================
+	@PutMapping("/update/program/{id}")
+	public ResponseEntity<ProgramResponse> updateProgram(
+	        @PathVariable Long id,
+	        @RequestBody ProgramRequest request) {
+
+	    ProgramResponse response = courseManagementService.updateProgram(id, request);
+	    return ResponseEntity.ok(response);
+	}
+
+	// ================= DELETE =================
+	@DeleteMapping("/delete/program/{id}")
+	public ResponseEntity<String> deleteProgram(@PathVariable Long id) {
+
+		courseManagementService.deleteProgram(id);
+		return ResponseEntity.ok("Program deleted successfully");
+	}
 }

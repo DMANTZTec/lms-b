@@ -81,5 +81,19 @@ public interface CourseManagementService {
 	TopicReferenceResponseDto addDocumentReference(
 			Long topicId,
 			TopicReferenceRequestDto dto);
+	
+	 List<ProgramCourseResponse> addCoursesToProgram(ProgramCourseRequest request);
+
+	  void deleteProgramCourse(Long programCourseId);
+
+	  void deleteProgram(Long programId);
+
+	  ProgramResponse updateProgram(Long programId, ProgramRequest request);
+
+	  List<ProgramResponse> getAllPrograms();
+
+	  ProgramResponse getProgramById(Long id);
+
+	  ProgramResponse createProgram(ProgramRequest request);
 
 }
