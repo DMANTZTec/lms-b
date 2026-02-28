@@ -4,6 +4,7 @@ import com.dmantz.lms_b.dto.request.ClassScheduleRequest;
 import com.dmantz.lms_b.dto.response.StudentDashboardResponse;
 import com.dmantz.lms_b.dto.response.ChapterProgressResponse;
 import com.dmantz.lms_b.dto.response.ClassScheduleResponse;
+import com.dmantz.lms_b.dto.response.CourseProgressSummaryResponse;
 import com.dmantz.lms_b.dto.response.StudentMyCoursesResponse;
 import com.dmantz.lms_b.dto.response.TopicProgressResponse;
 import com.dmantz.lms_b.dto.response.WeeklyScheduleResponse;
@@ -51,6 +52,17 @@ public class StudentDashboardController {
 
 		return ResponseEntity.ok(dashboardService.getChapterProgress(courseId, studentId));
 	}
+	
+	@GetMapping("/dashboard/course/{courseId}/progress")
+	public ResponseEntity<CourseProgressSummaryResponse> getCourseProgress(
+	        @PathVariable Long courseId,
+	        @RequestParam Long studentId) {
+
+	    return ResponseEntity.ok(
+	    		dashboardService.getCourseProgressSummary(courseId, studentId)
+	    );
+	}
+
 
 }
 

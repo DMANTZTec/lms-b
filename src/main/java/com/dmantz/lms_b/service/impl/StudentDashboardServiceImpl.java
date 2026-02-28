@@ -3,6 +3,7 @@ package com.dmantz.lms_b.service.impl;
 import com.dmantz.lms_b.dto.request.ClassScheduleRequest;
 import com.dmantz.lms_b.dto.response.ChapterProgressResponse;
 import com.dmantz.lms_b.dto.response.ClassScheduleResponse;
+import com.dmantz.lms_b.dto.response.CourseProgressSummaryResponse;
 import com.dmantz.lms_b.dto.response.StudentMyCoursesResponse;
 import com.dmantz.lms_b.dto.response.TopicProgressResponse;
 import com.dmantz.lms_b.dto.response.WeeklyScheduleResponse;
@@ -193,6 +194,84 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 
 		return response;
 	}
+	
+	@Override
+	public CourseProgressSummaryResponse getCourseProgressSummary(Long courseId, Long studentId) {
+
+	    Course course = courseRepository.findById(courseId)
+	            .orElseThrow(() -> new RuntimeException("Course not found"));
+
+	    int totalChapters = 0;
+	    int completedChapters = 0;
+
+	    int totalTopics = 0;
+	    int completedTopics = 0;
+
+	    int totalReferences = 0;
+	    int completedReferences = 0;
+
+	    for (Chapter chapter : course.getChapters()) {
+
+	        totalChapters++;
+
+	        boolean isChapterCompleted = true;
+
+	        for (Topic topic : chapter.getTopics()) {
+
+	            totalTopics++;
+
+	            List<TopicReference> references = topic.getReferences();
+	            int topicTotalReferences = (references == null) ? 0 : references.size();
+
+	            totalReferences += topicTotalReferences;
+
+	            List<StudentTopicReferenceProgress> progressList =
+	                    progressRepository.findByStudent_IdAndTopicReference_Topic_Id(
+	                            studentId, topic.getId());
+
+	            long topicCompletedReferences = progressList.stream()
+	                    .filter(p -> Boolean.TRUE.equals(p.getCompleted()))
+	                    .count();
+
+	            completedReferences += topicCompletedReferences;
+
+	            if (topicTotalReferences > 0 &&
+	                topicCompletedReferences == topicTotalReferences) {
+	                completedTopics++;
+	            } else {
+	                isChapterCompleted = false;
+	            }
+	        }
+
+	        if (isChapterCompleted && !chapter.getTopics().isEmpty()) {
+	            completedChapters++;
+	        }
+	    }
+
+	    double percentage = (totalReferences == 0) ? 0.0
+	            : (completedReferences * 100.0) / totalReferences;
+
+	    CourseProgressSummaryResponse response = new CourseProgressSummaryResponse();
+
+	    response.setCourseId(course.getId());
+	    response.setCourseName(course.getCourseTitle());
+
+	    response.setTotalChapters(totalChapters);
+	    response.setCompletedChapters(completedChapters);
+
+	    response.setTotalTopics(totalTopics);
+	    response.setCompletedTopics(completedTopics);
+
+	    response.setTotalReferences(totalReferences);
+	    response.setCompletedReferences(completedReferences);
+
+	    response.setCoursePercentage(percentage);
+	    response.setCompleted(totalReferences > 0 &&
+	                          completedReferences == totalReferences);
+
+	    return response;
+	}
+
 }
 
 //    @Override
