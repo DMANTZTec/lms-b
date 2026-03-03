@@ -1,13 +1,9 @@
 package com.dmantz.lms_b.service.impl;
 
 import com.dmantz.lms_b.dto.request.ClassScheduleRequest;
-import com.dmantz.lms_b.dto.response.ChapterProgressResponse;
-import com.dmantz.lms_b.dto.response.ClassScheduleResponse;
-import com.dmantz.lms_b.dto.response.CourseProgressSummaryResponse;
-import com.dmantz.lms_b.dto.response.StudentMyCoursesResponse;
-import com.dmantz.lms_b.dto.response.TopicProgressResponse;
-import com.dmantz.lms_b.dto.response.WeeklyScheduleResponse;
+import com.dmantz.lms_b.dto.response.*;
 import com.dmantz.lms_b.entity.*;
+import com.dmantz.lms_b.mapper.ClassBatchMapper;
 import com.dmantz.lms_b.mapper.ClassScheduleMapper;
 import com.dmantz.lms_b.mapper.StudentCourseMapper;
 import com.dmantz.lms_b.repository.ClassBatchRepository;
@@ -43,11 +39,13 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 	private final CourseRepository courseRepository;
 	private final StudentTopicReferenceProgressRepository progressRepository;
 
+	private final ClassBatchMapper classBatchMapper;
+
 	public StudentDashboardServiceImpl(ClassScheduleRepository classScheduleRepository,
 			ClassScheduleMapper classScheduleMapper, ClassBatchRepository classBatchRepository,
 			StaffRepository staffRepository, StudentCourseRepository studentCourseRepository,
 			StudentCourseMapper studentCourseMapper, CourseRepository courseRepository,
-			StudentTopicReferenceProgressRepository progressRepository) {
+			StudentTopicReferenceProgressRepository progressRepository, ClassBatchMapper classBatchMapper) {
 		super();
 		this.classScheduleRepository = classScheduleRepository;
 		this.classScheduleMapper = classScheduleMapper;
@@ -57,6 +55,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 		this.studentCourseMapper = studentCourseMapper;
 		this.courseRepository = courseRepository;
 		this.progressRepository = progressRepository;
+		this.classBatchMapper = classBatchMapper;
 	}
 
 	@Override
@@ -270,6 +269,17 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 	                          completedReferences == totalReferences);
 
 	    return response;
+	}
+
+	@Override
+	public List<StudentClassResponse> getClassInfo(String studentId) {
+
+		List<ClassBatch> batches =
+				classBatchRepository.findByStudentId(Long.valueOf(studentId));
+
+		return batches.stream()
+				.map(classBatchMapper::toDto)
+				.toList();
 	}
 
 }
