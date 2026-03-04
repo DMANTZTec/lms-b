@@ -52,18 +52,13 @@ public class StudentDashboardController {
 
 		return ResponseEntity.ok(dashboardService.getChapterProgress(courseId, studentId));
 	}
-	
+
 	@GetMapping("/dashboard/course/{courseId}/progress")
-	public ResponseEntity<CourseProgressSummaryResponse> getCourseProgress(
-	        @PathVariable Long courseId,
-	        @RequestParam Long studentId) {
+	public ResponseEntity<CourseProgressSummaryResponse> getCourseProgress(@PathVariable Long courseId,
+			@RequestParam Long studentId) {
 
-	    return ResponseEntity.ok(
-	    		dashboardService.getCourseProgressSummary(courseId, studentId)
-	    );
+		return ResponseEntity.ok(dashboardService.getCourseProgressSummary(courseId, studentId));
 	}
-
-
 }
 
 //    @GetMapping("/{studentId}/dashboard")
