@@ -4,11 +4,17 @@ import com.dmantz.lms_b.dto.request.ClassScheduleRequest;
 import com.dmantz.lms_b.dto.response.ChapterProgressResponse;
 import com.dmantz.lms_b.dto.response.ClassScheduleResponse;
 import com.dmantz.lms_b.dto.response.CourseProgressSummaryResponse;
+import com.dmantz.lms_b.dto.response.MyCourseResponse;
+import com.dmantz.lms_b.dto.response.StudentCourseResponse;
 import com.dmantz.lms_b.dto.response.StudentMyCoursesResponse;
 import com.dmantz.lms_b.dto.response.TopicProgressResponse;
 import com.dmantz.lms_b.dto.response.WeeklyScheduleResponse;
+import com.dmantz.lms_b.dto.response.*;
 import com.dmantz.lms_b.entity.*;
+
 import com.dmantz.lms_b.exceptions.ResourceNotFoundException;
+
+import com.dmantz.lms_b.mapper.ClassBatchMapper;
 import com.dmantz.lms_b.mapper.ClassScheduleMapper;
 import com.dmantz.lms_b.mapper.StudentCourseMapper;
 import com.dmantz.lms_b.repository.ClassBatchRepository;
@@ -25,6 +31,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -44,11 +51,16 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 	private final CourseRepository courseRepository;
 	private final StudentTopicReferenceProgressRepository progressRepository;
 
+	private final ClassBatchMapper classBatchMapper;
+
+	
+
 	public StudentDashboardServiceImpl(ClassScheduleRepository classScheduleRepository,
 			ClassScheduleMapper classScheduleMapper, ClassBatchRepository classBatchRepository,
 			StaffRepository staffRepository, StudentCourseRepository studentCourseRepository,
 			StudentCourseMapper studentCourseMapper, StudentRepository studentRepository,
-			CourseRepository courseRepository, StudentTopicReferenceProgressRepository progressRepository) {
+			CourseRepository courseRepository, StudentTopicReferenceProgressRepository progressRepository,
+			ClassBatchMapper classBatchMapper) {
 		super();
 		this.classScheduleRepository = classScheduleRepository;
 		this.classScheduleMapper = classScheduleMapper;
@@ -59,6 +71,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 		this.studentRepository = studentRepository;
 		this.courseRepository = courseRepository;
 		this.progressRepository = progressRepository;
+		this.classBatchMapper = classBatchMapper;
 	}
 
 	@Override
@@ -86,85 +99,123 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 	@Override
 	public StudentMyCoursesResponse getMyCourses(String studentId, CourseStatus status) {
 
-		// fetch all for counts
-		List<StudentCourse> allCourses = studentCourseRepository.findByStudentStudentId(studentId);
+		List<StudentCourse> allCourses = studentCourseRepository.findByStudent_StudentId(studentId);
 
-		// fetch filtered list for tab
-		List<StudentCourse> filteredCourses = (status == null) ? allCourses
-				: studentCourseRepository.findByStudentStudentIdAndStatus(studentId, status);
+		List<MyCourseResponse> courseResponses = new ArrayList<>();
+
+		long planned = 0;
+		long ongoing = 0;
+		long completed = 0;
+
+		for (StudentCourse sc : allCourses) {
+
+			CourseProgressSummaryResponse progress = getCourseProgressSummary(sc.getCourse().getId(),
+					sc.getStudent().getId());
+
+			double percentage = progress.getCoursePercentage();
+
+			CourseStatus derivedStatus;
+
+			if (percentage == 0) {
+				derivedStatus = CourseStatus.PLANNED;
+				planned++;
+			} else if (percentage == 100) {
+				derivedStatus = CourseStatus.COMPLETED;
+				completed++;
+			} else {
+				derivedStatus = CourseStatus.ONGOING;
+				ongoing++;
+			}
+
+			MyCourseResponse dto = new MyCourseResponse();
+			dto.setCourseId(sc.getCourse().getCourseId());
+			dto.setCourseName(sc.getCourse().getCourseTitle());
+			dto.setStatus(derivedStatus.name());
+			dto.setProgress(percentage);
+			dto.setStartDate(sc.getStart_dt() != null ? sc.getStart_dt().toLocalDate() : null);
+
+			dto.setEndDate(sc.getCompletedDt() != null ? sc.getCompletedDt().toLocalDate() : null);
+			courseResponses.add(dto);
+		}
+
+		// Filter AFTER deriving status
+		if (status != null) {
+			courseResponses = courseResponses.stream().filter(c -> c.getStatus().equals(status.name())).toList();
+		}
 
 		StudentMyCoursesResponse response = new StudentMyCoursesResponse();
-
-		// counts
 		response.setTotalCourses(allCourses.size());
-		response.setOngoing(countByStatus(allCourses, CourseStatus.ONGOING));
-		response.setPlanned(countByStatus(allCourses, CourseStatus.PLANNED));
-		response.setCompleted(countByStatus(allCourses, CourseStatus.COMPLETED));
-
-		// course list
-		response.setCourses(filteredCourses.stream().map(studentCourseMapper::toDto).toList());
+		response.setPlanned(planned);
+		response.setOngoing(ongoing);
+		response.setCompleted(completed);
+		response.setCourses(courseResponses);
 
 		return response;
 	}
 
-	private long countByStatus(List<StudentCourse> list, CourseStatus status) {
-		return list.stream().filter(c -> c.getStatus() == status).count();
-	}
+
 
 	@Override
 	public List<TopicProgressResponse> getTopicProgress(Long courseId, Long studentId) {
 
-		// 1) Validate course first
-		Course course = courseRepository.findById(courseId)
-				.orElseThrow(() -> new RuntimeException("Course not found with id " + courseId));
+	    // 1. Validate course
+	    Course course = courseRepository.findById(courseId)
+	            .orElseThrow(() -> new ResourceNotFoundException("Course not found with id " + courseId));
 
-		// 2) Validate student
-		studentRepository.findById(studentId)
-				.orElseThrow(() -> new RuntimeException("Student not found with id " + studentId));
+	    // 2. Validate student
+	    studentRepository.findById(studentId)
+	            .orElseThrow(() -> new ResourceNotFoundException("Student not found with id " + studentId));
 
-		// 3) Validate that the student is enrolled in this course
-		boolean enrolled = studentCourseRepository.findByStudent_IdAndCourse_Id(studentId, courseId).isPresent();
+	    // 3. Check enrollment
+	    boolean enrolled = studentCourseRepository
+	            .findByStudent_IdAndCourse_Id(studentId, courseId)
+	            .isPresent();
 
-		if (!enrolled) {
-			throw new RuntimeException("Student " + studentId + " not enrolled in course with id " + courseId);
-		}
+	    if (!enrolled) {
+	        throw new ResourceNotFoundException(
+	                "Student " + studentId + " not enrolled in course " + courseId);
+	    }
 
-		// 4) Existing topic progress logic
-		List<TopicProgressResponse> response = new ArrayList<>();
+	    List<TopicProgressResponse> response = new ArrayList<>();
 
-		for (Chapter chapter : course.getChapters()) {
-			for (Topic topic : chapter.getTopics()) {
+	    for (Chapter chapter : course.getChapters()) {
 
-				List<TopicReference> references = topic.getReferences();
-				int totalReferences = (references == null) ? 0 : references.size();
+	        for (Topic topic : chapter.getTopics()) {
 
-				List<StudentTopicReferenceProgress> studentProgress = progressRepository
-						.findByStudent_IdAndTopicReference_Topic_Id(studentId, topic.getId());
+	            List<TopicReference> references = topic.getReferences();
+	            int totalReferences = (references == null) ? 0 : references.size();
 
-				Set<Long> completedReferenceIds = studentProgress.stream()
-						.filter(p -> Boolean.TRUE.equals(p.getCompleted())).map(p -> p.getTopicReference().getId())
-						.collect(java.util.stream.Collectors.toSet());
+	            List<StudentTopicReferenceProgress> studentProgress =
+	                    progressRepository.findByStudent_IdAndTopicReference_Topic_Id(studentId, topic.getId());
 
-				long completedCount = (references == null) ? 0
-						: references.stream().filter(ref -> completedReferenceIds.contains(ref.getId())).count();
+	            Set<Long> completedReferenceIds = studentProgress.stream()
+	                    .filter(p -> Boolean.TRUE.equals(p.getCompleted()))
+	                    .map(p -> p.getTopicReference().getId())
+	                    .collect(java.util.stream.Collectors.toSet());
 
-				double percentage = (totalReferences == 0) ? 0.0 : (completedCount * 100.0) / totalReferences;
+	            long completedCount = (references == null) ? 0 :
+	                    references.stream()
+	                            .filter(ref -> completedReferenceIds.contains(ref.getId()))
+	                            .count();
 
-				TopicProgressResponse dto = new TopicProgressResponse();
-				dto.setTopicId(topic.getId());
-				dto.setTopicName(topic.getTopicNm());
-				dto.setProgressPercentage(percentage);
-				dto.setCompletedTopicReference((int) completedCount);
-				dto.setTotalTopicReference(totalReferences);
-				dto.setCompleted(totalReferences > 0 && completedCount == totalReferences);
+	            double percentage = (totalReferences == 0)
+	                    ? 0.0
+	                    : (completedCount * 100.0) / totalReferences;
 
-				response.add(dto);
-			}
-		}
+	            TopicProgressResponse dto = new TopicProgressResponse();
+	            dto.setTopicId(topic.getId());
+	            dto.setTopicName(topic.getTopicNm());
+	            dto.setProgressPercentage(percentage);
+	            dto.setCompletedTopicReference((int) completedCount);
+	            dto.setTotalTopicReference(totalReferences);
+	            dto.setCompleted(totalReferences > 0 && completedCount == totalReferences);
 
-		return response;
+	            response.add(dto);
+	        }
+	    }
+
+	    return response;
 	}
-
 	@Override
 	public List<ChapterProgressResponse> getChapterProgress(Long courseId, Long studentId) {
 
@@ -222,17 +273,14 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 
 		int totalChapters = 0;
 		int completedChapters = 0;
-
 		int totalTopics = 0;
 		int completedTopics = 0;
-
 		int totalReferences = 0;
 		int completedReferences = 0;
 
 		for (Chapter chapter : course.getChapters()) {
 
 			totalChapters++;
-
 			boolean isChapterCompleted = true;
 
 			for (Topic topic : chapter.getTopics()) {
@@ -266,6 +314,19 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 
 		double percentage = (totalReferences == 0) ? 0.0 : (completedReferences * 100.0) / totalReferences;
 
+		StudentCourse sc = studentCourseRepository.findByStudent_IdAndCourse_Id(studentId, courseId)
+				.orElseThrow(() -> new RuntimeException("Enrollment not found"));
+
+		if (percentage > 0 && sc.getStart_dt() == null) {
+			sc.setStart_dt(LocalDateTime.now());
+		}
+
+		if (percentage == 100 && sc.getCompletedDt() == null) {
+			sc.setCompletedDt(LocalDateTime.now());
+		}
+
+		studentCourseRepository.save(sc);
+
 		CourseProgressSummaryResponse response = new CourseProgressSummaryResponse();
 
 		response.setCourseId(course.getId());
@@ -286,6 +347,15 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 		return response;
 	}
 
+	public List<StudentClassResponse> getClassInfo(String studentId) {
+
+		List<ClassBatch> batches =
+				classBatchRepository.findByStudentId(Long.valueOf(studentId));
+
+		return batches.stream()
+				.map(classBatchMapper::toDto)
+				.toList();
+	}
 }
 
 //    @Override

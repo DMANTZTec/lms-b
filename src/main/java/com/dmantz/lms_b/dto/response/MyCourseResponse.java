@@ -7,7 +7,7 @@ public class MyCourseResponse {
     private String courseId;
     private String courseName;
     private String status;
-    private Integer progress;
+    private double progress;
     private LocalDate startDate;
     private LocalDate endDate;
 
@@ -36,11 +36,11 @@ public class MyCourseResponse {
         this.status = status;
     }
 
-    public Integer getProgress() {
+    public double getProgress() {
         return progress;
     }
 
-    public void setProgress(Integer progress) {
+    public void setProgress(double progress) {
         this.progress = progress;
     }
 

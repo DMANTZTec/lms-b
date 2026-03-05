@@ -39,14 +39,7 @@ public class ClassAdminServiceImpl implements ClassAdminService {
     private final StudentCourseMapper studentCourseMapper;
 
 
-
-  
-
-	
-
-	
-
-	public ClassAdminServiceImpl(CourseRepository courseRepository, ClassBatchRepository classBatchRepository,
+    	public ClassAdminServiceImpl(CourseRepository courseRepository, ClassBatchRepository classBatchRepository,
 			ClassBatchMapper classBatchMapper, ClassScheduleMapper classScheduleMapper, StaffRepository staffRepository,
 			ClassScheduleRepository classScheduleRepository, StudentRepository studentRepository,
 			StudentCourseRepository studentCourseRepository, StudentCourseMapper studentCourseMapper) {
@@ -193,7 +186,7 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 	    dto.setEnabled(student.getEnabled());
 
 	   
-	    List<StudentCourse> studentCourses = studentCourseRepository.findByStudentStudentId(studentId);
+	    List<StudentCourse> studentCourses = studentCourseRepository.findByStudent_StudentId(studentId);
 	    List<MyCourseResponse> courseDtos = studentCourses.stream()
 	            .map(studentCourseMapper::toDto)
 	            .toList();

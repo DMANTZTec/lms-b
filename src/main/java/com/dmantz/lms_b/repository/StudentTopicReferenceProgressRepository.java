@@ -18,7 +18,5 @@ public interface StudentTopicReferenceProgressRepository  extends JpaRepository<
             Long referenceId
     );
     
-    
-    
   
 }

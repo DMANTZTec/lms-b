@@ -45,7 +45,6 @@ public class StudentTopicReferenceProgressServiceImpl implements StudentTopicRef
 
 		StudentTopicReferenceProgress progress = progressRepository
 				.findByStudent_IdAndTopicReference_Id(studentId, referenceId).orElseGet(() -> {
-
 					Student student = studentRepository.findById(studentId)
 							.orElseThrow(() -> new ResourceNotFoundException("Student not found with id "+studentId ));
 
