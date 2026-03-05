@@ -62,38 +62,31 @@ public interface CourseManagementService {
 
 //	delete a topic
 	void deleteTopic(Long id);
-	
-	
+
 //	move chapter
 	void moveChapter(Long chapterId, int targetPosition);
 
 //	move topic
 	void moveTopic(Long topicId, int targetPosition);
 
-	TopicReferenceResponseDto addUrlReference(
-			Long topicId,
-			TopicReferenceRequestDto dto);
+	TopicReferenceResponseDto addUrlReference(Long topicId, TopicReferenceRequestDto dto);
 
-	TopicReferenceResponseDto addVideoReference(
-			Long topicId,
-			TopicReferenceRequestDto dto);
+	TopicReferenceResponseDto addVideoReference(Long topicId, TopicReferenceRequestDto dto);
 
-	TopicReferenceResponseDto addDocumentReference(
-			Long topicId,
-			TopicReferenceRequestDto dto);
-	
-	 List<ProgramCourseResponse> addCoursesToProgram(ProgramCourseRequest request);
+	TopicReferenceResponseDto addDocumentReference(Long topicId, TopicReferenceRequestDto dto);
 
-	  void deleteProgramCourse(Long programCourseId);
+	List<ProgramCourseResponse> addCoursesToProgram(ProgramCourseRequest request);
 
-	  void deleteProgram(Long programId);
+	void deleteProgramCourse(Long programCourseId);
 
-	  ProgramResponse updateProgram(Long programId, ProgramRequest request);
+	void deleteProgram(Long programId);
 
-	  List<ProgramResponse> getAllPrograms();
+	ProgramResponse updateProgram(Long programId, ProgramRequest request);
 
-	  ProgramResponse getProgramById(Long id);
+	List<ProgramResponse> getAllPrograms();
 
-	  ProgramResponse createProgram(ProgramRequest request);
+	ProgramResponse getProgramById(Long id);
+
+	ProgramResponse createProgram(ProgramRequest request);
 
 }

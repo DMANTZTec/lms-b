@@ -39,14 +39,14 @@ public class StudentDashboardController {
 		return ResponseEntity.ok(dashboardService.getMyCourses(studentId, status));
 	}
 
-	@GetMapping("/courses/{courseId}/topicsprogress")
+	@GetMapping("/{courseId}/topics-progress")
 	public ResponseEntity<List<TopicProgressResponse>> getTopicProgress(@PathVariable Long courseId,
 			@RequestParam Long studentId) {
 
 		return ResponseEntity.ok(dashboardService.getTopicProgress(courseId, studentId));
 	}
 
-	@GetMapping("/courses/{courseId}/chaptersprogress")
+	@GetMapping("/{courseId}/chapters-progress")
 	public ResponseEntity<List<ChapterProgressResponse>> getChapterProgress(@PathVariable Long courseId,
 			@RequestParam Long studentId) {
 

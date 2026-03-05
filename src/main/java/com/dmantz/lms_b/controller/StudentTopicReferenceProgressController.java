@@ -20,7 +20,7 @@ public class StudentTopicReferenceProgressController {
 		this.studentTopicReferenceProgressService = studentTopicReferenceProgressService;
 	}
 
-	@PostMapping("/complete")
+	@PostMapping("/markascomplete")
 	public ResponseEntity<StudentTopicReferenceProgressResponse> markReferenceCompleted(
 			@RequestBody StudentTopicReferenceProgressRequest request) {
 

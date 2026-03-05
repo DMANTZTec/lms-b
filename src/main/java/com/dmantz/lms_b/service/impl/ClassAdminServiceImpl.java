@@ -3,17 +3,26 @@ package com.dmantz.lms_b.service.impl;
 import com.dmantz.lms_b.dto.request.ClassScheduleRequest;
 import com.dmantz.lms_b.dto.request.CreateClassRequest;
 import com.dmantz.lms_b.dto.request.UpdateClassRequest;
+import com.dmantz.lms_b.dto.response.ClassAdminStudentDetailsResponse;
 import com.dmantz.lms_b.dto.response.ClassResponse;
 import com.dmantz.lms_b.dto.response.ClassScheduleResponse;
+import com.dmantz.lms_b.dto.response.MyCourseResponse;
 import com.dmantz.lms_b.entity.*;
 import com.dmantz.lms_b.mapper.ClassBatchMapper;
 import com.dmantz.lms_b.mapper.ClassScheduleMapper;
+import com.dmantz.lms_b.mapper.StudentCourseMapper;
 import com.dmantz.lms_b.repository.ClassBatchRepository;
 import com.dmantz.lms_b.repository.ClassScheduleRepository;
 import com.dmantz.lms_b.repository.CourseRepository;
 import com.dmantz.lms_b.repository.StaffRepository;
+import com.dmantz.lms_b.repository.StudentCourseRepository;
+import com.dmantz.lms_b.repository.StudentRepository;
 import com.dmantz.lms_b.service.ClassAdminService;
 import jakarta.transaction.Transactional;
+
+import java.time.LocalDate;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -25,18 +34,35 @@ public class ClassAdminServiceImpl implements ClassAdminService {
     private final ClassScheduleMapper classScheduleMapper;
     private final StaffRepository staffRepository;
     private final ClassScheduleRepository classScheduleRepository;
-
-    public ClassAdminServiceImpl(CourseRepository courseRepository, ClassBatchRepository classBatchRepository, ClassBatchMapper classBatchMapper, ClassScheduleMapper classScheduleMapper, StaffRepository staffRepository, ClassScheduleRepository classScheduleRepository) {
-        this.courseRepository = courseRepository;
-        this.classBatchRepository = classBatchRepository;
-        this.classBatchMapper = classBatchMapper;
-        this.classScheduleMapper = classScheduleMapper;
-        this.staffRepository = staffRepository;
-        this.classScheduleRepository = classScheduleRepository;
-    }
+    private final StudentRepository studentRepository;
+    private final StudentCourseRepository studentCourseRepository;
+    private final StudentCourseMapper studentCourseMapper;
 
 
-    @Override
+
+  
+
+	
+
+	
+
+	public ClassAdminServiceImpl(CourseRepository courseRepository, ClassBatchRepository classBatchRepository,
+			ClassBatchMapper classBatchMapper, ClassScheduleMapper classScheduleMapper, StaffRepository staffRepository,
+			ClassScheduleRepository classScheduleRepository, StudentRepository studentRepository,
+			StudentCourseRepository studentCourseRepository, StudentCourseMapper studentCourseMapper) {
+		super();
+		this.courseRepository = courseRepository;
+		this.classBatchRepository = classBatchRepository;
+		this.classBatchMapper = classBatchMapper;
+		this.classScheduleMapper = classScheduleMapper;
+		this.staffRepository = staffRepository;
+		this.classScheduleRepository = classScheduleRepository;
+		this.studentRepository = studentRepository;
+		this.studentCourseRepository = studentCourseRepository;
+		this.studentCourseMapper = studentCourseMapper;
+	}
+
+	@Override
     public ClassResponse addClass(String courseId, CreateClassRequest request) {
 
         // Fetch course using business ID
@@ -150,6 +176,64 @@ public class ClassAdminServiceImpl implements ClassAdminService {
         return classScheduleMapper.toResponse(updated);
     }
 
+	@Override
+	public ClassAdminStudentDetailsResponse viewStudentDetails(String studentId) {
+		
+	    Student student = studentRepository.findByStudentId(studentId)
+	            .orElseThrow(() -> new RuntimeException("Student not found"));
+
+	    ClassAdminStudentDetailsResponse dto = new ClassAdminStudentDetailsResponse();
+	    dto.setId(student.getId());
+	    dto.setStudentId(student.getStudentId());
+	    dto.setFirstNm(student.getFirstNm());
+	    dto.setLastNm(student.getLastNm());
+	    dto.setEmailId(student.getEmailId());
+	    dto.setMobileNum(student.getMobileNum());
+	    dto.setStatus(student.getStatus());
+	    dto.setEnabled(student.getEnabled());
+
+	   
+	    List<StudentCourse> studentCourses = studentCourseRepository.findByStudentStudentId(studentId);
+	    List<MyCourseResponse> courseDtos = studentCourses.stream()
+	            .map(studentCourseMapper::toDto)
+	            .toList();
+	    dto.setCourses(courseDtos);
+
+	   
+	    List<ClassSchedule> allSchedules = classScheduleRepository.findAllSchedulesForStudent(studentId);
+	    List<ClassScheduleResponse> scheduleDtos = classScheduleMapper.toDtoList(allSchedules);
+
+	    dto.setSchedules(scheduleDtos);
+	    dto.setTotalSchedules(allSchedules.size());
+
+	    LocalDate today = LocalDate.now();
+
+	    long upcoming = allSchedules.stream()
+	            .filter(s -> s.getStatus() == ClassStatus.SCHEDULED
+	                    && !s.getClassDate().isBefore(today))
+	            .count();
+
+	    long completed = allSchedules.stream()
+	            .filter(s -> s.getStatus() == ClassStatus.COMPLETED)
+	            .count();
+
+	    dto.setUpcoming(upcoming);
+	    dto.setCompletedSchedules(completed);
+
+	    return dto;
+
+	}
+
+	
+	@Override
+	public List<ClassAdminStudentDetailsResponse> viewStudents() {
+
+	    List<Student> students = studentRepository.findAll();
+
+	    return students.stream()
+	            .map(s -> viewStudentDetails(s.getStudentId()))
+	            .toList();
+	}
 }
 
 

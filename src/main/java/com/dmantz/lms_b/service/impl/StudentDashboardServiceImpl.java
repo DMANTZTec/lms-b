@@ -8,6 +8,7 @@ import com.dmantz.lms_b.dto.response.StudentMyCoursesResponse;
 import com.dmantz.lms_b.dto.response.TopicProgressResponse;
 import com.dmantz.lms_b.dto.response.WeeklyScheduleResponse;
 import com.dmantz.lms_b.entity.*;
+import com.dmantz.lms_b.exceptions.ResourceNotFoundException;
 import com.dmantz.lms_b.mapper.ClassScheduleMapper;
 import com.dmantz.lms_b.mapper.StudentCourseMapper;
 import com.dmantz.lms_b.repository.ClassBatchRepository;
@@ -39,15 +40,15 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 	private final StaffRepository staffRepository;
 	private final StudentCourseRepository studentCourseRepository;
 	private final StudentCourseMapper studentCourseMapper;
-
+	private final StudentRepository studentRepository;
 	private final CourseRepository courseRepository;
 	private final StudentTopicReferenceProgressRepository progressRepository;
 
 	public StudentDashboardServiceImpl(ClassScheduleRepository classScheduleRepository,
 			ClassScheduleMapper classScheduleMapper, ClassBatchRepository classBatchRepository,
 			StaffRepository staffRepository, StudentCourseRepository studentCourseRepository,
-			StudentCourseMapper studentCourseMapper, CourseRepository courseRepository,
-			StudentTopicReferenceProgressRepository progressRepository) {
+			StudentCourseMapper studentCourseMapper, StudentRepository studentRepository,
+			CourseRepository courseRepository, StudentTopicReferenceProgressRepository progressRepository) {
 		super();
 		this.classScheduleRepository = classScheduleRepository;
 		this.classScheduleMapper = classScheduleMapper;
@@ -55,6 +56,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 		this.staffRepository = staffRepository;
 		this.studentCourseRepository = studentCourseRepository;
 		this.studentCourseMapper = studentCourseMapper;
+		this.studentRepository = studentRepository;
 		this.courseRepository = courseRepository;
 		this.progressRepository = progressRepository;
 	}
@@ -112,8 +114,22 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 	@Override
 	public List<TopicProgressResponse> getTopicProgress(Long courseId, Long studentId) {
 
-		Course course = courseRepository.findById(courseId).orElseThrow(() -> new RuntimeException("Course not found"));
+		// 1) Validate course first
+		Course course = courseRepository.findById(courseId)
+				.orElseThrow(() -> new RuntimeException("Course not found with id " + courseId));
 
+		// 2) Validate student
+		studentRepository.findById(studentId)
+				.orElseThrow(() -> new RuntimeException("Student not found with id " + studentId));
+
+		// 3) Validate that the student is enrolled in this course
+		boolean enrolled = studentCourseRepository.findByStudent_IdAndCourse_Id(studentId, courseId).isPresent();
+
+		if (!enrolled) {
+			throw new RuntimeException("Student " + studentId + " not enrolled in course with id " + courseId);
+		}
+
+		// 4) Existing topic progress logic
 		List<TopicProgressResponse> response = new ArrayList<>();
 
 		for (Chapter chapter : course.getChapters()) {
@@ -122,7 +138,6 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 				List<TopicReference> references = topic.getReferences();
 				int totalReferences = (references == null) ? 0 : references.size();
 
-				// all progress rows for this student on this topic
 				List<StudentTopicReferenceProgress> studentProgress = progressRepository
 						.findByStudent_IdAndTopicReference_Topic_Id(studentId, topic.getId());
 
@@ -153,13 +168,16 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 	@Override
 	public List<ChapterProgressResponse> getChapterProgress(Long courseId, Long studentId) {
 
-		Course course = courseRepository.findById(courseId).orElseThrow(() -> new RuntimeException("Course not found"));
+		// 1️ Validate course
+		Course course = courseRepository.findById(courseId)
+				.orElseThrow(() -> new ResourceNotFoundException("Course not found with id " + courseId));
 
-		// Get all topic progress
+		// 2️ Get topic progress
 		List<TopicProgressResponse> topicProgressList = getTopicProgress(courseId, studentId);
 
 		List<ChapterProgressResponse> response = new ArrayList<>();
 
+		// 3️ Chapter level calculation
 		for (Chapter chapter : course.getChapters()) {
 
 			List<Topic> topics = chapter.getTopics();
@@ -168,12 +186,14 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 			int completedTopics = 0;
 
 			if (topics != null) {
+
 				for (Topic topic : topics) {
 
 					TopicProgressResponse topicProgress = topicProgressList.stream()
 							.filter(t -> t.getTopicId().equals(topic.getId())).findFirst().orElse(null);
 
 					if (topicProgress != null && Boolean.TRUE.equals(topicProgress.getCompleted())) {
+
 						completedTopics++;
 					}
 				}
@@ -194,82 +214,76 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 
 		return response;
 	}
-	
+
 	@Override
 	public CourseProgressSummaryResponse getCourseProgressSummary(Long courseId, Long studentId) {
 
-	    Course course = courseRepository.findById(courseId)
-	            .orElseThrow(() -> new RuntimeException("Course not found"));
+		Course course = courseRepository.findById(courseId).orElseThrow(() -> new RuntimeException("Course not found"));
 
-	    int totalChapters = 0;
-	    int completedChapters = 0;
+		int totalChapters = 0;
+		int completedChapters = 0;
 
-	    int totalTopics = 0;
-	    int completedTopics = 0;
+		int totalTopics = 0;
+		int completedTopics = 0;
 
-	    int totalReferences = 0;
-	    int completedReferences = 0;
+		int totalReferences = 0;
+		int completedReferences = 0;
 
-	    for (Chapter chapter : course.getChapters()) {
+		for (Chapter chapter : course.getChapters()) {
 
-	        totalChapters++;
+			totalChapters++;
 
-	        boolean isChapterCompleted = true;
+			boolean isChapterCompleted = true;
 
-	        for (Topic topic : chapter.getTopics()) {
+			for (Topic topic : chapter.getTopics()) {
 
-	            totalTopics++;
+				totalTopics++;
 
-	            List<TopicReference> references = topic.getReferences();
-	            int topicTotalReferences = (references == null) ? 0 : references.size();
+				List<TopicReference> references = topic.getReferences();
+				int topicTotalReferences = (references == null) ? 0 : references.size();
 
-	            totalReferences += topicTotalReferences;
+				totalReferences += topicTotalReferences;
 
-	            List<StudentTopicReferenceProgress> progressList =
-	                    progressRepository.findByStudent_IdAndTopicReference_Topic_Id(
-	                            studentId, topic.getId());
+				List<StudentTopicReferenceProgress> progressList = progressRepository
+						.findByStudent_IdAndTopicReference_Topic_Id(studentId, topic.getId());
 
-	            long topicCompletedReferences = progressList.stream()
-	                    .filter(p -> Boolean.TRUE.equals(p.getCompleted()))
-	                    .count();
+				long topicCompletedReferences = progressList.stream().filter(p -> Boolean.TRUE.equals(p.getCompleted()))
+						.count();
 
-	            completedReferences += topicCompletedReferences;
+				completedReferences += topicCompletedReferences;
 
-	            if (topicTotalReferences > 0 &&
-	                topicCompletedReferences == topicTotalReferences) {
-	                completedTopics++;
-	            } else {
-	                isChapterCompleted = false;
-	            }
-	        }
+				if (topicTotalReferences > 0 && topicCompletedReferences == topicTotalReferences) {
+					completedTopics++;
+				} else {
+					isChapterCompleted = false;
+				}
+			}
 
-	        if (isChapterCompleted && !chapter.getTopics().isEmpty()) {
-	            completedChapters++;
-	        }
-	    }
+			if (isChapterCompleted && !chapter.getTopics().isEmpty()) {
+				completedChapters++;
+			}
+		}
 
-	    double percentage = (totalReferences == 0) ? 0.0
-	            : (completedReferences * 100.0) / totalReferences;
+		double percentage = (totalReferences == 0) ? 0.0 : (completedReferences * 100.0) / totalReferences;
 
-	    CourseProgressSummaryResponse response = new CourseProgressSummaryResponse();
+		CourseProgressSummaryResponse response = new CourseProgressSummaryResponse();
 
-	    response.setCourseId(course.getId());
-	    response.setCourseName(course.getCourseTitle());
+		response.setCourseId(course.getId());
+		response.setCourseName(course.getCourseTitle());
 
-	    response.setTotalChapters(totalChapters);
-	    response.setCompletedChapters(completedChapters);
+		response.setTotalChapters(totalChapters);
+		response.setCompletedChapters(completedChapters);
 
-	    response.setTotalTopics(totalTopics);
-	    response.setCompletedTopics(completedTopics);
+		response.setTotalTopics(totalTopics);
+		response.setCompletedTopics(completedTopics);
 
-	    response.setTotalReferences(totalReferences);
-	    response.setCompletedReferences(completedReferences);
+		response.setTotalReferences(totalReferences);
+		response.setCompletedReferences(completedReferences);
 
-	    response.setCoursePercentage(percentage);
-	    response.setCompleted(totalReferences > 0 &&
-	                          completedReferences == totalReferences);
+		response.setCoursePercentage(percentage);
+		response.setCompleted(totalReferences > 0 && completedReferences == totalReferences);
 
-	    return response;
+		return response;
 	}
 
 }

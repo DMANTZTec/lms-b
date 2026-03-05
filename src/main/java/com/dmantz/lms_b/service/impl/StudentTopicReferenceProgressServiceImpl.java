@@ -47,10 +47,10 @@ public class StudentTopicReferenceProgressServiceImpl implements StudentTopicRef
 				.findByStudent_IdAndTopicReference_Id(studentId, referenceId).orElseGet(() -> {
 
 					Student student = studentRepository.findById(studentId)
-							.orElseThrow(() -> new RuntimeException("Student not found"));
+							.orElseThrow(() -> new ResourceNotFoundException("Student not found with id "+studentId ));
 
 					TopicReference reference = topicReferenceRepository.findById(referenceId)
-							.orElseThrow(() -> new RuntimeException("Reference not found"));
+							.orElseThrow(() -> new ResourceNotFoundException("Reference not found with id + "+referenceId));
 
 					StudentTopicReferenceProgress newProgress = new StudentTopicReferenceProgress();
 
@@ -61,13 +61,13 @@ public class StudentTopicReferenceProgressServiceImpl implements StudentTopicRef
 					return newProgress;
 				});
 
-		// Idempotent behavior
+
 		if (Boolean.TRUE.equals(progress.getCompleted())) {
 			return studentTopicReferenceProgressmapper.toResponse(progress);
 		}
 
 		progress.setCompleted(true);
-		progress.setCompletedAt(java.time.LocalDateTime.now());
+		progress.setCompletedAt(LocalDateTime.now());
 
 		StudentTopicReferenceProgress saved = progressRepository.save(progress);
 

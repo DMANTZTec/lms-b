@@ -3,11 +3,15 @@ package com.dmantz.lms_b.controller;
 import com.dmantz.lms_b.dto.request.ClassScheduleRequest;
 import com.dmantz.lms_b.dto.request.CreateClassRequest;
 import com.dmantz.lms_b.dto.request.UpdateClassRequest;
+import com.dmantz.lms_b.dto.response.ClassAdminStudentDetailsResponse;
 import com.dmantz.lms_b.dto.response.ClassResponse;
 import com.dmantz.lms_b.dto.response.ClassScheduleResponse;
 import com.dmantz.lms_b.service.ClassAdminService;
 import com.dmantz.lms_b.service.StudentDashboardService;
 import jakarta.validation.Valid;
+
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -72,6 +76,19 @@ public class ClassAdminController {
         return ResponseEntity.ok(
                 classAdminService.cancelSchedule(scheduleId)
         );
+    }
+    
+    
+    @GetMapping("/student-details/{studentId}")
+    public ResponseEntity<ClassAdminStudentDetailsResponse> getStudentDetails(
+            @PathVariable String studentId) {
+        return ResponseEntity.ok(classAdminService.viewStudentDetails(studentId));
+    }
+    
+    
+    @GetMapping("/view-students")
+    public ResponseEntity<List<ClassAdminStudentDetailsResponse>> viewStudents() {
+        return ResponseEntity.ok(classAdminService.viewStudents());
     }
 
 }

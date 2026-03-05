@@ -29,4 +29,17 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
             @Param("start") LocalDate start,
             @Param("end") LocalDate end,
             @Param("status") ClassStatus status);
+    
+    
+    
+    @Query("""
+    	       select cs
+    	       from ClassSchedule cs
+    	       join cs.classBatch cb
+    	       join cb.course c
+    	       join StudentCourse sc on sc.course.id = c.id
+    	       join sc.student s
+    	       where s.studentId = :studentId
+    	       """)
+    	List<ClassSchedule> findAllSchedulesForStudent(@Param("studentId") String studentId);
 }
