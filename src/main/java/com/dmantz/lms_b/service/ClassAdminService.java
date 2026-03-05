@@ -1,5 +1,6 @@
 package com.dmantz.lms_b.service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import com.dmantz.lms_b.dto.request.ClassScheduleRequest;
@@ -27,4 +28,9 @@ public interface ClassAdminService {
    ClassAdminStudentDetailsResponse viewStudentDetails(String studentId);
    
    List<ClassAdminStudentDetailsResponse> viewStudents();
+
+   List<ClassScheduleResponse> getSchedulesByStaffId(String staffId);
+
+   List<ClassScheduleResponse> getStaffDailySchedule(String staffId, LocalDate date);
+
 }

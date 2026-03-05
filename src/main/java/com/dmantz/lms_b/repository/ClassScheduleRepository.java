@@ -42,4 +42,10 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
     	       where s.studentId = :studentId
     	       """)
     	List<ClassSchedule> findAllSchedulesForStudent(@Param("studentId") String studentId);
+
+
+    List<ClassSchedule> findByStaff_StaffId(String staffId);
+
+    List<ClassSchedule> findByStaffStaffIdAndClassDate(String staffId, LocalDate classDate);
+
 }

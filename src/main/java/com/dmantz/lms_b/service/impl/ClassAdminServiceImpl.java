@@ -227,6 +227,26 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 	            .map(s -> viewStudentDetails(s.getStudentId()))
 	            .toList();
 	}
+
+    @Override
+    public List<ClassScheduleResponse> getSchedulesByStaffId(String staffId) {
+
+        List<ClassSchedule> schedules = classScheduleRepository.findByStaff_StaffId(staffId);
+
+        return classScheduleMapper.toDtoList(schedules);
+    }
+
+    @Override
+    public List<ClassScheduleResponse> getStaffDailySchedule(String staffId, LocalDate date) {
+
+        List<ClassSchedule> schedules =
+                classScheduleRepository.findByStaffStaffIdAndClassDate(staffId, date);
+
+        return schedules.stream()
+                .map(classScheduleMapper::toResponse)
+                .toList();
+    }
+
 }
 
 

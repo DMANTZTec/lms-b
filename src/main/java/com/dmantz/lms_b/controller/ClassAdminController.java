@@ -10,6 +10,7 @@ import com.dmantz.lms_b.service.ClassAdminService;
 import com.dmantz.lms_b.service.StudentDashboardService;
 import jakarta.validation.Valid;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -90,5 +91,22 @@ public class ClassAdminController {
     public ResponseEntity<List<ClassAdminStudentDetailsResponse>> viewStudents() {
         return ResponseEntity.ok(classAdminService.viewStudents());
     }
+
+    @GetMapping("/schedules/staff/{staffId}")
+    public ResponseEntity<List<ClassScheduleResponse>> getSchedulesByStaff(@PathVariable String staffId) {
+
+        List<ClassScheduleResponse> schedules = classAdminService.getSchedulesByStaffId(staffId);
+
+        return ResponseEntity.ok(schedules);
+    }
+
+    @GetMapping("/staff/{staffId}/dailySchedules")
+    public List<ClassScheduleResponse> getStaffDailySchedule(
+            @PathVariable String staffId,
+            @RequestParam LocalDate date) {
+
+        return classAdminService.getStaffDailySchedule(staffId, date);
+    }
+
 
 }
