@@ -24,6 +24,6 @@ public class StudentTopicReferenceProgressController {
 	public ResponseEntity<StudentTopicReferenceProgressResponse> markReferenceCompleted(
 			@RequestBody StudentTopicReferenceProgressRequest request) {
 
-		return ResponseEntity.ok(studentTopicReferenceProgressService.markReferenceCompleted(request));
+		return ResponseEntity.ok(studentTopicReferenceProgressService.markReferenceComplete(request));
 	}
 }

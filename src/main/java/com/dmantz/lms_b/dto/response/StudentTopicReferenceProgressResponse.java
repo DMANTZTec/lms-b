@@ -8,7 +8,7 @@ import com.dmantz.lms_b.entity.TopicReference;
 public class StudentTopicReferenceProgressResponse {
 
     private Long id;
-    private Long studentId;
+    private String studentId;
     private Long referenceId;
     private Boolean completed;
     private LocalDateTime completedAt;
@@ -19,10 +19,10 @@ public class StudentTopicReferenceProgressResponse {
 		this.id = id;
 	}
 
-	public Long getStudentId() {
+	public String getStudentId() {
 		return studentId;
 	}
-	public void setStudentId(Long studentId) {
+	public void setStudentId(String studentId) {
 		this.studentId = studentId;
 	}
 	public Long getReferenceId() {
@@ -43,7 +43,5 @@ public class StudentTopicReferenceProgressResponse {
 	public void setCompletedAt(LocalDateTime completedAt) {
 		this.completedAt = completedAt;
 	}
-	
-	
 	
 }

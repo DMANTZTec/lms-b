@@ -4,7 +4,7 @@ import com.dmantz.lms_b.entity.CourseStatus;
 
 public class CourseProgressSummaryResponse {
 
-	private Long courseId;
+	private String courseId;
 	private String courseName;
 
 	private int totalChapters;
@@ -19,11 +19,11 @@ public class CourseProgressSummaryResponse {
 	private double coursePercentage;
 	private boolean completed;
 	
-	public Long getCourseId() {
+	public String getCourseId() {
 		return courseId;
 	}
 
-	public void setCourseId(Long courseId) {
+	public void setCourseId(String courseId) {
 		this.courseId = courseId;
 	}
 

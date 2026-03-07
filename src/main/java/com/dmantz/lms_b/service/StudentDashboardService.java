@@ -11,12 +11,13 @@ public interface StudentDashboardService {
 
 	StudentMyCoursesResponse getMyCourses(String studentId, CourseStatus status);
 
-	List<TopicProgressResponse> getTopicProgress(Long courseId, Long studentId);
+	List<TopicProgressResponse> getTopicProgress(String courseId, String studentId); // ← String
 
-	List<ChapterProgressResponse> getChapterProgress(Long courseId, Long studentId);
+	List<ChapterProgressResponse> getChapterProgress(String courseId, String studentId); // ← String
 
-	CourseProgressSummaryResponse getCourseProgressSummary(Long courseId, Long studentId);
+	CourseProgressSummaryResponse getCourseProgressSummary(String courseId, String studentId); // ← String
 
 	List<StudentClassResponse> getClassInfo(String studentId);
 
+	StudentDashboardSummaryResponse getDashboardSummary(String studentId);
 }

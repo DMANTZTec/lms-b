@@ -14,6 +14,7 @@ import com.dmantz.lms_b.service.StudentTopicReferenceProgressService;
 import jakarta.transaction.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -21,12 +22,11 @@ import org.springframework.stereotype.Service;
 @Service
 @Transactional
 public class StudentTopicReferenceProgressServiceImpl implements StudentTopicReferenceProgressService {
-
 	private final StudentTopicReferenceProgressRepository progressRepository;
 	private final TopicReferenceRepository topicReferenceRepository;
 	private final StudentRepository studentRepository;
 	private final StudentTopicReferenceProgressMapper studentTopicReferenceProgressmapper;
-
+ 
 	public StudentTopicReferenceProgressServiceImpl(StudentTopicReferenceProgressRepository progressRepository,
 			TopicReferenceRepository topicReferenceRepository, StudentRepository studentRepository,
 			StudentTopicReferenceProgressMapper studentTopicReferenceProgressmapper) {
@@ -38,39 +38,26 @@ public class StudentTopicReferenceProgressServiceImpl implements StudentTopicRef
 	}
 
 	@Override
-	public StudentTopicReferenceProgressResponse markReferenceCompleted(StudentTopicReferenceProgressRequest request) {
+	public StudentTopicReferenceProgressResponse markReferenceComplete(StudentTopicReferenceProgressRequest request) {
 
-		Long studentId = request.getStudentId();
-		Long referenceId = request.getReferenceId();
+		Student student = studentRepository.findByStudentId(request.getStudentId())
+				.orElseThrow(() -> new RuntimeException("Student not found: " + request.getStudentId()));
 
-		StudentTopicReferenceProgress progress = progressRepository
-				.findByStudent_IdAndTopicReference_Id(studentId, referenceId).orElseGet(() -> {
-					Student student = studentRepository.findById(studentId)
-							.orElseThrow(() -> new ResourceNotFoundException("Student not found with id "+studentId ));
+		TopicReference topicReference = topicReferenceRepository.findById(request.getReferenceId())
+				.orElseThrow(() -> new RuntimeException("Reference not found: " + request.getReferenceId()));
 
-					TopicReference reference = topicReferenceRepository.findById(referenceId)
-							.orElseThrow(() -> new ResourceNotFoundException("Reference not found with id + "+referenceId));
+		Optional<StudentTopicReferenceProgress> existing = progressRepository.findByStudent_IdAndTopicReference_Id(
+				student.getId(), // ← Long internal id
+				topicReference.getId() // ← Long internal id
+		);
 
-					StudentTopicReferenceProgress newProgress = new StudentTopicReferenceProgress();
-
-					newProgress.setStudent(student);
-					newProgress.setTopicReference(reference);
-					newProgress.setCompleted(false);
-
-					return newProgress;
-				});
-
-
-		if (Boolean.TRUE.equals(progress.getCompleted())) {
-			return studentTopicReferenceProgressmapper.toResponse(progress);
-		}
-
+		StudentTopicReferenceProgress progress = existing.orElseGet(StudentTopicReferenceProgress::new);
+		progress.setStudent(student);
+		progress.setTopicReference(topicReference);
 		progress.setCompleted(true);
 		progress.setCompletedAt(LocalDateTime.now());
 
 		StudentTopicReferenceProgress saved = progressRepository.save(progress);
-
-		return studentTopicReferenceProgressmapper.toResponse(saved);
+		return studentTopicReferenceProgressmapper.toResponse(saved); // response will have String studentId
 	}
-
 }

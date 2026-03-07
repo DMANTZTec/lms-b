@@ -5,6 +5,5 @@ import com.dmantz.lms_b.dto.response.StudentTopicReferenceProgressResponse;
 
 public interface StudentTopicReferenceProgressService {
 
-    StudentTopicReferenceProgressResponse markReferenceCompleted(
-            StudentTopicReferenceProgressRequest request);
+	StudentTopicReferenceProgressResponse markReferenceComplete(StudentTopicReferenceProgressRequest request);
 }

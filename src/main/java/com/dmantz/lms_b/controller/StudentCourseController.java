@@ -2,7 +2,6 @@ package com.dmantz.lms_b.controller;
 
 import com.dmantz.lms_b.dto.request.StudentCourseEnrollRequest;
 import com.dmantz.lms_b.dto.response.StudentCourseResponse;
-import com.dmantz.lms_b.dto.response.StudentDashboardResponse;
 import com.dmantz.lms_b.service.StudentCourseService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

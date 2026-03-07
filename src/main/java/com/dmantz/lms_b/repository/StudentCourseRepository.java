@@ -11,13 +11,10 @@ import java.util.Optional;
 @Repository
 public interface StudentCourseRepository extends JpaRepository<StudentCourse, Long> {
 
-	Optional<StudentCourse>
-	findByStudent_IdAndCourse_Id(Long studentId, Long courseId);
-	
-	    List<StudentCourse> findByStudent_StudentId(String studentId);
-    
-	    List<StudentCourse> findByStudentStudentIdAndStatus(
-	            String studentId,
-	            CourseStatus status);
+	Optional<StudentCourse> findByStudent_IdAndCourse_Id(Long studentId, Long courseId);
+
+	List<StudentCourse> findByStudent_StudentId(String studentId);
+
+	List<StudentCourse> findByStudentStudentIdAndStatus(String studentId, CourseStatus status);
 
 }

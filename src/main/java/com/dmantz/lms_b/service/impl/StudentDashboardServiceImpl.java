@@ -1,14 +1,6 @@
 package com.dmantz.lms_b.service.impl;
 
 import com.dmantz.lms_b.dto.request.ClassScheduleRequest;
-import com.dmantz.lms_b.dto.response.ChapterProgressResponse;
-import com.dmantz.lms_b.dto.response.ClassScheduleResponse;
-import com.dmantz.lms_b.dto.response.CourseProgressSummaryResponse;
-import com.dmantz.lms_b.dto.response.MyCourseResponse;
-import com.dmantz.lms_b.dto.response.StudentCourseResponse;
-import com.dmantz.lms_b.dto.response.StudentMyCoursesResponse;
-import com.dmantz.lms_b.dto.response.TopicProgressResponse;
-import com.dmantz.lms_b.dto.response.WeeklyScheduleResponse;
 import com.dmantz.lms_b.dto.response.*;
 import com.dmantz.lms_b.entity.*;
 
@@ -52,8 +44,6 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 	private final StudentTopicReferenceProgressRepository progressRepository;
 
 	private final ClassBatchMapper classBatchMapper;
-
-	
 
 	public StudentDashboardServiceImpl(ClassScheduleRepository classScheduleRepository,
 			ClassScheduleMapper classScheduleMapper, ClassBatchRepository classBatchRepository,
@@ -109,8 +99,8 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 
 		for (StudentCourse sc : allCourses) {
 
-			CourseProgressSummaryResponse progress = getCourseProgressSummary(sc.getCourse().getId(),
-					sc.getStudent().getId());
+			CourseProgressSummaryResponse progress = getCourseProgressSummary(sc.getCourse().getCourseId(),
+					sc.getStudent().getStudentId());
 
 			double percentage = progress.getCoursePercentage();
 
@@ -153,98 +143,91 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 		return response;
 	}
 
-
-
 	@Override
-	public List<TopicProgressResponse> getTopicProgress(Long courseId, Long studentId) {
+	public List<TopicProgressResponse> getTopicProgress(String courseId, String studentId) {
 
-	    // 1. Validate course
-	    Course course = courseRepository.findById(courseId)
-	            .orElseThrow(() -> new ResourceNotFoundException("Course not found with id " + courseId));
+		// Bridge: String → entity → internal Long
+		Course course = courseRepository.findByCourseId(courseId)
+				.orElseThrow(() -> new ResourceNotFoundException("Course not found: " + courseId));
 
-	    // 2. Validate student
-	    studentRepository.findById(studentId)
-	            .orElseThrow(() -> new ResourceNotFoundException("Student not found with id " + studentId));
+		Student student = studentRepository.findByStudentId(studentId)
+				.orElseThrow(() -> new ResourceNotFoundException("Student not found: " + studentId));
 
-	    // 3. Check enrollment
-	    boolean enrolled = studentCourseRepository
-	            .findByStudent_IdAndCourse_Id(studentId, courseId)
-	            .isPresent();
+		Long internalStudentId = student.getId(); // ← Long for all DB calls
+		Long internalCourseId = course.getId(); // ← Long for all DB calls
 
-	    if (!enrolled) {
-	        throw new ResourceNotFoundException(
-	                "Student " + studentId + " not enrolled in course " + courseId);
-	    }
+		boolean enrolled = studentCourseRepository.findByStudent_IdAndCourse_Id(internalStudentId, internalCourseId)
+				.isPresent();
 
-	    List<TopicProgressResponse> response = new ArrayList<>();
+		if (!enrolled) {
+			throw new ResourceNotFoundException("Student " + studentId + " not enrolled in course " + courseId);
+		}
 
-	    for (Chapter chapter : course.getChapters()) {
+		List<TopicProgressResponse> response = new ArrayList<>();
 
-	        for (Topic topic : chapter.getTopics()) {
+		for (Chapter chapter : course.getChapters()) {
+			for (Topic topic : chapter.getTopics()) {
 
-	            List<TopicReference> references = topic.getReferences();
-	            int totalReferences = (references == null) ? 0 : references.size();
+				List<TopicReference> references = topic.getReferences();
+				int totalReferences = (references == null) ? 0 : references.size();
 
-	            List<StudentTopicReferenceProgress> studentProgress =
-	                    progressRepository.findByStudent_IdAndTopicReference_Topic_Id(studentId, topic.getId());
+				List<StudentTopicReferenceProgress> studentProgress = progressRepository
+						.findByStudent_IdAndTopicReference_Topic_Id(internalStudentId, topic.getId()); // ← Long
 
-	            Set<Long> completedReferenceIds = studentProgress.stream()
-	                    .filter(p -> Boolean.TRUE.equals(p.getCompleted()))
-	                    .map(p -> p.getTopicReference().getId())
-	                    .collect(java.util.stream.Collectors.toSet());
+				Set<Long> completedReferenceIds = studentProgress.stream()
+						.filter(p -> Boolean.TRUE.equals(p.getCompleted())).map(p -> p.getTopicReference().getId())
+						.collect(Collectors.toSet());
 
-	            long completedCount = (references == null) ? 0 :
-	                    references.stream()
-	                            .filter(ref -> completedReferenceIds.contains(ref.getId()))
-	                            .count();
+				long completedCount = (references == null) ? 0
+						: references.stream().filter(ref -> completedReferenceIds.contains(ref.getId())).count();
 
-	            double percentage = (totalReferences == 0)
-	                    ? 0.0
-	                    : (completedCount * 100.0) / totalReferences;
+				double percentage = (totalReferences == 0) ? 0.0 : (completedCount * 100.0) / totalReferences;
 
-	            TopicProgressResponse dto = new TopicProgressResponse();
-	            dto.setTopicId(topic.getId());
-	            dto.setTopicName(topic.getTopicNm());
-	            dto.setProgressPercentage(percentage);
-	            dto.setCompletedTopicReference((int) completedCount);
-	            dto.setTotalTopicReference(totalReferences);
-	            dto.setCompleted(totalReferences > 0 && completedCount == totalReferences);
+				TopicProgressResponse dto = new TopicProgressResponse();
+				dto.setTopicId(topic.getId());
+				dto.setTopicName(topic.getTopicNm());
+				dto.setProgressPercentage(percentage);
+				dto.setCompletedTopicReference((int) completedCount);
+				dto.setTotalTopicReference(totalReferences);
+				dto.setCompleted(totalReferences > 0 && completedCount == totalReferences);
 
-	            response.add(dto);
-	        }
-	    }
+				response.add(dto);
+			}
+		}
 
-	    return response;
+		return response;
 	}
+
 	@Override
-	public List<ChapterProgressResponse> getChapterProgress(Long courseId, Long studentId) {
+	public List<ChapterProgressResponse> getChapterProgress(String courseId, String studentId) {
 
-		// 1️ Validate course
-		Course course = courseRepository.findById(courseId)
-				.orElseThrow(() -> new ResourceNotFoundException("Course not found with id " + courseId));
+		// Bridge: String → entity → internal Long
+		Course course = courseRepository.findByCourseId(courseId)
+				.orElseThrow(() -> new ResourceNotFoundException("Course not found: " + courseId));
 
-		// 2️ Get topic progress
+		Student student = studentRepository.findByStudentId(studentId)
+				.orElseThrow(() -> new ResourceNotFoundException("Student not found: " + studentId));
+
+		Long internalStudentId = student.getId();
+		Long internalCourseId = course.getId();
+
+		// Reuse getTopicProgress — pass String ids (already bridged inside)
 		List<TopicProgressResponse> topicProgressList = getTopicProgress(courseId, studentId);
 
 		List<ChapterProgressResponse> response = new ArrayList<>();
 
-		// 3️ Chapter level calculation
 		for (Chapter chapter : course.getChapters()) {
 
 			List<Topic> topics = chapter.getTopics();
 			int totalTopics = (topics == null) ? 0 : topics.size();
-
 			int completedTopics = 0;
 
 			if (topics != null) {
-
 				for (Topic topic : topics) {
-
 					TopicProgressResponse topicProgress = topicProgressList.stream()
 							.filter(t -> t.getTopicId().equals(topic.getId())).findFirst().orElse(null);
 
 					if (topicProgress != null && Boolean.TRUE.equals(topicProgress.getCompleted())) {
-
 						completedTopics++;
 					}
 				}
@@ -267,16 +250,21 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 	}
 
 	@Override
-	public CourseProgressSummaryResponse getCourseProgressSummary(Long courseId, Long studentId) {
+	public CourseProgressSummaryResponse getCourseProgressSummary(String courseId, String studentId) {
 
-		Course course = courseRepository.findById(courseId).orElseThrow(() -> new RuntimeException("Course not found"));
+		// Bridge: String → entity → internal Long
+		Course course = courseRepository.findByCourseId(courseId)
+				.orElseThrow(() -> new ResourceNotFoundException("Course not found: " + courseId));
 
-		int totalChapters = 0;
-		int completedChapters = 0;
-		int totalTopics = 0;
-		int completedTopics = 0;
-		int totalReferences = 0;
-		int completedReferences = 0;
+		Student student = studentRepository.findByStudentId(studentId)
+				.orElseThrow(() -> new ResourceNotFoundException("Student not found: " + studentId));
+
+		Long internalStudentId = student.getId(); // ← Long for all DB calls
+		Long internalCourseId = course.getId(); // ← Long for all DB calls
+
+		int totalChapters = 0, completedChapters = 0;
+		int totalTopics = 0, completedTopics = 0;
+		int totalReferences = 0, completedReferences = 0;
 
 		for (Chapter chapter : course.getChapters()) {
 
@@ -289,11 +277,10 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 
 				List<TopicReference> references = topic.getReferences();
 				int topicTotalReferences = (references == null) ? 0 : references.size();
-
 				totalReferences += topicTotalReferences;
 
 				List<StudentTopicReferenceProgress> progressList = progressRepository
-						.findByStudent_IdAndTopicReference_Topic_Id(studentId, topic.getId());
+						.findByStudent_IdAndTopicReference_Topic_Id(internalStudentId, topic.getId()); // ← Long
 
 				long topicCompletedReferences = progressList.stream().filter(p -> Boolean.TRUE.equals(p.getCompleted()))
 						.count();
@@ -314,52 +301,82 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 
 		double percentage = (totalReferences == 0) ? 0.0 : (completedReferences * 100.0) / totalReferences;
 
-		StudentCourse sc = studentCourseRepository.findByStudent_IdAndCourse_Id(studentId, courseId)
+		StudentCourse sc = studentCourseRepository.findByStudent_IdAndCourse_Id(internalStudentId, internalCourseId) // ←
+																														// Long
 				.orElseThrow(() -> new RuntimeException("Enrollment not found"));
+		if (percentage == 0) {
+			sc.setStatus(CourseStatus.PLANNED);
+		} else if (percentage == 100) {
+			sc.setStatus(CourseStatus.COMPLETED);
+		} else {
+			sc.setStatus(CourseStatus.ONGOING);
+		}
 
 		if (percentage > 0 && sc.getStart_dt() == null) {
 			sc.setStart_dt(LocalDateTime.now());
 		}
-
 		if (percentage == 100 && sc.getCompletedDt() == null) {
 			sc.setCompletedDt(LocalDateTime.now());
 		}
-
 		studentCourseRepository.save(sc);
-
 		CourseProgressSummaryResponse response = new CourseProgressSummaryResponse();
-
-		response.setCourseId(course.getId());
+		response.setCourseId(course.getCourseId()); // ← String business ID
 		response.setCourseName(course.getCourseTitle());
-
 		response.setTotalChapters(totalChapters);
 		response.setCompletedChapters(completedChapters);
-
 		response.setTotalTopics(totalTopics);
 		response.setCompletedTopics(completedTopics);
-
 		response.setTotalReferences(totalReferences);
 		response.setCompletedReferences(completedReferences);
-
 		response.setCoursePercentage(percentage);
 		response.setCompleted(totalReferences > 0 && completedReferences == totalReferences);
 
 		return response;
 	}
 
+	@Override
 	public List<StudentClassResponse> getClassInfo(String studentId) {
 
-		List<ClassBatch> batches =
-				classBatchRepository.findByStudentId(Long.valueOf(studentId));
+		List<ClassBatch> batches = classBatchRepository.findByStudentId(Long.valueOf(studentId));
 
-		return batches.stream()
-				.map(classBatchMapper::toDto)
-				.toList();
+		return batches.stream().map(classBatchMapper::toDto).toList();
 	}
-}
 
-//    @Override
-//    public StudentDashboardResponse getDashboard(String studentId) {
-//        List<StudentCourse> studentCourses = studentCourseRepository.findByStudent_StudentId(studentId);
-//        return studentCourseMapper.toDashboard(studentCourses);
-//    }
+	@Override
+	public StudentDashboardSummaryResponse getDashboardSummary(String studentId) {
+
+		// Bridge once
+		Student student = studentRepository.findByStudentId(studentId)
+				.orElseThrow(() -> new ResourceNotFoundException("Student not found: " + studentId));
+
+		StudentMyCoursesResponse courses = getMyCourses(studentId, null);
+
+		WeeklyScheduleResponse weeklySchedule = getWeeklySchedule(studentId);
+
+		int grandTotal = 0;
+		int grandCompleted = 0;
+
+		for (MyCourseResponse course : courses.getCourses()) {
+			CourseProgressSummaryResponse summary = getCourseProgressSummary(course.getCourseId(), studentId); // String
+																												// ids
+			grandTotal += summary.getTotalReferences();
+			grandCompleted += summary.getCompletedReferences();
+		}
+
+		OverallProgressResponse overallProgress = new OverallProgressResponse();
+		overallProgress.setTotalReferences(grandTotal);
+		overallProgress.setCompletedReferences(grandCompleted);
+		overallProgress.setOverallPercentage(
+				grandTotal == 0 ? 0.0 : Math.round((grandCompleted * 100.0 / grandTotal) * 100.0) / 100.0);
+		overallProgress.setCompleted(grandTotal > 0 && grandCompleted == grandTotal);
+		StudentDashboardSummaryResponse response = new StudentDashboardSummaryResponse();
+		response.setStudentId(studentId);
+		response.setStudentName(student.getFirstNm() + " " + student.getLastNm()); // adjust to your Student fields
+		response.setCourses(courses);
+		response.setWeeklySchedule(weeklySchedule);
+		response.setOverallProgress(overallProgress);
+
+		return response;
+	}
+
+}

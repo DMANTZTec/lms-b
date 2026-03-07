@@ -32,38 +32,34 @@ public class StudentDashboardController {
 	}
 
 	@GetMapping("/{courseId}/topics-progress")
-	public ResponseEntity<List<TopicProgressResponse>> getTopicProgress(@PathVariable Long courseId,
-			@RequestParam Long studentId) {
+	public ResponseEntity<List<TopicProgressResponse>> getTopicProgress(@PathVariable String courseId,
+			@RequestParam String studentId) {
 
 		return ResponseEntity.ok(dashboardService.getTopicProgress(courseId, studentId));
 	}
 
 	@GetMapping("/{courseId}/chapters-progress")
-	public ResponseEntity<List<ChapterProgressResponse>> getChapterProgress(@PathVariable Long courseId,
-			@RequestParam Long studentId) {
+	public ResponseEntity<List<ChapterProgressResponse>> getChapterProgress(@PathVariable String courseId,
+			@RequestParam String studentId) {
 
 		return ResponseEntity.ok(dashboardService.getChapterProgress(courseId, studentId));
 	}
 
 	@GetMapping("/dashboard/course/{courseId}/progress")
-	public ResponseEntity<CourseProgressSummaryResponse> getCourseProgress(@PathVariable Long courseId,
-			@RequestParam Long studentId) {
+	public ResponseEntity<CourseProgressSummaryResponse> getCourseProgress(@PathVariable String courseId,
+			@RequestParam String studentId) {
 
 		return ResponseEntity.ok(dashboardService.getCourseProgressSummary(courseId, studentId));
 	}
 
 	@GetMapping("/classes/{studentId}")
-	public ResponseEntity<List<StudentClassResponse>> getMyClasses(
-			@PathVariable String studentId) {
+	public ResponseEntity<List<StudentClassResponse>> getMyClasses(@PathVariable String studentId) {
 
-		return ResponseEntity.ok(
-				dashboardService.getClassInfo(studentId));
+		return ResponseEntity.ok(dashboardService.getClassInfo(studentId));
 	}
 
+	@GetMapping("/summary/{studentId}")
+	public ResponseEntity<StudentDashboardSummaryResponse> getDashboardSummary(@PathVariable String studentId) {
+		return ResponseEntity.ok(dashboardService.getDashboardSummary(studentId));
+	}
 }
-
-//    @GetMapping("/{studentId}/dashboard")
-//    public ResponseEntity<StudentDashboardResponse> getDashboard(@PathVariable String studentId) {
-//        StudentDashboardResponse dashboard = dashboardService.getDashboard(studentId);
-//        return ResponseEntity.ok(dashboard);
-//    }

@@ -2,14 +2,14 @@ package com.dmantz.lms_b.dto.request;
 
 public class StudentTopicReferenceProgressRequest {
 
-    private Long studentId;
+    private String studentId;
     private Long referenceId;
 
-    public Long getStudentId() {
+    public String getStudentId() {
         return studentId;
     }
 
-    public void setStudentId(Long studentId) {
+    public void setStudentId(String studentId) {
         this.studentId = studentId;
     }
 
