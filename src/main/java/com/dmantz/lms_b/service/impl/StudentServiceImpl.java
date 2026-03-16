@@ -79,7 +79,7 @@ public class StudentServiceImpl implements StudentService {
 		return String.format("S%06d", count); // Format as S + 6-digit number → always 7 characters
 	}
 
-	private StudentOtp generateOtp(Student student) {
+	public StudentOtp generateOtp(Student student) {
 
 		StudentOtp otp = new StudentOtp();
 

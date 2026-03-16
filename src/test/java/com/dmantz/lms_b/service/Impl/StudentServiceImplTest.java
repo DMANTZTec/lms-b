@@ -1,8 +1,6 @@
 package com.dmantz.lms_b.service.Impl;
 
-import com.dmantz.lms_b.dto.request.OtpVerifyRequest;
-import com.dmantz.lms_b.dto.request.StudentLoginRequest;
-import com.dmantz.lms_b.dto.request.StudentRegistrationRequest;
+import com.dmantz.lms_b.dto.request.*;
 import com.dmantz.lms_b.dto.response.StudentLoginResponse;
 import com.dmantz.lms_b.dto.response.StudentResponse;
 import com.dmantz.lms_b.entity.OtpStatus;
@@ -16,6 +14,7 @@ import com.dmantz.lms_b.service.impl.StudentServiceImpl;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -23,10 +22,13 @@ import org.testng.annotations.Test;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.AssertJUnit.assertEquals;
 
 public class StudentServiceImplTest {
 
@@ -45,6 +47,7 @@ public class StudentServiceImplTest {
     @Mock
     private EmailService emailService;
 
+    @Spy
     @InjectMocks
     private StudentServiceImpl studentService;
 
@@ -78,7 +81,7 @@ public class StudentServiceImplTest {
 
         StudentResponse result = studentService.register(request);
 
-        Assert.assertNotNull(result);
+        assertNotNull(result);
         Assert.assertEquals(result.getStudentId(), "S000001");
 
         verify(studentRepository, times(1)).save(any(Student.class));
@@ -108,12 +111,106 @@ public class StudentServiceImplTest {
         otp.setStatus(OtpStatus.SENT);
         otp.setCreatedDt(LocalDateTime.now());
 
-        when(otpRepository.findByStudent_StudentIdOrderByCreatedDtDesc("S000001"))
-                .thenReturn(List.of(otp));
+        when(otpRepository.findByStudent_StudentIdOrderByCreatedDtDesc("S000001")).thenReturn(List.of(otp));
 
         var response = studentService.verifyOtp(request);
 
         Assert.assertTrue(response.isVerified());
+    }
+
+    // LOGIN TEST
+    @Test
+    public void testLoginSuccess() {
+
+        StudentLoginRequest request = new StudentLoginRequest();
+        request.setUsername("test@gmail.com");
+        request.setPassword("1234");
+
+        Student student = new Student();
+        student.setEmailId("test@gmail.com");
+        student.setPassword("encodedPassword");
+        student.setEnabled("Y");
+
+        StudentOtp otp = new StudentOtp();
+        otp.setOtp("123456");
+        StudentLoginResponse response = new StudentLoginResponse();
+
+        when(studentRepository.findByEmailIdOrMobileNumOrLoginId(any(), any(), any())).thenReturn(student);
+        when(passwordEncoder.matches(any(), any())).thenReturn(true);
+        when(studentMapper.toLoginResponse(student)).thenReturn(response);
+
+        doReturn(otp).when(studentService).generateOtp(any(Student.class));
+
+        StudentLoginResponse result = studentService.login(request);
+
+        assertNotNull(result);
+    }
+
+    @Test(expectedExceptions = RuntimeException.class)
+    public void testLoginInvalidUser() {
+
+        StudentLoginRequest request = new StudentLoginRequest();
+        request.setUsername("wrong@gmail.com");
+
+        when(studentRepository.findByEmailIdOrMobileNumOrLoginId(anyString(), anyString(), anyString()))
+                .thenReturn(null);
+
+        studentService.login(request);
+    }
+
+    // FORGOT PASSWORD
+    @Test
+    public void testForgotPasswordSuccess() {
+
+        ForgotPasswordRequest request = new ForgotPasswordRequest();
+        request.setEmail("test@gmail.com");
+
+        Student student = new Student();
+        student.setStudentId("S000001");
+        student.setLoginId("test@gmail.com");
+
+        StudentOtp otp = new StudentOtp();
+        otp.setOtp("123456");
+
+        when(studentRepository.findByEmailId("test@gmail.com")).thenReturn(Optional.of(student));
+
+        doReturn(otp).when(studentService).generateOtp(any(Student.class));
+
+        studentService.forgotPassword(request);
+
+        verify(studentRepository, times(1)).findByEmailId("test@gmail.com");
+    }
+
+    // RESET PASSWORD
+    @Test
+    public void testResetPasswordSuccess() {
+
+        ResetPasswordRequest request = new ResetPasswordRequest();
+        request.setStudentId("S000001");
+        request.setOtp("123456");
+        request.setNewPassword("newPassword");
+
+        StudentOtp otp = new StudentOtp();
+        otp.setOtp("123456");
+        otp.setStatus(OtpStatus.SENT);
+        otp.setCreatedDt(LocalDateTime.now());
+
+        Student student = new Student();
+        student.setStudentId("S000001");
+
+        when(otpRepository.findLatestOtpByStudentId("S000001")).thenReturn(List.of(otp));
+        when(studentRepository.findByStudentId("S000001")).thenReturn(Optional.of(student));
+        when(passwordEncoder.encode("newPassword")).thenReturn("encodedPassword");
+
+        studentService.resetPassword(request);
+
+        // verify password updated
+        assertEquals("encodedPassword", student.getPassword());
+
+        // verify student saved
+        verify(studentRepository, times(1)).save(student);
+
+        verify(otpRepository, atLeastOnce()).save(any(StudentOtp.class));
     }
 
     // GET ALL STUDENTS
@@ -133,6 +230,5 @@ public class StudentServiceImplTest {
 
         Assert.assertEquals(result.size(), 1);
     }
-
 
 }
