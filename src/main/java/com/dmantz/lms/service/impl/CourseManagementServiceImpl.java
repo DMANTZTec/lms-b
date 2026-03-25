@@ -179,18 +179,32 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 		// Return response
 		return courseMapper.toDto(savedCourse);
 	}
-
+	
 	private String generateCourseId(Subject subject) {
 
-		String subjectShortCd = subject.getSubjectShortCd();
+	    String subjectShortCd = subject.getSubjectShortCd();
 
-		if (subjectShortCd == null || subjectShortCd.isBlank()) {
-			throw new IllegalStateException("Subject short code is required");
-		}
+	    if (subjectShortCd == null || subjectShortCd.isBlank()) {
+	        throw new IllegalStateException("Subject short code is required");
+	    }
 
-		long count = courseRepository.countBySubject_SubjectShortCd(subjectShortCd) + 1;
+	    Optional<Course> lastCourse =
+	            courseRepository.findTopBySubject_SubjectShortCdOrderByIdDesc(subjectShortCd);
 
-		return String.format("%s%03d", subjectShortCd.toUpperCase(), count);
+	    int nextNumber = 1;
+
+	    if (lastCourse.isPresent() && lastCourse.get().getCourseId() != null) {
+	        String lastId = lastCourse.get().getCourseId();
+	        nextNumber = Integer.parseInt(lastId.substring(subjectShortCd.length())) + 1;
+	    }
+
+	    String generatedId;
+
+	    do {
+	        generatedId = String.format("%s%03d", subjectShortCd.toUpperCase(), nextNumber++);
+	    } while (courseRepository.existsByCourseId(generatedId));
+
+	    return generatedId;
 	}
 
 	// ------------------ VIEW ALL COURSES ------------------
