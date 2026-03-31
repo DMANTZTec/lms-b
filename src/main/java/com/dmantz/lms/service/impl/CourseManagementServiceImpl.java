@@ -325,31 +325,26 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 	// ================= UPDATE CHAPTER =================
 	@Override
 	public ChapterResponse updateChapter(Long chapterId, ChapterRequest request, Long staffId) {
-
-		staffRepository.findById(staffId)
-				.orElseThrow(() -> new ResourceNotFoundException("Staff not found with id: " + staffId));
-
-		Chapter chapter = chapterRepository.findById(chapterId)
-				.orElseThrow(() -> new ResourceNotFoundException("Chapter not found with id: " + chapterId));
-
-		Course course = null;
-		if (request.getCourseId() != null) {
-			course = courseRepository.findByCourseId(request.getCourseId()).orElseThrow(
-					() -> new ResourceNotFoundException("Course not found with id: " + request.getCourseId()));
-		}
-
-		String courseIdToCheck = (course != null) ? course.getCourseId() : chapter.getCourse().getCourseId();
-
-		chapterRepository.findByCourse_CourseIdAndChapterNmIgnoreCase(courseIdToCheck, request.getChapterNm())
-				.filter(ch -> !ch.getId().equals(chapterId)).ifPresent(ch -> {
-					throw new DuplicateValuesException("Chapter name already exists in this course");
-				});
-
-		chapterMapper.updateEntityFromRequest(request, chapter);
-		Chapter updatedChapter = chapterRepository.save(chapter);
-
-		return chapterMapper.toResponse(updatedChapter);
+	    staffRepository.findById(staffId)
+	            .orElseThrow(() -> new ResourceNotFoundException("Staff not found"));
+	    Chapter chapter = chapterRepository.findById(chapterId)
+	            .orElseThrow(() -> new ResourceNotFoundException("Chapter not found"));
+	    if (request.getChapterNm() != null) {
+	        chapterRepository
+	                .findByCourse_CourseIdAndChapterNmIgnoreCase(
+	                        chapter.getCourse().getCourseId(),
+	                        request.getChapterNm()
+	                )
+	                .filter(ch -> !ch.getId().equals(chapterId))
+	                .ifPresent(ch -> {
+	                    throw new DuplicateValuesException("Chapter name already exists in this course");
+	                });
+	    }
+	    chapterMapper.updateEntityFromRequest(request, chapter);
+	    Chapter updated = chapterRepository.saveAndFlush(chapter);
+	    return chapterMapper.toResponse(updated);
 	}
+
 
 	// ================= DELETE CHAPTER=================
 	@Override
