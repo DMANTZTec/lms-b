@@ -4,22 +4,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import com.dmantz.lms.entity.base.AuditFields;
-
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "course")
@@ -54,6 +43,17 @@ public class Course extends AuditFields{
 	@ManyToOne
 	@JoinColumn(name = "provider_id")
 	private Provider provider;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "level")
+	private CourseLevel level;
+
+	@Column(name = "course_image")
+	private String courseImage;
+
+	@Column(name = "intro_video")
+	private String introVideo;
+
 
 	public Long getId() {
 		return id;
@@ -103,6 +103,14 @@ public class Course extends AuditFields{
 		this.skills = skills;
 	}
 
+	public List<Chapter> getChapters() {
+		return chapters;
+	}
+
+	public void setChapters(List<Chapter> chapters) {
+		this.chapters = chapters;
+	}
+
 	public Subject getSubject() {
 		return subject;
 	}
@@ -119,21 +127,46 @@ public class Course extends AuditFields{
 		this.provider = provider;
 	}
 
-
-	public List<Chapter> getChapters() {
-		return chapters;
+	public CourseLevel getLevel() {
+		return level;
 	}
 
-	public void setChapters(List<Chapter> chapters) {
-		this.chapters = chapters;
+	public void setLevel(CourseLevel level) {
+		this.level = level;
+	}
+
+	public String getCourseImage() {
+		return courseImage;
+	}
+
+	public void setCourseImage(String courseImage) {
+		this.courseImage = courseImage;
+	}
+
+	public String getIntroVideo() {
+		return introVideo;
+	}
+
+	public void setIntroVideo(String introVideo) {
+		this.introVideo = introVideo;
 	}
 
 	@Override
 	public String toString() {
-		return "Course [id=" + id + ", courseId=" + courseId + ", courseTitle=" + courseTitle + ", description="
-				+ description + ", language=" + language + ", skills=" + skills + ", chapters=" + chapters
-				+ ", subject=" + subject + ", provider=" + provider + "]";
+		return "Course{" +
+				"id=" + id +
+				", courseId='" + courseId + '\'' +
+				", courseTitle='" + courseTitle + '\'' +
+				", description='" + description + '\'' +
+				", language='" + language + '\'' +
+				", skills='" + skills + '\'' +
+				", chapters=" + chapters +
+				", subject=" + subject +
+				", provider=" + provider +
+				", level=" + level +
+				", courseImage='" + courseImage + '\'' +
+				", introVideo='" + introVideo + '\'' +
+				'}';
 	}
 
-	
 }

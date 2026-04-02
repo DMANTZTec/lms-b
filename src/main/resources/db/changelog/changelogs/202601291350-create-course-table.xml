@@ -69,4 +69,20 @@
 
     </changeSet>
 
+    <changeSet id="202604021145" author="shiva">
+
+        <addColumn tableName="course">
+            <column name="level" type="VARCHAR(50)"/>
+        </addColumn>
+
+        <addColumn tableName="course">
+            <column name="course_image" type="VARCHAR(500)"/>
+        </addColumn>
+
+        <addColumn tableName="course">
+            <column name="intro_video" type="VARCHAR(500)"/>
+        </addColumn>
+
+    </changeSet>
+
 </databaseChangeLog>
