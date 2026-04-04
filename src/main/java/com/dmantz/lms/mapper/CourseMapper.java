@@ -1,3 +1,4 @@
+
 package com.dmantz.lms.mapper;
 
 import java.util.List;
@@ -24,6 +25,9 @@ public interface CourseMapper {
 	@Mapping(source = "description", target = "description")
 	@Mapping(source = "language", target = "language")
 	@Mapping(target = "skills", expression = "java(toJson(request.getSkills()))")
+	@Mapping(source = "level", target = "level")
+	@Mapping(source = "courseImage", target = "courseImage")
+	@Mapping(source = "introVideo", target = "introVideo")
 	Course toEntity(CourseRequest request);
 
 	// ---------- Entity → Response ----------
@@ -36,6 +40,9 @@ public interface CourseMapper {
 	@Mapping(target = "skills", expression = "java(fromJson(course.getSkills()))")
 	@Mapping(source = "subject.id", target = "subjectId")
 	@Mapping(source = "provider.id", target = "providerId")
+	@Mapping(source = "level", target = "level")
+	@Mapping(source = "courseImage", target = "courseImage")
+	@Mapping(source = "introVideo", target = "introVideo")
 	@Mapping(source = "createdBy", target = "createdBy")
 	@Mapping(source = "createdDt", target = "createdDt")
 	@Mapping(source = "updatedBy", target = "updatedBy")
@@ -48,6 +55,9 @@ public interface CourseMapper {
 	@Mapping(source = "description", target = "description")
 	@Mapping(source = "language", target = "language")
 	@Mapping(target = "skills", expression = "java(toJson(request.getSkills()))")
+	@Mapping(source = "level", target = "level")
+	@Mapping(source = "courseImage", target = "courseImage")
+	@Mapping(source = "introVideo", target = "introVideo")
 	void updateCourseFromRequest(CourseRequest request, @MappingTarget Course course);
 
 //	json format conversion
@@ -78,3 +88,5 @@ public interface CourseMapper {
 	}
 
 }
+
+

@@ -1,7 +1,10 @@
+
 package com.dmantz.lms.dto.response;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.dmantz.lms.entity.CourseLevel;
 
 public class CourseResponse {
 	private Long id;
@@ -17,6 +20,12 @@ public class CourseResponse {
 	private Long subjectId;
 
 	private Long providerId;
+
+	private CourseLevel level;
+
+	private String courseImage;
+
+	private String introVideo;
 
 	private Long createdBy;
 	private LocalDateTime createdDt;
@@ -117,6 +126,30 @@ public class CourseResponse {
 
 	public void setUpdatedDt(LocalDateTime updatedDt) {
 		this.updatedDt = updatedDt;
+	}
+
+	public CourseLevel getLevel() {
+		return level;
+	}
+
+	public void setLevel(CourseLevel level) {
+		this.level = level;
+	}
+
+	public String getCourseImage() {
+		return courseImage;
+	}
+
+	public void setCourseImage(String courseImage) {
+		this.courseImage = courseImage;
+	}
+
+	public String getIntroVideo() {
+		return introVideo;
+	}
+
+	public void setIntroVideo(String introVideo) {
+		this.introVideo = introVideo;
 	}
 
 }

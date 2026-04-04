@@ -2,6 +2,8 @@ package com.dmantz.lms.dto.request;
 
 import java.util.List;
 
+import com.dmantz.lms.entity.CourseLevel;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -31,7 +33,16 @@ public class CourseRequest {
 
 	@NotNull(message = "Provider ID is required")
 	private Long providerId;
-
+	
+	@NotNull(message = "Course level is required")
+	private CourseLevel level;
+	
+	@Size(max = 500, message = "Course image URL must be at most 500 characters")
+	private String courseImage;
+	
+	@Size(max = 500, message = "Intro video URL must be at most 500 characters")
+	private String introVideo;
+	
 	public String getCourseTitle() {
 		return courseTitle;
 	}
@@ -79,5 +90,33 @@ public class CourseRequest {
 	public void setProviderId(Long providerId) {
 		this.providerId = providerId;
 	}
+	
+	public CourseLevel getLevel() {
+		return level;
+	}
+	
+	public void setLevel(CourseLevel level) {
+		this.level = level;
+	}
+	
+	public String getCourseImage() {
+		return courseImage;
+	}
+	
+	public void setCourseImage(String courseImage) {
+		this.courseImage = courseImage;
+	}
+	
+	public String getIntroVideo() {
+		return introVideo;
+	}
+	
+	public void setIntroVideo(String introVideo) {
+		this.introVideo = introVideo;
+	}
+	
+	
+	
 
 }
+

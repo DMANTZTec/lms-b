@@ -195,7 +195,11 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 
 	    if (lastCourse.isPresent() && lastCourse.get().getCourseId() != null) {
 	        String lastId = lastCourse.get().getCourseId();
-	        nextNumber = Integer.parseInt(lastId.substring(subjectShortCd.length())) + 1;
+	        try {
+	            nextNumber = Integer.parseInt(lastId.substring(subjectShortCd.length())) + 1;
+	        } catch (NumberFormatException e) {
+	            nextNumber = 1; 
+	        }
 	    }
 
 	    String generatedId;
