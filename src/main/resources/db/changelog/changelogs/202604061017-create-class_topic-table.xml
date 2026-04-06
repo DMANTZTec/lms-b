@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+           http://www.liquibase.org/xml/ns/dbchangelog
+           http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+<changeSet id="202604061017" author="shiva">
+
+    <createTable tableName="class_topic">
+
+        <column name="id" type="BIGINT" autoIncrement="true">
+            <constraints primaryKey="true" nullable="false"/>
+        </column>
+
+        <column name="class_batch_id" type="BIGINT">
+            <constraints nullable="false"/>
+        </column>
+
+        <column name="topic_id" type="BIGINT">
+            <constraints nullable="false"/>
+        </column>
+
+        <column name="status" type="VARCHAR(50)"/>
+
+        <!-- Audit fields (assuming from AuditFields) -->
+        <column name="created_by" type="VARCHAR(100)"/>
+        <column name="created_date" type="TIMESTAMP"/>
+        <column name="updated_by" type="VARCHAR(100)"/>
+        <column name="updated_date" type="TIMESTAMP"/>
+
+    </createTable>
+
+    <!-- Foreign Key: class_batch -->
+    <addForeignKeyConstraint
+            baseTableName="class_topic"
+            baseColumnNames="class_batch_id"
+            referencedTableName="class_batch"
+            referencedColumnNames="id"
+            constraintName="fk_class_topic_class_batch"/>
+
+    <!-- Foreign Key: topic -->
+    <addForeignKeyConstraint
+            baseTableName="class_topic"
+            baseColumnNames="topic_id"
+            referencedTableName="topic"
+            referencedColumnNames="id"
+            constraintName="fk_class_topic_topic"/>
+
+    <!-- Unique Constraint (avoid duplicate topic per class) -->
+    <addUniqueConstraint
+            tableName="class_topic"
+            columnNames="class_batch_id, topic_id"
+            constraintName="uk_class_topic_unique"/>
+
+</changeSet>
+
+</databaseChangeLog>
