@@ -39,6 +39,7 @@ public interface CourseMapper {
 	@Mapping(source = "language", target = "language")
 	@Mapping(target = "skills", expression = "java(fromJson(course.getSkills()))")
 	@Mapping(source = "subject.id", target = "subjectId")
+	@Mapping(source = "subject.subjectNm", target = "subjectNm")
 	@Mapping(source = "provider.id", target = "providerId")
 	@Mapping(source = "level", target = "level")
 	@Mapping(source = "courseImage", target = "courseImage")

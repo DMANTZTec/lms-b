@@ -18,6 +18,8 @@ public class CourseResponse {
 	private List<String> skills;
 
 	private Long subjectId;
+	
+	private String subjectNm;
 
 	private Long providerId;
 
@@ -152,4 +154,14 @@ public class CourseResponse {
 		this.introVideo = introVideo;
 	}
 
+	public String getSubjectNm() {
+		return subjectNm;
+	}
+
+	public void setSubjectNm(String subjectNm) {
+		this.subjectNm = subjectNm;
+	}
+
+
+	
 }
