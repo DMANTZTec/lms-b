@@ -1,11 +1,10 @@
 package com.dmantz.lms.controller;
 
-import com.dmantz.lms.dto.request.ClassScheduleRequest;
-import com.dmantz.lms.dto.request.CreateClassRequest;
-import com.dmantz.lms.dto.request.UpdateClassRequest;
+import com.dmantz.lms.dto.request.*;
 import com.dmantz.lms.dto.response.ClassAdminStudentDetailsResponse;
 import com.dmantz.lms.dto.response.ClassResponse;
 import com.dmantz.lms.dto.response.ClassScheduleResponse;
+import com.dmantz.lms.dto.response.ClassTopicResponse;
 import com.dmantz.lms.service.ClassAdminService;
 import com.dmantz.lms.service.StudentDashboardService;
 import jakarta.validation.Valid;
@@ -108,5 +107,31 @@ public class ClassAdminController {
         return classAdminService.getStaffDailySchedule(staffId, date);
     }
 
+    @PostMapping("/classes/{batchId}/topics")
+    public ResponseEntity<String> addTopicsToClass(@PathVariable Long batchId,
+            @RequestBody AddClassTopicRequest request) {
+
+        classAdminService.addTopicsToClass(batchId, request);
+        return ResponseEntity.ok("Topics added successfully");
+    }
+
+
+    @DeleteMapping("/classes/{batchId}/topics")
+    public ResponseEntity<String> removeTopicsFromClass(
+            @PathVariable Long batchId,
+            @RequestBody RemoveClassTopicRequest removeClassTopicRequest) {
+
+        classAdminService.removeTopicsFromClass(batchId, removeClassTopicRequest);
+
+        return ResponseEntity.ok("Topics removed successfully");
+    }
+
+    @GetMapping("/classes/{batchId}/topics")
+    public ResponseEntity<List<ClassTopicResponse>> getTopicsByBatchId(
+            @PathVariable Long batchId) {
+
+        return ResponseEntity.ok(
+                classAdminService.getTopicsByBatchId(batchId));
+    }
 
 }

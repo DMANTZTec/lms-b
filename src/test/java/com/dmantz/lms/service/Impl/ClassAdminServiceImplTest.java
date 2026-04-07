@@ -8,6 +8,7 @@ import com.dmantz.lms.dto.response.ClassScheduleResponse;
 import com.dmantz.lms.entity.*;
 import com.dmantz.lms.mapper.ClassBatchMapper;
 import com.dmantz.lms.mapper.ClassScheduleMapper;
+import com.dmantz.lms.mapper.ClassTopicMapper;
 import com.dmantz.lms.mapper.StudentCourseMapper;
 import com.dmantz.lms.repository.*;
 import com.dmantz.lms.service.impl.ClassAdminServiceImpl;
@@ -55,6 +56,15 @@ public class ClassAdminServiceImplTest {
     @Mock
     private StudentCourseMapper studentCourseMapper;
 
+    @Mock
+    private ClassTopicRepository classTopicRepository;
+
+    @Mock
+    private TopicRepository topicRepository;
+
+    @Mock
+    private ClassTopicMapper classTopicMapper;
+
     @BeforeMethod
     public void setup() {
 
@@ -69,7 +79,10 @@ public class ClassAdminServiceImplTest {
                 classScheduleRepository,
                 studentRepository,
                 studentCourseRepository,
-                studentCourseMapper
+                studentCourseMapper,
+                classTopicRepository,
+                topicRepository,
+                classTopicMapper
         );
     }
 

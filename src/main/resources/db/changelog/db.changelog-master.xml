@@ -61,7 +61,7 @@
     <include file="db/changelog/changelogs/202602261518-create-student_topic_reference_progress-table.xml"/>
 
     <!-- Class Topic table -->
-    <include file="db/changelog/changelogs/202604061017-create-class_topic-table.xml"/>
+    <include file="/db/changelog/changelogs/202604071034-create-class_topic-table.xml"/>
 
     <!-- Class Student table -->
     <include file="/db/changelog/changelogs/202604061158-create-class_student-table.xml"/>

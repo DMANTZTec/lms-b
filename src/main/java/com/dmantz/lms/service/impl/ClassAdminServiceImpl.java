@@ -1,22 +1,13 @@
 package com.dmantz.lms.service.impl;
 
-import com.dmantz.lms.dto.request.ClassScheduleRequest;
-import com.dmantz.lms.dto.request.CreateClassRequest;
-import com.dmantz.lms.dto.request.UpdateClassRequest;
-import com.dmantz.lms.dto.response.ClassAdminStudentDetailsResponse;
-import com.dmantz.lms.dto.response.ClassResponse;
-import com.dmantz.lms.dto.response.ClassScheduleResponse;
-import com.dmantz.lms.dto.response.MyCourseResponse;
+import com.dmantz.lms.dto.request.*;
+import com.dmantz.lms.dto.response.*;
 import com.dmantz.lms.entity.*;
 import com.dmantz.lms.mapper.ClassBatchMapper;
 import com.dmantz.lms.mapper.ClassScheduleMapper;
+import com.dmantz.lms.mapper.ClassTopicMapper;
 import com.dmantz.lms.mapper.StudentCourseMapper;
-import com.dmantz.lms.repository.ClassBatchRepository;
-import com.dmantz.lms.repository.ClassScheduleRepository;
-import com.dmantz.lms.repository.CourseRepository;
-import com.dmantz.lms.repository.StaffRepository;
-import com.dmantz.lms.repository.StudentCourseRepository;
-import com.dmantz.lms.repository.StudentRepository;
+import com.dmantz.lms.repository.*;
 import com.dmantz.lms.service.ClassAdminService;
 import jakarta.transaction.Transactional;
 
@@ -26,6 +17,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 @Service
+@Transactional
 public class ClassAdminServiceImpl implements ClassAdminService {
 
     private final CourseRepository courseRepository;
@@ -37,25 +29,27 @@ public class ClassAdminServiceImpl implements ClassAdminService {
     private final StudentRepository studentRepository;
     private final StudentCourseRepository studentCourseRepository;
     private final StudentCourseMapper studentCourseMapper;
+    private final ClassTopicRepository classTopicRepository;
+    private final TopicRepository topicRepository;
+    private final ClassTopicMapper classTopicMapper;
+
+    public ClassAdminServiceImpl(CourseRepository courseRepository, ClassBatchRepository classBatchRepository, ClassBatchMapper classBatchMapper, ClassScheduleMapper classScheduleMapper, StaffRepository staffRepository, ClassScheduleRepository classScheduleRepository, StudentRepository studentRepository, StudentCourseRepository studentCourseRepository, StudentCourseMapper studentCourseMapper, ClassTopicRepository classTopicRepository, TopicRepository topicRepository, ClassTopicMapper classTopicMapper) {
+        this.courseRepository = courseRepository;
+        this.classBatchRepository = classBatchRepository;
+        this.classBatchMapper = classBatchMapper;
+        this.classScheduleMapper = classScheduleMapper;
+        this.staffRepository = staffRepository;
+        this.classScheduleRepository = classScheduleRepository;
+        this.studentRepository = studentRepository;
+        this.studentCourseRepository = studentCourseRepository;
+        this.studentCourseMapper = studentCourseMapper;
+        this.classTopicRepository = classTopicRepository;
+        this.topicRepository = topicRepository;
+        this.classTopicMapper = classTopicMapper;
+    }
 
 
-    	public ClassAdminServiceImpl(CourseRepository courseRepository, ClassBatchRepository classBatchRepository,
-			ClassBatchMapper classBatchMapper, ClassScheduleMapper classScheduleMapper, StaffRepository staffRepository,
-			ClassScheduleRepository classScheduleRepository, StudentRepository studentRepository,
-			StudentCourseRepository studentCourseRepository, StudentCourseMapper studentCourseMapper) {
-		super();
-		this.courseRepository = courseRepository;
-		this.classBatchRepository = classBatchRepository;
-		this.classBatchMapper = classBatchMapper;
-		this.classScheduleMapper = classScheduleMapper;
-		this.staffRepository = staffRepository;
-		this.classScheduleRepository = classScheduleRepository;
-		this.studentRepository = studentRepository;
-		this.studentCourseRepository = studentCourseRepository;
-		this.studentCourseMapper = studentCourseMapper;
-	}
-
-	@Override
+    @Override
     public ClassResponse addClass(String courseId, CreateClassRequest request) {
 
         // Fetch course using business ID
@@ -245,6 +239,55 @@ public class ClassAdminServiceImpl implements ClassAdminService {
         return schedules.stream()
                 .map(classScheduleMapper::toResponse)
                 .toList();
+    }
+
+    @Override
+    public void addTopicsToClass(Long batchId, AddClassTopicRequest request) {
+
+        ClassBatch classBatch = classBatchRepository.findById(batchId)
+                .orElseThrow(() -> new RuntimeException("ClassBatch not found"));
+
+        for (AddClassTopicRequest.TopicItem item : request.getTopics()) {
+
+            boolean exists = classTopicRepository
+                    .existsByClassBatchIdAndTopicId(batchId, item.getTopicId());
+
+            if (exists) {
+                continue;
+            }
+
+            Topic topic = topicRepository.findById(item.getTopicId())
+                    .orElseThrow(() -> new RuntimeException("Topic not found: " + item.getTopicId()));
+
+            ClassTopic classTopic = new ClassTopic();
+            classTopic.setClassBatch(classBatch);
+            classTopic.setTopic(topic);
+            classTopic.setStatus(item.getStatus());
+
+            classTopicRepository.save(classTopic);
+        }
+    }
+
+    @Override
+    public void removeTopicsFromClass(Long batchId, RemoveClassTopicRequest request) {
+
+        classBatchRepository.findById(batchId)
+                .orElseThrow(() -> new RuntimeException("ClassBatch not found"));
+
+        classTopicRepository.deleteByClassBatchIdAndTopicIdIn(batchId,
+                request.getTopicIds());
+    }
+
+    @Override
+    public List<ClassTopicResponse> getTopicsByBatchId(Long batchId) {
+
+        classBatchRepository.findById(batchId)
+                .orElseThrow(() -> new RuntimeException("ClassBatch not found"));
+
+        List<ClassTopic> classTopics =
+                classTopicRepository.findByClassBatchId(batchId);
+
+        return classTopicMapper.toResponseList(classTopics);
     }
 
 }

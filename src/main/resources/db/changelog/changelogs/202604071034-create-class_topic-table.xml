@@ -6,7 +6,7 @@
            http://www.liquibase.org/xml/ns/dbchangelog
            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
-<changeSet id="202604061017" author="shiva">
+<changeSet id="202604071034" author="shiva">
 
     <createTable tableName="class_topic">
 
@@ -26,9 +26,9 @@
 
         <!-- Audit fields (assuming from AuditFields) -->
         <column name="created_by" type="VARCHAR(100)"/>
-        <column name="created_date" type="TIMESTAMP"/>
+        <column name="created_dt" type="TIMESTAMP"/>
         <column name="updated_by" type="VARCHAR(100)"/>
-        <column name="updated_date" type="TIMESTAMP"/>
+        <column name="updated_dt" type="TIMESTAMP"/>
 
     </createTable>
 
