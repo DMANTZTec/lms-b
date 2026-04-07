@@ -18,7 +18,7 @@ public class CourseResponse {
 	private List<String> skills;
 
 	private Long subjectId;
-	
+
 	private String subjectNm;
 
 	private Long providerId;
@@ -30,8 +30,11 @@ public class CourseResponse {
 	private String introVideo;
 
 	private Long createdBy;
+	
 	private LocalDateTime createdDt;
+	
 	private Long updatedBy;
+	
 	private LocalDateTime updatedDt;
 
 	public Long getId() {
@@ -162,6 +165,4 @@ public class CourseResponse {
 		this.subjectNm = subjectNm;
 	}
 
-
-	
 }

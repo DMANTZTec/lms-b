@@ -1,5 +1,7 @@
 package com.dmantz.lms.entity;
 
+import java.util.List;
+
 import com.dmantz.lms.entity.base.AuditFields;
 
 import jakarta.persistence.*;
@@ -27,9 +29,14 @@ public class Program extends AuditFields {
 	@Column(name = "duration_in_months")
 	private Integer durationInMonths;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "provider_id", nullable = false)
-	private Provider provider;
+	  // ✅ FIX 1: Provider mapping (separate field)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "provider_id", nullable = false)
+    private Provider provider;
+
+    // ✅ FIX 2: ProgramCourses mapping
+    @OneToMany(mappedBy = "program", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<ProgramCourse> programCourses;
 
 	public Long getId() {
 		return id;
@@ -85,6 +92,14 @@ public class Program extends AuditFields {
 
 	public void setProvider(Provider provider) {
 		this.provider = provider;
+	}
+	
+	public List<ProgramCourse> getProgramCourses() {
+		return programCourses;
+	}
+	
+	public void setProgramCourses(List<ProgramCourse> programCourses) {
+		this.programCourses = programCourses;
 	}
 
 	@Override

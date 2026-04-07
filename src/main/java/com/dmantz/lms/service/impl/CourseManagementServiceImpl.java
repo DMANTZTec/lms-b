@@ -602,22 +602,20 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 		return generatedId;
 	}
 
-	// ================= GET BY ID =================
 	@Override
 	public ProgramResponse getProgramById(Long id) {
-
-		Program program = programRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Program not found with id: " + id));
-
-		return programMapper.toResponse(program);
+	    Program program = programRepository.findByIdWithCourses(id)
+	            .orElseThrow(() -> new ResourceNotFoundException("Program not found with id: " + id));
+	    return programMapper.toResponse(program);
 	}
-
-	// ================= GET ALL =================
 	@Override
 	public List<ProgramResponse> getAllPrograms() {
-
-		return programRepository.findAll().stream().map(programMapper::toResponse).toList();
+	    return programRepository.findAllWithCourses()
+	            .stream()
+	            .map(programMapper::toResponse)
+	            .toList();
 	}
+
 
 	// ================= UPDATE =================
 	@Override

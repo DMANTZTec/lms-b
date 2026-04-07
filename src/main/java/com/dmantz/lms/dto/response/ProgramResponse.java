@@ -1,6 +1,7 @@
 package com.dmantz.lms.dto.response;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.dmantz.lms.entity.ProgramStatus;
 
@@ -12,10 +13,10 @@ public class ProgramResponse {
 	private String description;
 	private ProgramStatus status;
 	private Integer durationInMonths;
+	private List<CourseResponse> coursesList;
 	private Long providerId;
 	private Long createdBy;
 	private LocalDateTime createdDt;
-
 	private Long updatedBy;
 	private LocalDateTime updatedDt;
 
@@ -105,6 +106,14 @@ public class ProgramResponse {
 
 	public void setUpdatedDt(LocalDateTime updatedDt) {
 		this.updatedDt = updatedDt;
+	}
+
+	public List<CourseResponse> getCoursesList() {
+		return coursesList;
+	}
+
+	public void setCoursesList(List<CourseResponse> coursesList) {
+		this.coursesList = coursesList;
 	}
 
 }
