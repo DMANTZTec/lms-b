@@ -1,10 +1,7 @@
 package com.dmantz.lms.controller;
 
 import com.dmantz.lms.dto.request.*;
-import com.dmantz.lms.dto.response.ClassAdminStudentDetailsResponse;
-import com.dmantz.lms.dto.response.ClassResponse;
-import com.dmantz.lms.dto.response.ClassScheduleResponse;
-import com.dmantz.lms.dto.response.ClassTopicResponse;
+import com.dmantz.lms.dto.response.*;
 import com.dmantz.lms.service.ClassAdminService;
 import com.dmantz.lms.service.StudentDashboardService;
 import jakarta.validation.Valid;
@@ -132,6 +129,15 @@ public class ClassAdminController {
 
         return ResponseEntity.ok(
                 classAdminService.getTopicsByBatchId(batchId));
+    }
+
+    @PostMapping("/students/{studentId}/courses")
+    public ResponseEntity<StudentCourseResponse> assignCourseToStudent(
+            @PathVariable String studentId,
+            @RequestBody AssignCourseRequest request) {
+
+        return ResponseEntity.ok(
+                classAdminService.assignCourseToStudent(studentId, request.getCourseId()));
     }
 
 }

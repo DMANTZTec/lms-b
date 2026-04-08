@@ -3,6 +3,9 @@ package com.dmantz.lms.service.impl;
 import com.dmantz.lms.dto.request.*;
 import com.dmantz.lms.dto.response.*;
 import com.dmantz.lms.entity.*;
+import com.dmantz.lms.exceptions.CourseAlreadyAssignedException;
+import com.dmantz.lms.exceptions.CourseNotFoundException;
+import com.dmantz.lms.exceptions.StudentNotFoundException;
 import com.dmantz.lms.mapper.ClassBatchMapper;
 import com.dmantz.lms.mapper.ClassScheduleMapper;
 import com.dmantz.lms.mapper.ClassTopicMapper;
@@ -288,6 +291,38 @@ public class ClassAdminServiceImpl implements ClassAdminService {
                 classTopicRepository.findByClassBatchId(batchId);
 
         return classTopicMapper.toResponseList(classTopics);
+    }
+
+    @Override
+    public StudentCourseResponse assignCourseToStudent(String studentId, String courseId) {
+
+        Student student = studentRepository
+                .findByStudentId(studentId)
+                .orElseThrow(() -> new StudentNotFoundException("Student not found: " + studentId));
+
+        Course course = courseRepository
+                .findByCourseId(courseId)
+                .orElseThrow(() -> new CourseNotFoundException("Course not found: " + courseId));
+
+        // Check if already assigned
+        boolean exists = studentCourseRepository
+                .existsByStudent_StudentIdAndCourse_CourseId(
+                        studentId,
+                        courseId);
+
+        if (exists) {
+            throw new CourseAlreadyAssignedException("Course already assigned to student: " + courseId);
+        }
+
+        // Create enrollment
+        StudentCourse studentCourse = new StudentCourse();
+        studentCourse.setStudent(student);
+        studentCourse.setCourse(course);
+        studentCourse.setStatus(CourseStatus.PLANNED);
+
+        var saved = studentCourseRepository.save(studentCourse);
+
+        return studentCourseMapper.toResponse(saved);
     }
 
 }

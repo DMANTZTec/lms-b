@@ -4,10 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.dmantz.lms.dto.request.*;
-import com.dmantz.lms.dto.response.ClassAdminStudentDetailsResponse;
-import com.dmantz.lms.dto.response.ClassResponse;
-import com.dmantz.lms.dto.response.ClassScheduleResponse;
-import com.dmantz.lms.dto.response.ClassTopicResponse;
+import com.dmantz.lms.dto.response.*;
 import jakarta.transaction.Transactional;
 
 public interface ClassAdminService {
@@ -37,5 +34,8 @@ public interface ClassAdminService {
    void removeTopicsFromClass(Long batchId, RemoveClassTopicRequest request);
 
    List<ClassTopicResponse> getTopicsByBatchId(Long batchId);
+
+   StudentCourseResponse assignCourseToStudent(String studentId, String courseId);
+
 
 }

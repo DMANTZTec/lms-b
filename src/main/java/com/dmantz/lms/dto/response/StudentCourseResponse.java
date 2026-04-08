@@ -1,11 +1,13 @@
 package com.dmantz.lms.dto.response;
 
+import com.dmantz.lms.entity.CourseStatus;
+
 public class StudentCourseResponse {
 
     private Long id;
     private String studentId;
     private String courseId;
-    private String status;
+    private CourseStatus status;
     private Double progressPercentage;
 
 
@@ -33,11 +35,11 @@ public class StudentCourseResponse {
         this.courseId = courseId;
     }
 
-    public String getStatus() {
+    public CourseStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(CourseStatus status) {
         this.status = status;
     }
 

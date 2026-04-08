@@ -17,4 +17,6 @@ public interface StudentCourseRepository extends JpaRepository<StudentCourse, Lo
 
 	List<StudentCourse> findByStudentStudentIdAndStatus(String studentId, CourseStatus status);
 
+	boolean existsByStudent_StudentIdAndCourse_CourseId(String studentId, String courseId);
+
 }
