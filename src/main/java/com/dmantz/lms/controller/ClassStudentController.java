@@ -1,6 +1,7 @@
 package com.dmantz.lms.controller;
 
 import com.dmantz.lms.dto.request.EnrollStudentRequest;
+import com.dmantz.lms.dto.request.RemoveStudentRequest;
 import com.dmantz.lms.dto.response.EnrollStudentResponse;
 import com.dmantz.lms.service.ClassStudentService;
 import jakarta.validation.Valid;
@@ -33,4 +34,12 @@ public class ClassStudentController {
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
+
+    @PostMapping("/remove")
+    public ResponseEntity<List<String>> removeStudents(@RequestBody RemoveStudentRequest request) {
+
+        List<String> removedStudents = classStudentService.removeStudents(request);
+        return ResponseEntity.ok(removedStudents);
+    }
+
 }

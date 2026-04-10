@@ -1,6 +1,7 @@
 package com.dmantz.lms.service.impl;
 
 import com.dmantz.lms.dto.request.EnrollStudentRequest;
+import com.dmantz.lms.dto.request.RemoveStudentRequest;
 import com.dmantz.lms.dto.response.EnrollStudentResponse;
 import com.dmantz.lms.entity.ClassBatch;
 import com.dmantz.lms.entity.ClassStudent;
@@ -105,4 +106,75 @@ public class ClassStudentServiceImpl implements ClassStudentService {
                 .map(mapper::toDto)
                 .toList();
     }
+
+
+    @Override
+    public List<String> removeStudents(RemoveStudentRequest request) {
+
+        // Validate class
+        ClassBatch classBatch = classBatchRepository.findById(request.getClassBatchId())
+                .orElseThrow(() -> new RuntimeException("Class not found"));
+
+        List<Student> students = new ArrayList<>();
+
+        // Self Remove
+        if (request.isSelfRemove()) {
+
+            String studentId = request.getStudentId();
+
+            if (studentId == null || studentId.isBlank()) {
+                throw new RuntimeException("StudentId required for self remove");
+            }
+
+            Student student = studentRepository.findByStudentId(studentId)
+                    .orElseThrow(() -> new RuntimeException("Student not found"));
+
+            students.add(student);
+
+        } else {
+
+            // Staff Remove
+            if (request.getStudentIds() == null || request.getStudentIds().isEmpty()) {
+                throw new RuntimeException("StudentIds required for staff remove");
+            }
+
+            students = studentRepository.findByStudentIdIn(request.getStudentIds());
+
+            if (students.isEmpty()) {
+                throw new RuntimeException("No valid students found");
+            }
+        }
+
+        List<String> removedStudents = new ArrayList<>();
+
+        for (Student student : students) {
+
+            ClassStudent mapping = classStudentRepository
+                    .findByClassBatchIdAndStudent_StudentId(
+                            classBatch.getId(),
+                            student.getStudentId()
+                    )
+                    .orElse(null);
+
+            if (mapping == null) {
+                continue; // not enrolled
+            }
+
+            //  Hard Delete
+            classStudentRepository.delete(mapping);
+
+            //  (Recommended): Soft Delete / Status Update
+            // mapping.setStatus(ClassStudentStatus.REMOVED);
+            // classStudentRepository.save(mapping);
+
+            removedStudents.add(student.getStudentId());
+        }
+
+        if (removedStudents.isEmpty()) {
+            throw new RuntimeException("No students removed (not enrolled)");
+        }
+
+        return removedStudents;
+    }
+
 }
