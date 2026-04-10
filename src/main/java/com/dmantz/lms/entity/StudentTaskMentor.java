@@ -21,7 +21,7 @@ public class StudentTaskMentor extends AuditFields {
     private Student mentorStudent;
 
     @Column(name = "mins_spent")
-    private Integer minsSpent;
+    private int minsSpent;
 
     @Column(name = "student_ack")
     private Boolean studentAck = false;
