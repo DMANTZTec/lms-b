@@ -79,5 +79,51 @@
         </createIndex>
 
     </changeSet>
+    
+    
+    
+ <changeSet id="202604101101" author="Tejaswini">
+
+        <!-- Drop existing FK before modifying the column -->
+        <dropForeignKeyConstraint
+                baseTableName="student_task"
+                constraintName="fk_student_task_student"/>
+
+        <!-- Drop the index on student_id -->
+        <dropIndex
+                tableName="student_task"
+                indexName="idx_student_task_student"/>
+
+        <!-- Drop the unique constraint that includes student_id -->
+        <dropUniqueConstraint
+                tableName="student_task"
+                constraintName="uk_student_task_student_topic"/>
+
+        <!-- Modify student_id column from BIGINT to CHAR(7) -->
+        <modifyDataType
+                tableName="student_task"
+                columnName="student_id"
+                newDataType="CHAR(7)"/>
+
+        <!-- Re-add the unique constraint -->
+        <addUniqueConstraint
+                tableName="student_task"
+                columnNames="student_id, topic_id"
+                constraintName="uk_student_task_student_topic"/>
+
+        <!-- Re-add the index -->
+        <createIndex indexName="idx_student_task_student" tableName="student_task">
+            <column name="student_id"/>
+        </createIndex>
+
+        <!-- Re-add FK referencing student.student_id (CHAR(7)) instead of student.id -->
+        <addForeignKeyConstraint
+                baseTableName="student_task"
+                baseColumnNames="student_id"
+                constraintName="fk_student_task_student"
+                referencedTableName="student"
+                referencedColumnNames="student_id"/>
+
+    </changeSet>
 
 </databaseChangeLog>
