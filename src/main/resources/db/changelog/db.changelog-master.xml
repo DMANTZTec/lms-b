@@ -67,10 +67,10 @@
     <include file="/db/changelog/changelogs/202604061158-create-class_student-table.xml"/>
 
     <!-- Student task table -->
-    <include file="/db/changelog/changelogs/202604141107-create-student_task-table.xml"/>
+    <include file="/db/changelog/changelogs/202604141226-create-student_task-table.xml"/>
 
     <!-- Student task Mentor table -->
-    <include file="/db/changelog/changelogs/202604141133-create-student_task_mentor-table.xml"/>
+    <include file="/db/changelog/changelogs/202604141227-create-student_task_mentor-table.xml"/>
 
 
 </databaseChangeLog>
