@@ -1,26 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="
-        http://www.liquibase.org/xml/ns/dbchangelog
-        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+           http://www.liquibase.org/xml/ns/dbchangelog
+           http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
-    <changeSet id="202604100412" author="shiva">
+    <changeSet id="202604141133" author="shiva">
 
-        <!--  Create Table -->
+        <!-- Create Table -->
         <createTable tableName="student_task_mentor">
 
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
 
+            <!-- FK to student_task -->
             <column name="student_task_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
 
-            <column name="mentor_student_id" type="BIGINT">
+            <!-- FK to student (mentor) -->
+            <column name="mentor_student_id" type="CHAR(7)">
                 <constraints nullable="false"/>
             </column>
 
@@ -32,7 +33,7 @@
                 <constraints nullable="false"/>
             </column>
 
-            <!--  Audit Fields -->
+            <!-- Audit Fields -->
             <column name="created_by" type="BIGINT"/>
             <column name="created_dt" type="TIMESTAMP"/>
             <column name="updated_by" type="BIGINT"/>
@@ -40,7 +41,7 @@
 
         </createTable>
 
-        <!--  Foreign Key: student_task -->
+        <!-- FK: student_task -->
         <addForeignKeyConstraint
                 baseTableName="student_task_mentor"
                 baseColumnNames="student_task_id"
@@ -48,21 +49,21 @@
                 referencedTableName="student_task"
                 referencedColumnNames="id"/>
 
-        <!--  Foreign Key: mentor (student) -->
+        <!-- FK: mentor_student → student -->
         <addForeignKeyConstraint
                 baseTableName="student_task_mentor"
                 baseColumnNames="mentor_student_id"
                 constraintName="fk_stm_mentor_student"
                 referencedTableName="student"
-                referencedColumnNames="id"/>
+                referencedColumnNames="student_id"/>
 
-        <!--  Optional Unique Constraint (Prevent duplicate mentor assignment) -->
+        <!-- Unique Constraint -->
         <addUniqueConstraint
                 tableName="student_task_mentor"
                 columnNames="student_task_id, mentor_student_id"
                 constraintName="uk_stm_task_mentor"/>
 
-        <!--  Indexes (Performance) -->
+        <!-- Indexes -->
         <createIndex indexName="idx_stm_task" tableName="student_task_mentor">
             <column name="student_task_id"/>
         </createIndex>
@@ -72,5 +73,6 @@
         </createIndex>
 
     </changeSet>
+
 
 </databaseChangeLog>

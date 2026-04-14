@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="
-        http://www.liquibase.org/xml/ns/dbchangelog
-        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+           http://www.liquibase.org/xml/ns/dbchangelog
+           http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
-    <changeSet id="202604100408" author="shiva">
+    <changeSet id="202604141107" author="shiva">
 
-        <!-- ✅ Create Table -->
+        <!-- Create Table -->
         <createTable tableName="student_task">
 
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
 
-            <column name="student_id" type="BIGINT">
+            <!--  Changed here -->
+            <column name="student_id" type="CHAR(7)">
                 <constraints nullable="false"/>
             </column>
 
@@ -40,7 +40,7 @@
 
             <column name="reviewer_comment_txt" type="VARCHAR(1000)"/>
 
-            <!-- ✅ Audit Fields -->
+            <!-- Audit Fields -->
             <column name="created_by" type="BIGINT"/>
             <column name="created_dt" type="TIMESTAMP"/>
             <column name="updated_by" type="BIGINT"/>
@@ -48,14 +48,8 @@
 
         </createTable>
 
-        <!-- ✅ Foreign Keys -->
-        <addForeignKeyConstraint
-                baseTableName="student_task"
-                baseColumnNames="student_id"
-                constraintName="fk_student_task_student"
-                referencedTableName="student"
-                referencedColumnNames="id"/>
 
+        <!-- Keep this FK (valid) -->
         <addForeignKeyConstraint
                 baseTableName="student_task"
                 baseColumnNames="topic_id"
@@ -63,13 +57,13 @@
                 referencedTableName="topic"
                 referencedColumnNames="id"/>
 
-        <!-- ✅ Unique Constraint -->
+        <!-- Unique Constraint -->
         <addUniqueConstraint
                 tableName="student_task"
                 columnNames="student_id, topic_id"
                 constraintName="uk_student_task_student_topic"/>
 
-        <!-- ✅ Indexes (Performance) -->
+        <!-- Indexes -->
         <createIndex indexName="idx_student_task_student" tableName="student_task">
             <column name="student_id"/>
         </createIndex>
@@ -79,7 +73,16 @@
         </createIndex>
 
     </changeSet>
-    
-    
+
+    <changeSet id="202604141118" author="shiva">
+
+        <addForeignKeyConstraint
+                baseTableName="student_task"
+                baseColumnNames="student_id"
+                constraintName="fk_student_task_student"
+                referencedTableName="student"
+                referencedColumnNames="student_id"/>
+
+    </changeSet>
 
 </databaseChangeLog>
