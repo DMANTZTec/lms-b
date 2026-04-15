@@ -1,4 +1,5 @@
 
+
 package com.dmantz.lms.mapper;
 
 import java.util.List;
@@ -89,5 +90,3 @@ public interface CourseMapper {
 	}
 
 }
-
-
