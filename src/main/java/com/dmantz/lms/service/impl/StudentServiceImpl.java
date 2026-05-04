@@ -76,6 +76,7 @@ public class StudentServiceImpl implements StudentService {
 		// System fields
 		student.setStatus("ACTIVE");
 		student.setEnabled("Y");
+		student.setProfileImg(request.getProfileImg());
 
 		Student savedStudent = studentRepository.save(student);
 

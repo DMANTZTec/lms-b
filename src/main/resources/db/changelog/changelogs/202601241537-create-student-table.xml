@@ -1,68 +1,74 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
            http://www.liquibase.org/xml/ns/dbchangelog
            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.15.xsd">
 
-    <!-- ChangeSet to create 'student' table -->
-    <changeSet id="202601241537" author="Shivashankar">
+	<!-- ChangeSet to create 'student' table -->
+	<changeSet id="202601241537" author="Shivashankar">
 
-        <createTable tableName="student">
-            <column name="id" type="BIGINT" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
+		<createTable tableName="student">
+			<column name="id" type="BIGINT" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
 
-            <column name="student_id" type="CHAR(7)">
-                <constraints unique="true" nullable="false"/>
-            </column>
+			<column name="student_id" type="CHAR(7)">
+				<constraints unique="true" nullable="false" />
+			</column>
 
-            <column name="login_id" type="VARCHAR(100)">
-                <constraints unique="true" nullable="false"/>
-            </column>
+			<column name="login_id" type="VARCHAR(100)">
+				<constraints unique="true" nullable="false" />
+			</column>
 
-            <column name="first_nm" type="VARCHAR(100)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="last_nm" type="VARCHAR(100)"/>
+			<column name="first_nm" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_nm" type="VARCHAR(100)" />
 
-            <column name="gender" type="VARCHAR(10)">
-                <constraints nullable="false"/>
-            </column>
+			<column name="gender" type="VARCHAR(10)">
+				<constraints nullable="false" />
+			</column>
 
-            <column name="dob" type="DATE"/>
-            <column name="addr1" type="VARCHAR(255)"/>
-            <column name="addr2" type="VARCHAR(255)"/>
-            <column name="city" type="VARCHAR(100)"/>
-            <column name="state" type="VARCHAR(100)"/>
-            <column name="country" type="VARCHAR(100)"/>
-            <column name="pin" type="VARCHAR(20)"/>
+			<column name="dob" type="DATE" />
+			<column name="addr1" type="VARCHAR(255)" />
+			<column name="addr2" type="VARCHAR(255)" />
+			<column name="city" type="VARCHAR(100)" />
+			<column name="state" type="VARCHAR(100)" />
+			<column name="country" type="VARCHAR(100)" />
+			<column name="pin" type="VARCHAR(20)" />
 
-            <column name="email_id" type="VARCHAR(150)">
-                <constraints unique="true" nullable="false"/>
-            </column>
+			<column name="email_id" type="VARCHAR(150)">
+				<constraints unique="true" nullable="false" />
+			</column>
 
-            <column name="mobile_num" type="VARCHAR(15)">
-                <constraints nullable="false"/>
-            </column>
+			<column name="mobile_num" type="VARCHAR(15)">
+				<constraints nullable="false" />
+			</column>
 
-            <column name="password" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
+			<column name="password" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
 
-            <column name="status" type="VARCHAR(20)" defaultValue="y"/>
-            <column name="enabled" type="CHAR(1)" defaultValue="y"/>
-            <column name="emergency_contact_nm" type="VARCHAR(100)"/>
-            <column name="emergency_contact_num" type="VARCHAR(15)"/>
-            <column name="profile_img" type="BLOB"/>
+			<column name="status" type="VARCHAR(20)" defaultValue="y" />
+			<column name="enabled" type="CHAR(1)" defaultValue="y" />
+			<column name="emergency_contact_nm" type="VARCHAR(100)" />
+			<column name="emergency_contact_num" type="VARCHAR(15)" />
+			<column name="profile_img" type="BLOB" />
 
-            <column name="created_dt" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
-            <column name="created_by" type="BIGINT"/>
-            <column name="updated_dt" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
-            <column name="updated_by" type="BIGINT"/>
-        </createTable>
+			<column name="created_dt" type="TIMESTAMP"
+				defaultValueComputed="CURRENT_TIMESTAMP" />
+			<column name="created_by" type="BIGINT" />
+			<column name="updated_dt" type="TIMESTAMP"
+				defaultValueComputed="CURRENT_TIMESTAMP" />
+			<column name="updated_by" type="BIGINT" />
+		</createTable>
 
-    </changeSet>
+	</changeSet>
 
+	<changeSet id="202605041443" author="Tejaswini">
+		<modifyDataType tableName="student"
+			columnName="profile_img" newDataType="VARCHAR(255)" />
+	</changeSet>
 </databaseChangeLog>
