@@ -43,7 +43,7 @@ public class StudentRegistrationRequest {
     private String emergencyContactNm;
     private String emergencyContactNum;
 
-    private String profile_img;
+    private String profileImg;
 
 
     public String getFirstNm() {
@@ -166,33 +166,22 @@ public class StudentRegistrationRequest {
         this.emergencyContactNum = emergencyContactNum;
     }
 
-    public String getProfile_img() {
-        return profile_img;
-    }
+	public String getProfileImg() {
+		return profileImg;
+	}
 
-    public void setProfile_img(String profile_img) {
-        this.profile_img = profile_img;
-    }
+	public void setProfileImg(String profileImg) {
+		this.profileImg = profileImg;
+	}
 
-    @Override
-    public String toString() {
-        return "StudentRegistrationRequest{" +
-                "firstNm='" + firstNm + '\'' +
-                ", lastNm='" + lastNm + '\'' +
-                ", gender='" + gender + '\'' +
-                ", dob=" + dob +
-                ", addr1='" + addr1 + '\'' +
-                ", addr2='" + addr2 + '\'' +
-                ", city='" + city + '\'' +
-                ", state='" + state + '\'' +
-                ", country='" + country + '\'' +
-                ", pin='" + pin + '\'' +
-                ", emailId='" + emailId + '\'' +
-                ", mobileNum='" + mobileNum + '\'' +
-                ", password='" + password + '\'' +
-                ", emergencyContactNm='" + emergencyContactNm + '\'' +
-                ", emergencyContactNum='" + emergencyContactNum + '\'' +
-                ", profile_img='" + profile_img + '\'' +
-                '}';
-    }
+	@Override
+	public String toString() {
+		return "StudentRegistrationRequest [firstNm=" + firstNm + ", lastNm=" + lastNm + ", gender=" + gender + ", dob="
+				+ dob + ", addr1=" + addr1 + ", addr2=" + addr2 + ", city=" + city + ", state=" + state + ", country="
+				+ country + ", pin=" + pin + ", emailId=" + emailId + ", mobileNum=" + mobileNum + ", password="
+				+ password + ", emergencyContactNm=" + emergencyContactNm + ", emergencyContactNum="
+				+ emergencyContactNum + ", profileImg=" + profileImg + "]";
+	}
+
+   
 }

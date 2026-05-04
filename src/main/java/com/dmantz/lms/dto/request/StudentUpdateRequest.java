@@ -13,7 +13,7 @@ public class StudentUpdateRequest {
 	private String mobileNum;
 	private String emergencyContactNm;
 	private String emergencyContactNum;
-
+	private String profileImg;
 	public String getFirstNm() {
 		return firstNm;
 	}
@@ -110,12 +110,21 @@ public class StudentUpdateRequest {
 		this.emergencyContactNum = emergencyContactNum;
 	}
 
+	public String getProfileImg() {
+		return profileImg;
+	}
+
+	public void setProfileImg(String profileImg) {
+		this.profileImg = profileImg;
+	}
+
 	@Override
 	public String toString() {
 		return "StudentUpdateRequest [firstNm=" + firstNm + ", lastNm=" + lastNm + ", gender=" + gender + ", addr1="
 				+ addr1 + ", addr2=" + addr2 + ", city=" + city + ", state=" + state + ", country=" + country + ", pin="
 				+ pin + ", mobileNum=" + mobileNum + ", emergencyContactNm=" + emergencyContactNm
-				+ ", emergencyContactNum=" + emergencyContactNum + "]";
+				+ ", emergencyContactNum=" + emergencyContactNum + ", profileImg=" + profileImg + "]";
 	}
 
+	
 }

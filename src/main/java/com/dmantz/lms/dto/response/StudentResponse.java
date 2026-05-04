@@ -31,8 +31,7 @@ public class StudentResponse {
 	private String emergencyContactNm;
 	private String emergencyContactNum;
 
-	// Optional: return profile image URL instead of byte[]
-	private String profile_img;
+	private String profileImg;
 
 	private Long createdBy;
 	private LocalDateTime createdDt;
@@ -184,12 +183,14 @@ public class StudentResponse {
 		this.emergencyContactNum = emergencyContactNum;
 	}
 
-	public String getProfile_img() {
-		return profile_img;
+	
+
+	public String getProfileImg() {
+		return profileImg;
 	}
 
-	public void setProfile_img(String profile_img) {
-		this.profile_img = profile_img;
+	public void setProfileImg(String profileImg) {
+		this.profileImg = profileImg;
 	}
 
 	public Long getCreatedBy() {
@@ -231,8 +232,9 @@ public class StudentResponse {
 				+ ", city=" + city + ", state=" + state + ", country=" + country + ", pin=" + pin + ", emailId="
 				+ emailId + ", mobileNum=" + mobileNum + ", status=" + status + ", enabled=" + enabled
 				+ ", emergencyContactNm=" + emergencyContactNm + ", emergencyContactNum=" + emergencyContactNum
-				+ ", profile_img=" + profile_img + ", createdBy=" + createdBy + ", createdDt=" + createdDt
+				+ ", profileImg=" + profileImg + ", createdBy=" + createdBy + ", createdDt=" + createdDt
 				+ ", updatedBy=" + updatedBy + ", updatedDt=" + updatedDt + "]";
 	}
 
+	
 }

@@ -32,6 +32,7 @@ public interface StudentMapper {
     @Mapping(target = "mobileNum", source = "mobileNum")
     @Mapping(target = "emergencyContactNm", source = "emergencyContactNm")
     @Mapping(target = "emergencyContactNum", source = "emergencyContactNum")
+    @Mapping(target = "profileImg", source = "profileImg")
     void updateStudentFromDto(StudentUpdateRequest request,
                               @MappingTarget Student entity);
 

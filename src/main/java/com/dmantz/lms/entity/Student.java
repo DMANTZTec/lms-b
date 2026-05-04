@@ -76,9 +76,8 @@ public class Student extends AuditFields {
 	@Column(name = "emergency_contact_num")
 	private String emergencyContactNum;
 
-	@Lob
 	@Column(name = "profile_img")
-	private byte[] profileImg;
+	private String profileImg;
 
 	public Long getId() {
 		return id;
@@ -240,38 +239,23 @@ public class Student extends AuditFields {
 		this.emergencyContactNum = emergencyContactNum;
 	}
 
-	public byte[] getProfileImg() {
+	public String getProfileImg() {
 		return profileImg;
 	}
 
-	public void setProfileImg(byte[] profileImg) {
+	public void setProfileImg(String profileImg) {
 		this.profileImg = profileImg;
 	}
 
 	@Override
 	public String toString() {
-		return "Student{" +
-				"id=" + id +
-				", studentId='" + studentId + '\'' +
-				", loginId='" + loginId + '\'' +
-				", firstNm='" + firstNm + '\'' +
-				", lastNm='" + lastNm + '\'' +
-				", gender='" + gender + '\'' +
-				", dob=" + dob +
-				", addr1='" + addr1 + '\'' +
-				", addr2='" + addr2 + '\'' +
-				", city='" + city + '\'' +
-				", state='" + state + '\'' +
-				", country='" + country + '\'' +
-				", pin='" + pin + '\'' +
-				", emailId='" + emailId + '\'' +
-				", mobileNum='" + mobileNum + '\'' +
-				", password='" + password + '\'' +
-				", status='" + status + '\'' +
-				", enabled='" + enabled + '\'' +
-				", emergencyContactNm='" + emergencyContactNm + '\'' +
-				", emergencyContactNum='" + emergencyContactNum + '\'' +
-				", profileImg=" + Arrays.toString(profileImg) +
-				'}';
+		return "Student [id=" + id + ", studentId=" + studentId + ", loginId=" + loginId + ", firstNm=" + firstNm
+				+ ", lastNm=" + lastNm + ", gender=" + gender + ", dob=" + dob + ", addr1=" + addr1 + ", addr2=" + addr2
+				+ ", city=" + city + ", state=" + state + ", country=" + country + ", pin=" + pin + ", emailId="
+				+ emailId + ", mobileNum=" + mobileNum + ", password=" + password + ", status=" + status + ", enabled="
+				+ enabled + ", emergencyContactNm=" + emergencyContactNm + ", emergencyContactNum="
+				+ emergencyContactNum + ", profileImg=" + profileImg + "]";
 	}
+
+	
 }
