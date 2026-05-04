@@ -1,0 +1,113 @@
+2026-05-04 12:53:28 INFO  AnnotationConfigContextLoaderUtils:83 - Could not detect default configuration classes for test class [com.dmantz.lms.LmsBApplicationTests]: LmsBApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-05-04 12:53:29 INFO  SpringBootTestContextBootstrapper:234 - Found @SpringBootConfiguration com.dmantz.lms.LmsBApplication for test class com.dmantz.lms.LmsBApplicationTests
+2026-05-04 12:53:29 INFO  Version:21 - HV000001: Hibernate Validator 8.0.1.Final
+2026-05-04 12:53:29 INFO  LmsBApplicationTests:50 - Starting LmsBApplicationTests using Java 25.0.2 with PID 21060 (started by Dmantz in C:\Users\ADMIN_4\Documents\Dmantz projects\lms-b)
+2026-05-04 12:53:29 INFO  LmsBApplicationTests:654 - No active profile set, falling back to 1 default profile: "default"
+2026-05-04 12:53:32 INFO  RepositoryConfigurationDelegate:139 - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-04 12:53:32 INFO  RepositoryConfigurationDelegate:208 - Finished Spring Data repository scanning in 303 ms. Found 22 JPA repository interfaces.
+2026-05-04 12:53:33 INFO  HikariDataSource:110 - HikariPool-1 - Starting...
+2026-05-04 12:53:34 INFO  HikariPool:565 - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@5e158f33
+2026-05-04 12:53:34 INFO  HikariDataSource:123 - HikariPool-1 - Start completed.
+2026-05-04 12:53:37 INFO  changelog:37 - Reading from lms_db.databasechangelog
+2026-05-04 12:53:37 INFO  changelog:37 - Reading from lms_db.databasechangelog
+2026-05-04 12:53:37 INFO  util:37 - UPDATE SUMMARY
+2026-05-04 12:53:37 INFO  util:37 - Run:                          0
+2026-05-04 12:53:37 INFO  util:37 - Previously run:              27
+2026-05-04 12:53:37 INFO  util:37 - Filtered out:                 0
+2026-05-04 12:53:37 INFO  util:37 - -------------------------------
+2026-05-04 12:53:37 INFO  util:37 - Total change sets:           27
+2026-05-04 12:53:37 INFO  util:37 - Update summary generated
+2026-05-04 12:53:37 INFO  lockservice:37 - Successfully released change log lock
+2026-05-04 12:53:37 INFO  command:37 - Command execution complete
+2026-05-04 12:53:37 INFO  LogHelper:31 - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-05-04 12:53:37 INFO  Version:44 - HHH000412: Hibernate ORM core version 6.4.1.Final
+2026-05-04 12:53:37 INFO  RegionFactoryInitiator:50 - HHH000026: Second-level cache disabled
+2026-05-04 12:53:38 INFO  SpringPersistenceUnitInfo:87 - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-04 12:53:43 INFO  JtaPlatformInitiator:58 - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-04 12:53:43 INFO  LocalContainerEntityManagerFactoryBean:437 - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-04 12:53:43 INFO  QueryEnhancerFactory:49 - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-05-04 12:53:46 WARN  JpaBaseConfiguration$JpaWebConfiguration:232 - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-05-04 12:53:46 INFO  DefaultSecurityFilterChain:54 - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@b78343b, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@369c6e1b, org.springframework.security.web.context.SecurityContextHolderFilter@52e752fc, org.springframework.security.web.header.HeaderWriterFilter@579aa873, org.springframework.web.filter.CorsFilter@652026d9, org.springframework.security.web.authentication.logout.LogoutFilter@265c741, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@4fc2ed44, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@7f8e4c7c, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@3e7a7ab8, org.springframework.security.web.access.ExceptionTranslationFilter@272c9d7e, org.springframework.security.web.access.intercept.AuthorizationFilter@4662b1a0]
+2026-05-04 12:53:47 INFO  LmsBApplicationTests:56 - Started LmsBApplicationTests in 18.494 seconds (process running for 22.017)
+2026-05-04 12:53:48 INFO  LocalContainerEntityManagerFactoryBean:650 - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-05-04 12:53:48 INFO  HikariDataSource:350 - HikariPool-1 - Shutdown initiated...
+2026-05-04 12:53:49 INFO  HikariDataSource:352 - HikariPool-1 - Shutdown completed.
+2026-05-04 12:54:24 INFO  Version:21 - HV000001: Hibernate Validator 8.0.1.Final
+2026-05-04 12:54:24 INFO  LmsBApplication:50 - Starting LmsBApplication using Java 25.0.2 with PID 20144 (C:\Users\ADMIN_4\Documents\Dmantz projects\lms-b\target\classes started by Dmantz in C:\Users\ADMIN_4\Documents\Dmantz projects\lms-b)
+2026-05-04 12:54:24 INFO  LmsBApplication:654 - No active profile set, falling back to 1 default profile: "default"
+2026-05-04 12:54:27 INFO  RepositoryConfigurationDelegate:139 - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-04 12:54:27 INFO  RepositoryConfigurationDelegate:208 - Finished Spring Data repository scanning in 279 ms. Found 22 JPA repository interfaces.
+2026-05-04 12:54:28 INFO  TomcatWebServer:109 - Tomcat initialized with port 9090 (http)
+2026-05-04 12:54:28 INFO  Http11NioProtocol:173 - Initializing ProtocolHandler ["http-nio-9090"]
+2026-05-04 12:54:28 INFO  StandardService:173 - Starting service [Tomcat]
+2026-05-04 12:54:28 INFO  StandardEngine:173 - Starting Servlet engine: [Apache Tomcat/10.1.18]
+2026-05-04 12:54:28 INFO  [/]:173 - Initializing Spring embedded WebApplicationContext
+2026-05-04 12:54:28 INFO  ServletWebServerApplicationContext:296 - Root WebApplicationContext: initialization completed in 3890 ms
+2026-05-04 12:54:29 INFO  HikariDataSource:110 - HikariPool-1 - Starting...
+2026-05-04 12:54:29 INFO  HikariPool:565 - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@176333ee
+2026-05-04 12:54:29 INFO  HikariDataSource:123 - HikariPool-1 - Start completed.
+2026-05-04 12:54:31 INFO  changelog:37 - Reading from lms_db.databasechangelog
+2026-05-04 12:54:32 INFO  changelog:37 - Reading from lms_db.databasechangelog
+2026-05-04 12:54:32 INFO  util:37 - UPDATE SUMMARY
+2026-05-04 12:54:32 INFO  util:37 - Run:                          0
+2026-05-04 12:54:32 INFO  util:37 - Previously run:              27
+2026-05-04 12:54:32 INFO  util:37 - Filtered out:                 0
+2026-05-04 12:54:32 INFO  util:37 - -------------------------------
+2026-05-04 12:54:32 INFO  util:37 - Total change sets:           27
+2026-05-04 12:54:32 INFO  util:37 - Update summary generated
+2026-05-04 12:54:32 INFO  lockservice:37 - Successfully released change log lock
+2026-05-04 12:54:32 INFO  command:37 - Command execution complete
+2026-05-04 12:54:32 INFO  LogHelper:31 - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-05-04 12:54:32 INFO  Version:44 - HHH000412: Hibernate ORM core version 6.4.1.Final
+2026-05-04 12:54:32 INFO  RegionFactoryInitiator:50 - HHH000026: Second-level cache disabled
+2026-05-04 12:54:33 INFO  SpringPersistenceUnitInfo:87 - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-04 12:54:36 INFO  JtaPlatformInitiator:58 - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-04 12:54:36 INFO  LocalContainerEntityManagerFactoryBean:437 - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-04 12:54:37 INFO  QueryEnhancerFactory:49 - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-05-04 12:54:39 WARN  JpaBaseConfiguration$JpaWebConfiguration:232 - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-05-04 12:54:39 INFO  DefaultSecurityFilterChain:54 - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@70453a3b, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@56bc5774, org.springframework.security.web.context.SecurityContextHolderFilter@3d275841, org.springframework.security.web.header.HeaderWriterFilter@2147b993, org.springframework.web.filter.CorsFilter@29fe10fa, org.springframework.security.web.authentication.logout.LogoutFilter@605f6b41, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@3688df81, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@4a384b92, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@6bc26806, org.springframework.security.web.access.ExceptionTranslationFilter@6868d3d2, org.springframework.security.web.access.intercept.AuthorizationFilter@1efc3829]
+2026-05-04 12:54:40 INFO  Http11NioProtocol:173 - Starting ProtocolHandler ["http-nio-9090"]
+2026-05-04 12:54:40 INFO  TomcatWebServer:241 - Tomcat started on port 9090 (http) with context path ''
+2026-05-04 12:54:40 INFO  LmsBApplication:56 - Started LmsBApplication in 16.452 seconds (process running for 18.753)
+2026-05-04 12:55:04 INFO  [/]:173 - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-05-04 12:55:04 INFO  DispatcherServlet:532 - Initializing Servlet 'dispatcherServlet'
+2026-05-04 12:55:04 INFO  DispatcherServlet:554 - Completed initialization in 11 ms
+2026-05-04 12:55:04 INFO  StudentServiceImpl:228 - Fetching all students
+2026-05-04 12:55:04 INFO  StudentServiceImpl:235 - Total students fetched: 5
+2026-05-04 12:57:27 INFO  LocalContainerEntityManagerFactoryBean:650 - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-05-04 12:57:27 INFO  HikariDataSource:350 - HikariPool-1 - Shutdown initiated...
+2026-05-04 12:57:27 INFO  HikariDataSource:352 - HikariPool-1 - Shutdown completed.
+2026-05-04 14:26:26 INFO  AnnotationConfigContextLoaderUtils:83 - Could not detect default configuration classes for test class [com.dmantz.lms.LmsBApplicationTests]: LmsBApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-05-04 14:26:26 INFO  SpringBootTestContextBootstrapper:234 - Found @SpringBootConfiguration com.dmantz.lms.LmsBApplication for test class com.dmantz.lms.LmsBApplicationTests
+2026-05-04 14:26:27 INFO  Version:21 - HV000001: Hibernate Validator 8.0.1.Final
+2026-05-04 14:26:27 INFO  LmsBApplicationTests:50 - Starting LmsBApplicationTests using Java 21.0.8 with PID 23540 (started by AFSHEEN in F:\Learning\lms-b)
+2026-05-04 14:26:27 INFO  LmsBApplicationTests:654 - No active profile set, falling back to 1 default profile: "default"
+2026-05-04 14:26:30 INFO  RepositoryConfigurationDelegate:139 - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-04 14:26:31 INFO  RepositoryConfigurationDelegate:208 - Finished Spring Data repository scanning in 426 ms. Found 22 JPA repository interfaces.
+2026-05-04 14:26:32 INFO  HikariDataSource:110 - HikariPool-1 - Starting...
+2026-05-04 14:26:33 INFO  HikariPool:565 - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@2c3f43d1
+2026-05-04 14:26:33 INFO  HikariDataSource:123 - HikariPool-1 - Start completed.
+2026-05-04 14:26:36 INFO  changelog:37 - Reading from lms_db.databasechangelog
+2026-05-04 14:26:37 INFO  changelog:37 - Reading from lms_db.databasechangelog
+2026-05-04 14:26:37 INFO  util:37 - UPDATE SUMMARY
+2026-05-04 14:26:37 INFO  util:37 - Run:                          0
+2026-05-04 14:26:37 INFO  util:37 - Previously run:              27
+2026-05-04 14:26:37 INFO  util:37 - Filtered out:                 0
+2026-05-04 14:26:37 INFO  util:37 - -------------------------------
+2026-05-04 14:26:37 INFO  util:37 - Total change sets:           27
+2026-05-04 14:26:37 INFO  util:37 - Update summary generated
+2026-05-04 14:26:37 INFO  lockservice:37 - Successfully released change log lock
+2026-05-04 14:26:37 INFO  command:37 - Command execution complete
+2026-05-04 14:26:37 INFO  LogHelper:31 - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-05-04 14:26:37 INFO  Version:44 - HHH000412: Hibernate ORM core version 6.4.1.Final
+2026-05-04 14:26:37 INFO  RegionFactoryInitiator:50 - HHH000026: Second-level cache disabled
+2026-05-04 14:26:38 INFO  SpringPersistenceUnitInfo:87 - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-04 14:26:41 INFO  JtaPlatformInitiator:58 - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-04 14:26:41 INFO  LocalContainerEntityManagerFactoryBean:437 - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-04 14:26:42 INFO  QueryEnhancerFactory:49 - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-05-04 14:26:44 WARN  JpaBaseConfiguration$JpaWebConfiguration:232 - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-05-04 14:26:45 INFO  DefaultSecurityFilterChain:54 - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@524abc69, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@12ce9fc, org.springframework.security.web.context.SecurityContextHolderFilter@3aedbf69, org.springframework.security.web.header.HeaderWriterFilter@395a5de6, org.springframework.web.filter.CorsFilter@26975ae, org.springframework.security.web.authentication.logout.LogoutFilter@500200a2, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@4334509d, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@787fa544, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@90596da, org.springframework.security.web.access.ExceptionTranslationFilter@5537d818, org.springframework.security.web.access.intercept.AuthorizationFilter@3ed7a23d]
+2026-05-04 14:26:46 INFO  LmsBApplicationTests:56 - Started LmsBApplicationTests in 19.222 seconds (process running for 22.634)
+2026-05-04 14:26:47 INFO  LocalContainerEntityManagerFactoryBean:650 - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-05-04 14:26:47 INFO  HikariDataSource:350 - HikariPool-1 - Shutdown initiated...
+2026-05-04 14:26:47 INFO  HikariDataSource:352 - HikariPool-1 - Shutdown completed.
