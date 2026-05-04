@@ -7,34 +7,34 @@ import com.dmantz.lms.dto.response.*;
 
 public interface CourseManagementService {
 //	create a subject
-	SubjectResponse createSubject(SubjectRequest requestDto, Long staffID);
+	SubjectResponse createSubject(SubjectRequest requestDto, String staffID);
 
 //  view all subject
 	List<SubjectResponse> viewAllSubjects();
 
 // update an existing subject
-	SubjectResponse updateSubject(Long subjectId, SubjectRequest request, Long staffId);
+	SubjectResponse updateSubject(Long subjectId, SubjectRequest request, String staffId);
 
 //	delete subject
-	void deleteSubject(Long subjectId, Long staffId);
+	void deleteSubject(Long subjectId, String staffId);
 
 //	create a course
-	CourseResponse createCourse(CourseRequest requestDto, Long staffId);
+	CourseResponse createCourse(CourseRequest requestDto, String staffId);
 
 //	 view all courses
 	List<CourseResponse> viewAllCourses();
 
 //	 update an existing course
-	CourseResponse updateCourse(Long courseId, CourseRequest request, Long staffId);
+	CourseResponse updateCourse(Long courseId, CourseRequest request, String staffId);
 
 //		delete subject
-	void deleteCourse(Long courseId, Long staffId);
+	void deleteCourse(Long courseId, String staffId);
 
 //	view Courses by subjects 
 	List<CourseResponse> viewCoursesBySubject(Long subjectId);
 
 //	create a course
-	ChapterResponse createChapter(Long staffId, ChapterRequest request);
+	ChapterResponse createChapter(String staffId, ChapterRequest request);
 
 //	get chapter by Id
 	ChapterResponse getChapterById(Long chapterId);
@@ -46,7 +46,7 @@ public interface CourseManagementService {
 	ChapterResponse updateChapter(Long chapterId, ChapterRequest request, Long staffId);
 
 //    delete a chapter
-	void deleteChapter(Long chapterId, Long staffId);
+	void deleteChapter(Long chapterId, String staffId);
 
 //	create a topic
 	TopicResponseDto createTopic(TopicRequestDto request);

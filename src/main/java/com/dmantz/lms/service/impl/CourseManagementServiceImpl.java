@@ -73,10 +73,10 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 
 	// ------------------ CREATE SUBJECT ------------------
 	@Override
-	public SubjectResponse createSubject(SubjectRequest requestDto, Long staffId) {
+	public SubjectResponse createSubject(SubjectRequest requestDto, String staffId) {
 
 		// Validate staff
-		if (!staffRepository.existsById(staffId)) {
+		if (!staffRepository.existsByStaffId(staffId)) {
 			throw new ResourceNotFoundException("Staff with ID " + staffId + " does not exist");
 		}
 
@@ -99,10 +99,10 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 
 	// ------------------ UPDATE SUBJECT ------------------
 	@Override
-	public SubjectResponse updateSubject(Long subjectId, SubjectRequest requestDto, Long staffId) {
+	public SubjectResponse updateSubject(Long subjectId, SubjectRequest requestDto, String staffId) {
 
 		// Validate staff
-		if (!staffRepository.existsById(staffId)) {
+		if (!staffRepository.existsByStaffId(staffId)) {
 			throw new ResourceNotFoundException("Staff with ID " + staffId + " does not exist");
 		}
 
@@ -126,10 +126,10 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 
 	// -------------------------DELETE SUBJECT-----------------------------
 	@Override
-	public void deleteSubject(Long subjectId, Long staffId) {
+	public void deleteSubject(Long subjectId, String staffId) {
 
 		// Validate staff
-		if (!staffRepository.existsById(staffId)) {
+		if (!staffRepository.existsByStaffId(staffId)) {
 			throw new ResourceNotFoundException("Staff not found with id: " + staffId);
 		}
 
@@ -141,10 +141,10 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 
 //  ----------------------------CREATE COURSE--------------------
 	@Override
-	public CourseResponse createCourse(CourseRequest requestDto, Long staffId) {
+	public CourseResponse createCourse(CourseRequest requestDto, String staffId) {
 
 		// Validate staff
-		if (!staffRepository.existsById(staffId)) {
+		if (!staffRepository.existsByStaffId(staffId)) {
 			throw new ResourceNotFoundException("Staff with ID " + staffId + " does not exist");
 		}
 
@@ -218,10 +218,10 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 	}
 
 	@Override
-	public CourseResponse updateCourse(Long courseId, CourseRequest request, Long staffId) {
+	public CourseResponse updateCourse(Long courseId, CourseRequest request, String staffId) {
 
 		// Validate staff
-		if (!staffRepository.existsById(staffId)) {
+		if (!staffRepository.existsByStaffId(staffId)) {
 			throw new ResourceNotFoundException("Staff with ID " + staffId + " does not exist");
 		}
 
@@ -262,10 +262,10 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 	}
 
 	@Override
-	public void deleteCourse(Long courseId, Long staffId) {
+	public void deleteCourse(Long courseId, String staffId) {
 
 		// Validate staff
-		if (!staffRepository.existsById(staffId)) {
+		if (!staffRepository.existsByStaffId(staffId)) {
 			throw new ResourceNotFoundException("Staff not found with id: " + staffId);
 		}
 
@@ -288,9 +288,9 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 
 	// ================= CREATE CHAPTER=================
 	@Override
-	public ChapterResponse createChapter(Long staffId, ChapterRequest request) {
+	public ChapterResponse createChapter(String staffId, ChapterRequest request) {
 
-		Staff staff = staffRepository.findById(staffId)
+		Staff staff = staffRepository.findByStaffId(staffId)
 				.orElseThrow(() -> new ResourceNotFoundException("Staff not found with id: " + staffId));
 
 		Course course = courseRepository.findByCourseId(request.getCourseId())
@@ -352,9 +352,9 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 
 	// ================= DELETE CHAPTER=================
 	@Override
-	public void deleteChapter(Long chapterId, Long staffId) {
+	public void deleteChapter(Long chapterId, String staffId) {
 
-		staffRepository.findById(staffId)
+		staffRepository.findByStaffId(staffId)
 				.orElseThrow(() -> new ResourceNotFoundException("Staff not found with id: " + staffId));
 
 		Chapter chapter = chapterRepository.findById(chapterId)

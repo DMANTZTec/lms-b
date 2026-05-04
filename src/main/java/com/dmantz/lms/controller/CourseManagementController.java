@@ -33,7 +33,7 @@ public class CourseManagementController {
 
 	@PostMapping("/subject/create")
 	public ResponseEntity<SubjectResponse> createSubject(@Valid @RequestBody SubjectRequest request,
-			@RequestParam Long staffId) {
+			@RequestParam String staffId) {
 
 		SubjectResponse response = courseManagementService.createSubject(request, staffId);
 
@@ -50,12 +50,12 @@ public class CourseManagementController {
 
 	@PutMapping("/subject/update/{subjectId}")
 	public ResponseEntity<SubjectResponse> updateSubject(@PathVariable Long subjectId,
-			@Valid @RequestBody SubjectRequest request, @RequestParam Long staffId) {
+			@Valid @RequestBody SubjectRequest request, @RequestParam String staffId) {
 		return ResponseEntity.ok(courseManagementService.updateSubject(subjectId, request, staffId));
 	}
 
 	@DeleteMapping("/subject/delete/{subjectId}")
-	public ResponseEntity<String> deleteSubject(@PathVariable Long subjectId, @RequestParam Long staffId) {
+	public ResponseEntity<String> deleteSubject(@PathVariable Long subjectId, @RequestParam String staffId) {
 
 		courseManagementService.deleteSubject(subjectId, staffId);
 
@@ -64,7 +64,7 @@ public class CourseManagementController {
 
 	@PostMapping("/course/create")
 	public ResponseEntity<CourseResponse> createCourse(@Valid @RequestBody CourseRequest request,
-			@RequestParam Long staffId) {
+			@RequestParam String staffId) {
 
 		CourseResponse response = courseManagementService.createCourse(request, staffId);
 
@@ -81,12 +81,12 @@ public class CourseManagementController {
 
 	@PutMapping("/course/update/{courseId}")
 	public ResponseEntity<CourseResponse> updateCourse(@PathVariable Long courseId,
-			@Valid @RequestBody CourseRequest request, @RequestParam Long staffId) {
+			@Valid @RequestBody CourseRequest request, @RequestParam String staffId) {
 		return ResponseEntity.ok(courseManagementService.updateCourse(courseId, request, staffId));
 	}
 
 	@DeleteMapping("/course/delete/{courseId}")
-	public ResponseEntity<String> deleteCourse(@PathVariable Long courseId, @RequestParam Long staffId) {
+	public ResponseEntity<String> deleteCourse(@PathVariable Long courseId, @RequestParam String staffId) {
 		courseManagementService.deleteCourse(courseId, staffId);
 		return ResponseEntity.ok("Course deleted successfully");
 	}
@@ -99,7 +99,7 @@ public class CourseManagementController {
 
 	// ================= CREATE =================
 	@PostMapping("/chapter/create")
-	public ResponseEntity<ChapterResponse> createChapter(@RequestParam Long staffId,
+	public ResponseEntity<ChapterResponse> createChapter(@RequestParam String staffId,
 			@RequestBody ChapterRequest request) {
 		ChapterResponse response = courseManagementService.createChapter(staffId, request);
 		return ResponseEntity.ok(response);
@@ -134,7 +134,7 @@ public class CourseManagementController {
 
 	// ================= DELETE =================
 	@DeleteMapping("/delete/{chapterId}")
-	public ResponseEntity<String> deleteChapter(@PathVariable Long chapterId, @RequestParam Long staffId) {
+	public ResponseEntity<String> deleteChapter(@PathVariable Long chapterId, @RequestParam String staffId) {
 		courseManagementService.deleteChapter(chapterId, staffId);
 		return ResponseEntity.ok("Chapter deleted successfully");
 	}
