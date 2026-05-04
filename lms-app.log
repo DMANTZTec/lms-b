@@ -77,7 +77,6 @@
 2026-05-04 12:57:27 INFO  LocalContainerEntityManagerFactoryBean:650 - Closing JPA EntityManagerFactory for persistence unit 'default'
 2026-05-04 12:57:27 INFO  HikariDataSource:350 - HikariPool-1 - Shutdown initiated...
 2026-05-04 12:57:27 INFO  HikariDataSource:352 - HikariPool-1 - Shutdown completed.
-<<<<<<< HEAD
 2026-05-04 14:26:26 INFO  AnnotationConfigContextLoaderUtils:83 - Could not detect default configuration classes for test class [com.dmantz.lms.LmsBApplicationTests]: LmsBApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
 2026-05-04 14:26:26 INFO  SpringBootTestContextBootstrapper:234 - Found @SpringBootConfiguration com.dmantz.lms.LmsBApplication for test class com.dmantz.lms.LmsBApplicationTests
 2026-05-04 14:26:27 INFO  Version:21 - HV000001: Hibernate Validator 8.0.1.Final
@@ -112,7 +111,6 @@
 2026-05-04 14:26:47 INFO  LocalContainerEntityManagerFactoryBean:650 - Closing JPA EntityManagerFactory for persistence unit 'default'
 2026-05-04 14:26:47 INFO  HikariDataSource:350 - HikariPool-1 - Shutdown initiated...
 2026-05-04 14:26:47 INFO  HikariDataSource:352 - HikariPool-1 - Shutdown completed.
-=======
 2026-05-04 14:45:58 INFO  AnnotationConfigContextLoaderUtils:83 - Could not detect default configuration classes for test class [com.dmantz.lms.LmsBApplicationTests]: LmsBApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
 2026-05-04 14:45:59 INFO  SpringBootTestContextBootstrapper:234 - Found @SpringBootConfiguration com.dmantz.lms.LmsBApplication for test class com.dmantz.lms.LmsBApplicationTests
 2026-05-04 14:45:59 INFO  Version:21 - HV000001: Hibernate Validator 8.0.1.Final
@@ -441,4 +439,952 @@ Identify and stop the process that's listening on port 9090 or configure this ap
 2026-05-04 14:55:29 INFO  StudentServiceImpl:110 - OTP generated successfully for studentId: S000001
 2026-05-04 14:55:51 INFO  StudentServiceImpl:335 - Updating student profile for studentId: s000001
 2026-05-04 14:55:52 INFO  StudentServiceImpl:347 - Student profile updated successfully for studentId: s000001
->>>>>>> e6cd7351e32ba848330afdd8bda6ca4370c0fbf5
+2026-05-04 15:29:56 INFO  AnnotationConfigContextLoaderUtils:83 - Could not detect default configuration classes for test class [com.dmantz.lms.LmsBApplicationTests]: LmsBApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-05-04 15:29:57 INFO  SpringBootTestContextBootstrapper:234 - Found @SpringBootConfiguration com.dmantz.lms.LmsBApplication for test class com.dmantz.lms.LmsBApplicationTests
+2026-05-04 15:29:57 INFO  Version:21 - HV000001: Hibernate Validator 8.0.1.Final
+2026-05-04 15:29:57 INFO  LmsBApplicationTests:50 - Starting LmsBApplicationTests using Java 21.0.8 with PID 3160 (started by AFSHEEN in F:\Learning\lms-b)
+2026-05-04 15:29:57 INFO  LmsBApplicationTests:654 - No active profile set, falling back to 1 default profile: "default"
+2026-05-04 15:30:00 INFO  RepositoryConfigurationDelegate:139 - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-04 15:30:00 INFO  RepositoryConfigurationDelegate:208 - Finished Spring Data repository scanning in 304 ms. Found 22 JPA repository interfaces.
+2026-05-04 15:30:02 INFO  HikariDataSource:110 - HikariPool-1 - Starting...
+2026-05-04 15:30:04 ERROR HikariPool:594 - HikariPool-1 - Exception during pool initialization.
+java.sql.SQLException: Access denied for user 'root'@'localhost' (using password: YES)
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:130) ~[mysql-connector-j-8.3.0.jar:8.3.0]
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:122) ~[mysql-connector-j-8.3.0.jar:8.3.0]
+	at com.mysql.cj.jdbc.ConnectionImpl.createNewIO(ConnectionImpl.java:815) ~[mysql-connector-j-8.3.0.jar:8.3.0]
+	at com.mysql.cj.jdbc.ConnectionImpl.<init>(ConnectionImpl.java:438) ~[mysql-connector-j-8.3.0.jar:8.3.0]
+	at com.mysql.cj.jdbc.ConnectionImpl.getInstance(ConnectionImpl.java:241) ~[mysql-connector-j-8.3.0.jar:8.3.0]
+	at com.mysql.cj.jdbc.NonRegisteringDriver.connect(NonRegisteringDriver.java:189) ~[mysql-connector-j-8.3.0.jar:8.3.0]
+	at com.zaxxer.hikari.util.DriverDataSource.getConnection(DriverDataSource.java:138) ~[HikariCP-5.0.1.jar:?]
+	at com.zaxxer.hikari.pool.PoolBase.newConnection(PoolBase.java:359) ~[HikariCP-5.0.1.jar:?]
+	at com.zaxxer.hikari.pool.PoolBase.newPoolEntry(PoolBase.java:201) ~[HikariCP-5.0.1.jar:?]
+	at com.zaxxer.hikari.pool.HikariPool.createPoolEntry(HikariPool.java:470) ~[HikariCP-5.0.1.jar:?]
+	at com.zaxxer.hikari.pool.HikariPool.checkFailFast(HikariPool.java:561) ~[HikariCP-5.0.1.jar:?]
+	at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:100) ~[HikariCP-5.0.1.jar:?]
+	at com.zaxxer.hikari.HikariDataSource.getConnection(HikariDataSource.java:112) ~[HikariCP-5.0.1.jar:?]
+	at liquibase.integration.spring.SpringLiquibase.afterPropertiesSet(SpringLiquibase.java:283) ~[liquibase-core-4.24.0.jar:?]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1820) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1769) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:599) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:521) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:312) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.context.support.AbstractApplicationContext.getBean(AbstractApplicationContext.java:1231) ~[spring-context-6.1.3.jar:6.1.3]
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:949) ~[spring-context-6.1.3.jar:6.1.3]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:624) ~[spring-context-6.1.3.jar:6.1.3]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:754) ~[spring-boot-3.2.2.jar:3.2.2]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:456) ~[spring-boot-3.2.2.jar:3.2.2]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:334) ~[spring-boot-3.2.2.jar:3.2.2]
+	at org.springframework.boot.test.context.SpringBootContextLoader.lambda$loadContext$3(SpringBootContextLoader.java:137) ~[spring-boot-test-3.2.2.jar:3.2.2]
+	at org.springframework.util.function.ThrowingSupplier.get(ThrowingSupplier.java:58) ~[spring-core-6.1.3.jar:6.1.3]
+	at org.springframework.util.function.ThrowingSupplier.get(ThrowingSupplier.java:46) ~[spring-core-6.1.3.jar:6.1.3]
+	at org.springframework.boot.SpringApplication.withHook(SpringApplication.java:1454) ~[spring-boot-3.2.2.jar:3.2.2]
+	at org.springframework.boot.test.context.SpringBootContextLoader$ContextLoaderHook.run(SpringBootContextLoader.java:552) ~[spring-boot-test-3.2.2.jar:3.2.2]
+	at org.springframework.boot.test.context.SpringBootContextLoader.loadContext(SpringBootContextLoader.java:137) ~[spring-boot-test-3.2.2.jar:3.2.2]
+	at org.springframework.boot.test.context.SpringBootContextLoader.loadContext(SpringBootContextLoader.java:108) ~[spring-boot-test-3.2.2.jar:3.2.2]
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContextInternal(DefaultCacheAwareContextLoaderDelegate.java:225) ~[spring-test-6.1.3.jar:6.1.3]
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:152) ~[spring-test-6.1.3.jar:6.1.3]
+	at org.springframework.test.context.support.DefaultTestContext.getApplicationContext(DefaultTestContext.java:130) ~[spring-test-6.1.3.jar:6.1.3]
+	at org.springframework.test.context.web.ServletTestExecutionListener.setUpRequestContextIfNecessary(ServletTestExecutionListener.java:191) ~[spring-test-6.1.3.jar:6.1.3]
+	at org.springframework.test.context.web.ServletTestExecutionListener.prepareTestInstance(ServletTestExecutionListener.java:130) ~[spring-test-6.1.3.jar:6.1.3]
+	at org.springframework.test.context.TestContextManager.prepareTestInstance(TestContextManager.java:260) ~[spring-test-6.1.3.jar:6.1.3]
+	at org.springframework.test.context.junit.jupiter.SpringExtension.postProcessTestInstance(SpringExtension.java:163) ~[spring-test-6.1.3.jar:6.1.3]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$invokeTestInstancePostProcessors$10(ClassBasedTestDescriptor.java:378) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.executeAndMaskThrowable(ClassBasedTestDescriptor.java:383) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$invokeTestInstancePostProcessors$11(ClassBasedTestDescriptor.java:378) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197) ~[?:?]
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:179) ~[?:?]
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1708) ~[?:?]
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:509) ~[?:?]
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499) ~[?:?]
+	at java.base/java.util.stream.StreamSpliterators$WrappingSpliterator.forEachRemaining(StreamSpliterators.java:310) ~[?:?]
+	at java.base/java.util.stream.Streams$ConcatSpliterator.forEachRemaining(Streams.java:735) ~[?:?]
+	at java.base/java.util.stream.Streams$ConcatSpliterator.forEachRemaining(Streams.java:734) ~[?:?]
+	at java.base/java.util.stream.ReferencePipeline$Head.forEach(ReferencePipeline.java:762) ~[?:?]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.invokeTestInstancePostProcessors(ClassBasedTestDescriptor.java:377) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$instantiateAndPostProcessTestInstance$6(ClassBasedTestDescriptor.java:290) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.instantiateAndPostProcessTestInstance(ClassBasedTestDescriptor.java:289) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$testInstancesProvider$4(ClassBasedTestDescriptor.java:279) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at java.base/java.util.Optional.orElseGet(Optional.java:364) ~[?:?]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$testInstancesProvider$5(ClassBasedTestDescriptor.java:278) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at org.junit.jupiter.engine.execution.TestInstancesProvider.getTestInstances(TestInstancesProvider.java:31) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$prepare$0(TestMethodTestDescriptor.java:106) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.prepare(TestMethodTestDescriptor.java:105) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.prepare(TestMethodTestDescriptor.java:69) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$prepare$2(NodeTestTask.java:123) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.prepare(NodeTestTask.java:123) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:90) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596) ~[?:?]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596) ~[?:?]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:198) ~[junit-platform-launcher-1.10.1.jar:1.10.1]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:169) ~[junit-platform-launcher-1.10.1.jar:1.10.1]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:93) ~[junit-platform-launcher-1.10.1.jar:1.10.1]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:58) ~[junit-platform-launcher-1.10.1.jar:1.10.1]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:141) [junit-platform-launcher-1.10.1.jar:1.10.1]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:57) [junit-platform-launcher-1.10.1.jar:1.10.1]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103) [junit-platform-launcher-1.10.1.jar:1.10.1]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85) [junit-platform-launcher-1.10.1.jar:1.10.1]
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47) [junit-platform-launcher-1.10.1.jar:1.10.1]
+	at org.apache.maven.surefire.junitplatform.LazyLauncher.execute(LazyLauncher.java:56) [surefire-junit-platform-3.2.5.jar:3.2.5]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:184) [surefire-junit-platform-3.2.5.jar:3.2.5]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:148) [surefire-junit-platform-3.2.5.jar:3.2.5]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:122) [surefire-junit-platform-3.2.5.jar:3.2.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385) [surefire-booter-3.2.5.jar:3.2.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162) [surefire-booter-3.2.5.jar:3.2.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507) [surefire-booter-3.2.5.jar:3.2.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495) [surefire-booter-3.2.5.jar:3.2.5]
+2026-05-04 15:30:04 WARN  GenericWebApplicationContext:632 - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'liquibase' defined in class path resource [org/springframework/boot/autoconfigure/liquibase/LiquibaseAutoConfiguration$LiquibaseConfiguration.class]: java.sql.SQLException: Access denied for user 'root'@'localhost' (using password: YES)
+2026-05-04 15:30:04 INFO  ConditionEvaluationReportLogger:82 - 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-05-04 15:30:04 ERROR SpringApplication:851 - Application run failed
+org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'liquibase' defined in class path resource [org/springframework/boot/autoconfigure/liquibase/LiquibaseAutoConfiguration$LiquibaseConfiguration.class]: java.sql.SQLException: Access denied for user 'root'@'localhost' (using password: YES)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1773) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:599) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:521) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:312) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.context.support.AbstractApplicationContext.getBean(AbstractApplicationContext.java:1231) ~[spring-context-6.1.3.jar:6.1.3]
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:949) ~[spring-context-6.1.3.jar:6.1.3]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:624) ~[spring-context-6.1.3.jar:6.1.3]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:754) ~[spring-boot-3.2.2.jar:3.2.2]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:456) ~[spring-boot-3.2.2.jar:3.2.2]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:334) ~[spring-boot-3.2.2.jar:3.2.2]
+	at org.springframework.boot.test.context.SpringBootContextLoader.lambda$loadContext$3(SpringBootContextLoader.java:137) ~[spring-boot-test-3.2.2.jar:3.2.2]
+	at org.springframework.util.function.ThrowingSupplier.get(ThrowingSupplier.java:58) ~[spring-core-6.1.3.jar:6.1.3]
+	at org.springframework.util.function.ThrowingSupplier.get(ThrowingSupplier.java:46) ~[spring-core-6.1.3.jar:6.1.3]
+	at org.springframework.boot.SpringApplication.withHook(SpringApplication.java:1454) ~[spring-boot-3.2.2.jar:3.2.2]
+	at org.springframework.boot.test.context.SpringBootContextLoader$ContextLoaderHook.run(SpringBootContextLoader.java:552) ~[spring-boot-test-3.2.2.jar:3.2.2]
+	at org.springframework.boot.test.context.SpringBootContextLoader.loadContext(SpringBootContextLoader.java:137) ~[spring-boot-test-3.2.2.jar:3.2.2]
+	at org.springframework.boot.test.context.SpringBootContextLoader.loadContext(SpringBootContextLoader.java:108) ~[spring-boot-test-3.2.2.jar:3.2.2]
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContextInternal(DefaultCacheAwareContextLoaderDelegate.java:225) ~[spring-test-6.1.3.jar:6.1.3]
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:152) ~[spring-test-6.1.3.jar:6.1.3]
+	at org.springframework.test.context.support.DefaultTestContext.getApplicationContext(DefaultTestContext.java:130) ~[spring-test-6.1.3.jar:6.1.3]
+	at org.springframework.test.context.web.ServletTestExecutionListener.setUpRequestContextIfNecessary(ServletTestExecutionListener.java:191) ~[spring-test-6.1.3.jar:6.1.3]
+	at org.springframework.test.context.web.ServletTestExecutionListener.prepareTestInstance(ServletTestExecutionListener.java:130) ~[spring-test-6.1.3.jar:6.1.3]
+	at org.springframework.test.context.TestContextManager.prepareTestInstance(TestContextManager.java:260) ~[spring-test-6.1.3.jar:6.1.3]
+	at org.springframework.test.context.junit.jupiter.SpringExtension.postProcessTestInstance(SpringExtension.java:163) ~[spring-test-6.1.3.jar:6.1.3]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$invokeTestInstancePostProcessors$10(ClassBasedTestDescriptor.java:378) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.executeAndMaskThrowable(ClassBasedTestDescriptor.java:383) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$invokeTestInstancePostProcessors$11(ClassBasedTestDescriptor.java:378) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197) ~[?:?]
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:179) ~[?:?]
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1708) ~[?:?]
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:509) ~[?:?]
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499) ~[?:?]
+	at java.base/java.util.stream.StreamSpliterators$WrappingSpliterator.forEachRemaining(StreamSpliterators.java:310) ~[?:?]
+	at java.base/java.util.stream.Streams$ConcatSpliterator.forEachRemaining(Streams.java:735) ~[?:?]
+	at java.base/java.util.stream.Streams$ConcatSpliterator.forEachRemaining(Streams.java:734) ~[?:?]
+	at java.base/java.util.stream.ReferencePipeline$Head.forEach(ReferencePipeline.java:762) ~[?:?]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.invokeTestInstancePostProcessors(ClassBasedTestDescriptor.java:377) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$instantiateAndPostProcessTestInstance$6(ClassBasedTestDescriptor.java:290) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.instantiateAndPostProcessTestInstance(ClassBasedTestDescriptor.java:289) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$testInstancesProvider$4(ClassBasedTestDescriptor.java:279) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at java.base/java.util.Optional.orElseGet(Optional.java:364) ~[?:?]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$testInstancesProvider$5(ClassBasedTestDescriptor.java:278) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at org.junit.jupiter.engine.execution.TestInstancesProvider.getTestInstances(TestInstancesProvider.java:31) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$prepare$0(TestMethodTestDescriptor.java:106) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.prepare(TestMethodTestDescriptor.java:105) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.prepare(TestMethodTestDescriptor.java:69) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$prepare$2(NodeTestTask.java:123) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.prepare(NodeTestTask.java:123) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:90) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596) ~[?:?]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596) ~[?:?]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:198) ~[junit-platform-launcher-1.10.1.jar:1.10.1]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:169) ~[junit-platform-launcher-1.10.1.jar:1.10.1]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:93) ~[junit-platform-launcher-1.10.1.jar:1.10.1]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:58) ~[junit-platform-launcher-1.10.1.jar:1.10.1]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:141) [junit-platform-launcher-1.10.1.jar:1.10.1]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:57) [junit-platform-launcher-1.10.1.jar:1.10.1]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103) [junit-platform-launcher-1.10.1.jar:1.10.1]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85) [junit-platform-launcher-1.10.1.jar:1.10.1]
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47) [junit-platform-launcher-1.10.1.jar:1.10.1]
+	at org.apache.maven.surefire.junitplatform.LazyLauncher.execute(LazyLauncher.java:56) [surefire-junit-platform-3.2.5.jar:3.2.5]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:184) [surefire-junit-platform-3.2.5.jar:3.2.5]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:148) [surefire-junit-platform-3.2.5.jar:3.2.5]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:122) [surefire-junit-platform-3.2.5.jar:3.2.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385) [surefire-booter-3.2.5.jar:3.2.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162) [surefire-booter-3.2.5.jar:3.2.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507) [surefire-booter-3.2.5.jar:3.2.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495) [surefire-booter-3.2.5.jar:3.2.5]
+Caused by: liquibase.exception.DatabaseException: java.sql.SQLException: Access denied for user 'root'@'localhost' (using password: YES)
+	at liquibase.integration.spring.SpringLiquibase.afterPropertiesSet(SpringLiquibase.java:288) ~[liquibase-core-4.24.0.jar:?]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1820) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1769) ~[spring-beans-6.1.3.jar:6.1.3]
+	... 96 more
+Caused by: java.sql.SQLException: Access denied for user 'root'@'localhost' (using password: YES)
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:130) ~[mysql-connector-j-8.3.0.jar:8.3.0]
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:122) ~[mysql-connector-j-8.3.0.jar:8.3.0]
+	at com.mysql.cj.jdbc.ConnectionImpl.createNewIO(ConnectionImpl.java:815) ~[mysql-connector-j-8.3.0.jar:8.3.0]
+	at com.mysql.cj.jdbc.ConnectionImpl.<init>(ConnectionImpl.java:438) ~[mysql-connector-j-8.3.0.jar:8.3.0]
+	at com.mysql.cj.jdbc.ConnectionImpl.getInstance(ConnectionImpl.java:241) ~[mysql-connector-j-8.3.0.jar:8.3.0]
+	at com.mysql.cj.jdbc.NonRegisteringDriver.connect(NonRegisteringDriver.java:189) ~[mysql-connector-j-8.3.0.jar:8.3.0]
+	at com.zaxxer.hikari.util.DriverDataSource.getConnection(DriverDataSource.java:138) ~[HikariCP-5.0.1.jar:?]
+	at com.zaxxer.hikari.pool.PoolBase.newConnection(PoolBase.java:359) ~[HikariCP-5.0.1.jar:?]
+	at com.zaxxer.hikari.pool.PoolBase.newPoolEntry(PoolBase.java:201) ~[HikariCP-5.0.1.jar:?]
+	at com.zaxxer.hikari.pool.HikariPool.createPoolEntry(HikariPool.java:470) ~[HikariCP-5.0.1.jar:?]
+	at com.zaxxer.hikari.pool.HikariPool.checkFailFast(HikariPool.java:561) ~[HikariCP-5.0.1.jar:?]
+	at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:100) ~[HikariCP-5.0.1.jar:?]
+	at com.zaxxer.hikari.HikariDataSource.getConnection(HikariDataSource.java:112) ~[HikariCP-5.0.1.jar:?]
+	at liquibase.integration.spring.SpringLiquibase.afterPropertiesSet(SpringLiquibase.java:283) ~[liquibase-core-4.24.0.jar:?]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1820) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1769) ~[spring-beans-6.1.3.jar:6.1.3]
+	... 96 more
+2026-05-04 15:30:04 WARN  TestContextManager:272 - Caught exception while allowing TestExecutionListener [org.springframework.test.context.web.ServletTestExecutionListener] to prepare test instance [com.dmantz.lms.LmsBApplicationTests@3982206a]
+java.lang.IllegalStateException: Failed to load ApplicationContext for [WebMergedContextConfiguration@2ffb0d10 testClass = com.dmantz.lms.LmsBApplicationTests, locations = [], classes = [com.dmantz.lms.LmsBApplication], contextInitializerClasses = [], activeProfiles = [], propertySourceDescriptors = [], propertySourceProperties = ["org.springframework.boot.test.context.SpringBootTestContextBootstrapper=true"], contextCustomizers = [org.springframework.boot.test.context.filter.ExcludeFilterContextCustomizer@403132fc, org.springframework.boot.test.json.DuplicateJsonObjectContextCustomizerFactory$DuplicateJsonObjectContextCustomizer@3a1d593e, org.springframework.boot.test.mock.mockito.MockitoContextCustomizer@0, org.springframework.boot.test.web.client.TestRestTemplateContextCustomizer@77307458, org.springframework.boot.test.autoconfigure.actuate.observability.ObservabilityContextCustomizerFactory$DisableObservabilityContextCustomizer@1f, org.springframework.boot.test.autoconfigure.properties.PropertyMappingContextCustomizer@0, org.springframework.boot.test.autoconfigure.web.servlet.WebDriverContextCustomizer@3bde62ff, org.springframework.boot.test.context.SpringBootTestAnnotation@85e4cb19], resourceBasePath = "src/main/webapp", contextLoader = org.springframework.boot.test.context.SpringBootContextLoader, parent = null]
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:180) ~[spring-test-6.1.3.jar:6.1.3]
+	at org.springframework.test.context.support.DefaultTestContext.getApplicationContext(DefaultTestContext.java:130) ~[spring-test-6.1.3.jar:6.1.3]
+	at org.springframework.test.context.web.ServletTestExecutionListener.setUpRequestContextIfNecessary(ServletTestExecutionListener.java:191) ~[spring-test-6.1.3.jar:6.1.3]
+	at org.springframework.test.context.web.ServletTestExecutionListener.prepareTestInstance(ServletTestExecutionListener.java:130) ~[spring-test-6.1.3.jar:6.1.3]
+	at org.springframework.test.context.TestContextManager.prepareTestInstance(TestContextManager.java:260) ~[spring-test-6.1.3.jar:6.1.3]
+	at org.springframework.test.context.junit.jupiter.SpringExtension.postProcessTestInstance(SpringExtension.java:163) ~[spring-test-6.1.3.jar:6.1.3]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$invokeTestInstancePostProcessors$10(ClassBasedTestDescriptor.java:378) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.executeAndMaskThrowable(ClassBasedTestDescriptor.java:383) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$invokeTestInstancePostProcessors$11(ClassBasedTestDescriptor.java:378) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:197) ~[?:?]
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:179) ~[?:?]
+	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1708) ~[?:?]
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:509) ~[?:?]
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499) ~[?:?]
+	at java.base/java.util.stream.StreamSpliterators$WrappingSpliterator.forEachRemaining(StreamSpliterators.java:310) ~[?:?]
+	at java.base/java.util.stream.Streams$ConcatSpliterator.forEachRemaining(Streams.java:735) ~[?:?]
+	at java.base/java.util.stream.Streams$ConcatSpliterator.forEachRemaining(Streams.java:734) ~[?:?]
+	at java.base/java.util.stream.ReferencePipeline$Head.forEach(ReferencePipeline.java:762) ~[?:?]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.invokeTestInstancePostProcessors(ClassBasedTestDescriptor.java:377) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$instantiateAndPostProcessTestInstance$6(ClassBasedTestDescriptor.java:290) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.instantiateAndPostProcessTestInstance(ClassBasedTestDescriptor.java:289) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$testInstancesProvider$4(ClassBasedTestDescriptor.java:279) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at java.base/java.util.Optional.orElseGet(Optional.java:364) ~[?:?]
+	at org.junit.jupiter.engine.descriptor.ClassBasedTestDescriptor.lambda$testInstancesProvider$5(ClassBasedTestDescriptor.java:278) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at org.junit.jupiter.engine.execution.TestInstancesProvider.getTestInstances(TestInstancesProvider.java:31) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$prepare$0(TestMethodTestDescriptor.java:106) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.prepare(TestMethodTestDescriptor.java:105) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.prepare(TestMethodTestDescriptor.java:69) ~[junit-jupiter-engine-5.10.1.jar:5.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$prepare$2(NodeTestTask.java:123) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.prepare(NodeTestTask.java:123) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:90) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596) ~[?:?]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596) ~[?:?]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54) ~[junit-platform-engine-1.10.1.jar:1.10.1]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:198) ~[junit-platform-launcher-1.10.1.jar:1.10.1]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:169) ~[junit-platform-launcher-1.10.1.jar:1.10.1]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:93) ~[junit-platform-launcher-1.10.1.jar:1.10.1]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:58) ~[junit-platform-launcher-1.10.1.jar:1.10.1]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:141) [junit-platform-launcher-1.10.1.jar:1.10.1]
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:57) [junit-platform-launcher-1.10.1.jar:1.10.1]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:103) [junit-platform-launcher-1.10.1.jar:1.10.1]
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:85) [junit-platform-launcher-1.10.1.jar:1.10.1]
+	at org.junit.platform.launcher.core.DelegatingLauncher.execute(DelegatingLauncher.java:47) [junit-platform-launcher-1.10.1.jar:1.10.1]
+	at org.apache.maven.surefire.junitplatform.LazyLauncher.execute(LazyLauncher.java:56) [surefire-junit-platform-3.2.5.jar:3.2.5]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:184) [surefire-junit-platform-3.2.5.jar:3.2.5]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:148) [surefire-junit-platform-3.2.5.jar:3.2.5]
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:122) [surefire-junit-platform-3.2.5.jar:3.2.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385) [surefire-booter-3.2.5.jar:3.2.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162) [surefire-booter-3.2.5.jar:3.2.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507) [surefire-booter-3.2.5.jar:3.2.5]
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495) [surefire-booter-3.2.5.jar:3.2.5]
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'liquibase' defined in class path resource [org/springframework/boot/autoconfigure/liquibase/LiquibaseAutoConfiguration$LiquibaseConfiguration.class]: java.sql.SQLException: Access denied for user 'root'@'localhost' (using password: YES)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1773) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:599) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:521) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:312) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.context.support.AbstractApplicationContext.getBean(AbstractApplicationContext.java:1231) ~[spring-context-6.1.3.jar:6.1.3]
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:949) ~[spring-context-6.1.3.jar:6.1.3]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:624) ~[spring-context-6.1.3.jar:6.1.3]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:754) ~[spring-boot-3.2.2.jar:3.2.2]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:456) ~[spring-boot-3.2.2.jar:3.2.2]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:334) ~[spring-boot-3.2.2.jar:3.2.2]
+	at org.springframework.boot.test.context.SpringBootContextLoader.lambda$loadContext$3(SpringBootContextLoader.java:137) ~[spring-boot-test-3.2.2.jar:3.2.2]
+	at org.springframework.util.function.ThrowingSupplier.get(ThrowingSupplier.java:58) ~[spring-core-6.1.3.jar:6.1.3]
+	at org.springframework.util.function.ThrowingSupplier.get(ThrowingSupplier.java:46) ~[spring-core-6.1.3.jar:6.1.3]
+	at org.springframework.boot.SpringApplication.withHook(SpringApplication.java:1454) ~[spring-boot-3.2.2.jar:3.2.2]
+	at org.springframework.boot.test.context.SpringBootContextLoader$ContextLoaderHook.run(SpringBootContextLoader.java:552) ~[spring-boot-test-3.2.2.jar:3.2.2]
+	at org.springframework.boot.test.context.SpringBootContextLoader.loadContext(SpringBootContextLoader.java:137) ~[spring-boot-test-3.2.2.jar:3.2.2]
+	at org.springframework.boot.test.context.SpringBootContextLoader.loadContext(SpringBootContextLoader.java:108) ~[spring-boot-test-3.2.2.jar:3.2.2]
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContextInternal(DefaultCacheAwareContextLoaderDelegate.java:225) ~[spring-test-6.1.3.jar:6.1.3]
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:152) ~[spring-test-6.1.3.jar:6.1.3]
+	... 73 more
+Caused by: liquibase.exception.DatabaseException: java.sql.SQLException: Access denied for user 'root'@'localhost' (using password: YES)
+	at liquibase.integration.spring.SpringLiquibase.afterPropertiesSet(SpringLiquibase.java:288) ~[liquibase-core-4.24.0.jar:?]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1820) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1769) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:599) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:521) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:312) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.context.support.AbstractApplicationContext.getBean(AbstractApplicationContext.java:1231) ~[spring-context-6.1.3.jar:6.1.3]
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:949) ~[spring-context-6.1.3.jar:6.1.3]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:624) ~[spring-context-6.1.3.jar:6.1.3]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:754) ~[spring-boot-3.2.2.jar:3.2.2]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:456) ~[spring-boot-3.2.2.jar:3.2.2]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:334) ~[spring-boot-3.2.2.jar:3.2.2]
+	at org.springframework.boot.test.context.SpringBootContextLoader.lambda$loadContext$3(SpringBootContextLoader.java:137) ~[spring-boot-test-3.2.2.jar:3.2.2]
+	at org.springframework.util.function.ThrowingSupplier.get(ThrowingSupplier.java:58) ~[spring-core-6.1.3.jar:6.1.3]
+	at org.springframework.util.function.ThrowingSupplier.get(ThrowingSupplier.java:46) ~[spring-core-6.1.3.jar:6.1.3]
+	at org.springframework.boot.SpringApplication.withHook(SpringApplication.java:1454) ~[spring-boot-3.2.2.jar:3.2.2]
+	at org.springframework.boot.test.context.SpringBootContextLoader$ContextLoaderHook.run(SpringBootContextLoader.java:552) ~[spring-boot-test-3.2.2.jar:3.2.2]
+	at org.springframework.boot.test.context.SpringBootContextLoader.loadContext(SpringBootContextLoader.java:137) ~[spring-boot-test-3.2.2.jar:3.2.2]
+	at org.springframework.boot.test.context.SpringBootContextLoader.loadContext(SpringBootContextLoader.java:108) ~[spring-boot-test-3.2.2.jar:3.2.2]
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContextInternal(DefaultCacheAwareContextLoaderDelegate.java:225) ~[spring-test-6.1.3.jar:6.1.3]
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:152) ~[spring-test-6.1.3.jar:6.1.3]
+	... 73 more
+Caused by: java.sql.SQLException: Access denied for user 'root'@'localhost' (using password: YES)
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:130) ~[mysql-connector-j-8.3.0.jar:8.3.0]
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:122) ~[mysql-connector-j-8.3.0.jar:8.3.0]
+	at com.mysql.cj.jdbc.ConnectionImpl.createNewIO(ConnectionImpl.java:815) ~[mysql-connector-j-8.3.0.jar:8.3.0]
+	at com.mysql.cj.jdbc.ConnectionImpl.<init>(ConnectionImpl.java:438) ~[mysql-connector-j-8.3.0.jar:8.3.0]
+	at com.mysql.cj.jdbc.ConnectionImpl.getInstance(ConnectionImpl.java:241) ~[mysql-connector-j-8.3.0.jar:8.3.0]
+	at com.mysql.cj.jdbc.NonRegisteringDriver.connect(NonRegisteringDriver.java:189) ~[mysql-connector-j-8.3.0.jar:8.3.0]
+	at com.zaxxer.hikari.util.DriverDataSource.getConnection(DriverDataSource.java:138) ~[HikariCP-5.0.1.jar:?]
+	at com.zaxxer.hikari.pool.PoolBase.newConnection(PoolBase.java:359) ~[HikariCP-5.0.1.jar:?]
+	at com.zaxxer.hikari.pool.PoolBase.newPoolEntry(PoolBase.java:201) ~[HikariCP-5.0.1.jar:?]
+	at com.zaxxer.hikari.pool.HikariPool.createPoolEntry(HikariPool.java:470) ~[HikariCP-5.0.1.jar:?]
+	at com.zaxxer.hikari.pool.HikariPool.checkFailFast(HikariPool.java:561) ~[HikariCP-5.0.1.jar:?]
+	at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:100) ~[HikariCP-5.0.1.jar:?]
+	at com.zaxxer.hikari.HikariDataSource.getConnection(HikariDataSource.java:112) ~[HikariCP-5.0.1.jar:?]
+	at liquibase.integration.spring.SpringLiquibase.afterPropertiesSet(SpringLiquibase.java:283) ~[liquibase-core-4.24.0.jar:?]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1820) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1769) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:599) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:521) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:312) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199) ~[spring-beans-6.1.3.jar:6.1.3]
+	at org.springframework.context.support.AbstractApplicationContext.getBean(AbstractApplicationContext.java:1231) ~[spring-context-6.1.3.jar:6.1.3]
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:949) ~[spring-context-6.1.3.jar:6.1.3]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:624) ~[spring-context-6.1.3.jar:6.1.3]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:754) ~[spring-boot-3.2.2.jar:3.2.2]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:456) ~[spring-boot-3.2.2.jar:3.2.2]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:334) ~[spring-boot-3.2.2.jar:3.2.2]
+	at org.springframework.boot.test.context.SpringBootContextLoader.lambda$loadContext$3(SpringBootContextLoader.java:137) ~[spring-boot-test-3.2.2.jar:3.2.2]
+	at org.springframework.util.function.ThrowingSupplier.get(ThrowingSupplier.java:58) ~[spring-core-6.1.3.jar:6.1.3]
+	at org.springframework.util.function.ThrowingSupplier.get(ThrowingSupplier.java:46) ~[spring-core-6.1.3.jar:6.1.3]
+	at org.springframework.boot.SpringApplication.withHook(SpringApplication.java:1454) ~[spring-boot-3.2.2.jar:3.2.2]
+	at org.springframework.boot.test.context.SpringBootContextLoader$ContextLoaderHook.run(SpringBootContextLoader.java:552) ~[spring-boot-test-3.2.2.jar:3.2.2]
+	at org.springframework.boot.test.context.SpringBootContextLoader.loadContext(SpringBootContextLoader.java:137) ~[spring-boot-test-3.2.2.jar:3.2.2]
+	at org.springframework.boot.test.context.SpringBootContextLoader.loadContext(SpringBootContextLoader.java:108) ~[spring-boot-test-3.2.2.jar:3.2.2]
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContextInternal(DefaultCacheAwareContextLoaderDelegate.java:225) ~[spring-test-6.1.3.jar:6.1.3]
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:152) ~[spring-test-6.1.3.jar:6.1.3]
+	... 73 more
+2026-05-04 15:30:58 INFO  AnnotationConfigContextLoaderUtils:83 - Could not detect default configuration classes for test class [com.dmantz.lms.LmsBApplicationTests]: LmsBApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-05-04 15:30:58 INFO  SpringBootTestContextBootstrapper:234 - Found @SpringBootConfiguration com.dmantz.lms.LmsBApplication for test class com.dmantz.lms.LmsBApplicationTests
+2026-05-04 15:30:59 INFO  Version:21 - HV000001: Hibernate Validator 8.0.1.Final
+2026-05-04 15:30:59 INFO  LmsBApplicationTests:50 - Starting LmsBApplicationTests using Java 21.0.8 with PID 9276 (started by AFSHEEN in F:\Learning\lms-b)
+2026-05-04 15:30:59 INFO  LmsBApplicationTests:654 - No active profile set, falling back to 1 default profile: "default"
+2026-05-04 15:31:02 INFO  RepositoryConfigurationDelegate:139 - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-04 15:31:02 INFO  RepositoryConfigurationDelegate:208 - Finished Spring Data repository scanning in 303 ms. Found 22 JPA repository interfaces.
+2026-05-04 15:31:03 INFO  HikariDataSource:110 - HikariPool-1 - Starting...
+2026-05-04 15:31:04 INFO  HikariPool:565 - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@b9b97ad
+2026-05-04 15:31:04 INFO  HikariDataSource:123 - HikariPool-1 - Start completed.
+2026-05-04 15:31:07 INFO  changelog:37 - Reading from lms_db.databasechangelog
+2026-05-04 15:31:08 WARN  changelog:37 - Due to mysql SQL limitations, modifyDataType will lose primary key/autoincrement/not null/comment settings explicitly redefined in the change. Use <sql> or <modifySql> to re-specify all configuration if this is the case
+2026-05-04 15:31:08 WARN  changelog:37 - Due to mysql SQL limitations, modifyDataType will lose primary key/autoincrement/not null/comment settings explicitly redefined in the change. Use <sql> or <modifySql> to re-specify all configuration if this is the case
+2026-05-04 15:31:08 INFO  lockservice:37 - Successfully acquired change log lock
+2026-05-04 15:31:08 INFO  command:37 - Using deploymentId: 7888868132
+2026-05-04 15:31:08 INFO  changelog:37 - Reading from lms_db.databasechangelog
+2026-05-04 15:31:08 INFO  changelog:37 - student.profile_img datatype was changed to VARCHAR(255)
+2026-05-04 15:31:08 INFO  changelog:37 - ChangeSet db/changelog/changelogs/202601241537-create-student-table.xml::202605041443::Tejaswini ran successfully in 282ms
+2026-05-04 15:31:08 INFO  util:37 - UPDATE SUMMARY
+2026-05-04 15:31:08 INFO  util:37 - Run:                          1
+2026-05-04 15:31:08 INFO  util:37 - Previously run:              27
+2026-05-04 15:31:08 INFO  util:37 - Filtered out:                 0
+2026-05-04 15:31:08 INFO  util:37 - -------------------------------
+2026-05-04 15:31:08 INFO  util:37 - Total change sets:           28
+2026-05-04 15:31:08 INFO  util:37 - Update summary generated
+2026-05-04 15:31:08 INFO  command:37 - Update command completed successfully.
+2026-05-04 15:31:08 INFO  lockservice:37 - Successfully released change log lock
+2026-05-04 15:31:08 INFO  command:37 - Command execution complete
+2026-05-04 15:31:08 INFO  LogHelper:31 - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-05-04 15:31:08 INFO  Version:44 - HHH000412: Hibernate ORM core version 6.4.1.Final
+2026-05-04 15:31:08 INFO  RegionFactoryInitiator:50 - HHH000026: Second-level cache disabled
+2026-05-04 15:31:09 INFO  SpringPersistenceUnitInfo:87 - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-04 15:31:12 INFO  JtaPlatformInitiator:58 - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-04 15:31:12 INFO  LocalContainerEntityManagerFactoryBean:437 - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-04 15:31:12 INFO  QueryEnhancerFactory:49 - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-05-04 15:31:15 WARN  JpaBaseConfiguration$JpaWebConfiguration:232 - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-05-04 15:31:15 INFO  DefaultSecurityFilterChain:54 - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@50cf046e, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@125793db, org.springframework.security.web.context.SecurityContextHolderFilter@5d60bcb2, org.springframework.security.web.header.HeaderWriterFilter@6bc3597d, org.springframework.web.filter.CorsFilter@5a621451, org.springframework.security.web.authentication.logout.LogoutFilter@7ae6782b, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@61667255, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@310aa2cd, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@50309ed9, org.springframework.security.web.access.ExceptionTranslationFilter@3805ebbe, org.springframework.security.web.access.intercept.AuthorizationFilter@9b828a8]
+2026-05-04 15:31:16 INFO  LmsBApplicationTests:56 - Started LmsBApplicationTests in 17.357 seconds (process running for 20.327)
+2026-05-04 15:31:17 INFO  LocalContainerEntityManagerFactoryBean:650 - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-05-04 15:31:17 INFO  HikariDataSource:350 - HikariPool-1 - Shutdown initiated...
+2026-05-04 15:31:17 INFO  HikariDataSource:352 - HikariPool-1 - Shutdown completed.
+2026-05-04 15:32:09 INFO  Version:21 - HV000001: Hibernate Validator 8.0.1.Final
+2026-05-04 15:32:09 INFO  LmsBApplication:50 - Starting LmsBApplication using Java 21.0.8 with PID 16252 (F:\Learning\lms-b\target\classes started by AFSHEEN in F:\Learning\lms-b)
+2026-05-04 15:32:09 INFO  LmsBApplication:654 - No active profile set, falling back to 1 default profile: "default"
+2026-05-04 15:32:10 INFO  RepositoryConfigurationDelegate:139 - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-04 15:32:10 INFO  RepositoryConfigurationDelegate:208 - Finished Spring Data repository scanning in 149 ms. Found 22 JPA repository interfaces.
+2026-05-04 15:32:11 INFO  TomcatWebServer:109 - Tomcat initialized with port 9090 (http)
+2026-05-04 15:32:11 INFO  Http11NioProtocol:173 - Initializing ProtocolHandler ["http-nio-9090"]
+2026-05-04 15:32:11 INFO  StandardService:173 - Starting service [Tomcat]
+2026-05-04 15:32:11 INFO  StandardEngine:173 - Starting Servlet engine: [Apache Tomcat/10.1.18]
+2026-05-04 15:32:11 INFO  [/]:173 - Initializing Spring embedded WebApplicationContext
+2026-05-04 15:32:11 INFO  ServletWebServerApplicationContext:296 - Root WebApplicationContext: initialization completed in 2046 ms
+2026-05-04 15:32:11 INFO  HikariDataSource:110 - HikariPool-1 - Starting...
+2026-05-04 15:32:12 INFO  HikariPool:565 - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@77a2688d
+2026-05-04 15:32:12 INFO  HikariDataSource:123 - HikariPool-1 - Start completed.
+2026-05-04 15:32:13 INFO  changelog:37 - Reading from lms_db.databasechangelog
+2026-05-04 15:32:14 INFO  changelog:37 - Reading from lms_db.databasechangelog
+2026-05-04 15:32:14 INFO  util:37 - UPDATE SUMMARY
+2026-05-04 15:32:14 INFO  util:37 - Run:                          0
+2026-05-04 15:32:14 INFO  util:37 - Previously run:              28
+2026-05-04 15:32:14 INFO  util:37 - Filtered out:                 0
+2026-05-04 15:32:14 INFO  util:37 - -------------------------------
+2026-05-04 15:32:14 INFO  util:37 - Total change sets:           28
+2026-05-04 15:32:14 INFO  util:37 - Update summary generated
+2026-05-04 15:32:14 INFO  lockservice:37 - Successfully released change log lock
+2026-05-04 15:32:14 INFO  command:37 - Command execution complete
+2026-05-04 15:32:14 INFO  LogHelper:31 - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-05-04 15:32:14 INFO  Version:44 - HHH000412: Hibernate ORM core version 6.4.1.Final
+2026-05-04 15:32:14 INFO  RegionFactoryInitiator:50 - HHH000026: Second-level cache disabled
+2026-05-04 15:32:14 INFO  SpringPersistenceUnitInfo:87 - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-04 15:32:16 INFO  JtaPlatformInitiator:58 - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-04 15:32:16 INFO  LocalContainerEntityManagerFactoryBean:437 - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-04 15:32:16 INFO  QueryEnhancerFactory:49 - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-05-04 15:32:17 WARN  AnnotationConfigServletWebServerApplicationContext:632 - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'classAdminController' defined in file [F:\Learning\lms-b\target\classes\com\dmantz\lms\controller\ClassAdminController.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'classAdminServiceImpl' defined in file [F:\Learning\lms-b\target\classes\com\dmantz\lms\service\impl\ClassAdminServiceImpl.class]: Unsatisfied dependency expressed through constructor parameter 2: No qualifying bean of type 'com.dmantz.lms.mapper.ClassBatchMapper' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+2026-05-04 15:32:17 INFO  LocalContainerEntityManagerFactoryBean:650 - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-05-04 15:32:17 INFO  HikariDataSource:350 - HikariPool-1 - Shutdown initiated...
+2026-05-04 15:32:17 INFO  HikariDataSource:352 - HikariPool-1 - Shutdown completed.
+2026-05-04 15:32:17 INFO  StandardService:173 - Stopping service [Tomcat]
+2026-05-04 15:32:17 INFO  ConditionEvaluationReportLogger:82 - 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-05-04 15:32:17 ERROR LoggingFailureAnalysisReporter:40 - 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Parameter 2 of constructor in com.dmantz.lms.service.impl.ClassAdminServiceImpl required a bean of type 'com.dmantz.lms.mapper.ClassBatchMapper' that could not be found.
+
+
+Action:
+
+Consider defining a bean of type 'com.dmantz.lms.mapper.ClassBatchMapper' in your configuration.
+
+2026-05-04 15:33:32 INFO  AnnotationConfigContextLoaderUtils:83 - Could not detect default configuration classes for test class [com.dmantz.lms.LmsBApplicationTests]: LmsBApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-05-04 15:33:32 INFO  SpringBootTestContextBootstrapper:234 - Found @SpringBootConfiguration com.dmantz.lms.LmsBApplication for test class com.dmantz.lms.LmsBApplicationTests
+2026-05-04 15:33:32 INFO  Version:21 - HV000001: Hibernate Validator 8.0.1.Final
+2026-05-04 15:33:33 INFO  LmsBApplicationTests:50 - Starting LmsBApplicationTests using Java 21.0.8 with PID 25652 (started by AFSHEEN in F:\Learning\lms-b)
+2026-05-04 15:33:33 INFO  LmsBApplicationTests:654 - No active profile set, falling back to 1 default profile: "default"
+2026-05-04 15:33:35 INFO  RepositoryConfigurationDelegate:139 - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-04 15:33:35 INFO  RepositoryConfigurationDelegate:208 - Finished Spring Data repository scanning in 306 ms. Found 22 JPA repository interfaces.
+2026-05-04 15:33:37 INFO  HikariDataSource:110 - HikariPool-1 - Starting...
+2026-05-04 15:33:37 INFO  HikariPool:565 - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@70cf7d1e
+2026-05-04 15:33:37 INFO  HikariDataSource:123 - HikariPool-1 - Start completed.
+2026-05-04 15:33:41 INFO  changelog:37 - Reading from lms_db.databasechangelog
+2026-05-04 15:33:41 INFO  changelog:37 - Reading from lms_db.databasechangelog
+2026-05-04 15:33:42 INFO  util:37 - UPDATE SUMMARY
+2026-05-04 15:33:42 INFO  util:37 - Run:                          0
+2026-05-04 15:33:42 INFO  util:37 - Previously run:              28
+2026-05-04 15:33:42 INFO  util:37 - Filtered out:                 0
+2026-05-04 15:33:42 INFO  util:37 - -------------------------------
+2026-05-04 15:33:42 INFO  util:37 - Total change sets:           28
+2026-05-04 15:33:42 INFO  util:37 - Update summary generated
+2026-05-04 15:33:42 INFO  lockservice:37 - Successfully released change log lock
+2026-05-04 15:33:42 INFO  command:37 - Command execution complete
+2026-05-04 15:33:42 INFO  LogHelper:31 - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-05-04 15:33:42 INFO  Version:44 - HHH000412: Hibernate ORM core version 6.4.1.Final
+2026-05-04 15:33:42 INFO  RegionFactoryInitiator:50 - HHH000026: Second-level cache disabled
+2026-05-04 15:33:43 INFO  SpringPersistenceUnitInfo:87 - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-04 15:33:45 INFO  JtaPlatformInitiator:58 - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-04 15:33:45 INFO  LocalContainerEntityManagerFactoryBean:437 - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-04 15:33:46 INFO  QueryEnhancerFactory:49 - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-05-04 15:33:50 WARN  JpaBaseConfiguration$JpaWebConfiguration:232 - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-05-04 15:33:51 INFO  DefaultSecurityFilterChain:54 - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@64c1ff9b, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@606b3174, org.springframework.security.web.context.SecurityContextHolderFilter@6299b325, org.springframework.security.web.header.HeaderWriterFilter@276f5549, org.springframework.web.filter.CorsFilter@af42895, org.springframework.security.web.authentication.logout.LogoutFilter@136d3f1a, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@42339fcb, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@276ee610, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@55e25c9, org.springframework.security.web.access.ExceptionTranslationFilter@34e0c1d5, org.springframework.security.web.access.intercept.AuthorizationFilter@4275101c]
+2026-05-04 15:33:52 INFO  LmsBApplicationTests:56 - Started LmsBApplicationTests in 20.194 seconds (process running for 23.334)
+2026-05-04 15:33:56 INFO  LocalContainerEntityManagerFactoryBean:650 - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-05-04 15:33:56 INFO  HikariDataSource:350 - HikariPool-1 - Shutdown initiated...
+2026-05-04 15:33:56 INFO  HikariDataSource:352 - HikariPool-1 - Shutdown completed.
+2026-05-04 15:36:26 INFO  AnnotationConfigContextLoaderUtils:83 - Could not detect default configuration classes for test class [com.dmantz.lms.LmsBApplicationTests]: LmsBApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-05-04 15:36:27 INFO  SpringBootTestContextBootstrapper:234 - Found @SpringBootConfiguration com.dmantz.lms.LmsBApplication for test class com.dmantz.lms.LmsBApplicationTests
+2026-05-04 15:36:27 INFO  Version:21 - HV000001: Hibernate Validator 8.0.1.Final
+2026-05-04 15:36:27 INFO  LmsBApplicationTests:50 - Starting LmsBApplicationTests using Java 21.0.8 with PID 18524 (started by AFSHEEN in F:\Learning\lms-b)
+2026-05-04 15:36:27 INFO  LmsBApplicationTests:654 - No active profile set, falling back to 1 default profile: "default"
+2026-05-04 15:36:30 INFO  RepositoryConfigurationDelegate:139 - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-04 15:36:30 INFO  RepositoryConfigurationDelegate:208 - Finished Spring Data repository scanning in 332 ms. Found 22 JPA repository interfaces.
+2026-05-04 15:36:32 INFO  HikariDataSource:110 - HikariPool-1 - Starting...
+2026-05-04 15:36:32 INFO  HikariPool:565 - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@70cf7d1e
+2026-05-04 15:36:32 INFO  HikariDataSource:123 - HikariPool-1 - Start completed.
+2026-05-04 15:36:36 INFO  changelog:37 - Reading from lms_db.databasechangelog
+2026-05-04 15:36:36 INFO  changelog:37 - Reading from lms_db.databasechangelog
+2026-05-04 15:36:36 INFO  util:37 - UPDATE SUMMARY
+2026-05-04 15:36:36 INFO  util:37 - Run:                          0
+2026-05-04 15:36:36 INFO  util:37 - Previously run:              28
+2026-05-04 15:36:36 INFO  util:37 - Filtered out:                 0
+2026-05-04 15:36:36 INFO  util:37 - -------------------------------
+2026-05-04 15:36:36 INFO  util:37 - Total change sets:           28
+2026-05-04 15:36:36 INFO  util:37 - Update summary generated
+2026-05-04 15:36:36 INFO  lockservice:37 - Successfully released change log lock
+2026-05-04 15:36:36 INFO  command:37 - Command execution complete
+2026-05-04 15:36:36 INFO  LogHelper:31 - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-05-04 15:36:37 INFO  Version:44 - HHH000412: Hibernate ORM core version 6.4.1.Final
+2026-05-04 15:36:37 INFO  RegionFactoryInitiator:50 - HHH000026: Second-level cache disabled
+2026-05-04 15:36:37 INFO  SpringPersistenceUnitInfo:87 - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-04 15:36:40 INFO  JtaPlatformInitiator:58 - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-04 15:36:40 INFO  LocalContainerEntityManagerFactoryBean:437 - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-04 15:36:41 INFO  QueryEnhancerFactory:49 - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-05-04 15:36:44 WARN  JpaBaseConfiguration$JpaWebConfiguration:232 - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-05-04 15:36:45 INFO  DefaultSecurityFilterChain:54 - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@682ce13b, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@64c1ff9b, org.springframework.security.web.context.SecurityContextHolderFilter@56f679c4, org.springframework.security.web.header.HeaderWriterFilter@5062bb4, org.springframework.web.filter.CorsFilter@606b3174, org.springframework.security.web.authentication.logout.LogoutFilter@56d12fce, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@3f817722, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@42339fcb, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@af42895, org.springframework.security.web.access.ExceptionTranslationFilter@1a5d6133, org.springframework.security.web.access.intercept.AuthorizationFilter@558a349b]
+2026-05-04 15:36:46 INFO  LmsBApplicationTests:56 - Started LmsBApplicationTests in 18.719 seconds (process running for 21.782)
+2026-05-04 15:36:47 INFO  LocalContainerEntityManagerFactoryBean:650 - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-05-04 15:36:47 INFO  HikariDataSource:350 - HikariPool-1 - Shutdown initiated...
+2026-05-04 15:36:47 INFO  HikariDataSource:352 - HikariPool-1 - Shutdown completed.
+2026-05-04 15:37:06 INFO  Version:21 - HV000001: Hibernate Validator 8.0.1.Final
+2026-05-04 15:37:06 INFO  LmsBApplication:50 - Starting LmsBApplication using Java 21.0.8 with PID 27116 (F:\Learning\lms-b\target\classes started by AFSHEEN in F:\Learning\lms-b)
+2026-05-04 15:37:06 INFO  LmsBApplication:654 - No active profile set, falling back to 1 default profile: "default"
+2026-05-04 15:37:07 INFO  RepositoryConfigurationDelegate:139 - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-04 15:37:07 INFO  RepositoryConfigurationDelegate:208 - Finished Spring Data repository scanning in 166 ms. Found 22 JPA repository interfaces.
+2026-05-04 15:37:08 INFO  TomcatWebServer:109 - Tomcat initialized with port 9090 (http)
+2026-05-04 15:37:08 INFO  Http11NioProtocol:173 - Initializing ProtocolHandler ["http-nio-9090"]
+2026-05-04 15:37:08 INFO  StandardService:173 - Starting service [Tomcat]
+2026-05-04 15:37:08 INFO  StandardEngine:173 - Starting Servlet engine: [Apache Tomcat/10.1.18]
+2026-05-04 15:37:08 INFO  [/]:173 - Initializing Spring embedded WebApplicationContext
+2026-05-04 15:37:08 INFO  ServletWebServerApplicationContext:296 - Root WebApplicationContext: initialization completed in 2266 ms
+2026-05-04 15:37:08 INFO  HikariDataSource:110 - HikariPool-1 - Starting...
+2026-05-04 15:37:09 INFO  HikariPool:565 - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@674aa626
+2026-05-04 15:37:09 INFO  HikariDataSource:123 - HikariPool-1 - Start completed.
+2026-05-04 15:37:10 INFO  changelog:37 - Reading from lms_db.databasechangelog
+2026-05-04 15:37:10 INFO  changelog:37 - Reading from lms_db.databasechangelog
+2026-05-04 15:37:10 INFO  util:37 - UPDATE SUMMARY
+2026-05-04 15:37:10 INFO  util:37 - Run:                          0
+2026-05-04 15:37:10 INFO  util:37 - Previously run:              28
+2026-05-04 15:37:10 INFO  util:37 - Filtered out:                 0
+2026-05-04 15:37:10 INFO  util:37 - -------------------------------
+2026-05-04 15:37:10 INFO  util:37 - Total change sets:           28
+2026-05-04 15:37:10 INFO  util:37 - Update summary generated
+2026-05-04 15:37:10 INFO  lockservice:37 - Successfully released change log lock
+2026-05-04 15:37:10 INFO  command:37 - Command execution complete
+2026-05-04 15:37:10 INFO  LogHelper:31 - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-05-04 15:37:10 INFO  Version:44 - HHH000412: Hibernate ORM core version 6.4.1.Final
+2026-05-04 15:37:11 INFO  RegionFactoryInitiator:50 - HHH000026: Second-level cache disabled
+2026-05-04 15:37:11 INFO  SpringPersistenceUnitInfo:87 - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-04 15:37:13 INFO  JtaPlatformInitiator:58 - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-04 15:37:13 INFO  LocalContainerEntityManagerFactoryBean:437 - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-04 15:37:14 INFO  QueryEnhancerFactory:49 - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-05-04 15:37:15 WARN  AnnotationConfigServletWebServerApplicationContext:632 - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'classAdminController' defined in file [F:\Learning\lms-b\target\classes\com\dmantz\lms\controller\ClassAdminController.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'classAdminServiceImpl' defined in file [F:\Learning\lms-b\target\classes\com\dmantz\lms\service\impl\ClassAdminServiceImpl.class]: Unsatisfied dependency expressed through constructor parameter 2: No qualifying bean of type 'com.dmantz.lms.mapper.ClassBatchMapper' available: expected at least 1 bean which qualifies as autowire candidate. Dependency annotations: {}
+2026-05-04 15:37:15 INFO  LocalContainerEntityManagerFactoryBean:650 - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-05-04 15:37:15 INFO  HikariDataSource:350 - HikariPool-1 - Shutdown initiated...
+2026-05-04 15:37:15 INFO  HikariDataSource:352 - HikariPool-1 - Shutdown completed.
+2026-05-04 15:37:15 INFO  StandardService:173 - Stopping service [Tomcat]
+2026-05-04 15:37:15 INFO  ConditionEvaluationReportLogger:82 - 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-05-04 15:37:15 ERROR LoggingFailureAnalysisReporter:40 - 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Parameter 2 of constructor in com.dmantz.lms.service.impl.ClassAdminServiceImpl required a bean of type 'com.dmantz.lms.mapper.ClassBatchMapper' that could not be found.
+
+
+Action:
+
+Consider defining a bean of type 'com.dmantz.lms.mapper.ClassBatchMapper' in your configuration.
+
+2026-05-04 15:39:09 INFO  Version:21 - HV000001: Hibernate Validator 8.0.1.Final
+2026-05-04 15:39:09 INFO  LmsBApplication:50 - Starting LmsBApplication using Java 21.0.8 with PID 1580 (F:\Learning\lms-b\target\classes started by AFSHEEN in F:\Learning\lms-b)
+2026-05-04 15:39:09 INFO  LmsBApplication:654 - No active profile set, falling back to 1 default profile: "default"
+2026-05-04 15:39:11 INFO  RepositoryConfigurationDelegate:139 - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-04 15:39:11 INFO  RepositoryConfigurationDelegate:208 - Finished Spring Data repository scanning in 197 ms. Found 22 JPA repository interfaces.
+2026-05-04 15:39:12 INFO  TomcatWebServer:109 - Tomcat initialized with port 9090 (http)
+2026-05-04 15:39:12 INFO  Http11NioProtocol:173 - Initializing ProtocolHandler ["http-nio-9090"]
+2026-05-04 15:39:12 INFO  StandardService:173 - Starting service [Tomcat]
+2026-05-04 15:39:12 INFO  StandardEngine:173 - Starting Servlet engine: [Apache Tomcat/10.1.18]
+2026-05-04 15:39:12 INFO  [/]:173 - Initializing Spring embedded WebApplicationContext
+2026-05-04 15:39:12 INFO  ServletWebServerApplicationContext:296 - Root WebApplicationContext: initialization completed in 3160 ms
+2026-05-04 15:39:12 INFO  HikariDataSource:110 - HikariPool-1 - Starting...
+2026-05-04 15:39:13 INFO  HikariPool:565 - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@3d235635
+2026-05-04 15:39:13 INFO  HikariDataSource:123 - HikariPool-1 - Start completed.
+2026-05-04 15:39:15 INFO  changelog:37 - Reading from lms_db.databasechangelog
+2026-05-04 15:39:15 INFO  changelog:37 - Reading from lms_db.databasechangelog
+2026-05-04 15:39:15 INFO  util:37 - UPDATE SUMMARY
+2026-05-04 15:39:15 INFO  util:37 - Run:                          0
+2026-05-04 15:39:15 INFO  util:37 - Previously run:              28
+2026-05-04 15:39:15 INFO  util:37 - Filtered out:                 0
+2026-05-04 15:39:15 INFO  util:37 - -------------------------------
+2026-05-04 15:39:15 INFO  util:37 - Total change sets:           28
+2026-05-04 15:39:15 INFO  util:37 - Update summary generated
+2026-05-04 15:39:16 INFO  lockservice:37 - Successfully released change log lock
+2026-05-04 15:39:16 INFO  command:37 - Command execution complete
+2026-05-04 15:39:16 INFO  LogHelper:31 - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-05-04 15:39:16 INFO  Version:44 - HHH000412: Hibernate ORM core version 6.4.1.Final
+2026-05-04 15:39:16 INFO  RegionFactoryInitiator:50 - HHH000026: Second-level cache disabled
+2026-05-04 15:39:16 INFO  SpringPersistenceUnitInfo:87 - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-04 15:39:18 INFO  JtaPlatformInitiator:58 - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-04 15:39:18 INFO  LocalContainerEntityManagerFactoryBean:437 - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-04 15:39:19 INFO  QueryEnhancerFactory:49 - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-05-04 15:39:21 WARN  JpaBaseConfiguration$JpaWebConfiguration:232 - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-05-04 15:39:21 INFO  DefaultSecurityFilterChain:54 - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@2a7369e3, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@130813d4, org.springframework.security.web.context.SecurityContextHolderFilter@b4a6ee4, org.springframework.security.web.header.HeaderWriterFilter@11eceb90, org.springframework.web.filter.CorsFilter@7ddd975f, org.springframework.security.web.authentication.logout.LogoutFilter@264c6a50, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@6423d1a7, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@435fdb36, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@7a139c99, org.springframework.security.web.access.ExceptionTranslationFilter@442dec82, org.springframework.security.web.access.intercept.AuthorizationFilter@62919547]
+2026-05-04 15:39:22 INFO  Http11NioProtocol:173 - Starting ProtocolHandler ["http-nio-9090"]
+2026-05-04 15:39:22 WARN  AnnotationConfigServletWebServerApplicationContext:632 - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
+2026-05-04 15:39:22 INFO  LocalContainerEntityManagerFactoryBean:650 - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-05-04 15:39:22 INFO  HikariDataSource:350 - HikariPool-1 - Shutdown initiated...
+2026-05-04 15:39:22 INFO  HikariDataSource:352 - HikariPool-1 - Shutdown completed.
+2026-05-04 15:39:22 INFO  ConditionEvaluationReportLogger:82 - 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-05-04 15:39:22 ERROR LoggingFailureAnalysisReporter:40 - 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 9090 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 9090 or configure this application to listen on another port.
+
+2026-05-04 15:39:30 INFO  Version:21 - HV000001: Hibernate Validator 8.0.1.Final
+2026-05-04 15:39:30 INFO  LmsBApplication:50 - Starting LmsBApplication using Java 21.0.8 with PID 20928 (F:\Learning\lms-b\target\classes started by AFSHEEN in F:\Learning\lms-b)
+2026-05-04 15:39:30 INFO  LmsBApplication:654 - No active profile set, falling back to 1 default profile: "default"
+2026-05-04 15:39:32 INFO  RepositoryConfigurationDelegate:139 - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-04 15:39:32 INFO  RepositoryConfigurationDelegate:208 - Finished Spring Data repository scanning in 157 ms. Found 22 JPA repository interfaces.
+2026-05-04 15:39:33 INFO  TomcatWebServer:109 - Tomcat initialized with port 9090 (http)
+2026-05-04 15:39:33 INFO  Http11NioProtocol:173 - Initializing ProtocolHandler ["http-nio-9090"]
+2026-05-04 15:39:33 INFO  StandardService:173 - Starting service [Tomcat]
+2026-05-04 15:39:33 INFO  StandardEngine:173 - Starting Servlet engine: [Apache Tomcat/10.1.18]
+2026-05-04 15:39:33 INFO  [/]:173 - Initializing Spring embedded WebApplicationContext
+2026-05-04 15:39:33 INFO  ServletWebServerApplicationContext:296 - Root WebApplicationContext: initialization completed in 2129 ms
+2026-05-04 15:39:33 INFO  HikariDataSource:110 - HikariPool-1 - Starting...
+2026-05-04 15:39:33 INFO  HikariPool:565 - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@5a8dcfbb
+2026-05-04 15:39:33 INFO  HikariDataSource:123 - HikariPool-1 - Start completed.
+2026-05-04 15:39:35 INFO  changelog:37 - Reading from lms_db.databasechangelog
+2026-05-04 15:39:35 INFO  changelog:37 - Reading from lms_db.databasechangelog
+2026-05-04 15:39:35 INFO  util:37 - UPDATE SUMMARY
+2026-05-04 15:39:35 INFO  util:37 - Run:                          0
+2026-05-04 15:39:35 INFO  util:37 - Previously run:              28
+2026-05-04 15:39:35 INFO  util:37 - Filtered out:                 0
+2026-05-04 15:39:35 INFO  util:37 - -------------------------------
+2026-05-04 15:39:35 INFO  util:37 - Total change sets:           28
+2026-05-04 15:39:35 INFO  util:37 - Update summary generated
+2026-05-04 15:39:35 INFO  lockservice:37 - Successfully released change log lock
+2026-05-04 15:39:35 INFO  command:37 - Command execution complete
+2026-05-04 15:39:35 INFO  LogHelper:31 - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-05-04 15:39:35 INFO  Version:44 - HHH000412: Hibernate ORM core version 6.4.1.Final
+2026-05-04 15:39:35 INFO  RegionFactoryInitiator:50 - HHH000026: Second-level cache disabled
+2026-05-04 15:39:36 INFO  SpringPersistenceUnitInfo:87 - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-04 15:39:38 INFO  JtaPlatformInitiator:58 - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-04 15:39:38 INFO  LocalContainerEntityManagerFactoryBean:437 - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-04 15:39:38 INFO  QueryEnhancerFactory:49 - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-05-04 15:39:40 WARN  JpaBaseConfiguration$JpaWebConfiguration:232 - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-05-04 15:39:41 INFO  DefaultSecurityFilterChain:54 - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@3d81525b, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@3002a5b9, org.springframework.security.web.context.SecurityContextHolderFilter@6e96b655, org.springframework.security.web.header.HeaderWriterFilter@264c6a50, org.springframework.web.filter.CorsFilter@47179c33, org.springframework.security.web.authentication.logout.LogoutFilter@48b3b9dd, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@5affe1f2, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@77fa7d98, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@2667c953, org.springframework.security.web.access.ExceptionTranslationFilter@66f6ae9a, org.springframework.security.web.access.intercept.AuthorizationFilter@3048f547]
+2026-05-04 15:39:41 INFO  Http11NioProtocol:173 - Starting ProtocolHandler ["http-nio-9090"]
+2026-05-04 15:39:41 INFO  TomcatWebServer:241 - Tomcat started on port 9090 (http) with context path ''
+2026-05-04 15:39:41 INFO  LmsBApplication:56 - Started LmsBApplication in 11.028 seconds (process running for 12.293)
+2026-05-04 15:40:07 INFO  [/]:173 - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-05-04 15:40:07 INFO  DispatcherServlet:532 - Initializing Servlet 'dispatcherServlet'
+2026-05-04 15:40:07 INFO  DispatcherServlet:554 - Completed initialization in 4 ms
+2026-05-04 15:40:09 INFO  AbstractOpenApiResource:390 - Init duration for springdoc-openapi is: 1474 ms
+2026-05-04 15:51:29 INFO  StudentServiceImpl:57 - Student registration started for email: Adsgf@gmail.com
+2026-05-04 15:51:29 INFO  StudentServiceImpl:83 - Student registered successfully with studentId: S000003
+2026-05-04 15:51:29 INFO  StudentServiceImpl:98 - Generating OTP for studentId: S000003
+2026-05-04 15:51:29 INFO  StudentServiceImpl:110 - OTP generated successfully for studentId: S000003
+2026-05-04 15:54:07 INFO  StudentServiceImpl:335 - Updating student profile for studentId: S000003
+2026-05-04 15:54:07 INFO  StudentServiceImpl:347 - Student profile updated successfully for studentId: S000003
+2026-05-04 16:00:05 INFO  AnnotationConfigContextLoaderUtils:83 - Could not detect default configuration classes for test class [com.dmantz.lms.LmsBApplicationTests]: LmsBApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-05-04 16:00:05 INFO  SpringBootTestContextBootstrapper:234 - Found @SpringBootConfiguration com.dmantz.lms.LmsBApplication for test class com.dmantz.lms.LmsBApplicationTests
+2026-05-04 16:00:06 INFO  Version:21 - HV000001: Hibernate Validator 8.0.1.Final
+2026-05-04 16:00:06 INFO  LmsBApplicationTests:50 - Starting LmsBApplicationTests using Java 21.0.8 with PID 8020 (started by AFSHEEN in F:\Learning\lms-b)
+2026-05-04 16:00:06 INFO  LmsBApplicationTests:654 - No active profile set, falling back to 1 default profile: "default"
+2026-05-04 16:00:08 INFO  RepositoryConfigurationDelegate:139 - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-04 16:00:09 INFO  RepositoryConfigurationDelegate:208 - Finished Spring Data repository scanning in 263 ms. Found 22 JPA repository interfaces.
+2026-05-04 16:00:10 INFO  HikariDataSource:110 - HikariPool-1 - Starting...
+2026-05-04 16:00:10 INFO  HikariPool:565 - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@72f3f14c
+2026-05-04 16:00:10 INFO  HikariDataSource:123 - HikariPool-1 - Start completed.
+2026-05-04 16:00:13 INFO  changelog:37 - Reading from lms_db.databasechangelog
+2026-05-04 16:00:14 INFO  changelog:37 - Reading from lms_db.databasechangelog
+2026-05-04 16:00:14 INFO  util:37 - UPDATE SUMMARY
+2026-05-04 16:00:14 INFO  util:37 - Run:                          0
+2026-05-04 16:00:14 INFO  util:37 - Previously run:              28
+2026-05-04 16:00:14 INFO  util:37 - Filtered out:                 0
+2026-05-04 16:00:14 INFO  util:37 - -------------------------------
+2026-05-04 16:00:14 INFO  util:37 - Total change sets:           28
+2026-05-04 16:00:14 INFO  util:37 - Update summary generated
+2026-05-04 16:00:14 INFO  lockservice:37 - Successfully released change log lock
+2026-05-04 16:00:14 INFO  command:37 - Command execution complete
+2026-05-04 16:00:14 INFO  LogHelper:31 - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-05-04 16:00:14 INFO  Version:44 - HHH000412: Hibernate ORM core version 6.4.1.Final
+2026-05-04 16:00:14 INFO  RegionFactoryInitiator:50 - HHH000026: Second-level cache disabled
+2026-05-04 16:00:15 INFO  SpringPersistenceUnitInfo:87 - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-04 16:00:18 INFO  JtaPlatformInitiator:58 - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-04 16:00:18 INFO  LocalContainerEntityManagerFactoryBean:437 - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-04 16:00:18 INFO  QueryEnhancerFactory:49 - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-05-04 16:00:21 WARN  JpaBaseConfiguration$JpaWebConfiguration:232 - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-05-04 16:00:21 INFO  DefaultSecurityFilterChain:54 - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@a6402f3, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@36b75ac7, org.springframework.security.web.context.SecurityContextHolderFilter@3d468558, org.springframework.security.web.header.HeaderWriterFilter@64115783, org.springframework.web.filter.CorsFilter@558a349b, org.springframework.security.web.authentication.logout.LogoutFilter@730e60b, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@5062bb4, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@276f5549, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@4275101c, org.springframework.security.web.access.ExceptionTranslationFilter@44f38e4d, org.springframework.security.web.access.intercept.AuthorizationFilter@196f563c]
+2026-05-04 16:00:22 INFO  LmsBApplicationTests:56 - Started LmsBApplicationTests in 16.644 seconds (process running for 19.747)
+2026-05-04 16:00:23 INFO  LocalContainerEntityManagerFactoryBean:650 - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-05-04 16:00:23 INFO  HikariDataSource:350 - HikariPool-1 - Shutdown initiated...
+2026-05-04 16:00:23 INFO  HikariDataSource:352 - HikariPool-1 - Shutdown completed.
+2026-05-04 16:00:38 INFO  Version:21 - HV000001: Hibernate Validator 8.0.1.Final
+2026-05-04 16:00:38 INFO  LmsBApplication:50 - Starting LmsBApplication using Java 21.0.8 with PID 16860 (F:\Learning\lms-b\target\classes started by AFSHEEN in F:\Learning\lms-b)
+2026-05-04 16:00:38 INFO  LmsBApplication:654 - No active profile set, falling back to 1 default profile: "default"
+2026-05-04 16:00:40 INFO  RepositoryConfigurationDelegate:139 - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-04 16:00:40 INFO  RepositoryConfigurationDelegate:208 - Finished Spring Data repository scanning in 271 ms. Found 22 JPA repository interfaces.
+2026-05-04 16:00:41 INFO  TomcatWebServer:109 - Tomcat initialized with port 9090 (http)
+2026-05-04 16:00:41 INFO  Http11NioProtocol:173 - Initializing ProtocolHandler ["http-nio-9090"]
+2026-05-04 16:00:41 INFO  StandardService:173 - Starting service [Tomcat]
+2026-05-04 16:00:41 INFO  StandardEngine:173 - Starting Servlet engine: [Apache Tomcat/10.1.18]
+2026-05-04 16:00:42 INFO  [/]:173 - Initializing Spring embedded WebApplicationContext
+2026-05-04 16:00:42 INFO  ServletWebServerApplicationContext:296 - Root WebApplicationContext: initialization completed in 3331 ms
+2026-05-04 16:00:42 INFO  HikariDataSource:110 - HikariPool-1 - Starting...
+2026-05-04 16:00:42 INFO  HikariPool:565 - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@432c0f1
+2026-05-04 16:00:42 INFO  HikariDataSource:123 - HikariPool-1 - Start completed.
+2026-05-04 16:00:44 INFO  changelog:37 - Reading from lms_db.databasechangelog
+2026-05-04 16:00:44 INFO  changelog:37 - Reading from lms_db.databasechangelog
+2026-05-04 16:00:44 INFO  util:37 - UPDATE SUMMARY
+2026-05-04 16:00:44 INFO  util:37 - Run:                          0
+2026-05-04 16:00:44 INFO  util:37 - Previously run:              28
+2026-05-04 16:00:44 INFO  util:37 - Filtered out:                 0
+2026-05-04 16:00:44 INFO  util:37 - -------------------------------
+2026-05-04 16:00:44 INFO  util:37 - Total change sets:           28
+2026-05-04 16:00:44 INFO  util:37 - Update summary generated
+2026-05-04 16:00:44 INFO  lockservice:37 - Successfully released change log lock
+2026-05-04 16:00:44 INFO  command:37 - Command execution complete
+2026-05-04 16:00:44 INFO  LogHelper:31 - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-05-04 16:00:44 INFO  Version:44 - HHH000412: Hibernate ORM core version 6.4.1.Final
+2026-05-04 16:00:44 INFO  RegionFactoryInitiator:50 - HHH000026: Second-level cache disabled
+2026-05-04 16:00:44 INFO  SpringPersistenceUnitInfo:87 - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-04 16:00:46 INFO  JtaPlatformInitiator:58 - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-04 16:00:46 INFO  LocalContainerEntityManagerFactoryBean:437 - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-04 16:00:46 INFO  QueryEnhancerFactory:49 - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-05-04 16:00:48 WARN  JpaBaseConfiguration$JpaWebConfiguration:232 - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-05-04 16:00:48 INFO  DefaultSecurityFilterChain:54 - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@1478ffd7, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@7456c1d4, org.springframework.security.web.context.SecurityContextHolderFilter@18273c31, org.springframework.security.web.header.HeaderWriterFilter@61766f77, org.springframework.web.filter.CorsFilter@1e45728c, org.springframework.security.web.authentication.logout.LogoutFilter@3969b65b, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@46455b22, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@21a92708, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@71645fc7, org.springframework.security.web.access.ExceptionTranslationFilter@5ccb3b0, org.springframework.security.web.access.intercept.AuthorizationFilter@2559e406]
+2026-05-04 16:00:49 INFO  Http11NioProtocol:173 - Starting ProtocolHandler ["http-nio-9090"]
+2026-05-04 16:00:49 WARN  AnnotationConfigServletWebServerApplicationContext:632 - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'
+2026-05-04 16:00:49 INFO  LocalContainerEntityManagerFactoryBean:650 - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-05-04 16:00:49 INFO  HikariDataSource:350 - HikariPool-1 - Shutdown initiated...
+2026-05-04 16:00:49 INFO  HikariDataSource:352 - HikariPool-1 - Shutdown completed.
+2026-05-04 16:00:49 INFO  ConditionEvaluationReportLogger:82 - 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-05-04 16:00:49 ERROR LoggingFailureAnalysisReporter:40 - 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 9090 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 9090 or configure this application to listen on another port.
+
+2026-05-04 16:00:52 INFO  SpringApplicationAdminMXBeanRegistrar$SpringApplicationAdmin:159 - Application shutdown requested.
+2026-05-04 16:00:52 INFO  Http11NioProtocol:173 - Stopping ProtocolHandler ["http-nio-9090"]
+2026-05-04 16:00:52 INFO  LocalContainerEntityManagerFactoryBean:650 - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-05-04 16:00:52 INFO  HikariDataSource:350 - HikariPool-1 - Shutdown initiated...
+2026-05-04 16:00:52 INFO  HikariDataSource:352 - HikariPool-1 - Shutdown completed.
+2026-05-04 16:00:56 INFO  Version:21 - HV000001: Hibernate Validator 8.0.1.Final
+2026-05-04 16:00:56 INFO  LmsBApplication:50 - Starting LmsBApplication using Java 21.0.8 with PID 27032 (F:\Learning\lms-b\target\classes started by AFSHEEN in F:\Learning\lms-b)
+2026-05-04 16:00:56 INFO  LmsBApplication:654 - No active profile set, falling back to 1 default profile: "default"
+2026-05-04 16:00:57 INFO  RepositoryConfigurationDelegate:139 - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-04 16:00:57 INFO  RepositoryConfigurationDelegate:208 - Finished Spring Data repository scanning in 150 ms. Found 22 JPA repository interfaces.
+2026-05-04 16:00:58 INFO  TomcatWebServer:109 - Tomcat initialized with port 9090 (http)
+2026-05-04 16:00:58 INFO  Http11NioProtocol:173 - Initializing ProtocolHandler ["http-nio-9090"]
+2026-05-04 16:00:58 INFO  StandardService:173 - Starting service [Tomcat]
+2026-05-04 16:00:58 INFO  StandardEngine:173 - Starting Servlet engine: [Apache Tomcat/10.1.18]
+2026-05-04 16:00:58 INFO  [/]:173 - Initializing Spring embedded WebApplicationContext
+2026-05-04 16:00:58 INFO  ServletWebServerApplicationContext:296 - Root WebApplicationContext: initialization completed in 1933 ms
+2026-05-04 16:00:58 INFO  HikariDataSource:110 - HikariPool-1 - Starting...
+2026-05-04 16:00:59 INFO  HikariPool:565 - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@1846ad0f
+2026-05-04 16:00:59 INFO  HikariDataSource:123 - HikariPool-1 - Start completed.
+2026-05-04 16:01:00 INFO  changelog:37 - Reading from lms_db.databasechangelog
+2026-05-04 16:01:00 INFO  changelog:37 - Reading from lms_db.databasechangelog
+2026-05-04 16:01:00 INFO  util:37 - UPDATE SUMMARY
+2026-05-04 16:01:00 INFO  util:37 - Run:                          0
+2026-05-04 16:01:01 INFO  util:37 - Previously run:              28
+2026-05-04 16:01:01 INFO  util:37 - Filtered out:                 0
+2026-05-04 16:01:01 INFO  util:37 - -------------------------------
+2026-05-04 16:01:01 INFO  util:37 - Total change sets:           28
+2026-05-04 16:01:01 INFO  util:37 - Update summary generated
+2026-05-04 16:01:01 INFO  lockservice:37 - Successfully released change log lock
+2026-05-04 16:01:01 INFO  command:37 - Command execution complete
+2026-05-04 16:01:01 INFO  LogHelper:31 - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-05-04 16:01:01 INFO  Version:44 - HHH000412: Hibernate ORM core version 6.4.1.Final
+2026-05-04 16:01:01 INFO  RegionFactoryInitiator:50 - HHH000026: Second-level cache disabled
+2026-05-04 16:01:01 INFO  SpringPersistenceUnitInfo:87 - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-04 16:01:03 INFO  JtaPlatformInitiator:58 - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-04 16:01:03 INFO  LocalContainerEntityManagerFactoryBean:437 - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-04 16:01:04 INFO  QueryEnhancerFactory:49 - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-05-04 16:01:05 WARN  JpaBaseConfiguration$JpaWebConfiguration:232 - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-05-04 16:01:05 INFO  DefaultSecurityFilterChain:54 - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@3048f547, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@58f73cce, org.springframework.security.web.context.SecurityContextHolderFilter@5d0598de, org.springframework.security.web.header.HeaderWriterFilter@66f6ae9a, org.springframework.web.filter.CorsFilter@3d81525b, org.springframework.security.web.authentication.logout.LogoutFilter@63c4310c, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@6e96b655, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@2bcd4f3d, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@3002a5b9, org.springframework.security.web.access.ExceptionTranslationFilter@6fc42eff, org.springframework.security.web.access.intercept.AuthorizationFilter@61e08e6d]
+2026-05-04 16:01:06 INFO  Http11NioProtocol:173 - Starting ProtocolHandler ["http-nio-9090"]
+2026-05-04 16:01:06 INFO  TomcatWebServer:241 - Tomcat started on port 9090 (http) with context path ''
+2026-05-04 16:01:06 INFO  LmsBApplication:56 - Started LmsBApplication in 10.045 seconds (process running for 11.289)
+2026-05-04 16:04:46 INFO  SpringApplicationAdminMXBeanRegistrar$SpringApplicationAdmin:159 - Application shutdown requested.
+2026-05-04 16:04:46 INFO  Http11NioProtocol:173 - Stopping ProtocolHandler ["http-nio-9090"]
+2026-05-04 16:04:46 INFO  LocalContainerEntityManagerFactoryBean:650 - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-05-04 16:04:46 INFO  HikariDataSource:350 - HikariPool-1 - Shutdown initiated...
+2026-05-04 16:04:46 INFO  HikariDataSource:352 - HikariPool-1 - Shutdown completed.
+2026-05-04 16:05:24 INFO  AnnotationConfigContextLoaderUtils:83 - Could not detect default configuration classes for test class [com.dmantz.lms.LmsBApplicationTests]: LmsBApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-05-04 16:05:24 INFO  SpringBootTestContextBootstrapper:234 - Found @SpringBootConfiguration com.dmantz.lms.LmsBApplication for test class com.dmantz.lms.LmsBApplicationTests
+2026-05-04 16:05:25 INFO  Version:21 - HV000001: Hibernate Validator 8.0.1.Final
+2026-05-04 16:05:25 INFO  LmsBApplicationTests:50 - Starting LmsBApplicationTests using Java 21.0.8 with PID 16548 (started by AFSHEEN in F:\Learning\lms-b)
+2026-05-04 16:05:25 INFO  LmsBApplicationTests:654 - No active profile set, falling back to 1 default profile: "default"
+2026-05-04 16:05:27 INFO  RepositoryConfigurationDelegate:139 - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-04 16:05:28 INFO  RepositoryConfigurationDelegate:208 - Finished Spring Data repository scanning in 232 ms. Found 22 JPA repository interfaces.
+2026-05-04 16:05:29 INFO  HikariDataSource:110 - HikariPool-1 - Starting...
+2026-05-04 16:05:30 INFO  HikariPool:565 - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@70cf7d1e
+2026-05-04 16:05:30 INFO  HikariDataSource:123 - HikariPool-1 - Start completed.
+2026-05-04 16:05:32 INFO  changelog:37 - Reading from lms_db.databasechangelog
+2026-05-04 16:05:33 INFO  changelog:37 - Reading from lms_db.databasechangelog
+2026-05-04 16:05:33 INFO  util:37 - UPDATE SUMMARY
+2026-05-04 16:05:33 INFO  util:37 - Run:                          0
+2026-05-04 16:05:33 INFO  util:37 - Previously run:              28
+2026-05-04 16:05:33 INFO  util:37 - Filtered out:                 0
+2026-05-04 16:05:33 INFO  util:37 - -------------------------------
+2026-05-04 16:05:33 INFO  util:37 - Total change sets:           28
+2026-05-04 16:05:33 INFO  util:37 - Update summary generated
+2026-05-04 16:05:33 INFO  lockservice:37 - Successfully released change log lock
+2026-05-04 16:05:33 INFO  command:37 - Command execution complete
+2026-05-04 16:05:33 INFO  LogHelper:31 - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-05-04 16:05:33 INFO  Version:44 - HHH000412: Hibernate ORM core version 6.4.1.Final
+2026-05-04 16:05:33 INFO  RegionFactoryInitiator:50 - HHH000026: Second-level cache disabled
+2026-05-04 16:05:34 INFO  SpringPersistenceUnitInfo:87 - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-04 16:05:36 INFO  JtaPlatformInitiator:58 - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-04 16:05:37 INFO  LocalContainerEntityManagerFactoryBean:437 - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-04 16:05:37 INFO  QueryEnhancerFactory:49 - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-05-04 16:05:40 WARN  JpaBaseConfiguration$JpaWebConfiguration:232 - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-05-04 16:05:40 INFO  DefaultSecurityFilterChain:54 - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@64c1ff9b, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@606b3174, org.springframework.security.web.context.SecurityContextHolderFilter@6299b325, org.springframework.security.web.header.HeaderWriterFilter@276f5549, org.springframework.web.filter.CorsFilter@af42895, org.springframework.security.web.authentication.logout.LogoutFilter@136d3f1a, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@42339fcb, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@276ee610, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@55e25c9, org.springframework.security.web.access.ExceptionTranslationFilter@34e0c1d5, org.springframework.security.web.access.intercept.AuthorizationFilter@4275101c]
+2026-05-04 16:05:41 INFO  LmsBApplicationTests:56 - Started LmsBApplicationTests in 16.498 seconds (process running for 19.437)
+2026-05-04 16:05:42 INFO  LocalContainerEntityManagerFactoryBean:650 - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-05-04 16:05:42 INFO  HikariDataSource:350 - HikariPool-1 - Shutdown initiated...
+2026-05-04 16:05:42 INFO  HikariDataSource:352 - HikariPool-1 - Shutdown completed.
+2026-05-04 16:08:15 INFO  Version:21 - HV000001: Hibernate Validator 8.0.1.Final
+2026-05-04 16:08:15 INFO  LmsBApplication:50 - Starting LmsBApplication using Java 21.0.8 with PID 16772 (F:\Learning\lms-b\target\classes started by AFSHEEN in F:\Learning\lms-b)
+2026-05-04 16:08:15 INFO  LmsBApplication:654 - No active profile set, falling back to 1 default profile: "default"
+2026-05-04 16:08:16 INFO  RepositoryConfigurationDelegate:139 - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-05-04 16:08:16 INFO  RepositoryConfigurationDelegate:208 - Finished Spring Data repository scanning in 177 ms. Found 22 JPA repository interfaces.
+2026-05-04 16:08:17 INFO  TomcatWebServer:109 - Tomcat initialized with port 9090 (http)
+2026-05-04 16:08:17 INFO  Http11NioProtocol:173 - Initializing ProtocolHandler ["http-nio-9090"]
+2026-05-04 16:08:17 INFO  StandardService:173 - Starting service [Tomcat]
+2026-05-04 16:08:17 INFO  StandardEngine:173 - Starting Servlet engine: [Apache Tomcat/10.1.18]
+2026-05-04 16:08:17 INFO  [/]:173 - Initializing Spring embedded WebApplicationContext
+2026-05-04 16:08:17 INFO  ServletWebServerApplicationContext:296 - Root WebApplicationContext: initialization completed in 2040 ms
+2026-05-04 16:08:17 INFO  HikariDataSource:110 - HikariPool-1 - Starting...
+2026-05-04 16:08:18 INFO  HikariPool:565 - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@674aa626
+2026-05-04 16:08:18 INFO  HikariDataSource:123 - HikariPool-1 - Start completed.
+2026-05-04 16:08:19 INFO  changelog:37 - Reading from lms_db.databasechangelog
+2026-05-04 16:08:19 INFO  changelog:37 - Reading from lms_db.databasechangelog
+2026-05-04 16:08:19 INFO  util:37 - UPDATE SUMMARY
+2026-05-04 16:08:19 INFO  util:37 - Run:                          0
+2026-05-04 16:08:19 INFO  util:37 - Previously run:              28
+2026-05-04 16:08:19 INFO  util:37 - Filtered out:                 0
+2026-05-04 16:08:19 INFO  util:37 - -------------------------------
+2026-05-04 16:08:19 INFO  util:37 - Total change sets:           28
+2026-05-04 16:08:19 INFO  util:37 - Update summary generated
+2026-05-04 16:08:19 INFO  lockservice:37 - Successfully released change log lock
+2026-05-04 16:08:19 INFO  command:37 - Command execution complete
+2026-05-04 16:08:19 INFO  LogHelper:31 - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-05-04 16:08:19 INFO  Version:44 - HHH000412: Hibernate ORM core version 6.4.1.Final
+2026-05-04 16:08:19 INFO  RegionFactoryInitiator:50 - HHH000026: Second-level cache disabled
+2026-05-04 16:08:20 INFO  SpringPersistenceUnitInfo:87 - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-05-04 16:08:21 INFO  JtaPlatformInitiator:58 - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-05-04 16:08:21 INFO  LocalContainerEntityManagerFactoryBean:437 - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-05-04 16:08:22 INFO  QueryEnhancerFactory:49 - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-05-04 16:08:23 WARN  JpaBaseConfiguration$JpaWebConfiguration:232 - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-05-04 16:08:23 INFO  DefaultSecurityFilterChain:54 - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@26b24ef3, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@28d912ee, org.springframework.security.web.context.SecurityContextHolderFilter@3a8baf0d, org.springframework.security.web.header.HeaderWriterFilter@1a2821da, org.springframework.web.filter.CorsFilter@2559e406, org.springframework.security.web.authentication.logout.LogoutFilter@3c77e35a, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@1f02667e, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@7f33171d, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@2009e8f3, org.springframework.security.web.access.ExceptionTranslationFilter@362e6a0c, org.springframework.security.web.access.intercept.AuthorizationFilter@41b9869d]
+2026-05-04 16:08:24 INFO  Http11NioProtocol:173 - Starting ProtocolHandler ["http-nio-9090"]
+2026-05-04 16:08:24 INFO  TomcatWebServer:241 - Tomcat started on port 9090 (http) with context path ''
+2026-05-04 16:08:24 INFO  LmsBApplication:56 - Started LmsBApplication in 9.33 seconds (process running for 10.524)
