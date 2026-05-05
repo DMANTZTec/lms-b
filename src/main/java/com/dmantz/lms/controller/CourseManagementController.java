@@ -107,7 +107,7 @@ public class CourseManagementController {
 
 	// ================= UPDATE =================
 	@PutMapping("/update/{chapterId}")
-	public ResponseEntity<ChapterResponse> updateChapter(@PathVariable Long chapterId, @RequestParam Long staffId,
+	public ResponseEntity<ChapterResponse> updateChapter(@PathVariable Long chapterId, @RequestParam String staffId,
 			@RequestBody ChapterRequest request) {
 		ChapterResponse response = courseManagementService.updateChapter(chapterId, request, staffId);
 		return ResponseEntity.ok(response);

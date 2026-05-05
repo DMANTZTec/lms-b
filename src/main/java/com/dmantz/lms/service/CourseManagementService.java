@@ -43,7 +43,7 @@ public interface CourseManagementService {
 	List<ChapterResponse> getAllChapters();
 
 //    update a chapter
-	ChapterResponse updateChapter(Long chapterId, ChapterRequest request, Long staffId);
+	ChapterResponse updateChapter(Long chapterId, ChapterRequest request, String staffId);
 
 //    delete a chapter
 	void deleteChapter(Long chapterId, String staffId);
