@@ -183,11 +183,11 @@ public class CourseManagementController {
 	// ====================== DELETE TOPIC =================================
 
 	@DeleteMapping("topics/{id}")
-	public ResponseEntity<Void> deleteTopic(@PathVariable Long id) {
+	public ResponseEntity<String> deleteTopic(@PathVariable Long id) {
 
 		courseManagementService.deleteTopic(id);
 
-		return ResponseEntity.noContent().build();
+		return ResponseEntity.ok("Topic deleted successfully");
 	}
 
 	// Move chapter to specific position

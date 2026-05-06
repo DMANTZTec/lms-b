@@ -19,5 +19,8 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
 
     // Find specific topic inside chapter
     Optional<Topic> findByIdAndChapterId(Long topicId, Long chapterId);
+    
+    
+    boolean existsByChapter_IdAndTopicNm(Long chapterId, String topicNm);
 
 }

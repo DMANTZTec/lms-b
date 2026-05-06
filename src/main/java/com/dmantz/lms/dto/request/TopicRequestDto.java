@@ -21,9 +21,8 @@ public class TopicRequestDto {
     @Positive(message = "Expected time must be greater than 0 minutes")
     private Long expectedTimeMin;
 
-    @NotNull(message = "Staff ID is required")
-    @Positive(message = "Staff ID must be a positive number")
-    private Long staffId;
+    @NotBlank(message = "Staff ID is required")
+    private String staffId;
 
     public Long getChapterId() {
         return chapterId;
@@ -57,11 +56,13 @@ public class TopicRequestDto {
         this.expectedTimeMin = expectedTimeMin;
     }
 
-    public Long getStaffId() {
-        return staffId;
-    }
+	public String getStaffId() {
+		return staffId;
+	}
 
-    public void setStaffId(Long staffId) {
-        this.staffId = staffId;
-    }
+	public void setStaffId(String staffId) {
+		this.staffId = staffId;
+	}
+
+   
 }
