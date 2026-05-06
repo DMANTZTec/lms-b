@@ -15,10 +15,16 @@ import com.dmantz.lms.repository.StaffOtpRepository;
 import com.dmantz.lms.repository.StaffRepository;
 import com.dmantz.lms.service.EmailService;
 import com.dmantz.lms.service.impl.StaffServiceImpl;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
+
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -30,11 +36,15 @@ import java.util.Set;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertFalse;
 
 public class StaffServiceImplTest {
+
+    private static final Logger logger =
+            LogManager.getLogger(StaffServiceImplTest.class);
 
     @InjectMocks
     private StaffServiceImpl staffService;
@@ -59,13 +69,20 @@ public class StaffServiceImplTest {
 
     @BeforeMethod
     public void setup() {
+
+        logger.info("Initializing mocks for StaffServiceImplTest");
+
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
     public void testRegisterStaffSuccess() {
 
-        StaffRegistrationRequest request = new StaffRegistrationRequest();
+        logger.info("Starting test: testRegisterStaffSuccess");
+
+        StaffRegistrationRequest request =
+                new StaffRegistrationRequest();
+
         request.setEmailId("test@gmail.com");
         request.setPassword("123456");
         request.setRoles(Set.of("ADMIN"));
@@ -76,26 +93,49 @@ public class StaffServiceImplTest {
         Role role = new Role();
         role.setRoleNm("ADMIN");
 
-        when(staffRepository.findByEmailId("test@gmail.com")).thenReturn(Optional.empty());
-        when(staffRepository.count()).thenReturn(0L);
-        when(roleRepository.findByRoleNm("ADMIN")).thenReturn(Optional.of(role));
-        when(passwordEncoder.encode("123456")).thenReturn("encodedPass");
-        when(staffMapper.toEntity(request)).thenReturn(staff);
-        when(staffRepository.save(any())).thenReturn(staff);
-        when(staffMapper.toResponse(staff)).thenReturn(new StaffResponse());
+        when(staffRepository.findByEmailId("test@gmail.com"))
+                .thenReturn(Optional.empty());
 
-        StaffResponse response = staffService.registerStaff(request, null);
+        when(staffRepository.count())
+                .thenReturn(0L);
+
+        when(roleRepository.findByRoleNm("ADMIN"))
+                .thenReturn(Optional.of(role));
+
+        when(passwordEncoder.encode("123456"))
+                .thenReturn("encodedPass");
+
+        when(staffMapper.toEntity(request))
+                .thenReturn(staff);
+
+        when(staffRepository.save(any()))
+                .thenReturn(staff);
+
+        when(staffMapper.toResponse(staff))
+                .thenReturn(new StaffResponse());
+
+        StaffResponse response =
+                staffService.registerStaff(request, null);
+
         assertNotNull(response);
+
         verify(staffRepository).save(any());
+
+        logger.info("testRegisterStaffSuccess completed successfully");
     }
 
     @Test(expectedExceptions = RuntimeException.class)
     public void testRegisterStaffEmailExists() {
 
-        StaffRegistrationRequest request = new StaffRegistrationRequest();
+        logger.info("Starting test: testRegisterStaffEmailExists");
+
+        StaffRegistrationRequest request =
+                new StaffRegistrationRequest();
+
         request.setEmailId("test@gmail.com");
 
-        when(staffRepository.findByEmailId("test@gmail.com")).thenReturn(Optional.of(new Staff()));
+        when(staffRepository.findByEmailId("test@gmail.com"))
+                .thenReturn(Optional.of(new Staff()));
 
         staffService.registerStaff(request, null);
     }
@@ -103,86 +143,136 @@ public class StaffServiceImplTest {
     @Test
     public void testLoginSuccess() {
 
-        StaffLoginRequest request = new StaffLoginRequest();
+        logger.info("Starting test: testLoginSuccess");
+
+        StaffLoginRequest request =
+                new StaffLoginRequest();
+
         request.setLoginId("admin@gmail.com");
         request.setPassword("123456");
 
         Staff staff = new Staff();
+
         staff.setStaffId("SF00001");
         staff.setEmailId("admin@gmail.com");
         staff.setPassword("encodedPass");
         staff.setEnabled("Y");
 
         StaffOtp otp = new StaffOtp();
+
         otp.setOtp("123456");
         otp.setStatus(OtpStatus.NEW);
 
-        when(staffRepository.findByLoginId("admin@gmail.com")).thenReturn(Optional.of(staff));
-        when(passwordEncoder.matches("123456", "encodedPass")).thenReturn(true);
-        when(staffOtpRepository.findTopByStaffIdAndStatusOrderByIdDesc(any(), any())).thenReturn(Optional.empty());
-        when(staffOtpRepository.save(any())).thenReturn(otp);
-        when(staffMapper.toLoginResponse(staff)).thenReturn(new StaffLoginResponse());
+        when(staffRepository.findByLoginId("admin@gmail.com"))
+                .thenReturn(Optional.of(staff));
 
-        StaffLoginResponse response = staffService.login(request);
+        when(passwordEncoder.matches("123456", "encodedPass"))
+                .thenReturn(true);
+
+        when(staffOtpRepository
+                .findTopByStaffIdAndStatusOrderByIdDesc(any(), any()))
+                .thenReturn(Optional.empty());
+
+        when(staffOtpRepository.save(any()))
+                .thenReturn(otp);
+
+        when(staffMapper.toLoginResponse(staff))
+                .thenReturn(new StaffLoginResponse());
+
+        StaffLoginResponse response =
+                staffService.login(request);
 
         assertNotNull(response);
-        verify(emailService).sendOtpEmail(any(), any(), any());
+
+        verify(emailService)
+                .sendOtpEmail(any(), any(), any());
+
+        logger.info("testLoginSuccess completed successfully");
     }
 
     @Test
     public void testVerifyStaffOtpSuccess() {
 
-        StaffOtpVerifyRequest request = new StaffOtpVerifyRequest();
+        logger.info("Starting test: testVerifyStaffOtpSuccess");
+
+        StaffOtpVerifyRequest request =
+                new StaffOtpVerifyRequest();
+
         request.setStaffId("SF00001");
         request.setOtp("123456");
 
         StaffOtp otp = new StaffOtp();
+
         otp.setOtp("123456");
         otp.setStatus(OtpStatus.SENT);
         otp.setCreatedDt(LocalDateTime.now());
 
-        when(staffOtpRepository.findTopByStaffIdOrderByCreatedDtDesc("SF00001"))
+        when(staffOtpRepository
+                .findTopByStaffIdOrderByCreatedDtDesc("SF00001"))
                 .thenReturn(Optional.of(otp));
 
-        OtpVerifyResponse response = staffService.verifyStaffOtp(request);
+        OtpVerifyResponse response =
+                staffService.verifyStaffOtp(request);
+
         assertTrue(response.isVerified());
+
         verify(staffOtpRepository).save(any());
+
+        logger.info("testVerifyStaffOtpSuccess completed successfully");
     }
 
     @Test
     public void testForgotPasswordSuccess() {
 
-        ForgotPasswordRequest request = new ForgotPasswordRequest();
+        logger.info("Starting test: testForgotPasswordSuccess");
+
+        ForgotPasswordRequest request =
+                new ForgotPasswordRequest();
+
         request.setEmail("admin@gmail.com");
 
         Staff staff = new Staff();
+
         staff.setStaffId("SF00001");
         staff.setEmailId("admin@gmail.com");
 
-        when(staffRepository.findByEmailId("admin@gmail.com")).thenReturn(Optional.of(staff));
-        when(staffMapper.toPasswordResponse(staff)).thenReturn(new StaffPasswordResponse());
-        StaffPasswordResponse response = staffService.forgotPassword(request);
+        when(staffRepository.findByEmailId("admin@gmail.com"))
+                .thenReturn(Optional.of(staff));
+
+        when(staffMapper.toPasswordResponse(staff))
+                .thenReturn(new StaffPasswordResponse());
+
+        StaffPasswordResponse response =
+                staffService.forgotPassword(request);
 
         assertNotNull(response);
 
-        verify(emailService).sendOtpEmail(any(), any(), any());
+        verify(emailService)
+                .sendOtpEmail(any(), any(), any());
+
+        logger.info("testForgotPasswordSuccess completed successfully");
     }
 
     @Test
     public void testResetPasswordSuccess() {
 
-        StaffResetPasswordRequest request = new StaffResetPasswordRequest();
+        logger.info("Starting test: testResetPasswordSuccess");
+
+        StaffResetPasswordRequest request =
+                new StaffResetPasswordRequest();
 
         request.setStaffId("SF00001");
         request.setOtp("123456");
         request.setNewPassword("newPass");
 
         StaffOtp otp = new StaffOtp();
+
         otp.setOtp("123456");
         otp.setStatus(OtpStatus.SENT);
         otp.setCreatedDt(LocalDateTime.now());
 
         Staff staff = new Staff();
+
         staff.setStaffId("SF00001");
         staff.setEmailId("admin@gmail.com");
 
@@ -190,20 +280,32 @@ public class StaffServiceImplTest {
                 .findTopByStaffIdAndStatusOrderByCreatedDtDesc(any(), any()))
                 .thenReturn(Optional.of(otp));
 
-        when(staffRepository.findByStaffId("SF00001")).thenReturn(Optional.of(staff));
-        when(passwordEncoder.encode("newPass")).thenReturn("encodedPass");
-        when(staffMapper.toPasswordResponse(staff)).thenReturn(new StaffPasswordResponse());
+        when(staffRepository.findByStaffId("SF00001"))
+                .thenReturn(Optional.of(staff));
 
-        StaffPasswordResponse response = staffService.resetPassword(request);
+        when(passwordEncoder.encode("newPass"))
+                .thenReturn("encodedPass");
+
+        when(staffMapper.toPasswordResponse(staff))
+                .thenReturn(new StaffPasswordResponse());
+
+        StaffPasswordResponse response =
+                staffService.resetPassword(request);
 
         assertNotNull(response);
+
         verify(staffRepository).save(any());
+
+        logger.info("testResetPasswordSuccess completed successfully");
     }
 
     @Test
     public void testGetAllStaffSuccess() {
 
-        List<Staff> staffList = List.of(new Staff());
+        logger.info("Starting test: testGetAllStaffSuccess");
+
+        List<Staff> staffList =
+                List.of(new Staff());
 
         when(staffRepository.findAll())
                 .thenReturn(staffList);
@@ -215,19 +317,30 @@ public class StaffServiceImplTest {
                 staffService.getAllStaff();
 
         assertFalse(response.isEmpty());
+
+        logger.info("testGetAllStaffSuccess completed successfully");
     }
 
     @Test
     public void testGetStaffByIdSuccess() {
 
+        logger.info("Starting test: testGetStaffByIdSuccess");
+
         Staff staff = new Staff();
+
         staff.setStaffId("SF00001");
 
-        when(staffRepository.findByStaffId("SF00001")).thenReturn(Optional.of(staff));
-        when(staffMapper.toResponse(staff)).thenReturn(new StaffResponse());
+        when(staffRepository.findByStaffId("SF00001"))
+                .thenReturn(Optional.of(staff));
 
-        StaffResponse response = staffService.getStaffByStaffId("SF00001");
+        when(staffMapper.toResponse(staff))
+                .thenReturn(new StaffResponse());
+
+        StaffResponse response =
+                staffService.getStaffByStaffId("SF00001");
+
         assertNotNull(response);
-    }
 
+        logger.info("testGetStaffByIdSuccess completed successfully");
+    }
 }

@@ -6,6 +6,7 @@ import com.dmantz.lms.dto.response.StaffLoginResponse;
 import com.dmantz.lms.dto.response.StaffPasswordResponse;
 import com.dmantz.lms.dto.response.StaffResponse;
 import com.dmantz.lms.entity.*;
+import com.dmantz.lms.exceptions.*;
 import com.dmantz.lms.mapper.StaffMapper;
 import com.dmantz.lms.repository.RoleRepository;
 import com.dmantz.lms.repository.StaffOtpRepository;
@@ -13,6 +14,8 @@ import com.dmantz.lms.repository.StaffRepository;
 import com.dmantz.lms.service.EmailService;
 import com.dmantz.lms.service.StaffService;
 import jakarta.transaction.Transactional;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,371 +28,482 @@ import java.util.stream.Collectors;
 @Transactional
 public class StaffServiceImpl implements StaffService {
 
-    private final StaffRepository staffRepository;
-    private final RoleRepository roleRepository;
-    private final StaffMapper staffMapper;
-    private final PasswordEncoder passwordEncoder;
-    private final StaffOtpRepository staffOtpRepository;
-    private final EmailService emailService;
-
-    public StaffServiceImpl(StaffRepository staffRepository,
-                            RoleRepository roleRepository,
-                            StaffMapper staffMapper,
-                            PasswordEncoder passwordEncoder, StaffOtpRepository staffOtpRepository, EmailService emailService) {
-        this.staffRepository = staffRepository;
-        this.roleRepository = roleRepository;
-        this.staffMapper = staffMapper;
-        this.passwordEncoder = passwordEncoder;
-        this.staffOtpRepository = staffOtpRepository;
-        this.emailService = emailService;
-    }
-
-
-    @Override
-    @Transactional
-    public StaffResponse registerStaff(StaffRegistrationRequest request, Staff loggedInStaff) {
-
-        // Check email uniqueness
-        staffRepository.findByEmailId(request.getEmailId())
-                .ifPresent(s -> {
-                    throw new RuntimeException("Staff already exists with this email");
-                });
-
-        boolean isFirstStaff = staffRepository.count() == 0;
-
-        // Authorization check
-        if (!isFirstStaff) {
-            if (loggedInStaff == null) {
-                throw new RuntimeException("Unauthorized access");
-            }
-
-            Staff dbStaff = staffRepository.findById(loggedInStaff.getId())
-                    .orElseThrow(() -> new RuntimeException("Logged-in staff not found"));
-
-            boolean isAdmin = dbStaff.getRoles().stream()
-                    .anyMatch(r -> "ADMIN".equalsIgnoreCase(r.getRoleNm()));
-
-            if (!isAdmin) {
-                throw new RuntimeException("Only ADMIN can register staff");
-            }
-        }
-
-        //  Validate roles
-        if (request.getRoles() == null || request.getRoles().isEmpty()) {
-            throw new RuntimeException("At least one role must be provided");
-        }
-
-        //  First staff must be ADMIN
-        if (isFirstStaff && request.getRoles().stream()
-                .noneMatch("ADMIN"::equalsIgnoreCase)) {
-            throw new RuntimeException("First staff must have ADMIN role");
-        }
-
-        // Map entity
-        Staff staff = staffMapper.toEntity(request);
-        staff.setStaffId(generateStaffId());
-        staff.setPassword(passwordEncoder.encode(request.getPassword()));
-        staff.setStatus("ACTIVE");
-        staff.setEnabled("Y");
-        staff.setCreatedDt(LocalDateTime.now());
-        staff.setCreatedBy(isFirstStaff ? null : loggedInStaff.getId());
-
-        // Profile image
-        if (request.getProfileImgBase64() != null && !request.getProfileImgBase64().isBlank()) {
-            staff.setProfileImg(Base64.getDecoder().decode(request.getProfileImgBase64()));
-        }
-
-        // Assign roles
-        Set<Role> assignedRoles = request.getRoles().stream()
-                .map(r -> r.trim().toUpperCase())
-                .map(roleNm -> roleRepository.findByRoleNm(roleNm)
-                        .orElseThrow(() -> new RuntimeException(roleNm + " role not found")))
-                .collect(Collectors.toSet());
-
-        staff.setRoles(assignedRoles);
-
-        // Save
-        Staff savedStaff = staffRepository.save(staff);
-        return staffMapper.toResponse(savedStaff);
-    }
-
-
-    private String generateStaffId() {
-        Long count = staffRepository.count() + 1;
-        return String.format("SF%05d", count); // SF00001, SF00002
-    }
-
-    @Override
-    public Optional<Staff> findByStaffId(String staffId) {
-        return staffRepository.findByStaffId(staffId);
-    }
-
-    private StaffOtp generateStaffOtp(String staffId) {
-
-        //  Check existing active OTP
-        Optional<StaffOtp> existingOtp =
-                staffOtpRepository.findTopByStaffIdAndStatusOrderByIdDesc(
-                        staffId,
-                        OtpStatus.NEW
-                );
+	private static final Logger logger = LogManager.getLogger(StaffServiceImpl.class);
 
-        if (existingOtp.isPresent()) {
-            return existingOtp.get(); // reuse OTP (or you can throw exception)
-        }
+	private final StaffRepository staffRepository;
+	private final RoleRepository roleRepository;
+	private final StaffMapper staffMapper;
+	private final PasswordEncoder passwordEncoder;
+	private final StaffOtpRepository staffOtpRepository;
+	private final EmailService emailService;
 
-        // Generate new OTP
-        StaffOtp otp = new StaffOtp();
-        otp.setStaffId(staffId); //  STRING ONLY
-        otp.setOtp(String.format("%06d",
-                new SecureRandom().nextInt(1_000_000))); // 6-digit numeric OTP
-        otp.setStatus(OtpStatus.NEW);
-        otp.setAttemptsNum(0);
-        otp.setCreatedDt(LocalDateTime.now());
-        return staffOtpRepository.save(otp);
-    }
-
-    @Override
-    public StaffLoginResponse login(StaffLoginRequest request) {
-
-        Staff staff = staffRepository.findByLoginId(request.getLoginId())
-                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+	public StaffServiceImpl(StaffRepository staffRepository, RoleRepository roleRepository, StaffMapper staffMapper,
+			PasswordEncoder passwordEncoder, StaffOtpRepository staffOtpRepository, EmailService emailService) {
 
-        if (!"Y".equalsIgnoreCase(staff.getEnabled())) {
-            throw new RuntimeException("Staff account is disabled");
-        }
-
-        if (!passwordEncoder.matches(request.getPassword(), staff.getPassword())) {
-            throw new RuntimeException("Invalid email or password");
-        }
-
-        //  Generate / reuse OTP
-        StaffOtp otp = generateStaffOtp(staff.getStaffId());
-
-        try {
-            emailService.sendOtpEmail(
-                    staff.getEmailId(),
-                    otp.getOtp(),
-                    OtpPurpose.STAFF_LOGIN
-            );
+		this.staffRepository = staffRepository;
+		this.roleRepository = roleRepository;
+		this.staffMapper = staffMapper;
+		this.passwordEncoder = passwordEncoder;
+		this.staffOtpRepository = staffOtpRepository;
+		this.emailService = emailService;
+	}
 
-            otp.setStatus(OtpStatus.SENT);
-            otp.setUpdatedDt(LocalDateTime.now());
-            staffOtpRepository.save(otp);
-
-        } catch (Exception e) {
+	@Override
+	public StaffResponse registerStaff(StaffRegistrationRequest request, Staff loggedInStaff) {
 
-            System.out.println("Staff OTP email failed");
-
-            // optional but recommended
-            otp.setStatus(OtpStatus.FAILED);
-            otp.setUpdatedDt(LocalDateTime.now());
-            staffOtpRepository.save(otp);
-
-            throw new RuntimeException("Unable to send OTP. Please try again.");
-        }
-
-        StaffLoginResponse response = staffMapper.toLoginResponse(staff);
-        response.setMessage("Login successfully Completed. OTP sent to your email.");
-
-        return response;
-    }
-
-
-    @Override
-    public OtpVerifyResponse verifyStaffOtp(StaffOtpVerifyRequest request) {
-
-        StaffOtp otp = staffOtpRepository
-                .findTopByStaffIdOrderByCreatedDtDesc(request.getStaffId())
-                .orElseThrow(() -> new RuntimeException("OTP not found"));
-
-        if (otp.getStatus() != OtpStatus.SENT) {
-            throw new RuntimeException("OTP is not valid");
-        }
-
-        if (otp.getCreatedDt().isBefore(LocalDateTime.now().minusMinutes(5))) {
-            otp.setStatus(OtpStatus.EXPIRED);
-            otp.setUpdatedDt(LocalDateTime.now());
-            staffOtpRepository.save(otp);
-            throw new RuntimeException("OTP expired");
-        }
-
-        if (!otp.getOtp().equals(request.getOtp())) {
-            otp.setAttemptsNum(otp.getAttemptsNum() + 1);
-            otp.setUpdatedDt(LocalDateTime.now());
-            staffOtpRepository.save(otp);
-            throw new RuntimeException("Invalid OTP");
-        }
+		logger.info("Staff registration started for email: {}", request.getEmailId());
 
-        otp.setStatus(OtpStatus.VERIFIED);
-        otp.setUpdatedDt(LocalDateTime.now());
-        staffOtpRepository.save(otp);
+		staffRepository.findByEmailId(request.getEmailId()).ifPresent(s -> {
 
-        OtpVerifyResponse response = new OtpVerifyResponse();
-        response.setVerified(true);
-        response.setMessage("OTP verified successfully");
+			logger.error("Email already exists: {}", request.getEmailId());
 
-        return response;
-    }
+			throw new DuplicateValuesException("Staff already exists with this email");
+		});
 
+		boolean isFirstStaff = staffRepository.count() == 0;
 
-    @Override
-    public StaffPasswordResponse forgotPassword(ForgotPasswordRequest request) {
+		if (!isFirstStaff) {
 
-        Staff staff = staffRepository.findByEmailId(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Staff not found"));
+			if (loggedInStaff == null) {
 
-        // Expire previous OTPs
-        staffOtpRepository.expireActiveOtps(
-                staff.getStaffId(),
-                OtpStatus.EXPIRED,
-                List.of(OtpStatus.NEW, OtpStatus.SENT)
-        );
+				logger.error("Unauthorized staff registration attempt");
 
-        StaffOtp otp = new StaffOtp();
-        otp.setStaffId(staff.getStaffId());
-        otp.setOtp(String.valueOf(100000 + new Random().nextInt(900000)));
-        otp.setStatus(OtpStatus.SENT);
-        otp.setCreatedDt(LocalDateTime.now());
+				throw new UnauthorizedAccessException("Unauthorized access");
+			}
 
-        staffOtpRepository.save(otp);
+			Staff dbStaff = staffRepository.findById(loggedInStaff.getId()).orElseThrow(() -> {
 
-        emailService.sendOtpEmail(
-                staff.getEmailId(),
-                otp.getOtp(),
-                OtpPurpose.STAFF_FORGOT_PASSWORD
-        );
+				logger.error("Logged-in staff not found");
 
-        StaffPasswordResponse response = staffMapper.toPasswordResponse(staff);
-        response.setMessage("OTP sent to your registered email.");
+				return new ResourceNotFoundException("Logged-in staff not found");
+			});
 
-        return response;
-    }
+			boolean isAdmin = dbStaff.getRoles().stream().anyMatch(role -> "ADMIN".equalsIgnoreCase(role.getRoleNm()));
 
+			if (!isAdmin) {
 
-    @Override
-    public StaffPasswordResponse resetPassword(StaffResetPasswordRequest request) {
+				logger.warn("Non-admin tried to register staff");
 
-        //  Fetch latest SENT OTP for staff
-        StaffOtp otp = staffOtpRepository
-                .findTopByStaffIdAndStatusOrderByCreatedDtDesc(
-                        request.getStaffId(),
-                        OtpStatus.SENT
-                )
-                .orElseThrow(() -> new RuntimeException("OTP not found or expired"));
+				throw new UnauthorizedAccessException("Only ADMIN can register staff");
+			}
+		}
 
-        // Validate OTP value
-        if (!otp.getOtp().equals(request.getOtp())) {
-            throw new RuntimeException("Invalid OTP");
-        }
+		if (request.getRoles() == null || request.getRoles().isEmpty()) {
 
-        if (otp.getCreatedDt().isBefore(LocalDateTime.now().minusMinutes(5))) {
-            otp.setStatus(OtpStatus.EXPIRED);
-            staffOtpRepository.save(otp);
-            throw new RuntimeException("OTP expired");
-        }
+			logger.error("Roles are empty");
 
-        Staff staff = staffRepository.findByStaffId(request.getStaffId())
-                .orElseThrow(() -> new RuntimeException("Staff not found"));
+			throw new InvalidCredentialsException("At least one role must be provided");
+		}
 
-        staff.setPassword(passwordEncoder.encode(request.getNewPassword()));
-        staffRepository.save(staff);
+		if (isFirstStaff && request.getRoles().stream().noneMatch(role -> "ADMIN".equalsIgnoreCase(role))) {
 
-        otp.setStatus(OtpStatus.VERIFIED);
-        otp.setUpdatedDt(LocalDateTime.now());
-        staffOtpRepository.save(otp);
+			logger.error("First staff must have ADMIN role");
 
-        emailService.sendOtpEmail(
-                staff.getEmailId(),
-                null,
-                OtpPurpose.STAFF_PASSWORD_RESET_SUCCESS
-        );
+			throw new UnauthorizedAccessException("First staff must have ADMIN role");
+		}
 
-        StaffPasswordResponse response = staffMapper.toPasswordResponse(staff);
-        response.setMessage("Password reset successful.");
+		Staff staff = staffMapper.toEntity(request);
 
-        return response;
-    }
+		staff.setStaffId(generateStaffId());
 
-    @Override
-    public List<StaffResponse> getAllStaff() {
+		staff.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        List<Staff> staffList = staffRepository.findAll();
+		staff.setStatus("ACTIVE");
+		staff.setEnabled("Y");
+		staff.setCreatedDt(LocalDateTime.now());
 
-        if (staffList.isEmpty()) {
-            throw new RuntimeException("No staff found");
-        }
+		if (!isFirstStaff) {
 
-        return staffMapper.toResponseList(staffList);
-    }
+			staff.setCreatedBy(loggedInStaff.getId());
+		}
 
-    @Override
-    public StaffResponse getStaffByStaffId(String staffId) {
+		if (request.getProfileImgBase64() != null && !request.getProfileImgBase64().isBlank()) {
 
-        Staff staff = staffRepository.findByStaffId(staffId)
-                .orElseThrow(() -> new RuntimeException("Staff not found"));
+			String base64 = request.getProfileImgBase64();
 
-        return staffMapper.toResponse(staff);
-    }
+			if (base64.contains(",")) {
 
-    @Transactional
-    @Override
-    public StaffResponse registerInitialAdmin(StaffRegistrationRequest request) {
+				base64 = base64.substring(base64.indexOf(",") + 1);
+			}
 
-        //  Check if staff already exists
-        if (staffRepository.count() > 0) {
-            throw new RuntimeException("Initial admin already created");
-        }
+			staff.setProfileImg(Base64.getDecoder().decode(base64));
+		}
 
-        //  Validate ADMIN role
-        if (request.getRoles() == null ||
-                request.getRoles().stream()
-                        .noneMatch(r -> "ADMIN".equalsIgnoreCase(r))) {
+		Set<Role> assignedRoles = request.getRoles().stream().map(String::toUpperCase)
+				.map(roleNm -> roleRepository.findByRoleNm(roleNm).orElseThrow(() -> {
 
-            throw new RuntimeException("Initial staff must have ADMIN role");
-        }
+					logger.error("Role not found: {}", roleNm);
 
-        //  Email uniqueness
-        staffRepository.findByEmailId(request.getEmailId())
-                .ifPresent(s -> {
-                    throw new RuntimeException("Email already exists");
-                });
+					return new ResourceNotFoundException(roleNm + " role not found");
+				})).collect(Collectors.toSet());
 
+		staff.setRoles(assignedRoles);
 
-        Staff staff = staffMapper.toEntity(request);
+		Staff savedStaff = staffRepository.save(staff);
 
-        staff.setStaffId(generateStaffId());
-        staff.setPassword(passwordEncoder.encode(request.getPassword()));
-        staff.setStatus("ACTIVE");
-        staff.setEnabled("Y");
-        staff.setCreatedBy(null); // system created
+		logger.info("Staff registered successfully with staffId: {}", savedStaff.getStaffId());
 
-        //  Profile image (optional)
-        if (request.getProfileImgBase64() != null &&
-                !request.getProfileImgBase64().isBlank()) {
+		return staffMapper.toResponse(savedStaff);
+	}
 
-            String base64 = request.getProfileImgBase64();
-            if (base64.contains(",")) {
-                base64 = base64.substring(base64.indexOf(",") + 1);
-            }
-            staff.setProfileImg(Base64.getDecoder().decode(base64));
-        }
+	private String generateStaffId() {
 
-        // Assign ADMIN role
-        Set<Role> roles = request.getRoles().stream()
-                .map(r -> r.trim().toUpperCase())
-                .map(roleNm -> roleRepository.findByRoleNm(roleNm)
-                        .orElseThrow(() -> new RuntimeException(roleNm + " role not found")))
-                .collect(Collectors.toSet());
+		Long count = staffRepository.count() + 1;
 
-        staff.setRoles(roles);
+		return String.format("SF%05d", count);
+	}
 
-        Staff saved = staffRepository.save(staff);
-        return staffMapper.toResponse(saved);
-    }
+	@Override
+	public Optional<Staff> findByStaffId(String staffId) {
 
+		logger.info("Fetching staff by staffId: {}", staffId);
 
+		return staffRepository.findByStaffId(staffId);
+	}
+
+	private StaffOtp generateStaffOtp(String staffId) {
+
+		logger.info("Generating OTP for staffId: {}", staffId);
+
+		Optional<StaffOtp> existingOtp = staffOtpRepository.findTopByStaffIdAndStatusOrderByIdDesc(staffId,
+				OtpStatus.NEW);
+
+		if (existingOtp.isPresent()) {
+
+			logger.warn("Existing active OTP found for staffId: {}", staffId);
+
+			return existingOtp.get();
+		}
+
+		StaffOtp otp = new StaffOtp();
+
+		otp.setStaffId(staffId);
+
+		otp.setOtp(String.format("%06d", new SecureRandom().nextInt(1_000_000)));
+
+		otp.setStatus(OtpStatus.NEW);
+		otp.setAttemptsNum(0);
+		otp.setCreatedDt(LocalDateTime.now());
+
+		StaffOtp savedOtp = staffOtpRepository.save(otp);
+
+		logger.info("OTP generated successfully for staffId: {}", staffId);
+
+		return savedOtp;
+	}
+
+	@Override
+	public StaffLoginResponse login(StaffLoginRequest request) {
+
+		logger.info("Staff login attempt for loginId: {}", request.getLoginId());
+
+		Staff staff = staffRepository.findByLoginId(request.getLoginId()).orElseThrow(() -> {
+
+			logger.error("Invalid loginId: {}", request.getLoginId());
+
+			return new InvalidCredentialsException("Invalid credentials");
+		});
+
+		if (!"Y".equalsIgnoreCase(staff.getEnabled())) {
+
+			logger.warn("Disabled account login attempt: {}", staff.getStaffId());
+
+			throw new AccountDisabledException("Staff account is disabled");
+		}
+
+		if (!passwordEncoder.matches(request.getPassword(), staff.getPassword())) {
+
+			logger.warn("Invalid password attempt for staffId: {}", staff.getStaffId());
+
+			throw new InvalidCredentialsException("Invalid email or password");
+		}
+
+		StaffOtp otp = generateStaffOtp(staff.getStaffId());
+
+		try {
+
+			emailService.sendOtpEmail(staff.getEmailId(), otp.getOtp(), OtpPurpose.STAFF_LOGIN);
+
+			otp.setStatus(OtpStatus.SENT);
+			otp.setUpdatedDt(LocalDateTime.now());
+
+			staffOtpRepository.save(otp);
+
+			logger.info("OTP sent successfully to email: {}", staff.getEmailId());
+
+		} catch (Exception e) {
+
+			logger.error("Failed to send OTP email to: {}", staff.getEmailId(), e);
+
+			otp.setStatus(OtpStatus.FAILED);
+			otp.setUpdatedDt(LocalDateTime.now());
+
+			staffOtpRepository.save(otp);
+
+			throw new EmailSendingException("Unable to send OTP. Please try again.");
+		}
+
+		StaffLoginResponse response = staffMapper.toLoginResponse(staff);
+
+		response.setMessage("OTP sent to your registered email");
+
+		logger.info("Login successful for staffId: {}", staff.getStaffId());
+
+		return response;
+	}
+
+	@Override
+	public OtpVerifyResponse verifyStaffOtp(StaffOtpVerifyRequest request) {
+
+		logger.info("OTP verification started for staffId: {}", request.getStaffId());
+
+		StaffOtp otp = staffOtpRepository.findTopByStaffIdOrderByCreatedDtDesc(request.getStaffId()).orElseThrow(() -> {
+
+			logger.error("OTP not found for staffId: {}", request.getStaffId());
+
+			return new OtpNotFoundException("OTP not found");
+		});
+
+		if (otp.getStatus() != OtpStatus.SENT) {
+
+			logger.warn("Invalid OTP status for staffId: {}", request.getStaffId());
+
+			throw new OtpInvalidException("OTP is not valid");
+		}
+
+		if (otp.getCreatedDt().isBefore(LocalDateTime.now().minusMinutes(5))) {
+
+			otp.setStatus(OtpStatus.EXPIRED);
+			otp.setUpdatedDt(LocalDateTime.now());
+
+			staffOtpRepository.save(otp);
+
+			logger.warn("OTP expired for staffId: {}", request.getStaffId());
+
+			throw new OtpExpiredException("OTP expired");
+		}
+
+		if (!otp.getOtp().equals(request.getOtp())) {
+
+			otp.setAttemptsNum(otp.getAttemptsNum() + 1);
+
+			otp.setUpdatedDt(LocalDateTime.now());
+
+			staffOtpRepository.save(otp);
+
+			logger.warn("Invalid OTP entered for staffId: {}", request.getStaffId());
+
+			throw new OtpInvalidException("Invalid OTP");
+		}
+
+		otp.setStatus(OtpStatus.VERIFIED);
+		otp.setUpdatedDt(LocalDateTime.now());
+
+		staffOtpRepository.save(otp);
+
+		logger.info("OTP verified successfully for staffId: {}", request.getStaffId());
+
+		OtpVerifyResponse response = new OtpVerifyResponse();
+
+		response.setVerified(true);
+		response.setMessage("OTP verified successfully");
+
+		return response;
+	}
+
+	@Override
+	public StaffPasswordResponse forgotPassword(ForgotPasswordRequest request) {
+
+		logger.info("Forgot password started for email: {}", request.getEmail());
+
+		Staff staff = staffRepository.findByEmailId(request.getEmail()).orElseThrow(() -> {
+
+			logger.error("Staff not found for email: {}", request.getEmail());
+
+			return new ResourceNotFoundException("Staff not found");
+		});
+
+		staffOtpRepository.expireActiveOtps(staff.getStaffId(), OtpStatus.EXPIRED,
+				List.of(OtpStatus.NEW, OtpStatus.SENT));
+
+		StaffOtp otp = new StaffOtp();
+
+		otp.setStaffId(staff.getStaffId());
+
+		otp.setOtp(String.valueOf(100000 + new Random().nextInt(900000)));
+
+		otp.setStatus(OtpStatus.SENT);
+		otp.setCreatedDt(LocalDateTime.now());
+
+		staffOtpRepository.save(otp);
+
+		emailService.sendOtpEmail(staff.getEmailId(), otp.getOtp(), OtpPurpose.STAFF_FORGOT_PASSWORD);
+
+		logger.info("Forgot password OTP sent successfully to: {}", staff.getEmailId());
+
+		StaffPasswordResponse response = staffMapper.toPasswordResponse(staff);
+
+		response.setMessage("OTP sent to your registered email.");
+
+		return response;
+	}
+
+	@Override
+	public StaffPasswordResponse resetPassword(StaffResetPasswordRequest request) {
+
+		logger.info("Reset password started for staffId: {}", request.getStaffId());
+
+		StaffOtp otp = staffOtpRepository
+				.findTopByStaffIdAndStatusOrderByCreatedDtDesc(request.getStaffId(), OtpStatus.SENT).orElseThrow(() -> {
+
+					logger.error("OTP not found for staffId: {}", request.getStaffId());
+
+					return new OtpNotFoundException("OTP not found or expired");
+				});
+
+		if (!otp.getOtp().equals(request.getOtp())) {
+
+			logger.warn("Invalid OTP entered for staffId: {}", request.getStaffId());
+
+			throw new OtpInvalidException("Invalid OTP");
+		}
+
+		if (otp.getCreatedDt().isBefore(LocalDateTime.now().minusMinutes(5))) {
+
+			otp.setStatus(OtpStatus.EXPIRED);
+
+			staffOtpRepository.save(otp);
+
+			logger.warn("OTP expired for staffId: {}", request.getStaffId());
+
+			throw new OtpExpiredException("OTP expired");
+		}
+
+		Staff staff = staffRepository.findByStaffId(request.getStaffId()).orElseThrow(() -> {
+
+			logger.error("Staff not found for staffId: {}", request.getStaffId());
+
+			return new ResourceNotFoundException("Staff not found");
+		});
+
+		staff.setPassword(passwordEncoder.encode(request.getNewPassword()));
+
+		staffRepository.save(staff);
+
+		otp.setStatus(OtpStatus.VERIFIED);
+		otp.setUpdatedDt(LocalDateTime.now());
+
+		staffOtpRepository.save(otp);
+
+		emailService.sendOtpEmail(staff.getEmailId(), null, OtpPurpose.STAFF_PASSWORD_RESET_SUCCESS);
+
+		logger.info("Password reset successful for staffId: {}", request.getStaffId());
+
+		StaffPasswordResponse response = staffMapper.toPasswordResponse(staff);
+
+		response.setMessage("Password reset successful.");
+
+		return response;
+	}
+
+	@Override
+	public List<StaffResponse> getAllStaff() {
+
+		logger.info("Fetching all staff");
+
+		List<Staff> staffList = staffRepository.findAll();
+
+		if (staffList.isEmpty()) {
+
+			logger.warn("No staff found");
+
+			throw new ResourceNotFoundException("No staff found");
+		}
+
+		logger.info("Total staff fetched: {}", staffList.size());
+
+		return staffMapper.toResponseList(staffList);
+	}
+
+	@Override
+	public StaffResponse getStaffByStaffId(String staffId) {
+
+		logger.info("Fetching staff by staffId: {}", staffId);
+
+		Staff staff = staffRepository.findByStaffId(staffId).orElseThrow(() -> {
+
+			logger.error("Staff not found for staffId: {}", staffId);
+
+			return new ResourceNotFoundException("Staff not found");
+		});
+
+		logger.info("Staff fetched successfully for staffId: {}", staffId);
+
+		return staffMapper.toResponse(staff);
+	}
+
+	@Override
+	public StaffResponse registerInitialAdmin(StaffRegistrationRequest request) {
+
+		logger.info("Initial admin registration started");
+
+		if (staffRepository.count() > 0) {
+
+			logger.error("Initial admin already exists");
+
+			throw new DuplicateValuesException("Initial admin already created");
+		}
+
+		if (request.getRoles() == null || request.getRoles().stream().noneMatch(r -> "ADMIN".equalsIgnoreCase(r))) {
+
+			logger.error("Initial admin must have ADMIN role");
+
+			throw new UnauthorizedAccessException("Initial staff must have ADMIN role");
+		}
+
+		staffRepository.findByEmailId(request.getEmailId()).ifPresent(s -> {
+
+			logger.error("Email already exists: {}", request.getEmailId());
+
+			throw new DuplicateValuesException("Email already exists");
+		});
+
+		Staff staff = staffMapper.toEntity(request);
+
+		staff.setStaffId(generateStaffId());
+
+		staff.setPassword(passwordEncoder.encode(request.getPassword()));
+
+		staff.setStatus("ACTIVE");
+		staff.setEnabled("Y");
+		staff.setCreatedBy(null);
+
+		if (request.getProfileImgBase64() != null && !request.getProfileImgBase64().isBlank()) {
+
+			String base64 = request.getProfileImgBase64();
+
+			if (base64.contains(",")) {
+
+				base64 = base64.substring(base64.indexOf(",") + 1);
+			}
+
+			staff.setProfileImg(Base64.getDecoder().decode(base64));
+		}
+
+		Set<Role> roles = request.getRoles().stream().map(String::toUpperCase)
+				.map(roleNm -> roleRepository.findByRoleNm(roleNm).orElseThrow(() -> {
+
+					logger.error("Role not found: {}", roleNm);
+
+					return new ResourceNotFoundException(roleNm + " role not found");
+				})).collect(Collectors.toSet());
+
+		staff.setRoles(roles);
+
+		Staff savedStaff = staffRepository.save(staff);
+
+		logger.info("Initial admin registered successfully with staffId: {}", savedStaff.getStaffId());
+
+		return staffMapper.toResponse(savedStaff);
+	}
 }
-
-
-
-

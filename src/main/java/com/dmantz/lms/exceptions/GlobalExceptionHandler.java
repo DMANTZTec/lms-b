@@ -54,4 +54,19 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
 	}
 
+	@ExceptionHandler(UnauthorizedAccessException.class)
+	public ResponseEntity<String> handleUnauthorized(UnauthorizedAccessException ex) {
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
+	}
+
+	@ExceptionHandler(AccountDisabledException.class)
+	public ResponseEntity<String> handleAccountDisabled(AccountDisabledException ex) {
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
+	}
+
+	@ExceptionHandler(EmailSendingException.class)
+	public ResponseEntity<String> handleEmailSending(EmailSendingException ex) {
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+	}
+
 }

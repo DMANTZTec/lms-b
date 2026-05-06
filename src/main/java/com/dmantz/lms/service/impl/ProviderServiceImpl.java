@@ -3,6 +3,8 @@ package com.dmantz.lms.service.impl;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import com.dmantz.lms.dto.request.ProviderRequest;
@@ -21,12 +23,17 @@ import jakarta.transaction.Transactional;
 @Transactional
 public class ProviderServiceImpl implements ProviderService {
 
+	private static final Logger logger =
+			LogManager.getLogger(ProviderServiceImpl.class);
+
 	private final ProviderRepository providerRepository;
 	private final ProviderMapper providerMapper;
 	private final StaffRepository staffRepository;
 
-	public ProviderServiceImpl(ProviderRepository providerRepository, ProviderMapper providerMapper,
-			StaffRepository staffRepository) {
+	public ProviderServiceImpl(ProviderRepository providerRepository,
+							   ProviderMapper providerMapper,
+							   StaffRepository staffRepository) {
+
 		this.providerRepository = providerRepository;
 		this.providerMapper = providerMapper;
 		this.staffRepository = staffRepository;
@@ -34,26 +41,52 @@ public class ProviderServiceImpl implements ProviderService {
 
 	// ================= CREATE =================
 	@Override
-	public ProviderResponse createProvider(ProviderRequest request, Long staffId) {
+	public ProviderResponse createProvider(ProviderRequest request, String staffId) {
 
-		staffRepository.findById(staffId)
-				.orElseThrow(() -> new ResourceNotFoundException("Staff not found with id: " + staffId));
+		logger.info("Provider creation started by staffId: {}", staffId);
+
+		staffRepository.findByStaffId(staffId)
+				.orElseThrow(() -> {
+					logger.error("Staff not found with id: {}", staffId);
+					return new ResourceNotFoundException(
+							"Staff not found with id: " + staffId);
+				});
 
 		if (providerRepository.existsByProviderName(request.getProviderName())) {
-			throw new DuplicateValuesException("Provider name already exists");
+
+			logger.warn("Provider name already exists: {}",
+					request.getProviderName());
+
+			throw new DuplicateValuesException(
+					"Provider name already exists");
 		}
 
 		Provider provider = providerMapper.toEntity(request);
 
 		Provider saved = providerRepository.save(provider);
+
+		logger.info("Provider created successfully with providerId: {}",
+				saved.getId());
+
 		return providerMapper.toResponse(saved);
 	}
 
 	// ================= GET BY ID =================
 	@Override
 	public ProviderResponse getProviderById(Long id) {
+
+		logger.info("Fetching provider with id: {}", id);
+
 		Provider provider = providerRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Provider not found with id: " + id));
+				.orElseThrow(() -> {
+
+					logger.error("Provider not found with id: {}", id);
+
+					return new ResourceNotFoundException(
+							"Provider not found with id: " + id);
+				});
+
+		logger.info("Provider fetched successfully with id: {}", id);
 
 		return providerMapper.toResponse(provider);
 	}
@@ -61,39 +94,97 @@ public class ProviderServiceImpl implements ProviderService {
 	// ================= GET ALL =================
 	@Override
 	public List<ProviderResponse> getAllProviders() {
-		return providerRepository.findAll().stream().map(providerMapper::toResponse).toList();
+
+		logger.info("Fetching all providers");
+
+		List<ProviderResponse> providers = providerRepository.findAll()
+				.stream()
+				.map(providerMapper::toResponse)
+				.toList();
+
+		logger.info("Total providers fetched: {}", providers.size());
+
+		return providers;
 	}
 
 	// ================= UPDATE =================
 	@Override
-	public ProviderResponse updateProvider(Long providerId, ProviderRequest request, Long staffId) {
+	public ProviderResponse updateProvider(Long providerId,
+										   ProviderRequest request,
+										   String staffId) {
 
-		staffRepository.findById(staffId)
-				.orElseThrow(() -> new ResourceNotFoundException("Staff not found with id: " + staffId));
+		logger.info("Updating provider with providerId: {} by staffId: {}",
+				providerId, staffId);
+
+		staffRepository.findByStaffId(staffId)
+				.orElseThrow(() -> {
+
+					logger.error("Staff not found with id: {}", staffId);
+
+					return new ResourceNotFoundException(
+							"Staff not found with id: " + staffId);
+				});
 
 		Provider provider = providerRepository.findById(providerId)
-				.orElseThrow(() -> new ResourceNotFoundException("Provider not found with id: " + providerId));
+				.orElseThrow(() -> {
 
-		if (providerRepository.existsByProviderNameAndIdNot(request.getProviderName(), providerId)) {
-			throw new DuplicateValuesException("Provider name already exists");
+					logger.error("Provider not found with id: {}",
+							providerId);
+
+					return new ResourceNotFoundException(
+							"Provider not found with id: " + providerId);
+				});
+
+		if (providerRepository.existsByProviderNameAndIdNot(
+				request.getProviderName(),
+				providerId)) {
+
+			logger.warn("Duplicate provider name found: {}",
+					request.getProviderName());
+
+			throw new DuplicateValuesException(
+					"Provider name already exists");
 		}
 
 		providerMapper.updateEntityFromRequest(request, provider);
+
 		Provider updated = providerRepository.save(provider);
+
+		logger.info("Provider updated successfully with providerId: {}",
+				updated.getId());
+
 		return providerMapper.toResponse(updated);
 	}
 
 	// ================= DELETE BY ID =================
 	@Override
-	public void deleteProvider(Long providerId, Long staffId) {
+	public void deleteProvider(Long providerId, String staffId) {
 
-		staffRepository.findById(staffId)
-				.orElseThrow(() -> new ResourceNotFoundException("Staff not found with id: " + staffId));
+		logger.info("Deleting provider with providerId: {} by staffId: {}",
+				providerId, staffId);
+
+		staffRepository.findByStaffId(staffId)
+				.orElseThrow(() -> {
+
+					logger.error("Staff not found with id: {}", staffId);
+
+					return new ResourceNotFoundException(
+							"Staff not found with id: " + staffId);
+				});
 
 		Provider provider = providerRepository.findById(providerId)
-				.orElseThrow(() -> new ResourceNotFoundException("Provider not found with id: " + providerId));
+				.orElseThrow(() -> {
+
+					logger.error("Provider not found with id: {}",
+							providerId);
+
+					return new ResourceNotFoundException(
+							"Provider not found with id: " + providerId);
+				});
 
 		providerRepository.delete(provider);
-	}
 
+		logger.info("Provider deleted successfully with providerId: {}",
+				providerId);
+	}
 }
