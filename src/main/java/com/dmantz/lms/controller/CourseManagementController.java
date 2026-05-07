@@ -4,6 +4,9 @@ import java.util.List;
 
 import com.dmantz.lms.dto.request.*;
 import com.dmantz.lms.dto.response.*;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,6 +27,8 @@ import jakarta.validation.Valid;
 @RequestMapping("/api")
 public class CourseManagementController {
 
+	private static final Logger logger = LogManager.getLogger(CourseManagementController.class);
+
 	private final CourseManagementService courseManagementService;
 
 	public CourseManagementController(CourseManagementService courseManagementService) {
@@ -35,30 +40,45 @@ public class CourseManagementController {
 	public ResponseEntity<SubjectResponse> createSubject(@Valid @RequestBody SubjectRequest request,
 			@RequestParam String staffId) {
 
+		logger.info("POST /subject/create - Creating subject with shortCode: {} by staffId: {}",
+				request.getSubjectShortCd(), staffId);
+
 		SubjectResponse response = courseManagementService.createSubject(request, staffId);
 
+		logger.info("Subject created successfully with shortCode: {}", request.getSubjectShortCd());
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
 	@GetMapping("/subject/view-subjects")
 	public ResponseEntity<List<SubjectResponse>> viewAllSubjects() {
+		logger.info("GET /subject/view-subjects - Fetching all subjects");
 
 		List<SubjectResponse> subjects = courseManagementService.viewAllSubjects();
 
+		logger.debug("Returning {} subjects", subjects.size());
 		return ResponseEntity.ok(subjects);
 	}
 
 	@PutMapping("/subject/update/{subjectId}")
 	public ResponseEntity<SubjectResponse> updateSubject(@PathVariable Long subjectId,
 			@Valid @RequestBody SubjectRequest request, @RequestParam String staffId) {
-		return ResponseEntity.ok(courseManagementService.updateSubject(subjectId, request, staffId));
+
+		logger.info("PUT /subject/update/{} - Updating subject by staffId: {}", subjectId, staffId);
+
+		SubjectResponse response = courseManagementService.updateSubject(subjectId, request, staffId);
+
+		logger.info("Subject updated successfully with id: {}", subjectId);
+		return ResponseEntity.ok(response);
 	}
 
 	@DeleteMapping("/subject/delete/{subjectId}")
 	public ResponseEntity<String> deleteSubject(@PathVariable Long subjectId, @RequestParam String staffId) {
 
+		logger.info("DELETE /subject/delete/{} - Deleting subject by staffId: {}", subjectId, staffId);
+
 		courseManagementService.deleteSubject(subjectId, staffId);
 
+		logger.info("Subject deleted successfully with id: {}", subjectId);
 		return ResponseEntity.ok("Subject deleted successfully");
 	}
 
@@ -66,42 +86,67 @@ public class CourseManagementController {
 	public ResponseEntity<CourseResponse> createCourse(@Valid @RequestBody CourseRequest request,
 			@RequestParam String staffId) {
 
-		CourseResponse response = courseManagementService.createCourse(request, staffId);
+		logger.info("POST /course/create - Creating course: {} by staffId: {}", request.getCourseTitle(), staffId);
 
+		CourseResponse response = courseManagementService.createCourse(request, staffId);
+		logger.info("Course created successfully with title: {}", request.getCourseTitle());
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
 	@GetMapping("/course/view-courses")
 	public ResponseEntity<List<CourseResponse>> viewAllCourses() {
 
+		logger.info("GET /course/view-courses - Fetching all courses");
+
 		List<CourseResponse> courses = courseManagementService.viewAllCourses();
 
+		logger.debug("Returning {} courses", courses.size());
 		return ResponseEntity.ok(courses);
 	}
 
 	@PutMapping("/course/update/{courseId}")
 	public ResponseEntity<CourseResponse> updateCourse(@PathVariable Long courseId,
 			@Valid @RequestBody CourseRequest request, @RequestParam String staffId) {
-		return ResponseEntity.ok(courseManagementService.updateCourse(courseId, request, staffId));
+		logger.info("PUT /course/update/{} - Updating course by staffId: {}", courseId, staffId);
+
+		CourseResponse response = courseManagementService.updateCourse(courseId, request, staffId);
+
+		logger.info("Course updated successfully with id: {}", courseId);
+		return ResponseEntity.ok(response);
 	}
 
 	@DeleteMapping("/course/delete/{courseId}")
 	public ResponseEntity<String> deleteCourse(@PathVariable Long courseId, @RequestParam String staffId) {
+		logger.info("DELETE /course/delete/{} - Deleting course by staffId: {}", courseId, staffId);
+
 		courseManagementService.deleteCourse(courseId, staffId);
+
+		logger.info("Course deleted successfully with id: {}", courseId);
 		return ResponseEntity.ok("Course deleted successfully");
 	}
 
 //	get all courses by subject
 	@GetMapping("/subjects/{subjectId}/view-courses")
 	public ResponseEntity<List<CourseResponse>> viewCoursesBySubject(@PathVariable Long subjectId) {
-		return ResponseEntity.ok(courseManagementService.viewCoursesBySubject(subjectId));
+		logger.info("GET /subjects/{}/view-courses - Fetching courses for subjectId: {}", subjectId, subjectId);
+
+		List<CourseResponse> courses = courseManagementService.viewCoursesBySubject(subjectId);
+
+		logger.debug("Returning {} courses for subjectId: {}", courses.size(), subjectId);
+		return ResponseEntity.ok(courses);
 	}
 
 	// ================= CREATE =================
 	@PostMapping("/chapter/create")
 	public ResponseEntity<ChapterResponse> createChapter(@RequestParam String staffId,
 			@RequestBody ChapterRequest request) {
+
+		logger.info("POST /chapter/create - Creating chapter: {} for courseId: {} by staffId: {}",
+				request.getChapterNm(), request.getCourseId(), staffId);
+
 		ChapterResponse response = courseManagementService.createChapter(staffId, request);
+
+		logger.info("Chapter created successfully: {}", request.getChapterNm());
 		return ResponseEntity.ok(response);
 	}
 
@@ -109,7 +154,12 @@ public class CourseManagementController {
 	@PutMapping("/update/{chapterId}")
 	public ResponseEntity<ChapterResponse> updateChapter(@PathVariable Long chapterId, @RequestParam String staffId,
 			@RequestBody ChapterRequest request) {
+
+		logger.info("PUT /update/{} - Updating chapter by staffId: {}", chapterId, staffId);
+
 		ChapterResponse response = courseManagementService.updateChapter(chapterId, request, staffId);
+
+		logger.info("Chapter updated successfully with id: {}", chapterId);
 		return ResponseEntity.ok(response);
 	}
 
@@ -118,7 +168,11 @@ public class CourseManagementController {
 	public ResponseEntity<ChapterResponse> getChapterById(@PathVariable Long chapterId
 
 	) {
+
+		logger.info("GET /get/{} - Fetching chapter by id", chapterId);
 		ChapterResponse response = courseManagementService.getChapterById(chapterId);
+
+		logger.debug("Chapter fetched successfully with id: {}", chapterId);
 		return ResponseEntity.ok(response);
 	}
 
@@ -128,32 +182,48 @@ public class CourseManagementController {
 	public ResponseEntity<List<ChapterResponse>> getChaptersByCourse(
 
 	) {
+
+		logger.info("GET /chapters/getAll - Fetching all chapters");
+
 		List<ChapterResponse> response = courseManagementService.getAllChapters();
+
+		logger.debug("Returning {} chapters", response.size());
 		return ResponseEntity.ok(response);
 	}
-	
-	@GetMapping("/course/{courseId}/chapters")
-	public ResponseEntity<List<ChapterResponse>> getChaptersByCourseId(
-	        @PathVariable String courseId) {
 
-	    return ResponseEntity.ok(
-	            courseManagementService.getChaptersByCourseStringId(courseId)
-	    );
+	@GetMapping("/course/{courseId}/chapters")
+	public ResponseEntity<List<ChapterResponse>> getChaptersByCourseId(@PathVariable String courseId) {
+
+		logger.info("GET /course/{}/chapters - Fetching chapters for courseId: {}", courseId, courseId);
+
+		List<ChapterResponse> response = courseManagementService.getChaptersByCourseStringId(courseId);
+
+		logger.debug("Returning {} chapters for courseId: {}", response.size(), courseId);
+		return ResponseEntity.ok(response);
 	}
 
 	// ================= DELETE =================
 	@DeleteMapping("/delete/{chapterId}")
 	public ResponseEntity<String> deleteChapter(@PathVariable Long chapterId, @RequestParam String staffId) {
+
+		logger.info("DELETE /delete/{} - Deleting chapter by staffId: {}", chapterId, staffId);
 		courseManagementService.deleteChapter(chapterId, staffId);
+
+		logger.info("Chapter deleted successfully with id: {}", chapterId);
 		return ResponseEntity.ok("Chapter deleted successfully");
 	}
-	
+
 	// =============== CREATE TOPIC====================
 
 	@PostMapping("/topics")
 	public ResponseEntity<TopicResponseDto> createTopic(@Valid @RequestBody TopicRequestDto request) {
 
+		logger.info("POST /topics - Creating topic: {} in chapterId: {} by staffId: {}", request.getTopicName(),
+				request.getChapterId(), request.getStaffId());
+
 		TopicResponseDto response = courseManagementService.createTopic(request);
+
+		logger.info("Topic created successfully: {}", request.getTopicName());
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
@@ -162,8 +232,11 @@ public class CourseManagementController {
 	@GetMapping("/topics")
 	public ResponseEntity<List<TopicResponseDto>> getTopicsByChapterId(@RequestParam Long chapterId) {
 
+		logger.info("GET /topics - Fetching topics for chapterId: {}", chapterId);
+
 		List<TopicResponseDto> topics = courseManagementService.getTopicsByChapterId(chapterId);
 
+		logger.debug("Returning {} topics for chapterId: {}", topics.size(), chapterId);
 		return ResponseEntity.ok(topics);
 	}
 
@@ -174,8 +247,11 @@ public class CourseManagementController {
 	public ResponseEntity<TopicResponseDto> getTopicByIdAndChapterId(@PathVariable Long topicId,
 			@RequestParam Long chapterId) {
 
+		logger.info("GET /topics/{} - Fetching topic in chapterId: {}", topicId, chapterId);
+
 		TopicResponseDto response = courseManagementService.getTopicByIdAndChapterId(topicId, chapterId);
 
+		logger.debug("Topic fetched successfully with id: {} in chapterId: {}", topicId, chapterId);
 		return ResponseEntity.ok(response);
 	}
 
@@ -185,7 +261,10 @@ public class CourseManagementController {
 	public ResponseEntity<TopicResponseDto> updateTopic(@PathVariable Long id,
 			@Valid @RequestBody TopicRequestDto requestDto) {
 
+		logger.info("PUT /topics/{} - Updating topic", id);
 		TopicResponseDto response = courseManagementService.updateTopic(id, requestDto);
+
+		logger.info("Topic updated successfully with id: {}", id);
 		return ResponseEntity.ok(response);
 	}
 
@@ -194,8 +273,11 @@ public class CourseManagementController {
 	@DeleteMapping("topics/{id}")
 	public ResponseEntity<String> deleteTopic(@PathVariable Long id) {
 
+		logger.info("DELETE /topics/{} - Deleting topic", id);
+
 		courseManagementService.deleteTopic(id);
 
+		logger.info("Topic deleted successfully with id: {}", id);
 		return ResponseEntity.ok("Topic deleted successfully");
 	}
 
@@ -203,8 +285,10 @@ public class CourseManagementController {
 	@PutMapping("/{chapterId}/movechapter")
 	public ResponseEntity<String> moveChapter(@PathVariable Long chapterId, @RequestParam int targetPosition) {
 
+		logger.info("PUT /{}/movechapter - Moving chapter to position: {}", chapterId, targetPosition);
 		courseManagementService.moveChapter(chapterId, targetPosition);
 
+		logger.info("Chapter {} moved to position {} successfully", chapterId, targetPosition);
 		return ResponseEntity.ok("Chapter moved successfully");
 	}
 
@@ -212,7 +296,10 @@ public class CourseManagementController {
 	@PutMapping("/{topicId}/movetopic")
 	public ResponseEntity<String> moveTopic(@PathVariable Long topicId, @RequestParam int targetPosition) {
 
+		logger.info("PUT /{}/movetopic - Moving topic to position: {}", topicId, targetPosition);
 		courseManagementService.moveTopic(topicId, targetPosition);
+
+		logger.info("Topic {} moved to position {} successfully", topicId, targetPosition);
 		return ResponseEntity.ok("Topic moved successfully");
 	}
 
@@ -222,7 +309,12 @@ public class CourseManagementController {
 	public ResponseEntity<TopicReferenceResponseDto> addUrl(@PathVariable Long topicId,
 			@RequestBody TopicReferenceRequestDto dto) {
 
-		return ResponseEntity.ok(courseManagementService.addUrlReference(topicId, dto));
+		logger.info("POST /topics/{}/references/url - Adding URL reference", topicId);
+
+		TopicReferenceResponseDto response = courseManagementService.addUrlReference(topicId, dto);
+
+		logger.info("URL reference added successfully to topicId: {}", topicId);
+		return ResponseEntity.ok(response);
 	}
 
 	// ========================= Add Video Reference =============================
@@ -231,7 +323,12 @@ public class CourseManagementController {
 	public ResponseEntity<TopicReferenceResponseDto> addVideo(@PathVariable Long topicId,
 			@RequestBody TopicReferenceRequestDto dto) {
 
-		return ResponseEntity.ok(courseManagementService.addVideoReference(topicId, dto));
+		logger.info("POST /topics/{}/references/video - Adding VIDEO reference", topicId);
+
+		TopicReferenceResponseDto response = courseManagementService.addVideoReference(topicId, dto);
+
+		logger.info("VIDEO reference added successfully to topicId: {}", topicId);
+		return ResponseEntity.ok(response);
 	}
 
 	// ========================= Add Document Reference
@@ -240,21 +337,34 @@ public class CourseManagementController {
 	public ResponseEntity<TopicReferenceResponseDto> addDocument(@PathVariable Long topicId,
 			@RequestBody TopicReferenceRequestDto dto) {
 
-		return ResponseEntity.ok(courseManagementService.addDocumentReference(topicId, dto));
+		logger.info("POST /topics/{}/references/document - Adding DOCUMENT reference", topicId);
+
+		TopicReferenceResponseDto response = courseManagementService.addDocumentReference(topicId, dto);
+
+		logger.info("DOCUMENT reference added successfully to topicId: {}", topicId);
+		return ResponseEntity.ok(response);
 	}
 
 //	========================= Add course to program =============================
 	@PostMapping("/add/course/program")
 	public ResponseEntity<List<ProgramCourseResponse>> addCourses(@Valid @RequestBody ProgramCourseRequest request) {
 
-		return ResponseEntity.ok(courseManagementService.addCoursesToProgram(request));
+		logger.info("POST /add/course/program - Adding {} course(s) to programId: {}", request.getCourseIds().size(),
+				request.getProgramId());
+
+		List<ProgramCourseResponse> response = courseManagementService.addCoursesToProgram(request);
+
+		logger.info("Successfully added {} course(s) to programId: {}", response.size(), request.getProgramId());
+		return ResponseEntity.ok(response);
 	}
 
 //========================= delete course from program =============================
 	@DeleteMapping("/remove/course/{id}")
 	public ResponseEntity<String> removeCourse(@PathVariable Long id) {
 
+		logger.info("DELETE /remove/course/{} - Removing program-course mapping", id);
 		courseManagementService.deleteProgramCourse(id);
+		logger.info("Program-Course mapping removed successfully with id: {}", id);
 		return ResponseEntity.ok("Program-Course mapping removed successfully");
 	}
 
@@ -262,7 +372,12 @@ public class CourseManagementController {
 	@PostMapping("/add/program")
 	public ResponseEntity<ProgramResponse> createProgram(@RequestBody ProgramRequest request) {
 
+		logger.info("POST /add/program - Creating program: {} for providerId: {}", request.getProgramTitle(),
+				request.getProviderId());
+
 		ProgramResponse response = courseManagementService.createProgram(request);
+
+		logger.info("Program created successfully with title: {}", request.getProgramTitle());
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
@@ -270,7 +385,10 @@ public class CourseManagementController {
 	@GetMapping("/getById/program/{id}")
 	public ResponseEntity<ProgramResponse> getProgramById(@PathVariable Long id) {
 
+		logger.info("GET /getById/program/{} - Fetching program by id", id);
 		ProgramResponse response = courseManagementService.getProgramById(id);
+
+		logger.debug("Program fetched successfully with id: {}", id);
 		return ResponseEntity.ok(response);
 	}
 
@@ -278,25 +396,33 @@ public class CourseManagementController {
 	@GetMapping("/getAll/program")
 	public ResponseEntity<List<ProgramResponse>> getAllPrograms() {
 
-	    List<ProgramResponse> response = courseManagementService.getAllPrograms();
-	    return ResponseEntity.ok(response);
+		logger.info("GET /getAll/program - Fetching all programs");
+
+		List<ProgramResponse> response = courseManagementService.getAllPrograms();
+		logger.debug("Returning {} programs", response.size());
+		return ResponseEntity.ok(response);
 	}
-	
+
 	// ================= UPDATE =================
 	@PutMapping("/update/program/{id}")
-	public ResponseEntity<ProgramResponse> updateProgram(
-	        @PathVariable Long id,
-	        @RequestBody ProgramRequest request) {
+	public ResponseEntity<ProgramResponse> updateProgram(@PathVariable Long id, @RequestBody ProgramRequest request) {
 
-	    ProgramResponse response = courseManagementService.updateProgram(id, request);
-	    return ResponseEntity.ok(response);
+		logger.info("PUT /update/program/{} - Updating program with title: {}", id, request.getProgramTitle());
+
+		ProgramResponse response = courseManagementService.updateProgram(id, request);
+
+		logger.info("Program updated successfully with id: {}", id);
+		return ResponseEntity.ok(response);
 	}
 
 	// ================= DELETE =================
 	@DeleteMapping("/delete/program/{id}")
 	public ResponseEntity<String> deleteProgram(@PathVariable Long id) {
 
+		logger.info("DELETE /delete/program/{} - Deleting program", id);
 		courseManagementService.deleteProgram(id);
+
+		logger.info("Program deleted successfully with id: {}", id);
 		return ResponseEntity.ok("Program deleted successfully");
 	}
 }
