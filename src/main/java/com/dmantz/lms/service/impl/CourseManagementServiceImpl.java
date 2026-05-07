@@ -405,6 +405,7 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 		logger.debug("Total chapters found: {}", chapters.size());
 		return chapters;
 	}
+	
 
 	// ================= UPDATE CHAPTER =================
 	@Override

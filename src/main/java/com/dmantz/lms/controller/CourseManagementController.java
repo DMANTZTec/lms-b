@@ -138,7 +138,7 @@ public class CourseManagementController {
 		courseManagementService.deleteChapter(chapterId, staffId);
 		return ResponseEntity.ok("Chapter deleted successfully");
 	}
-
+	
 	// =============== CREATE TOPIC====================
 
 	@PostMapping("/topics")

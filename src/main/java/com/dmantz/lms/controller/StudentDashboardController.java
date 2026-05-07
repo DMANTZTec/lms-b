@@ -3,6 +3,9 @@ package com.dmantz.lms.controller;
 import com.dmantz.lms.dto.response.*;
 import com.dmantz.lms.entity.CourseStatus;
 import com.dmantz.lms.service.StudentDashboardService;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,54 +15,177 @@ import java.util.List;
 @RequestMapping("/api/student-dashboard")
 public class StudentDashboardController {
 
-	private final StudentDashboardService dashboardService;
+    private static final Logger logger =
+            LogManager.getLogger(StudentDashboardController.class);
 
-	public StudentDashboardController(StudentDashboardService dashboardService) {
-		this.dashboardService = dashboardService;
-	}
+    private final StudentDashboardService dashboardService;
 
-	@GetMapping("/weekly-schedule/{studentId}")
-	public ResponseEntity<WeeklyScheduleResponse> getWeeklySchedule(@PathVariable String studentId) {
+    public StudentDashboardController(StudentDashboardService dashboardService) {
+        this.dashboardService = dashboardService;
+    }
 
-		return ResponseEntity.ok(dashboardService.getWeeklySchedule(studentId));
-	}
+    // ================= WEEKLY SCHEDULE =================
 
-	@GetMapping("/my-coursesprogress")
-	public ResponseEntity<StudentMyCoursesResponse> getMyCourses(@RequestParam String studentId,
-			@RequestParam(required = false) CourseStatus status) {
+    @GetMapping("/weekly-schedule/{studentId}")
+    public ResponseEntity<WeeklyScheduleResponse> getWeeklySchedule(
+            @PathVariable String studentId) {
 
-		return ResponseEntity.ok(dashboardService.getMyCourses(studentId, status));
-	}
+        logger.info(
+                "Received request to fetch weekly schedule for studentId: {}",
+                studentId
+        );
 
-	@GetMapping("/{courseId}/topics-progress")
-	public ResponseEntity<List<TopicProgressResponse>> getTopicProgress(@PathVariable String courseId,
-			@RequestParam String studentId) {
+        WeeklyScheduleResponse response =
+                dashboardService.getWeeklySchedule(studentId);
 
-		return ResponseEntity.ok(dashboardService.getTopicProgress(courseId, studentId));
-	}
+        logger.info(
+                "Weekly schedule fetched successfully for studentId: {}",
+                studentId
+        );
 
-	@GetMapping("/{courseId}/chapters-progress")
-	public ResponseEntity<List<ChapterProgressResponse>> getChapterProgress(@PathVariable String courseId,
-			@RequestParam String studentId) {
+        return ResponseEntity.ok(response);
+    }
 
-		return ResponseEntity.ok(dashboardService.getChapterProgress(courseId, studentId));
-	}
+    // ================= MY COURSES =================
 
-	@GetMapping("/dashboard/course/{courseId}/progress")
-	public ResponseEntity<CourseProgressSummaryResponse> getCourseProgress(@PathVariable String courseId,
-			@RequestParam String studentId) {
+    @GetMapping("/my-coursesprogress")
+    public ResponseEntity<StudentMyCoursesResponse> getMyCourses(
+            @RequestParam String studentId,
+            @RequestParam(required = false) CourseStatus status) {
 
-		return ResponseEntity.ok(dashboardService.getCourseProgressSummary(courseId, studentId));
-	}
+        logger.info(
+                "Received request to fetch courses for studentId: {} with status: {}",
+                studentId,
+                status
+        );
 
-	@GetMapping("/classes/{studentId}")
-	public ResponseEntity<List<StudentClassResponse>> getMyClasses(@PathVariable String studentId) {
+        StudentMyCoursesResponse response =
+                dashboardService.getMyCourses(studentId, status);
 
-		return ResponseEntity.ok(dashboardService.getClassInfo(studentId));
-	}
+        logger.info(
+                "Courses fetched successfully for studentId: {}",
+                studentId
+        );
 
-	@GetMapping("/summary/{studentId}")
-	public ResponseEntity<StudentDashboardSummaryResponse> getDashboardSummary(@PathVariable String studentId) {
-		return ResponseEntity.ok(dashboardService.getDashboardSummary(studentId));
-	}
+        return ResponseEntity.ok(response);
+    }
+
+    // ================= TOPIC PROGRESS =================
+
+    @GetMapping("/{courseId}/topics-progress")
+    public ResponseEntity<List<TopicProgressResponse>> getTopicProgress(
+            @PathVariable String courseId,
+            @RequestParam String studentId) {
+
+        logger.info(
+                "Received request to fetch topic progress for courseId: {} and studentId: {}",
+                courseId,
+                studentId
+        );
+
+        List<TopicProgressResponse> response =
+                dashboardService.getTopicProgress(courseId, studentId);
+
+        logger.info(
+                "Topic progress fetched successfully for courseId: {} and studentId: {}",
+                courseId,
+                studentId
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ================= CHAPTER PROGRESS =================
+
+    @GetMapping("/{courseId}/chapters-progress")
+    public ResponseEntity<List<ChapterProgressResponse>> getChapterProgress(
+            @PathVariable String courseId,
+            @RequestParam String studentId) {
+
+        logger.info(
+                "Received request to fetch chapter progress for courseId: {} and studentId: {}",
+                courseId,
+                studentId
+        );
+
+        List<ChapterProgressResponse> response =
+                dashboardService.getChapterProgress(courseId, studentId);
+
+        logger.info(
+                "Chapter progress fetched successfully for courseId: {} and studentId: {}",
+                courseId,
+                studentId
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ================= COURSE PROGRESS =================
+
+    @GetMapping("/dashboard/course/{courseId}/progress")
+    public ResponseEntity<CourseProgressSummaryResponse> getCourseProgress(
+            @PathVariable String courseId,
+            @RequestParam String studentId) {
+
+        logger.info(
+                "Received request to fetch course progress for courseId: {} and studentId: {}",
+                courseId,
+                studentId
+        );
+
+        CourseProgressSummaryResponse response =
+                dashboardService.getCourseProgressSummary(courseId, studentId);
+
+        logger.info(
+                "Course progress fetched successfully for courseId: {} and studentId: {}",
+                courseId,
+                studentId
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ================= CLASS INFO =================
+
+    @GetMapping("/classes/{studentId}")
+    public ResponseEntity<List<StudentClassResponse>> getMyClasses(
+            @PathVariable String studentId) {
+
+        logger.info(
+                "Received request to fetch class info for studentId: {}",
+                studentId
+        );
+
+        List<StudentClassResponse> response =
+                dashboardService.getClassInfo(studentId);
+
+        logger.info(
+                "Class info fetched successfully for studentId: {}",
+                studentId
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ================= DASHBOARD SUMMARY =================
+
+    @GetMapping("/summary/{studentId}")
+    public ResponseEntity<StudentDashboardSummaryResponse> getDashboardSummary(
+            @PathVariable String studentId) {
+
+        logger.info(
+                "Received request to fetch dashboard summary for studentId: {}",
+                studentId
+        );
+
+        StudentDashboardSummaryResponse response =
+                dashboardService.getDashboardSummary(studentId);
+
+        logger.info(
+                "Dashboard summary fetched successfully for studentId: {}",
+                studentId
+        );
+
+        return ResponseEntity.ok(response);
+    }
 }
