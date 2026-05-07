@@ -131,6 +131,15 @@ public class CourseManagementController {
 		List<ChapterResponse> response = courseManagementService.getAllChapters();
 		return ResponseEntity.ok(response);
 	}
+	
+	@GetMapping("/course/{courseId}/chapters")
+	public ResponseEntity<List<ChapterResponse>> getChaptersByCourseId(
+	        @PathVariable String courseId) {
+
+	    return ResponseEntity.ok(
+	            courseManagementService.getChaptersByCourseStringId(courseId)
+	    );
+	}
 
 	// ================= DELETE =================
 	@DeleteMapping("/delete/{chapterId}")

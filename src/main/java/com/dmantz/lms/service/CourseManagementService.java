@@ -88,6 +88,9 @@ public interface CourseManagementService {
 	ProgramResponse getProgramById(Long id);
 
 	ProgramResponse createProgram(ProgramRequest request);
+	
+	List<ChapterResponse> getChaptersByCourseStringId(String courseId);
+
 
 
 }

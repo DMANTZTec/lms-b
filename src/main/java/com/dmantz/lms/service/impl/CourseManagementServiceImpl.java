@@ -407,6 +407,31 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 		return chapters;
 	}
 	
+	@Override
+	public List<ChapterResponse> getChaptersByCourseStringId(String courseId) {
+
+	    logger.info("Fetching chapters for courseId: {}", courseId);
+
+	    // Validate course
+	    Course course = courseRepository.findByCourseId(courseId)
+	            .orElseThrow(() -> {
+	                logger.warn("Course not found with courseId: {}", courseId);
+	                return new ResourceNotFoundException(
+	                        "Course not found with id: " + courseId);
+	            });
+
+	    // Fetch chapters
+	    List<ChapterResponse> chapters = chapterRepository
+	            .findByCourseIdOrderByChapterNumAsc(course.getId())
+	            .stream()
+	            .map(chapterMapper::toResponse)
+	            .collect(Collectors.toList());
+
+	    logger.debug("Found {} chapters for courseId: {}",
+	            chapters.size(), courseId);
+
+	    return chapters;
+	}
 
 	// ================= UPDATE CHAPTER =================
 	@Override
