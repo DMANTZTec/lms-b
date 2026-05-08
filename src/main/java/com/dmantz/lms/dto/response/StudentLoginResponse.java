@@ -2,9 +2,19 @@ package com.dmantz.lms.dto.response;
 
 public class StudentLoginResponse {
 
+    private String role;
     private String studentId;
     private String email;
+    private String token;
     private String message;
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
 
     public String getStudentId() {
         return studentId;
@@ -22,6 +32,14 @@ public class StudentLoginResponse {
         this.email = email;
     }
 
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
     public String getMessage() {
         return message;
     }
@@ -33,8 +51,10 @@ public class StudentLoginResponse {
     @Override
     public String toString() {
         return "StudentLoginResponse{" +
-                "studentId='" + studentId + '\'' +
+                "role='" + role + '\'' +
+                ", studentId='" + studentId + '\'' +
                 ", email='" + email + '\'' +
+                ", token='" + token + '\'' +
                 ", message='" + message + '\'' +
                 '}';
     }
