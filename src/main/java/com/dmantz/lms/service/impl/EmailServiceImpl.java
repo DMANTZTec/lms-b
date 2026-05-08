@@ -2,6 +2,10 @@ package com.dmantz.lms.service.impl;
 
 import com.dmantz.lms.entity.OtpPurpose;
 import com.dmantz.lms.service.EmailService;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -9,6 +13,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class EmailServiceImpl implements EmailService {
 
+	private static final Logger logger = LogManager.getLogger(EmailServiceImpl.class);
+	
     private final JavaMailSender mailSender;
 
     public EmailServiceImpl(JavaMailSender mailSender) {
@@ -17,7 +23,19 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendOtpEmail(String toEmail, String otp, OtpPurpose purpose) {
+    	
+    	 logger.info("Preparing to send OTP email to: {} for purpose: {}", toEmail, purpose);
 
+         if (toEmail == null || toEmail.isBlank()) {
+             logger.error("Recipient email is null or blank. Aborting email send.");
+             throw new IllegalArgumentException("Recipient email must not be null or blank");
+         }
+
+         if (purpose == null) {
+             logger.error("OTP purpose is null. Aborting email send.");
+             throw new IllegalArgumentException("OTP purpose must not be null");
+         }
+    	
         String subject;
         String body;
 
@@ -82,7 +100,8 @@ public class EmailServiceImpl implements EmailService {
 
 
             default:
-                throw new IllegalArgumentException("Invalid OTP purpose");
+            	logger.error("Unsupported OTP purpose received: {}", purpose);
+                throw new IllegalArgumentException("Invalid OTP purpose: " + purpose);
         }
 
         try {
@@ -91,11 +110,19 @@ public class EmailServiceImpl implements EmailService {
             message.setSubject(subject);
             message.setText(body);
 
+            logger.debug("Sending email - To: {}, Subject: {}", toEmail, subject);
             mailSender.send(message);
+            logger.info("OTP email sent successfully to: {} for purpose: {}", toEmail, purpose);
+
+        } catch (MailException ex) {
+            logger.error("Mail delivery failure while sending OTP email to: {} for purpose: {}. Reason: {}",
+                    toEmail, purpose, ex.getMessage(), ex);
+            throw new RuntimeException("Failed to send OTP email to " + toEmail + ". Please try again later.", ex);
 
         } catch (Exception ex) {
-            System.err.println("Failed to send OTP email to " + toEmail);
-            ex.printStackTrace();
+            logger.error("Unexpected error while sending OTP email to: {} for purpose: {}",
+                    toEmail, purpose, ex);
+            throw new RuntimeException("An unexpected error occurred while sending email.", ex);
         }
     }
 }
