@@ -1,13 +1,10 @@
 package com.dmantz.lms.controller;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.dmantz.lms.dto.request.AcknowledgeMentorRequest;
 import com.dmantz.lms.dto.request.StudentTaskMentorRequest;
@@ -15,44 +12,51 @@ import com.dmantz.lms.dto.request.UpdateMentorMinutesRequest;
 import com.dmantz.lms.dto.response.StudentTaskMentorResponse;
 import com.dmantz.lms.service.StudentTaskMentorService;
 
-
 @RestController
 @RequestMapping("/api/student-task-mentor")
 public class StudentTaskMentorController {
 
-    @Autowired
-    private StudentTaskMentorService mentorService;
+	private static final Logger logger = LogManager.getLogger(StudentTaskMentorController.class);
 
-    @PostMapping
-    public ResponseEntity<StudentTaskMentorResponse> createMentoringActivity(
-            @RequestBody StudentTaskMentorRequest request) {
+	@Autowired
+	private StudentTaskMentorService mentorService;
 
-        StudentTaskMentorResponse response =
-                mentorService.createMentoringActivity(request);
+	@PostMapping
+	public ResponseEntity<StudentTaskMentorResponse> createMentoringActivity(
+			@RequestBody StudentTaskMentorRequest request) {
 
-        return ResponseEntity.ok(response);
-    }
-    @PutMapping("/{id}")
-    public ResponseEntity<StudentTaskMentorResponse> updateMentoringMinutes(
-            @PathVariable Long id,
-            @RequestBody UpdateMentorMinutesRequest request) {
+		logger.info("Received request to create mentoring activity");
 
-        StudentTaskMentorResponse response =
-                mentorService.updateMentoringMinutes(id, request);
+		StudentTaskMentorResponse response = mentorService.createMentoringActivity(request);
 
-        return ResponseEntity.ok(response);
-    }
-    
-    @PutMapping("/{id}/acknowledge")
-    public ResponseEntity<StudentTaskMentorResponse> acknowledgeMentorHelp(
-            @PathVariable Long id,
-            @RequestBody AcknowledgeMentorRequest request) {
+		logger.info("Mentoring activity created successfully");
 
-        StudentTaskMentorResponse response =
-                mentorService.acknowledgeMentorHelp(id);
+		return ResponseEntity.ok(response);
+	}
 
-        return ResponseEntity.ok(response);
-    }
+	@PutMapping("/{id}")
+	public ResponseEntity<StudentTaskMentorResponse> updateMentoringMinutes(@PathVariable("id") Long id,
+			@RequestBody UpdateMentorMinutesRequest request) {
 
+		logger.info("Received request to update mentoring minutes for id: {}", id);
+
+		StudentTaskMentorResponse response = mentorService.updateMentoringMinutes(id, request);
+
+		logger.info("Mentoring minutes updated successfully for id: {}", id);
+
+		return ResponseEntity.ok(response);
+	}
+
+	@PutMapping("/{id}/acknowledge")
+	public ResponseEntity<StudentTaskMentorResponse> acknowledgeMentorHelp(@PathVariable("id") Long id,
+			@RequestBody AcknowledgeMentorRequest request) {
+
+		logger.info("Received request to acknowledge mentor help for id: {}", id);
+
+		StudentTaskMentorResponse response = mentorService.acknowledgeMentorHelp(id);
+
+		logger.info("Mentor help acknowledged successfully for id: {}", id);
+
+		return ResponseEntity.ok(response);
+	}
 }
-

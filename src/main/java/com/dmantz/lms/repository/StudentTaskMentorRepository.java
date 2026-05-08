@@ -6,4 +6,6 @@ import com.dmantz.lms.entity.StudentTaskMentor;
 
 public interface StudentTaskMentorRepository extends JpaRepository<StudentTaskMentor, Long> {
 
+	boolean existsByStudentTask_IdAndMentorStudent_StudentId(Long studentTaskId, String mentorStudentId);
+
 }

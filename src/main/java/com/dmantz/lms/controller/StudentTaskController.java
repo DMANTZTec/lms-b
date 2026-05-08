@@ -4,7 +4,12 @@ import com.dmantz.lms.entity.StudentNeedHelpRequest;
 import com.dmantz.lms.dto.request.StudentTaskRequest;
 import com.dmantz.lms.dto.response.StudentTaskResponse;
 import com.dmantz.lms.service.StudentTaskService;
+
 import jakarta.validation.Valid;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,27 +17,41 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/student-task")
 public class StudentTaskController {
 
-    private final StudentTaskService studentTaskService;
+	private static final Logger logger = LogManager.getLogger(StudentTaskController.class);
 
-    public StudentTaskController(StudentTaskService studentTaskService) {
-        this.studentTaskService = studentTaskService;
-    }
+	private final StudentTaskService studentTaskService;
 
-    @PostMapping("/addtask")
-    public ResponseEntity<StudentTaskResponse> addStudentTask(
-            @Valid @RequestBody StudentTaskRequest request) {
+	public StudentTaskController(StudentTaskService studentTaskService) {
+		this.studentTaskService = studentTaskService;
+	}
 
-        StudentTaskResponse response = studentTaskService.addTask(request);
+	// ================= ADD STUDENT TASK =================
+	@PostMapping("/addtask")
+	public ResponseEntity<StudentTaskResponse> addStudentTask(@Valid @RequestBody StudentTaskRequest request) {
 
-        return ResponseEntity.ok(response);
-    }
+		logger.info("Received add task request for studentId: {} and topicId: {}", request.getStudentId(),
+				request.getTopicId());
 
-    @PatchMapping("/need-help")
-    public ResponseEntity<StudentTaskResponse> markNeedHelp(
-            @Valid @RequestBody StudentNeedHelpRequest request) {
+		StudentTaskResponse response = studentTaskService.addTask(request);
 
-        StudentTaskResponse response = studentTaskService.updateNeedHelp(request);
+		logger.info("Task added successfully for studentId: {} and topicId: {}", request.getStudentId(),
+				request.getTopicId());
 
-        return ResponseEntity.ok(response);
-    }
+		return ResponseEntity.ok(response);
+	}
+
+	// ================= UPDATE NEED HELP =================
+	@PatchMapping("/need-help")
+	public ResponseEntity<StudentTaskResponse> markNeedHelp(@Valid @RequestBody StudentNeedHelpRequest request) {
+
+		logger.info("Received need-help update request for studentId: {} and topicId: {}", request.getStudentId(),
+				request.getTopicId());
+
+		StudentTaskResponse response = studentTaskService.updateNeedHelp(request);
+
+		logger.info("Need-help status updated successfully for studentId: {} and topicId: {}", request.getStudentId(),
+				request.getTopicId());
+
+		return ResponseEntity.ok(response);
+	}
 }

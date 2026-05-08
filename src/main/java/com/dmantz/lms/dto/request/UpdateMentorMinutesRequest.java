@@ -2,15 +2,13 @@ package com.dmantz.lms.dto.request;
 
 public class UpdateMentorMinutesRequest {
 
-	private int minsSpent;
+	private Integer minsSpent;
 
-	    public int getMinsSpent() {
-	        return minsSpent;
-	    }
-
-	    public void setMinsSpent(int minsSpent) {
-	        this.minsSpent = minsSpent;
-	    }
+	public Integer getMinsSpent() {
+		return minsSpent;
+		}
+	public void setMinsSpent(Integer minsSpent) {
+		this.minsSpent = minsSpent;
 	}
 
-
+}
