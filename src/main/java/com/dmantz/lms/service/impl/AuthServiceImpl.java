@@ -76,7 +76,8 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // GENERATE JWT TOKEN
-        String token = jwtUtil.generateToken(student.getEmailId(), "STUDENT");
+        String token = jwtUtil.generateToken(student.getEmailId(), "STUDENT",
+                        student.getStudentId());
 
         // GENERATE OTP
         StudentOtp otp = generateOtp(student);

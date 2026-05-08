@@ -12,10 +12,10 @@ public class JwtUtil {
 
     private final String SECRET = "mySuperSecretKeyForJwtRestroProject1234567890";
 
-    public String generateToken(String email, String role) {
-        return Jwts.builder()
+    public String generateToken(String email, String role, String studentId) {        return Jwts.builder()
                 .setSubject(email)
                 .claim("role", role)
+                .claim("studentId", studentId)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 86400000))
                 .signWith(SignatureAlgorithm.HS256, SECRET).compact();
@@ -27,6 +27,10 @@ public class JwtUtil {
 
     public String extractRole(String token) {
         return getClaims(token).get("role", String.class);
+    }
+
+    public String extractStudentId(String token) {
+        return getClaims(token).get("studentId", String.class);
     }
 
     private Claims getClaims(String token) {
