@@ -36,7 +36,6 @@ public interface StaffMapper {
     StaffResponse toResponse(Staff staff);
 
     @Mapping(target = "staffId", source = "staffId")
-    @Mapping(target = "name", expression = "java(staff.getFirstNm() + \" \" + staff.getLastNm())")
     StaffLoginResponse toLoginResponse(Staff staff);
 
     StaffPasswordResponse toPasswordResponse(Staff staff);

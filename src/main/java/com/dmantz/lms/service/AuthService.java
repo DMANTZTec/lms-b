@@ -1,6 +1,8 @@
 package com.dmantz.lms.service;
 
+import com.dmantz.lms.dto.request.StaffLoginRequest;
 import com.dmantz.lms.dto.request.StudentLoginRequest;
+import com.dmantz.lms.dto.response.StaffLoginResponse;
 import com.dmantz.lms.dto.response.StudentLoginResponse;
 
 public interface AuthService {
@@ -8,6 +10,6 @@ public interface AuthService {
     StudentLoginResponse studentLogin(
             StudentLoginRequest studentLoginRequest);
 
-//    LoginResponse staffLogin(
-//            LoginRequest request);
+    StaffLoginResponse staffLogin(
+            StaffLoginRequest request);
 }

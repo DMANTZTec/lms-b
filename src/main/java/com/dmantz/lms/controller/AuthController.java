@@ -1,6 +1,8 @@
 package com.dmantz.lms.controller;
 
+import com.dmantz.lms.dto.request.StaffLoginRequest;
 import com.dmantz.lms.dto.request.StudentLoginRequest;
+import com.dmantz.lms.dto.response.StaffLoginResponse;
 import com.dmantz.lms.dto.response.StudentLoginResponse;
 import com.dmantz.lms.service.AuthService;
 import org.springframework.http.ResponseEntity;
@@ -13,18 +15,25 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private final AuthService authService;
+	private final AuthService authService;
 
-    public AuthController(AuthService authService) {
-        this.authService = authService;
-    }
+	public AuthController(AuthService authService) {
+		this.authService = authService;
+	}
 
-    @PostMapping("/student/login")
-    public ResponseEntity<StudentLoginResponse> studentLogin(
-            @RequestBody StudentLoginRequest request) {
+	@PostMapping("/student/login")
+	public ResponseEntity<StudentLoginResponse> studentLogin(@RequestBody StudentLoginRequest request) {
 
-        StudentLoginResponse response = authService.studentLogin(request);
-        return ResponseEntity.ok(response);
-    }
+		StudentLoginResponse response = authService.studentLogin(request);
+		return ResponseEntity.ok(response);
+	}
+
+	@PostMapping("/staff/login")
+	public ResponseEntity<StaffLoginResponse> staffLogin(@RequestBody StaffLoginRequest request) {
+
+		StaffLoginResponse response = authService.staffLogin(request);
+
+		return ResponseEntity.ok(response);
+	}
 
 }

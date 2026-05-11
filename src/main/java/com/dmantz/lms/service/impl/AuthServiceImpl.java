@@ -1,10 +1,13 @@
 package com.dmantz.lms.service.impl;
 
 import com.dmantz.lms.config.JwtUtil;
+import com.dmantz.lms.dto.request.StaffLoginRequest;
 import com.dmantz.lms.dto.request.StudentLoginRequest;
+import com.dmantz.lms.dto.response.StaffLoginResponse;
 import com.dmantz.lms.dto.response.StudentLoginResponse;
 import com.dmantz.lms.entity.OtpPurpose;
 import com.dmantz.lms.entity.OtpStatus;
+import com.dmantz.lms.entity.Staff;
 import com.dmantz.lms.entity.Student;
 import com.dmantz.lms.entity.StudentOtp;
 import com.dmantz.lms.repository.StaffRepository;
@@ -23,116 +26,152 @@ import java.util.Random;
 @Service
 public class AuthServiceImpl implements AuthService {
 
-    private static final Logger logger =
-            LoggerFactory.getLogger(AuthServiceImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
 
-    private final StudentRepository studentRepository;
-    private final StaffRepository staffRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtUtil jwtUtil;
-    private final StudentOtpRepository otpRepository;
-    private final EmailService emailService;
+	private final StudentRepository studentRepository;
+	private final StaffRepository staffRepository;
+	private final PasswordEncoder passwordEncoder;
+	private final JwtUtil jwtUtil;
+	private final StudentOtpRepository otpRepository;
+	private final EmailService emailService;
 
+	public AuthServiceImpl(StudentRepository studentRepository, StaffRepository staffRepository,
+			PasswordEncoder passwordEncoder, JwtUtil jwtUtil, StudentOtpRepository otpRepository,
+			EmailService emailService) {
+		this.studentRepository = studentRepository;
+		this.staffRepository = staffRepository;
+		this.passwordEncoder = passwordEncoder;
+		this.jwtUtil = jwtUtil;
+		this.otpRepository = otpRepository;
+		this.emailService = emailService;
+	}
 
-    public AuthServiceImpl(StudentRepository studentRepository, StaffRepository staffRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, StudentOtpRepository otpRepository, EmailService emailService) {
-        this.studentRepository = studentRepository;
-        this.staffRepository = staffRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtUtil = jwtUtil;
-        this.otpRepository = otpRepository;
-        this.emailService = emailService;
-    }
+	@Override
+	public StudentLoginResponse studentLogin(StudentLoginRequest request) {
 
-    @Override
-    public StudentLoginResponse studentLogin(StudentLoginRequest request) {
+		logger.info("Login attempt for username: {}", request.getUsername());
 
-        logger.info("Login attempt for username: {}", request.getUsername());
+		String username = request.getUsername();
 
-        String username = request.getUsername();
+		Student student = studentRepository.findByEmailIdOrMobileNumOrLoginId(username, username, username);
 
-        Student student = studentRepository.findByEmailIdOrMobileNumOrLoginId(
-                        username, username, username);
+		// INVALID USER
+		if (student == null) {
+			logger.warn("Invalid login credentials for username: {}", username);
+			throw new RuntimeException("Invalid Credentials");
+		}
 
-        // INVALID USER
-        if (student == null) {
-            logger.warn("Invalid login credentials for username: {}", username);
-            throw new RuntimeException("Invalid Credentials");
-        }
+		// ACCOUNT DISABLED
+		if (!"Y".equals(student.getEnabled())) {
+			logger.warn("Account disabled for studentId: {}", student.getStudentId());
+			throw new RuntimeException("Account disabled");
+		}
 
-        // ACCOUNT DISABLED
-        if (!"Y".equals(student.getEnabled())) {
-            logger.warn("Account disabled for studentId: {}", student.getStudentId());
-            throw new RuntimeException("Account disabled");
-        }
+		if (!passwordEncoder.matches(request.getPassword(), student.getPassword())) {
 
-        if (!passwordEncoder.matches(request.getPassword(),
-                student.getPassword())) {
+			logger.warn("Wrong password attempt for studentId: {}", student.getStudentId());
 
-            logger.warn("Wrong password attempt for studentId: {}",
-                    student.getStudentId()
-            );
+			throw new RuntimeException("Invalid Credentials");
+		}
 
-            throw new RuntimeException("Invalid Credentials");
-        }
+		// GENERATE JWT TOKEN
+		String token = jwtUtil.generateToken(student.getEmailId(), "STUDENT", student.getStudentId());
 
-        // GENERATE JWT TOKEN
-        String token = jwtUtil.generateToken(student.getEmailId(), "STUDENT",
-                        student.getStudentId());
+		// GENERATE OTP
+		StudentOtp otp = generateOtp(student);
 
-        // GENERATE OTP
-        StudentOtp otp = generateOtp(student);
+		try {
+			// SEND OTP EMAIL
+			emailService.sendOtpEmail(student.getEmailId(), otp.getOtp(), OtpPurpose.LOGIN);
 
-        try {
-            // SEND OTP EMAIL
-            emailService.sendOtpEmail(
-                    student.getEmailId(),
-                    otp.getOtp(),
-                    OtpPurpose.LOGIN);
+			otp.setStatus(OtpStatus.SENT);
+			otp.setUpdatedDt(LocalDateTime.now());
+			otpRepository.save(otp);
 
-            otp.setStatus(OtpStatus.SENT);
-            otp.setUpdatedDt(LocalDateTime.now());
-            otpRepository.save(otp);
+			logger.info("Login OTP sent successfully to email: {}", student.getEmailId());
 
-            logger.info("Login OTP sent successfully to email: {}",
-                    student.getEmailId()
-            );
+		} catch (Exception e) {
 
-        } catch (Exception e) {
+			logger.error("Failed to send login OTP to email: {}", student.getEmailId(), e);
 
-            logger.error("Failed to send login OTP to email: {}",
-                    student.getEmailId(), e );
+			otp.setStatus(OtpStatus.FAILED);
+			otpRepository.save(otp);
+			throw new RuntimeException("Failed to send OTP");
+		}
 
-            otp.setStatus(OtpStatus.FAILED);
-            otpRepository.save(otp);
-            throw new RuntimeException("Failed to send OTP");
-        }
+		StudentLoginResponse response = new StudentLoginResponse();
+		response.setRole("STUDENT");
+		response.setStudentId(student.getStudentId());
+		response.setEmail(student.getEmailId());
+		response.setToken(token);
+		response.setMessage("Login Successful. OTP sent to registered email.");
+		return response;
+	}
 
-        StudentLoginResponse response = new StudentLoginResponse();
-        response.setRole("STUDENT");
-        response.setStudentId(student.getStudentId());
-        response.setEmail(student.getEmailId());
-        response.setToken(token);
-        response.setMessage("Login Successful. OTP sent to registered email.");
-        return response;
-    }
+	public StudentOtp generateOtp(Student student) {
 
-    public StudentOtp generateOtp(Student student) {
+		logger.info("Generating OTP for studentId: {}", student.getStudentId());
 
-        logger.info("Generating OTP for studentId: {}", student.getStudentId());
+		StudentOtp otp = new StudentOtp();
+		otp.setStudent(student);
+		otp.setOtp(String.valueOf(new Random().nextInt(900000) + 100000));
+		otp.setStatus(OtpStatus.NEW);
+		otp.setAttemptsNum(0);
+		otp.setCreatedDt(LocalDateTime.now());
+		StudentOtp savedOtp = otpRepository.save(otp);
 
-        StudentOtp otp = new StudentOtp();
-        otp.setStudent(student);
-        otp.setOtp(String.valueOf(new Random().nextInt(900000) + 100000));
-        otp.setStatus(OtpStatus.NEW);
-        otp.setAttemptsNum(0);
-        otp.setCreatedDt(LocalDateTime.now());
-        StudentOtp savedOtp = otpRepository.save(otp);
+		logger.info("OTP generated successfully for studentId: {}", student.getStudentId());
 
-        logger.info("OTP generated successfully for studentId: {}",
-                student.getStudentId());
+		return savedOtp;
+	}
 
-        return savedOtp;
-    }
+	@Override
+	public StaffLoginResponse staffLogin(StaffLoginRequest request) {
 
+		logger.info("Staff login attempt for username: {}", request.getUsername());
 
+		String username = request.getUsername();
+
+		Staff staff = staffRepository.findByLoginId(username).orElseThrow(() -> {
+
+			logger.warn("Invalid credentials for username: {}", username);
+
+			return new RuntimeException("Invalid Credentials");
+		});
+
+		// ACCOUNT DISABLED
+		if (!"Y".equals(staff.getEnabled())) {
+
+			logger.warn("Disabled account for staffId: {}", staff.getStaffId());
+
+			throw new RuntimeException("Account disabled");
+		}
+
+		// PASSWORD CHECK
+		if (!passwordEncoder.matches(request.getPassword(), staff.getPassword())) {
+
+			logger.warn("Wrong password for staffId: {}", staff.getStaffId());
+
+			throw new RuntimeException("Invalid Credentials");
+		}
+
+		// ROLE
+		String role = staff.getRoles().stream().findFirst().map(r -> r.getRoleNm()).orElse("STAFF");
+
+		// JWT TOKEN
+		String token = jwtUtil.generateToken(staff.getEmailId(), role, staff.getStaffId());
+
+		// RESPONSE
+		StaffLoginResponse response = new StaffLoginResponse();
+
+		response.setRole(role);
+		response.setStaffId(staff.getStaffId());
+		response.setEmail(staff.getEmailId());
+		response.setToken(token);
+		response.setMessage("Login Successful");
+
+		logger.info("Staff login successful for staffId: {}", staff.getStaffId());
+
+		return response;
+	}
 }

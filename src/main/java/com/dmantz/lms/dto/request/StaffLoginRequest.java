@@ -5,19 +5,19 @@ import jakarta.validation.constraints.NotBlank;
 public class StaffLoginRequest {
 
     @NotBlank
-    private String loginId;
+    private String username;
     @NotBlank
     private String password;
 
-    public String getLoginId() {
-        return loginId;
-    }
+    public String getUsername() {
+		return username;
+	}
 
-    public void setLoginId(String loginId) {
-        this.loginId = loginId;
-    }
+	public void setUsername(String username) {
+		this.username = username;
+	}
 
-    public String getPassword() {
+	public String getPassword() {
         return password;
     }
 
@@ -25,11 +25,4 @@ public class StaffLoginRequest {
         this.password = password;
     }
 
-    @Override
-    public String toString() {
-        return "StaffLoginRequest{" +
-                "loginId='" + loginId + '\'' +
-                ", password='" + password + '\'' +
-                '}';
-    }
 }

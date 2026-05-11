@@ -193,66 +193,6 @@ public class StaffServiceImpl implements StaffService {
 	}
 
 	@Override
-	public StaffLoginResponse login(StaffLoginRequest request) {
-
-		logger.info("Staff login attempt for loginId: {}", request.getLoginId());
-
-		Staff staff = staffRepository.findByLoginId(request.getLoginId()).orElseThrow(() -> {
-
-			logger.error("Invalid loginId: {}", request.getLoginId());
-
-			return new InvalidCredentialsException("Invalid credentials");
-		});
-
-		if (!"Y".equalsIgnoreCase(staff.getEnabled())) {
-
-			logger.warn("Disabled account login attempt: {}", staff.getStaffId());
-
-			throw new AccountDisabledException("Staff account is disabled");
-		}
-
-		if (!passwordEncoder.matches(request.getPassword(), staff.getPassword())) {
-
-			logger.warn("Invalid password attempt for staffId: {}", staff.getStaffId());
-
-			throw new InvalidCredentialsException("Invalid email or password");
-		}
-
-		StaffOtp otp = generateStaffOtp(staff.getStaffId());
-
-		try {
-
-			emailService.sendOtpEmail(staff.getEmailId(), otp.getOtp(), OtpPurpose.STAFF_LOGIN);
-
-			otp.setStatus(OtpStatus.SENT);
-			otp.setUpdatedDt(LocalDateTime.now());
-
-			staffOtpRepository.save(otp);
-
-			logger.info("OTP sent successfully to email: {}", staff.getEmailId());
-
-		} catch (Exception e) {
-
-			logger.error("Failed to send OTP email to: {}", staff.getEmailId(), e);
-
-			otp.setStatus(OtpStatus.FAILED);
-			otp.setUpdatedDt(LocalDateTime.now());
-
-			staffOtpRepository.save(otp);
-
-			throw new EmailSendingException("Unable to send OTP. Please try again.");
-		}
-
-		StaffLoginResponse response = staffMapper.toLoginResponse(staff);
-
-		response.setMessage("OTP sent to your registered email");
-
-		logger.info("Login successful for staffId: {}", staff.getStaffId());
-
-		return response;
-	}
-
-	@Override
 	public OtpVerifyResponse verifyStaffOtp(StaffOtpVerifyRequest request) {
 
 		logger.info("OTP verification started for staffId: {}", request.getStaffId());

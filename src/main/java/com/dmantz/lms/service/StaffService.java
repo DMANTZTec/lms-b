@@ -15,11 +15,7 @@ public interface StaffService {
 
     StaffResponse registerStaff(StaffRegistrationRequest request, Staff loggedInStaff);
 
-
     Optional<Staff> findByStaffId(String staffId);
-
-
-    StaffLoginResponse login(StaffLoginRequest request);
 
     OtpVerifyResponse verifyStaffOtp(StaffOtpVerifyRequest request);
 

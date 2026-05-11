@@ -57,18 +57,6 @@ public class StaffController {
 		return ResponseEntity.ok(response);
 	}
 
-	@PostMapping("/login")
-	public ResponseEntity<StaffLoginResponse> login(@RequestBody @Valid StaffLoginRequest request) {
-
-		logger.info("Staff login request received for loginId: {}", request.getLoginId());
-
-		StaffLoginResponse response = staffService.login(request);
-
-		logger.info("OTP sent successfully for loginId: {}", request.getLoginId());
-
-		return ResponseEntity.ok(response);
-	}
-
 	@PostMapping("/verify-otp")
 	public ResponseEntity<OtpVerifyResponse> verifyOtp(@RequestBody StaffOtpVerifyRequest request) {
 

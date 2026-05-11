@@ -30,7 +30,5 @@ public interface StaffRepository extends JpaRepository<Staff, Long> {
     """)
     Optional<Staff> findByLoginId(@Param("loginId") String loginId);
 
-
-
 }
 

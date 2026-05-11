@@ -1,13 +1,20 @@
 package com.dmantz.lms.dto.response;
 
-import java.util.Set;
-
 public class StaffLoginResponse {
 
+    private String role;
     private String staffId;
-    private String name;
+    private String email;
+    private String token;
     private String message;
 
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
 
     public String getStaffId() {
         return staffId;
@@ -17,12 +24,20 @@ public class StaffLoginResponse {
         this.staffId = staffId;
     }
 
-    public String getName() {
-        return name;
+    public String getEmail() {
+        return email;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public String getMessage() {
@@ -31,15 +46,5 @@ public class StaffLoginResponse {
 
     public void setMessage(String message) {
         this.message = message;
-    }
-
-
-    @Override
-    public String toString() {
-        return "StaffLoginResponse{" +
-                "staffId='" + staffId + '\'' +
-                ", name='" + name + '\'' +
-                ", message='" + message + '\'' +
-                '}';
     }
 }
