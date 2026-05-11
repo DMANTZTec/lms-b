@@ -26,6 +26,10 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 
 
     List<Student> findByStudentIdIn(List<String> studentIds);
+
+    @Query(value = "SELECT MAX(student_id) FROM student", nativeQuery = true)
+    String findMaxStudentId();
+
 }
 
 

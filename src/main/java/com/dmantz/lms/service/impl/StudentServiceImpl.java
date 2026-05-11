@@ -88,9 +88,12 @@ public class StudentServiceImpl implements StudentService {
 	}
 
 	private String generateStudentId() {
-
-		Long count = studentRepository.count() + 1; // Get total count of students
-		return String.format("S%06d", count); // Format as S + 6-digit number → always 7 characters
+		String lastId = studentRepository.findMaxStudentId();
+		if (lastId == null || lastId.isBlank()) {
+			return "S000001";
+		}
+		int number = Integer.parseInt(lastId.substring(1));
+		return String.format("S%06d", number + 1);
 	}
 
 	public StudentOtp generateOtp(Student student) {
