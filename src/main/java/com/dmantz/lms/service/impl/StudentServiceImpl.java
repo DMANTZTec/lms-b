@@ -65,7 +65,6 @@ public class StudentServiceImpl implements StudentService {
 			throw new RuntimeException("mobile number already exists");
 		}
 
-		// DTO → Entity
 		Student student = studentMapper.toEntity(request);
 
 		student.setStudentId(generateStudentId());
@@ -73,7 +72,6 @@ public class StudentServiceImpl implements StudentService {
 
 		student.setPassword(passwordEncoder.encode(request.getPassword())); // Encrypt password
 
-		// System fields
 		student.setStatus("ACTIVE");
 		student.setEnabled("Y");
 		student.setProfileImg(request.getProfileImg());
@@ -186,7 +184,6 @@ public class StudentServiceImpl implements StudentService {
 					return new OtpNotFoundException("OTP not found");
 				});
 
-		// Only SENT OTPs are valid
 		if (otp.getStatus() != OtpStatus.SENT) {
 			logger.warn("Invalid OTP status for studentId: {}", request.getStudentId());
 			throw new OtpInvalidException("OTP is not valid");
@@ -344,7 +341,6 @@ public class StudentServiceImpl implements StudentService {
 				});
 
 		studentMapper.updateStudentFromDto(request, student);
-
 		studentRepository.save(student);
 
 		logger.info("Student profile updated successfully for studentId: {}", studentId);
