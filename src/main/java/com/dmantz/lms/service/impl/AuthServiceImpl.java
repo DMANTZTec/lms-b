@@ -8,15 +8,19 @@ import com.dmantz.lms.dto.response.StudentLoginResponse;
 import com.dmantz.lms.entity.OtpPurpose;
 import com.dmantz.lms.entity.OtpStatus;
 import com.dmantz.lms.entity.Staff;
+import com.dmantz.lms.entity.StaffOtp;
 import com.dmantz.lms.entity.Student;
 import com.dmantz.lms.entity.StudentOtp;
+import com.dmantz.lms.repository.StaffOtpRepository;
 import com.dmantz.lms.repository.StaffRepository;
 import com.dmantz.lms.repository.StudentOtpRepository;
 import com.dmantz.lms.repository.StudentRepository;
 import com.dmantz.lms.service.AuthService;
 import com.dmantz.lms.service.EmailService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -33,16 +37,19 @@ public class AuthServiceImpl implements AuthService {
 	private final PasswordEncoder passwordEncoder;
 	private final JwtUtil jwtUtil;
 	private final StudentOtpRepository otpRepository;
+	private final StaffOtpRepository staffOtpRepository;
 	private final EmailService emailService;
 
 	public AuthServiceImpl(StudentRepository studentRepository, StaffRepository staffRepository,
 			PasswordEncoder passwordEncoder, JwtUtil jwtUtil, StudentOtpRepository otpRepository,
-			EmailService emailService) {
+			StaffOtpRepository staffOtpRepository, EmailService emailService) {
+
 		this.studentRepository = studentRepository;
 		this.staffRepository = staffRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.jwtUtil = jwtUtil;
 		this.otpRepository = otpRepository;
+		this.staffOtpRepository = staffOtpRepository;
 		this.emailService = emailService;
 	}
 
@@ -81,11 +88,13 @@ public class AuthServiceImpl implements AuthService {
 		StudentOtp otp = generateOtp(student);
 
 		try {
+
 			// SEND OTP EMAIL
 			emailService.sendOtpEmail(student.getEmailId(), otp.getOtp(), OtpPurpose.LOGIN);
 
 			otp.setStatus(OtpStatus.SENT);
 			otp.setUpdatedDt(LocalDateTime.now());
+
 			otpRepository.save(otp);
 
 			logger.info("Login OTP sent successfully to email: {}", student.getEmailId());
@@ -95,16 +104,21 @@ public class AuthServiceImpl implements AuthService {
 			logger.error("Failed to send login OTP to email: {}", student.getEmailId(), e);
 
 			otp.setStatus(OtpStatus.FAILED);
+
 			otpRepository.save(otp);
+
 			throw new RuntimeException("Failed to send OTP");
 		}
 
 		StudentLoginResponse response = new StudentLoginResponse();
+
 		response.setRole("STUDENT");
 		response.setStudentId(student.getStudentId());
 		response.setEmail(student.getEmailId());
 		response.setToken(token);
+
 		response.setMessage("Login Successful. OTP sent to registered email.");
+
 		return response;
 	}
 
@@ -113,14 +127,44 @@ public class AuthServiceImpl implements AuthService {
 		logger.info("Generating OTP for studentId: {}", student.getStudentId());
 
 		StudentOtp otp = new StudentOtp();
+
 		otp.setStudent(student);
+
 		otp.setOtp(String.valueOf(new Random().nextInt(900000) + 100000));
+
 		otp.setStatus(OtpStatus.NEW);
+
 		otp.setAttemptsNum(0);
+
 		otp.setCreatedDt(LocalDateTime.now());
+
 		StudentOtp savedOtp = otpRepository.save(otp);
 
 		logger.info("OTP generated successfully for studentId: {}", student.getStudentId());
+
+		return savedOtp;
+	}
+
+	// STAFF OTP METHOD
+	public StaffOtp generateStaffOtp(Staff staff) {
+
+		logger.info("Generating OTP for staffId: {}", staff.getStaffId());
+
+		StaffOtp otp = new StaffOtp();
+
+	    otp.setStaffId(staff.getStaffId());
+
+		otp.setOtp(String.valueOf(new Random().nextInt(900000) + 100000));
+
+		otp.setStatus(OtpStatus.NEW);
+
+		otp.setAttemptsNum(0);
+
+		otp.setCreatedDt(LocalDateTime.now());
+
+		StaffOtp savedOtp = staffOtpRepository.save(otp);
+
+		logger.info("OTP generated successfully for staffId: {}", staff.getStaffId());
 
 		return savedOtp;
 	}
@@ -161,6 +205,33 @@ public class AuthServiceImpl implements AuthService {
 		// JWT TOKEN
 		String token = jwtUtil.generateToken(staff.getEmailId(), role, staff.getStaffId());
 
+		// GENERATE OTP
+		StaffOtp otp = generateStaffOtp(staff);
+
+		try {
+
+			// SEND OTP EMAIL
+			emailService.sendOtpEmail(staff.getEmailId(), otp.getOtp(), OtpPurpose.LOGIN);
+
+			otp.setStatus(OtpStatus.SENT);
+
+			otp.setUpdatedDt(LocalDateTime.now());
+
+			staffOtpRepository.save(otp);
+
+			logger.info("Login OTP sent successfully to email: {}", staff.getEmailId());
+
+		} catch (Exception e) {
+
+			logger.error("Failed to send login OTP to email: {}", staff.getEmailId(), e);
+
+			otp.setStatus(OtpStatus.FAILED);
+
+			staffOtpRepository.save(otp);
+
+			throw new RuntimeException("Failed to send OTP");
+		}
+
 		// RESPONSE
 		StaffLoginResponse response = new StaffLoginResponse();
 
@@ -168,7 +239,8 @@ public class AuthServiceImpl implements AuthService {
 		response.setStaffId(staff.getStaffId());
 		response.setEmail(staff.getEmailId());
 		response.setToken(token);
-		response.setMessage("Login Successful");
+
+		response.setMessage("Login Successful. OTP sent to registered email.");
 
 		logger.info("Staff login successful for staffId: {}", staff.getStaffId());
 
