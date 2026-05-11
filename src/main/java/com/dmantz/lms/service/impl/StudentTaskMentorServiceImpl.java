@@ -1,9 +1,10 @@
 package com.dmantz.lms.service.impl;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.dmantz.lms.dto.request.AcknowledgeMentorRequest;
 import com.dmantz.lms.dto.request.StudentTaskMentorRequest;
 import com.dmantz.lms.dto.request.UpdateMentorMinutesRequest;
 import com.dmantz.lms.dto.response.StudentTaskMentorResponse;
@@ -11,6 +12,8 @@ import com.dmantz.lms.entity.MentorHelpStatus;
 import com.dmantz.lms.entity.Student;
 import com.dmantz.lms.entity.StudentTask;
 import com.dmantz.lms.entity.StudentTaskMentor;
+import com.dmantz.lms.exceptions.DuplicateValuesException;
+import com.dmantz.lms.exceptions.ResourceNotFoundException;
 import com.dmantz.lms.mapper.StudentTaskMentorMapper;
 import com.dmantz.lms.repository.StudentRepository;
 import com.dmantz.lms.repository.StudentTaskMentorRepository;
@@ -20,83 +23,112 @@ import com.dmantz.lms.service.StudentTaskMentorService;
 @Service
 public class StudentTaskMentorServiceImpl implements StudentTaskMentorService {
 
-    @Autowired
-    private StudentTaskMentorRepository mentorRepo;
+	private static final Logger logger = LogManager.getLogger(StudentTaskMentorServiceImpl.class);
 
-    @Autowired
-    private StudentTaskRepository taskRepo;
+	@Autowired
+	private StudentTaskMentorRepository mentorRepo;
 
-    @Autowired
-    private StudentRepository studentRepo;
+	@Autowired
+	private StudentTaskRepository taskRepo;
 
-    @Autowired
-    private StudentTaskMentorMapper mapper;
+	@Autowired
+	private StudentRepository studentRepo;
 
-    @Override
-    public StudentTaskMentorResponse createMentoringActivity(
-            StudentTaskMentorRequest request) {
+	@Autowired
+	private StudentTaskMentorMapper mapper;
 
-        // ✅ Validate Task
-        StudentTask task = taskRepo.findById(request.getStudentTaskId())
-                .orElseThrow(() -> new RuntimeException("StudentTask not found"));
+	@Override
+	public StudentTaskMentorResponse createMentoringActivity(StudentTaskMentorRequest request) {
 
-        // ✅ Validate Mentor
-        Student mentor = studentRepo.findByStudentId(request.getMentorStudentId())
-                .orElseThrow(() -> new RuntimeException("Mentor not found"));
+		logger.info("Creating mentoring activity for studentTaskId: {} and mentorStudentId: {}",
+				request.getStudentTaskId(), request.getMentorStudentId());
 
-        // ✅ Map
-        StudentTaskMentor entity = mapper.toEntity(request);
+		StudentTask task = taskRepo.findById(request.getStudentTaskId()).orElseThrow(() -> {
 
-        // ✅ Set relationships
-        entity.setStudentTask(task);
-        entity.setMentorStudent(mentor);
+			logger.warn("StudentTask not found with id: {}", request.getStudentTaskId());
 
-        // ✅ Default values
-        entity.setStatus(MentorHelpStatus.IN_PROGRESS);
-        
+			return new ResourceNotFoundException("StudentTask not found with id: " + request.getStudentTaskId());
+		});
 
-        // ✅ Save
-        StudentTaskMentor saved = mentorRepo.save(entity);
+		Student mentor = studentRepo.findByStudentId(request.getMentorStudentId()).orElseThrow(() -> {
 
-        return mapper.toDto(saved);
-    }
-    @Override
-    public StudentTaskMentorResponse updateMentoringMinutes(
-            Long id, UpdateMentorMinutesRequest request) {
+			logger.warn("Mentor not found with studentId: {}", request.getMentorStudentId());
 
-        StudentTaskMentor entity = mentorRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Mentoring record not found"));
+			return new ResourceNotFoundException("Mentor not found with studentId: " + request.getMentorStudentId());
+		});
 
-        if (request.getMinsSpent() <= 0) {
-            throw new RuntimeException("Minutes must be greater than 0");
-        }
+		boolean exists = mentorRepo.existsByStudentTask_IdAndMentorStudent_StudentId(request.getStudentTaskId(),
+				request.getMentorStudentId());
 
-        entity.setMinsSpent(request.getMinsSpent());
-        entity.setStatus(MentorHelpStatus.IN_PROGRESS);
+		if (exists) {
 
-        StudentTaskMentor updated = mentorRepo.save(entity);
+			logger.warn("Mentoring activity already exists for taskId: {} and mentorStudentId: {}",
+					request.getStudentTaskId(), request.getMentorStudentId());
 
-        return mapper.toDto(updated);
-    }
+			throw new DuplicateValuesException("Mentoring activity already exists");
+		}
 
-    @Override
-    public StudentTaskMentorResponse acknowledgeMentorHelp(
-            Long id) {
+		StudentTaskMentor entity = mapper.toEntity(request);
 
+		entity.setStudentTask(task);
+		entity.setMentorStudent(mentor);
+		entity.setStatus(MentorHelpStatus.IN_PROGRESS);
 
-        StudentTaskMentor entity = mentorRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Mentoring record not found"));
+		StudentTaskMentor saved = mentorRepo.save(entity);
 
-        if (Boolean.TRUE.equals(entity.getStudentAck())) {
-            throw new RuntimeException("Already acknowledged");
-        }
+		logger.info("Mentoring activity created successfully with id: {}", saved.getId());
 
-        entity.setStudentAck(true);
-        entity.setStatus(MentorHelpStatus.COMPLETED);
+		return mapper.toDto(saved);
+	}
 
-        StudentTaskMentor updated = mentorRepo.save(entity);
+	@Override
+	public StudentTaskMentorResponse updateMentoringMinutes(Long id, UpdateMentorMinutesRequest request) {
 
-        return mapper.toDto(updated);
-    }
+		logger.info("Updating mentoring minutes for mentoringId: {}", id);
 
+		StudentTaskMentor entity = mentorRepo.findById(id).orElseThrow(() -> {
+
+			logger.warn("Mentoring record not found with id: {}", id);
+
+			return new ResourceNotFoundException("Mentoring record not found with id: " + id);
+		});
+
+		entity.setMinsSpent(request.getMinsSpent());
+		entity.setStatus(MentorHelpStatus.IN_PROGRESS);
+
+		StudentTaskMentor updated = mentorRepo.save(entity);
+
+		logger.info("Mentoring minutes updated successfully for id: {}", updated.getId());
+
+		return mapper.toDto(updated);
+	}
+
+	@Override
+	public StudentTaskMentorResponse acknowledgeMentorHelp(Long id) {
+
+		logger.info("Acknowledging mentor help for mentoringId: {}", id);
+
+		StudentTaskMentor entity = mentorRepo.findById(id).orElseThrow(() -> {
+
+			logger.warn("Mentoring record not found with id: {}", id);
+
+			return new ResourceNotFoundException("Mentoring record not found with id: " + id);
+		});
+
+		if (Boolean.TRUE.equals(entity.getStudentAck())) {
+
+			logger.warn("Mentor help already acknowledged for id: {}", id);
+
+			throw new DuplicateValuesException("Mentor help already acknowledged");
+		}
+
+		entity.setStudentAck(true);
+		entity.setStatus(MentorHelpStatus.COMPLETED);
+
+		StudentTaskMentor updated = mentorRepo.save(entity);
+
+		logger.info("Mentor help acknowledged successfully for id: {}", updated.getId());
+
+		return mapper.toDto(updated);
+	}
 }

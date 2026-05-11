@@ -5,6 +5,7 @@ import com.dmantz.lms.dto.response.*;
 import com.dmantz.lms.entity.*;
 import com.dmantz.lms.exceptions.CourseAlreadyAssignedException;
 import com.dmantz.lms.exceptions.CourseNotFoundException;
+import com.dmantz.lms.exceptions.ResourceNotFoundException;
 import com.dmantz.lms.exceptions.StudentNotFoundException;
 import com.dmantz.lms.mapper.ClassBatchMapper;
 import com.dmantz.lms.mapper.ClassScheduleMapper;
@@ -17,11 +18,16 @@ import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 @Service
 @Transactional
 public class ClassAdminServiceImpl implements ClassAdminService {
+
+	
+	  private static final Logger logger = LogManager.getLogger(ClassAdminServiceImpl.class);
 
     private final CourseRepository courseRepository;
     private final ClassBatchRepository classBatchRepository;
@@ -55,9 +61,15 @@ public class ClassAdminServiceImpl implements ClassAdminService {
     @Override
     public ClassResponse addClass(String courseId, CreateClassRequest request) {
 
+    	
         // Fetch course using business ID
-        Course course = courseRepository.findByCourseId(courseId)
-                .orElseThrow(() -> new RuntimeException("Course not found"));
+    	  logger.info("Creating class for courseId: {}", courseId);
+
+          Course course = courseRepository.findByCourseId(courseId)
+                  .orElseThrow(() -> {
+                      logger.warn("Course not found with courseId: {} during addClass", courseId);
+                      return new CourseNotFoundException("Course not found with ID: " + courseId);
+                  });
 
         // Map request to entity
         ClassBatch classBatch = classBatchMapper.toEntity(request);
@@ -72,33 +84,46 @@ public class ClassAdminServiceImpl implements ClassAdminService {
         // Save
         classBatch = classBatchRepository.save(classBatch);
 
+        logger.info("Class created successfully with batchId: {} for courseId: {}", classBatch.getId(), courseId);
         return classBatchMapper.toResponse(classBatch);
     }
 
     @Override
     public ClassResponse modifyClass(Long batchId, UpdateClassRequest request) {
 
-        ClassBatch classBatch = classBatchRepository.findById(batchId)
-                .orElseThrow(() -> new RuntimeException("Class not found"));
+    	   logger.info("Modifying class with batchId: {}", batchId);
 
+           ClassBatch classBatch = classBatchRepository.findById(batchId)
+                   .orElseThrow(() -> {
+                       logger.warn("ClassBatch not found with id: {} during modifyClass", batchId);
+                       return new ResourceNotFoundException("Class not found with id: " + batchId);
+                   });
         // Update only allowed fields
         classBatchMapper.updateClassFromDto(request, classBatch);
 
         classBatch = classBatchRepository.save(classBatch);
 
+        logger.info("Class modified successfully with batchId: {}", batchId);
         return classBatchMapper.toResponse(classBatch);
     }
 
     @Override
     public ClassResponse cancelClass(Long batchId) {
 
-        ClassBatch classBatch = classBatchRepository.findById(batchId)
-                .orElseThrow(() -> new RuntimeException("Class not found"));
 
+        logger.info("Cancelling class with batchId: {}", batchId);
+
+        ClassBatch classBatch = classBatchRepository.findById(batchId)
+                .orElseThrow(() -> {
+                    logger.warn("ClassBatch not found with id: {} during cancelClass", batchId);
+                    return new ResourceNotFoundException("Class not found with id: " + batchId);
+                });
+        
         classBatch.setStatus("CANCELLED");
 
         classBatch = classBatchRepository.save(classBatch);
 
+        logger.info("Class cancelled successfully with batchId: {}", batchId);
         return classBatchMapper.toResponse(classBatch);
     }
 
@@ -106,6 +131,9 @@ public class ClassAdminServiceImpl implements ClassAdminService {
     @Override
     public ClassScheduleResponse addScheduleToClass(ClassScheduleRequest request) {
 
+    	logger.info("Adding schedule to classId: {} with staffId: {}", request.getClassId(), request.getStaffId());
+
+    	
         ClassSchedule schedule = classScheduleMapper.toEntity(request);
 
         if (schedule.getStatus() == null) {
@@ -113,15 +141,23 @@ public class ClassAdminServiceImpl implements ClassAdminService {
         }
 
         ClassBatch batch = classBatchRepository.findById(request.getClassId())
-                .orElseThrow(() -> new RuntimeException("Class not found"));
+                .orElseThrow(() -> {
+                    logger.warn("ClassBatch not found with id: {} during addScheduleToClass", request.getClassId());
+                    return new ResourceNotFoundException("Class not found with id: " + request.getClassId());
+                });
 
         Staff staff = staffRepository.findById(request.getStaffId())
-                .orElseThrow(() -> new RuntimeException("Staff not found"));
+                .orElseThrow(() -> {
+                    logger.warn("Staff not found with id: {} during addScheduleToClass", request.getStaffId());
+                    return new ResourceNotFoundException("Staff not found with id: " + request.getStaffId());
+                });
 
         schedule.setClassBatch(batch);
         schedule.setStaff(staff);
 
         ClassSchedule saved = classScheduleRepository.save(schedule);
+        
+        logger.info("Schedule added successfully with id: {} to classId: {}", saved.getId(), request.getClassId());
         return classScheduleMapper.toResponse(saved);
     }
 
@@ -129,49 +165,77 @@ public class ClassAdminServiceImpl implements ClassAdminService {
     public ClassScheduleResponse modifySchedule(Long scheduleId,
                                                 ClassScheduleRequest request) {
 
-        ClassSchedule schedule = classScheduleRepository.findById(scheduleId)
-                .orElseThrow(() -> new RuntimeException("Schedule not found"));
+    	   logger.info("Modifying schedule with id: {}", scheduleId);
 
+           ClassSchedule schedule = classScheduleRepository.findById(scheduleId)
+                   .orElseThrow(() -> {
+                       logger.warn("Schedule not found with id: {} during modifySchedule", scheduleId);
+                       return new ResourceNotFoundException("Schedule not found with id: " + scheduleId);
+                   });
+           
         // update fields
         schedule.setStartTime(request.getStartTime());
         schedule.setEndTime(request.getEndTime());
 
         // update staff if changed
         if (request.getStaffId() != null) {
+            logger.debug("Updating staff to id: {} for scheduleId: {}", request.getStaffId(), scheduleId);
             Staff staff = staffRepository.findById(request.getStaffId())
-                    .orElseThrow(() -> new RuntimeException("Staff not found"));
+                    .orElseThrow(() -> {
+                        logger.warn("Staff not found with id: {} during modifySchedule", request.getStaffId());
+                        return new ResourceNotFoundException("Staff not found with id: " + request.getStaffId());
+                    });
             schedule.setStaff(staff);
         }
 
         // update class if changed
         if (request.getClassId() != null) {
+            logger.debug("Updating class to id: {} for scheduleId: {}", request.getClassId(), scheduleId);
             ClassBatch batch = classBatchRepository.findById(request.getClassId())
-                    .orElseThrow(() -> new RuntimeException("Class not found"));
+                    .orElseThrow(() -> {
+                        logger.warn("ClassBatch not found with id: {} during modifySchedule", request.getClassId());
+                        return new ResourceNotFoundException("Class not found with id: " + request.getClassId());
+                    });
             schedule.setClassBatch(batch);
         }
 
         ClassSchedule updated = classScheduleRepository.save(schedule);
+        
+        logger.info("Schedule modified successfully with id: {}", scheduleId);
         return classScheduleMapper.toResponse(updated);
     }
 
     @Override
     public ClassScheduleResponse cancelSchedule(Long scheduleId) {
 
+    	logger.info("Cancelling schedule with id: {}", scheduleId);
+
         ClassSchedule schedule = classScheduleRepository.findById(scheduleId)
-                .orElseThrow(() -> new RuntimeException("Schedule not found"));
+                .orElseThrow(() -> {
+                    logger.warn("Schedule not found with id: {} during cancelSchedule", scheduleId);
+                    return new ResourceNotFoundException("Schedule not found with id: " + scheduleId);
+                });
 
         schedule.setStatus(ClassStatus.CANCELLED);
 
         ClassSchedule updated = classScheduleRepository.save(schedule);
+        
+        logger.info("Schedule cancelled successfully with id: {}", scheduleId);
         return classScheduleMapper.toResponse(updated);
     }
 
 	@Override
 	public ClassAdminStudentDetailsResponse viewStudentDetails(String studentId) {
 		
-	    Student student = studentRepository.findByStudentId(studentId)
-	            .orElseThrow(() -> new RuntimeException("Student not found"));
 
+        logger.info("Fetching student details for studentId: {}", studentId);
+
+        Student student = studentRepository.findByStudentId(studentId)
+                .orElseThrow(() -> {
+                    logger.warn("Student not found with id: {} during viewStudentDetails", studentId);
+                    return new StudentNotFoundException("Student not found with ID: " + studentId);
+                });
+        
 	    ClassAdminStudentDetailsResponse dto = new ClassAdminStudentDetailsResponse();
 	    dto.setId(student.getId());
 	    dto.setStudentId(student.getStudentId());
@@ -210,6 +274,9 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 	    dto.setUpcoming(upcoming);
 	    dto.setCompletedSchedules(completed);
 
+	    logger.debug("Student details fetched for studentId: {} — courses: {}, schedules: {}, upcoming: {}, completed: {}",
+                studentId, courseDtos.size(), allSchedules.size(), upcoming, completed);
+
 	    return dto;
 
 	}
@@ -218,7 +285,10 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 	@Override
 	public List<ClassAdminStudentDetailsResponse> viewStudents() {
 
+		  logger.info("Fetching details for all students");
 	    List<Student> students = studentRepository.findAll();
+
+	    logger.debug("Total students found: {}", students.size());
 
 	    return students.stream()
 	            .map(s -> viewStudentDetails(s.getStudentId()))
@@ -228,8 +298,13 @@ public class ClassAdminServiceImpl implements ClassAdminService {
     @Override
     public List<ClassScheduleResponse> getSchedulesByStaffId(String staffId) {
 
+
+        logger.info("Fetching schedules for staffId: {}", staffId);
+    	
         List<ClassSchedule> schedules = classScheduleRepository.findByStaff_StaffId(staffId);
 
+        
+        logger.debug("Found {} schedule(s) for staffId: {}", schedules.size(), staffId);
         return classScheduleMapper.toDtoList(schedules);
     }
 
@@ -247,63 +322,95 @@ public class ClassAdminServiceImpl implements ClassAdminService {
     @Override
     public void addTopicsToClass(Long batchId, AddClassTopicRequest request) {
 
-        ClassBatch classBatch = classBatchRepository.findById(batchId)
-                .orElseThrow(() -> new RuntimeException("ClassBatch not found"));
+        logger.info("Adding {} topic(s) to batchId: {}", request.getTopics().size(), batchId);
 
+        ClassBatch classBatch = classBatchRepository.findById(batchId)
+                .orElseThrow(() -> {
+                    logger.warn("ClassBatch not found with id: {} during addTopicsToClass", batchId);
+                    return new ResourceNotFoundException("ClassBatch not found with id: " + batchId);
+                });
+        
         for (AddClassTopicRequest.TopicItem item : request.getTopics()) {
 
             boolean exists = classTopicRepository
                     .existsByClassBatchIdAndTopicId(batchId, item.getTopicId());
 
             if (exists) {
+            	 logger.debug("TopicId: {} already exists in batchId: {}, skipping", item.getTopicId(), batchId);
                 continue;
             }
 
             Topic topic = topicRepository.findById(item.getTopicId())
-                    .orElseThrow(() -> new RuntimeException("Topic not found: " + item.getTopicId()));
-
+                    .orElseThrow(() -> {
+                        logger.warn("Topic not found with id: {} during addTopicsToClass", item.getTopicId());
+                        return new ResourceNotFoundException("Topic not found with id: " + item.getTopicId());
+                    });
+            
             ClassTopic classTopic = new ClassTopic();
             classTopic.setClassBatch(classBatch);
             classTopic.setTopic(topic);
             classTopic.setStatus(item.getStatus());
 
             classTopicRepository.save(classTopic);
+            logger.debug("TopicId: {} added successfully to batchId: {}", item.getTopicId(), batchId);
         }
+        logger.info("Topics processing completed for batchId: {}", batchId);
     }
 
     @Override
     public void removeTopicsFromClass(Long batchId, RemoveClassTopicRequest request) {
 
-        classBatchRepository.findById(batchId)
-                .orElseThrow(() -> new RuntimeException("ClassBatch not found"));
+    	 logger.info("Removing {} topic(s) from batchId: {}", request.getTopicIds().size(), batchId);
 
+         classBatchRepository.findById(batchId)
+                 .orElseThrow(() -> {
+                     logger.warn("ClassBatch not found with id: {} during removeTopicsFromClass", batchId);
+                     return new ResourceNotFoundException("ClassBatch not found with id: " + batchId);
+                 });
+         
+         
         classTopicRepository.deleteByClassBatchIdAndTopicIdIn(batchId,
                 request.getTopicIds());
+        
+        logger.info("Topics removed successfully from batchId: {}", batchId);
     }
 
     @Override
     public List<ClassTopicResponse> getTopicsByBatchId(Long batchId) {
 
-        classBatchRepository.findById(batchId)
-                .orElseThrow(() -> new RuntimeException("ClassBatch not found"));
+    	  logger.info("Fetching topics for batchId: {}", batchId);
 
+          classBatchRepository.findById(batchId)
+                  .orElseThrow(() -> {
+                      logger.warn("ClassBatch not found with id: {} during getTopicsByBatchId", batchId);
+                      return new ResourceNotFoundException("ClassBatch not found with id: " + batchId);
+                  });
+          
+          
         List<ClassTopic> classTopics =
                 classTopicRepository.findByClassBatchId(batchId);
 
+        logger.debug("Found {} topic(s) for batchId: {}", classTopics.size(), batchId);
         return classTopicMapper.toResponseList(classTopics);
     }
 
     @Override
     public StudentCourseResponse assignCourseToStudent(String studentId, String courseId) {
+    	  logger.info("Assigning courseId: {} to studentId: {}", courseId, studentId);
 
-        Student student = studentRepository
-                .findByStudentId(studentId)
-                .orElseThrow(() -> new StudentNotFoundException("Student not found: " + studentId));
+          Student student = studentRepository.findByStudentId(studentId)
+                  .orElseThrow(() -> {
+                      logger.warn("Student not found with id: {} during assignCourseToStudent", studentId);
+                      return new StudentNotFoundException("Student not found: " + studentId);
+                  });
 
-        Course course = courseRepository
-                .findByCourseId(courseId)
-                .orElseThrow(() -> new CourseNotFoundException("Course not found: " + courseId));
-
+          Course course = courseRepository.findByCourseId(courseId)
+                  .orElseThrow(() -> {
+                      logger.warn("Course not found with courseId: {} during assignCourseToStudent", courseId);
+                      return new CourseNotFoundException("Course not found: " + courseId);
+                  });
+          
+          
         // Check if already assigned
         boolean exists = studentCourseRepository
                 .existsByStudent_StudentIdAndCourse_CourseId(
@@ -311,6 +418,7 @@ public class ClassAdminServiceImpl implements ClassAdminService {
                         courseId);
 
         if (exists) {
+        	 logger.warn("CourseId: {} is already assigned to studentId: {}", courseId, studentId);
             throw new CourseAlreadyAssignedException("Course already assigned to student: " + courseId);
         }
 
@@ -322,6 +430,7 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 
         var saved = studentCourseRepository.save(studentCourse);
 
+        logger.info("CourseId: {} assigned successfully to studentId: {}", courseId, studentId);
         return studentCourseMapper.toResponse(saved);
     }
 
