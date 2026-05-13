@@ -460,7 +460,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 
 		response.setStudentId(studentId);
 		response.setStudentName(student.getFirstNm() + " " + student.getLastNm());
-	
+		response.setProfileImg(student.getProfileImg());
 		response.setCourses(courses);
 		response.setWeeklySchedule(weeklySchedule);
 		response.setOverallProgress(overallProgress);

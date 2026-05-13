@@ -4,7 +4,7 @@ public class StudentDashboardSummaryResponse {
 
 	private String studentId;
 	private String studentName;
-
+	private String profileImg;
 	private StudentMyCoursesResponse courses; // reuse — has totalCourses, planned, ongoing, completed, courseList
 	private WeeklyScheduleResponse weeklySchedule; // reuse — has weekStart, weekEnd, totalClasses, classList
 	private OverallProgressResponse overallProgress;
@@ -49,4 +49,11 @@ public class StudentDashboardSummaryResponse {
 		this.weeklySchedule = weeklySchedule;
 	}
 
+	public String getProfileImg() {
+		return profileImg;
+	}
+	
+	public void setProfileImg(String profileImg) {
+		this.profileImg = profileImg;
+	}
 }
