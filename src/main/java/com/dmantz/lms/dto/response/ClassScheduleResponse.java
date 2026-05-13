@@ -14,6 +14,8 @@ public class ClassScheduleResponse {
     private String courseName;
 
     private Long staffId;
+    
+    private String staffName;
 
     private LocalDate classDate;
     private LocalTime startTime;
@@ -129,22 +131,23 @@ public class ClassScheduleResponse {
         this.location = location;
     }
 
-    @Override
-    public String toString() {
-        return "ClassScheduleResponse{" +
-                "scheduleId=" + scheduleId +
-                ", classId=" + classId +
-                ", className='" + className + '\'' +
-                ", courseId=" + courseId +
-                ", courseName='" + courseName + '\'' +
-                ", staffId=" + staffId +
-                ", classDate=" + classDate +
-                ", startTime=" + startTime +
-                ", endTime=" + endTime +
-                ", mode='" + mode + '\'' +
-                ", status='" + status + '\'' +
-                ", meetingLink='" + meetingLink + '\'' +
-                ", location='" + location + '\'' +
-                '}';
-    }
+	public String getStaffName() {
+		return staffName;
+	}
+
+	public void setStaffName(String staffName) {
+		this.staffName = staffName;
+	}
+
+	@Override
+	public String toString() {
+		return "ClassScheduleResponse [scheduleId=" + scheduleId + ", classId=" + classId + ", className=" + className
+				+ ", courseId=" + courseId + ", courseName=" + courseName + ", staffId=" + staffId + ", staffName="
+				+ staffName + ", classDate=" + classDate + ", startTime=" + startTime + ", endTime=" + endTime
+				+ ", mode=" + mode + ", status=" + status + ", meetingLink=" + meetingLink + ", location=" + location
+				+ "]";
+	}
+
+    
+	
 }

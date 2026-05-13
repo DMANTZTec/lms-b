@@ -19,6 +19,7 @@ import java.util.List;
     @Mapping(source = "classBatch.course.id", target = "courseId")
     @Mapping(source = "classBatch.course.courseTitle", target = "courseName")
     @Mapping(source = "staff.id", target = "staffId")
+    @Mapping(target = "staffName", expression = "java(getStaffFullName(entity))")
     @Mapping(source = "mode", target = "mode")
     @Mapping(source = "status", target = "status")
     ClassScheduleResponse toResponse(ClassSchedule entity);
@@ -29,4 +30,13 @@ import java.util.List;
     @Mapping(source = "classId", target = "classBatch.id")
     @Mapping(source = "staffId", target = "staff.id")
     ClassSchedule toEntity(ClassScheduleRequest request);
+    
+    
+    
+    default String getStaffFullName(ClassSchedule entity) {
+        if (entity.getStaff() == null) return null;
+        String first = entity.getStaff().getFirstNm() != null ? entity.getStaff().getFirstNm() : "";
+        String last  = entity.getStaff().getLastNm()  != null ? entity.getStaff().getLastNm()  : "";
+        return (first + " " + last).trim();
+    }
 }
