@@ -2,6 +2,6 @@ package com.dmantz.lms.entity;
 
 public enum CourseStatus {
     PLANNED,
-    ONGOING,
+    ACTIVE,
     COMPLETED
 }

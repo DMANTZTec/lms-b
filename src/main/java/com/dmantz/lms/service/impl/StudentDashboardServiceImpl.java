@@ -121,7 +121,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 				derivedStatus = CourseStatus.COMPLETED;
 				completed++;
 			} else {
-				derivedStatus = CourseStatus.ONGOING;
+				derivedStatus = CourseStatus.ACTIVE;
 				ongoing++;
 			}
 
@@ -366,7 +366,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 		} else if (percentage == 100) {
 			sc.setStatus(CourseStatus.COMPLETED);
 		} else {
-			sc.setStatus(CourseStatus.ONGOING);
+			sc.setStatus(CourseStatus.ACTIVE);
 		}
 
 		if (percentage > 0 && sc.getStart_dt() == null) {

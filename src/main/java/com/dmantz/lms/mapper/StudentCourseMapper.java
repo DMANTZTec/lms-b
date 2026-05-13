@@ -49,7 +49,7 @@ public interface StudentCourseMapper {
 
         return switch (entity.getStatus()) {
             case COMPLETED -> 100;
-            case ONGOING -> 50; // temporary logic
+            case ACTIVE -> 50; // temporary logic
             case PLANNED -> 0;
         };
     }
