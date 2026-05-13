@@ -425,4 +425,23 @@ public class CourseManagementController {
 		logger.info("Program deleted successfully with id: {}", id);
 		return ResponseEntity.ok("Program deleted successfully");
 	}
+	
+	
+	// ====================== GET COMPLETE COURSE DETAILS ======================
+
+	@GetMapping("/coursedetails/{courseId}")
+	public ResponseEntity<CourseDetailsResponse> getCourseDetails(
+	        @PathVariable String courseId) {
+
+	    logger.info("GET /course/details/{} - Fetching complete course details",
+	            courseId);
+
+	    CourseDetailsResponse response =
+	            courseManagementService.getCourseDetails(courseId);
+
+	    logger.info("Course details fetched successfully for courseId: {}",
+	            courseId);
+
+	    return ResponseEntity.ok(response);
+	}
 }

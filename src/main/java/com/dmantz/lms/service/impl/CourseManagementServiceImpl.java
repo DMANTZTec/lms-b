@@ -406,31 +406,25 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 		logger.debug("Total chapters found: {}", chapters.size());
 		return chapters;
 	}
-	
+
 	@Override
 	public List<ChapterResponse> getChaptersByCourseStringId(String courseId) {
 
-	    logger.info("Fetching chapters for courseId: {}", courseId);
+		logger.info("Fetching chapters for courseId: {}", courseId);
 
-	    // Validate course
-	    Course course = courseRepository.findByCourseId(courseId)
-	            .orElseThrow(() -> {
-	                logger.warn("Course not found with courseId: {}", courseId);
-	                return new ResourceNotFoundException(
-	                        "Course not found with id: " + courseId);
-	            });
+		// Validate course
+		Course course = courseRepository.findByCourseId(courseId).orElseThrow(() -> {
+			logger.warn("Course not found with courseId: {}", courseId);
+			return new ResourceNotFoundException("Course not found with id: " + courseId);
+		});
 
-	    // Fetch chapters
-	    List<ChapterResponse> chapters = chapterRepository
-	            .findByCourseIdOrderByChapterNumAsc(course.getId())
-	            .stream()
-	            .map(chapterMapper::toResponse)
-	            .collect(Collectors.toList());
+		// Fetch chapters
+		List<ChapterResponse> chapters = chapterRepository.findByCourseIdOrderByChapterNumAsc(course.getId()).stream()
+				.map(chapterMapper::toResponse).collect(Collectors.toList());
 
-	    logger.debug("Found {} chapters for courseId: {}",
-	            chapters.size(), courseId);
+		logger.debug("Found {} chapters for courseId: {}", chapters.size(), courseId);
 
-	    return chapters;
+		return chapters;
 	}
 
 	// ================= UPDATE CHAPTER =================
@@ -600,7 +594,8 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 		return topicMapper.toResponseDto(updatedTopic);
 	}
 
-	// ============================= Delete Topic   ===================================
+	// ============================= Delete Topic
+	// ===================================
 
 	@Override
 	public void deleteTopic(Long id) {
@@ -616,24 +611,23 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 		logger.info("Topic deleted successfully with id: {}", id);
 	}
 
-	// =====================  MOVE CHAPTER ========================================
+	// ===================== MOVE CHAPTER ========================================
 	@Override
 	public void moveChapter(Long chapterId, int targetPosition) {
 		logger.info("Moving chapterId: {} to position: {}", chapterId, targetPosition);
 
-		Chapter chapter = chapterRepository.findById(chapterId)
-				.orElseThrow(() -> {
-					logger.warn("Chapter not found with id: {} during move", chapterId);
-					return new ResourceNotFoundException("Chapter not found");
-				});
+		Chapter chapter = chapterRepository.findById(chapterId).orElseThrow(() -> {
+			logger.warn("Chapter not found with id: {} during move", chapterId);
+			return new ResourceNotFoundException("Chapter not found");
+		});
 
 		Long courseId = chapter.getCourse().getId();
 		List<Chapter> chapters = chapterRepository.findByCourseIdOrderByChapterNumAsc(courseId);
 		int size = chapters.size();
 
 		if (targetPosition < 1 || targetPosition > size) {
-			logger.warn("Invalid target position: {} for chapterId: {}, total chapters: {}",
-					targetPosition, chapterId, size);
+			logger.warn("Invalid target position: {} for chapterId: {}, total chapters: {}", targetPosition, chapterId,
+					size);
 			throw new InvalidPositionException("Invalid target position");
 		}
 
@@ -658,24 +652,22 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 		logger.info("ChapterId: {} moved to position: {} successfully", chapterId, targetPosition);
 	}
 
-	// =====================  MOVE TOPIC ========================================
+	// ===================== MOVE TOPIC ========================================
 	@Override
 	public void moveTopic(Long topicId, int targetPosition) {
 		logger.info("Moving topicId: {} to position: {}", topicId, targetPosition);
 
-		Topic topic = topicRepository.findById(topicId)
-				.orElseThrow(() -> {
-					logger.warn("Topic not found with id: {} during move", topicId);
-					return new ResourceNotFoundException("Topic not found");
-				});
+		Topic topic = topicRepository.findById(topicId).orElseThrow(() -> {
+			logger.warn("Topic not found with id: {} during move", topicId);
+			return new ResourceNotFoundException("Topic not found");
+		});
 
 		Long chapterId = topic.getChapter().getId();
 		List<Topic> topics = topicRepository.findByChapterIdOrderByTopicNumAsc(chapterId);
 		int size = topics.size();
 
 		if (targetPosition < 1 || targetPosition > size) {
-			logger.warn("Invalid target position: {} for topicId: {}, total topics: {}",
-					targetPosition, topicId, size);
+			logger.warn("Invalid target position: {} for topicId: {}, total topics: {}", targetPosition, topicId, size);
 			throw new InvalidPositionException("Invalid target position");
 		}
 
@@ -699,6 +691,7 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 
 		logger.info("TopicId: {} moved to position: {} successfully", topicId, targetPosition);
 	}
+
 // =============================== Add Topic References ======================================
 	@Override
 	public TopicReferenceResponseDto addUrlReference(Long topicId, TopicReferenceRequestDto dto) {
@@ -720,11 +713,10 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 
 	private TopicReferenceResponseDto saveReference(Long topicId, TopicReferenceRequestDto dto, String type) {
 		logger.debug("Saving reference of type: {} for topicId: {}", type, topicId);
-		Topic topic = topicRepository.findById(topicId)
-				.orElseThrow(() -> {
-					logger.warn("Topic not found with id: {} while saving reference", topicId);
-					return new ResourceNotFoundException("Topic not found");
-				});
+		Topic topic = topicRepository.findById(topicId).orElseThrow(() -> {
+			logger.warn("Topic not found with id: {} while saving reference", topicId);
+			return new ResourceNotFoundException("Topic not found");
+		});
 
 		TopicReference entity = topicReferenceMapper.toEntity(dto);
 		entity.setRefType(type);
@@ -739,26 +731,19 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 	@Override
 	public ProgramResponse createProgram(ProgramRequest request) {
 
-		logger.info("Creating program: {} for providerId: {}",
-				request.getProgramTitle(), request.getProviderId());
+		logger.info("Creating program: {} for providerId: {}", request.getProgramTitle(), request.getProviderId());
 
-		Provider provider = providerRepository.findById(request.getProviderId())
-				.orElseThrow(() -> {
-					logger.warn("Provider not found with id: {}", request.getProviderId());
-					return new ResourceNotFoundException(
-							"Provider not found with id: " + request.getProviderId());
-				});
+		Provider provider = providerRepository.findById(request.getProviderId()).orElseThrow(() -> {
+			logger.warn("Provider not found with id: {}", request.getProviderId());
+			return new ResourceNotFoundException("Provider not found with id: " + request.getProviderId());
+		});
 
-		if (programRepository.existsByProgramTitleAndProvider_Id(
-				request.getProgramTitle(), request.getProviderId())) {
+		if (programRepository.existsByProgramTitleAndProvider_Id(request.getProgramTitle(), request.getProviderId())) {
 
-			logger.warn("Duplicate program: {} for providerId: {}",
-					request.getProgramTitle(), request.getProviderId());
+			logger.warn("Duplicate program: {} for providerId: {}", request.getProgramTitle(), request.getProviderId());
 
-			throw new DuplicateValuesException(
-					"Program already exists for this provider");
+			throw new DuplicateValuesException("Program already exists for this provider");
 		}
-
 
 		Program program = programMapper.toEntity(request);
 
@@ -769,8 +754,8 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 		program.setStatus(ProgramStatus.ACTIVE);
 
 		Program savedProgram = programRepository.save(program);
-		logger.info("Program created successfully with id: {} and programId: {}",
-				savedProgram.getId(), savedProgram.getProgramId());
+		logger.info("Program created successfully with id: {} and programId: {}", savedProgram.getId(),
+				savedProgram.getProgramId());
 		return programMapper.toResponse(savedProgram);
 	}
 
@@ -799,12 +784,10 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 	@Override
 	public ProgramResponse getProgramById(Long id) {
 		logger.info("Fetching program with id: {}", id);
-		Program program = programRepository.findByIdWithCourses(id)
-				.orElseThrow(() -> {
-					logger.warn("Program not found with id: {}", id);
-					return new ResourceNotFoundException(
-							"Program not found with id: " + id);
-				});
+		Program program = programRepository.findByIdWithCourses(id).orElseThrow(() -> {
+			logger.warn("Program not found with id: {}", id);
+			return new ResourceNotFoundException("Program not found with id: " + id);
+		});
 		return programMapper.toResponse(program);
 	}
 
@@ -813,9 +796,7 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 
 		logger.info("Fetching all programs");
 
-		List<ProgramResponse> programs = programRepository.findAllWithCourses()
-				.stream()
-				.map(programMapper::toResponse)
+		List<ProgramResponse> programs = programRepository.findAllWithCourses().stream().map(programMapper::toResponse)
 				.toList();
 
 		logger.debug("Total programs found: {}", programs.size());
@@ -829,32 +810,24 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 
 		logger.info("Updating program with id: {}", programId);
 
-		Program program = programRepository.findById(programId)
-				.orElseThrow(() -> {
-					logger.warn("Program not found with id: {}", programId);
-					return new ResourceNotFoundException(
-							"Program not found with id: " + programId);
-				});
+		Program program = programRepository.findById(programId).orElseThrow(() -> {
+			logger.warn("Program not found with id: {}", programId);
+			return new ResourceNotFoundException("Program not found with id: " + programId);
+		});
 
-		Provider provider = providerRepository.findById(request.getProviderId())
-				.orElseThrow(() -> {
-					logger.warn("Provider not found with id: {}",
-							request.getProviderId());
+		Provider provider = providerRepository.findById(request.getProviderId()).orElseThrow(() -> {
+			logger.warn("Provider not found with id: {}", request.getProviderId());
 
-					return new ResourceNotFoundException(
-							"Provider not found with id: " + request.getProviderId());
-				});
+			return new ResourceNotFoundException("Provider not found with id: " + request.getProviderId());
+		});
 
-		if (programRepository.existsByProgramTitleAndProvider_IdAndIdNot(
-				request.getProgramTitle(),
-				request.getProviderId(),
-				programId)) {
+		if (programRepository.existsByProgramTitleAndProvider_IdAndIdNot(request.getProgramTitle(),
+				request.getProviderId(), programId)) {
 
-			logger.warn("Duplicate program title: {} for providerId: {}",
-					request.getProgramTitle(), request.getProviderId());
+			logger.warn("Duplicate program title: {} for providerId: {}", request.getProgramTitle(),
+					request.getProviderId());
 
-			throw new DuplicateValuesException(
-					"Program already exists for this provider");
+			throw new DuplicateValuesException("Program already exists for this provider");
 		}
 
 		// Update entity (excluding programId)
@@ -862,8 +835,7 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 		program.setProvider(provider);
 
 		Program updatedProgram = programRepository.save(program);
-		logger.info("Program updated successfully with id: {}",
-				updatedProgram.getId());
+		logger.info("Program updated successfully with id: {}", updatedProgram.getId());
 		return programMapper.toResponse(updatedProgram);
 	}
 
@@ -872,14 +844,11 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 	public void deleteProgram(Long programId) {
 		logger.info("Deleting program with id: {}", programId);
 
-		Program program = programRepository.findById(programId)
-				.orElseThrow(() -> {
-					logger.warn("Program not found with id: {} for deletion",
-							programId);
+		Program program = programRepository.findById(programId).orElseThrow(() -> {
+			logger.warn("Program not found with id: {} for deletion", programId);
 
-					return new ResourceNotFoundException(
-							"Program not found with id: " + programId);
-				});
+			return new ResourceNotFoundException("Program not found with id: " + programId);
+		});
 		programRepository.delete(program);
 		logger.info("Program deleted successfully with id: {}", programId);
 	}
@@ -887,44 +856,33 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 //	========================= Add course to program =============================
 	@Override
 	public List<ProgramCourseResponse> addCoursesToProgram(ProgramCourseRequest request) {
-		
-		logger.info("Adding {} course(s) to programId: {}",
-				request.getCourseIds().size(),
-				request.getProgramId());
-		
+
+		logger.info("Adding {} course(s) to programId: {}", request.getCourseIds().size(), request.getProgramId());
+
 		String programId = request.getProgramId();
 		List<String> courseIds = request.getCourseIds();
 
+		Program program = programRepository.findByProgramId(programId).orElseThrow(() -> {
+			logger.warn("Program not found with programId: {}", programId);
 
-		Program program = programRepository.findByProgramId(programId)
-				.orElseThrow(() -> {
-					logger.warn("Program not found with programId: {}", programId);
+			return new ResourceNotFoundException("Program not found with ID: " + programId);
+		});
 
-					return new ResourceNotFoundException(
-							"Program not found with ID: " + programId);
-				});
-		
 		List<ProgramCourse> savedList = new ArrayList<>();
 
 		for (String courseId : courseIds) {
-			logger.debug("Mapping courseId: {} to programId: {}",
-					courseId, programId);
-			
+			logger.debug("Mapping courseId: {} to programId: {}", courseId, programId);
 
-			Course course = courseRepository.findByCourseId(courseId)
-					.orElseThrow(() -> {
-						logger.warn("Course not found with courseId: {}",
-								courseId);
+			Course course = courseRepository.findByCourseId(courseId).orElseThrow(() -> {
+				logger.warn("Course not found with courseId: {}", courseId);
 
-						return new ResourceNotFoundException(
-								"Course not found with ID: " + courseId);
-					});
+				return new ResourceNotFoundException("Course not found with ID: " + courseId);
+			});
 
 			boolean exists = programCourseRepository.existsByProgram_ProgramIdAndCourse_CourseId(programId, courseId);
 
 			if (exists) {
-				logger.warn("CourseId: {} already mapped to programId: {}",
-						courseId, programId);
+				logger.warn("CourseId: {} already mapped to programId: {}", courseId, programId);
 				throw new DuplicateValuesException("Course " + courseId + " is already mapped to Program " + programId);
 			}
 
@@ -933,11 +891,9 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 			programCourse.setCourse(course);
 
 			savedList.add(programCourseRepository.save(programCourse));
-			logger.debug("CourseId: {} successfully added to programId: {}",
-					courseId, programId);
+			logger.debug("CourseId: {} successfully added to programId: {}", courseId, programId);
 		}
-		logger.info("Total {} course(s) added to programId: {}",
-				savedList.size(), programId);
+		logger.info("Total {} course(s) added to programId: {}", savedList.size(), programId);
 		return programcourseMapper.toResponseList(savedList);
 	}
 
@@ -945,24 +901,116 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 	@Override
 	public void deleteProgramCourse(Long programCourseId) {
 
-		logger.info("Removing programCourse mapping with id: {}",
-				programCourseId);
-		
+		logger.info("Removing programCourse mapping with id: {}", programCourseId);
 
-		ProgramCourse programCourse = programCourseRepository.findById(programCourseId)
-				.orElseThrow(() -> {
-					logger.warn("ProgramCourse not found with id: {}",
-							programCourseId);
+		ProgramCourse programCourse = programCourseRepository.findById(programCourseId).orElseThrow(() -> {
+			logger.warn("ProgramCourse not found with id: {}", programCourseId);
 
-					return new ResourceNotFoundException(
-							"ProgramCourse not found with id: "
-									+ programCourseId);
-				});
+			return new ResourceNotFoundException("ProgramCourse not found with id: " + programCourseId);
+		});
 
 		programCourseRepository.delete(programCourse);
-		
-		logger.info("ProgramCourse mapping deleted successfully with id: {}",
-				programCourseId);
+
+		logger.info("ProgramCourse mapping deleted successfully with id: {}", programCourseId);
 	}
 
+	@Override
+	public CourseDetailsResponse getCourseDetails(String courseId) {
+
+		logger.info("Fetching complete course details for courseId: {}", courseId);
+
+		// ================= COURSE =================
+
+		Course course = courseRepository.findByCourseId(courseId).orElseThrow(() -> {
+			logger.warn("Course not found with courseId: {}", courseId);
+
+			return new ResourceNotFoundException("Course not found with id: " + courseId);
+		});
+
+		CourseDetailsResponse response = new CourseDetailsResponse();
+
+		response.setCourseTitle(course.getCourseTitle());
+		response.setDescription(course.getDescription());
+
+		// ================= CHAPTERS =================
+
+		List<Chapter> chapters = chapterRepository.findByCourseIdOrderByChapterNumAsc(course.getId());
+
+		List<ChapterDetailResponse> chapterResponses = chapters.stream().map(chapter -> {
+
+			ChapterDetailResponse chapterDto = new ChapterDetailResponse();
+
+			chapterDto.setChapterId(chapter.getId());
+
+			chapterDto.setChapterNumber(chapter.getChapterNum().intValue());
+
+			chapterDto.setChapterTitle(chapter.getChapterNm());
+
+			// ================= TOPICS =================
+
+			List<Topic> topics = topicRepository.findByChapterIdOrderByTopicNumAsc(chapter.getId());
+
+			List<TopicDetailResponse> topicResponses = topics.stream().map(topic -> {
+
+				TopicDetailResponse topicDto = new TopicDetailResponse();
+
+				topicDto.setTopicId(topic.getId());
+
+				topicDto.setTopicNum(topic.getTopicNum());
+
+				topicDto.setTopicTitle(topic.getTopicNm());
+
+				topicDto.setTopicDescription(topic.getDescription());
+
+				if (topic.getExpectedTimeMin() != null) {
+
+					topicDto.setDuration(topic.getExpectedTimeMin() + " mins");
+				}
+
+				// ================= REFERENCES =================
+
+				List<TopicReference> references = topicReferenceRepository.findByTopicId(topic.getId());
+
+				TopicReferencesDetailResponse resources = new TopicReferencesDetailResponse();
+
+				// DOCUMENTS
+
+				List<TopicReferenceResponseDto> documents = references.stream()
+						.filter(ref -> "DOCUMENT".equalsIgnoreCase(ref.getRefType())).map(topicReferenceMapper::toDto)
+						.collect(Collectors.toList());
+
+				// VIDEOS
+
+				List<TopicReferenceResponseDto> videos = references.stream()
+						.filter(ref -> "VIDEO".equalsIgnoreCase(ref.getRefType())).map(topicReferenceMapper::toDto)
+						.collect(Collectors.toList());
+
+				// URLS
+
+				List<TopicReferenceResponseDto> urls = references.stream()
+						.filter(ref -> "URL".equalsIgnoreCase(ref.getRefType())).map(topicReferenceMapper::toDto)
+						.collect(Collectors.toList());
+
+				resources.setDocuments(documents);
+				resources.setVideos(videos);
+				resources.setUrls(urls);
+
+				topicDto.setResources(resources);
+
+				return topicDto;
+
+			}).collect(Collectors.toList());
+
+			chapterDto.setTopics(topicResponses);
+
+			return chapterDto;
+
+		}).collect(Collectors.toList());
+
+		response.setChapters(chapterResponses);
+
+		logger.info("Successfully fetched course details for courseId: {}", courseId);
+
+		return response;
+	}
 }
