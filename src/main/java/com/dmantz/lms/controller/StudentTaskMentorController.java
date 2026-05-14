@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import com.dmantz.lms.dto.request.AcknowledgeMentorRequest;
 import com.dmantz.lms.dto.request.StudentTaskMentorRequest;
 import com.dmantz.lms.dto.request.UpdateMentorMinutesRequest;
+import com.dmantz.lms.dto.response.MentorPointsResponse;
 import com.dmantz.lms.dto.response.StudentTaskMentorResponse;
 import com.dmantz.lms.service.StudentTaskMentorService;
 
@@ -57,6 +58,18 @@ public class StudentTaskMentorController {
 
 		logger.info("Mentor help acknowledged successfully for id: {}", id);
 
+		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/summary/{studentId}")
+	public ResponseEntity<MentorPointsResponse> getMentorPointsSummary(@PathVariable String studentId) {
+		
+		logger.info("Received mentor points summary request for studentId: {}", studentId);
+		
+		MentorPointsResponse response = mentorService.getMentorPointsSummary(studentId);
+		
+		logger.info("Returning mentor points summary for studentId: {}", studentId);
+		
 		return ResponseEntity.ok(response);
 	}
 }

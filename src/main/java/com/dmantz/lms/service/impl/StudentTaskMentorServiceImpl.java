@@ -1,5 +1,7 @@
 package com.dmantz.lms.service.impl;
 
+import java.time.LocalDateTime;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.dmantz.lms.dto.request.StudentTaskMentorRequest;
 import com.dmantz.lms.dto.request.UpdateMentorMinutesRequest;
+import com.dmantz.lms.dto.response.MentorPointsResponse;
 import com.dmantz.lms.dto.response.StudentTaskMentorResponse;
 import com.dmantz.lms.entity.MentorHelpStatus;
 import com.dmantz.lms.entity.Student;
@@ -131,4 +134,26 @@ public class StudentTaskMentorServiceImpl implements StudentTaskMentorService {
 
 		return mapper.toDto(updated);
 	}
-}
+	@Override
+	public MentorPointsResponse getMentorPointsSummary(String studentId) {
+	    logger.info("Fetching mentor points summary for studentId: {}", studentId);
+
+	    // Check if student exists
+	    if (!studentRepo.existsByStudentId(studentId)) {
+	        logger.error("Student not found for studentId: {}", studentId);
+	        throw new ResourceNotFoundException("Student not found with studentId: " + studentId);
+	    }
+
+	    Integer total = mentorRepo.getTotalPoints(studentId);
+	    Integer thisMonth = mentorRepo.getPointsSince(
+	            studentId,
+	            LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0)
+	    );
+
+	    MentorPointsResponse response = new MentorPointsResponse();
+	    response.setTotalPoints(total != null ? total : 0);
+	    response.setThisMonthPoints(thisMonth != null ? thisMonth : 0);
+
+	    logger.info("Mentor points for studentId: {} — total: {}, thisMonth: {}", studentId, total, thisMonth);
+	    return response;
+	}}
