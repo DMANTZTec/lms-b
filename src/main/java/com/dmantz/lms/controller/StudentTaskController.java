@@ -2,6 +2,7 @@ package com.dmantz.lms.controller;
 
 import com.dmantz.lms.entity.StudentNeedHelpRequest;
 import com.dmantz.lms.dto.request.StudentTaskRequest;
+import com.dmantz.lms.dto.response.HoursSpentResponse;
 import com.dmantz.lms.dto.response.StudentTaskResponse;
 import com.dmantz.lms.service.StudentTaskService;
 
@@ -52,6 +53,14 @@ public class StudentTaskController {
 		logger.info("Need-help status updated successfully for studentId: {} and topicId: {}", request.getStudentId(),
 				request.getTopicId());
 
+		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/hours-spent/{studentId}")
+	public ResponseEntity<HoursSpentResponse> getHoursSpent(@PathVariable String studentId) {
+		logger.info("Received request to get hours spent for studentId: {}", studentId);
+		HoursSpentResponse response = studentTaskService.getHoursSpent(studentId);
+		logger.info("Hours spent retrieved successfully for studentId: {}", studentId);
 		return ResponseEntity.ok(response);
 	}
 }
