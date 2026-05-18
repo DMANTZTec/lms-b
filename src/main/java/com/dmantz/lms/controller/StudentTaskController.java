@@ -2,10 +2,13 @@ package com.dmantz.lms.controller;
 
 import com.dmantz.lms.entity.StudentNeedHelpRequest;
 import com.dmantz.lms.dto.request.StudentTaskRequest;
+import com.dmantz.lms.dto.request.StudentTaskUpdateRequest;
 import com.dmantz.lms.dto.response.HoursSpentResponse;
+import com.dmantz.lms.dto.response.StudentTaskListResponse;
 import com.dmantz.lms.dto.response.StudentTaskResponse;
 import com.dmantz.lms.service.StudentTaskService;
-
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 
 import org.apache.logging.log4j.LogManager;
@@ -63,4 +66,57 @@ public class StudentTaskController {
 		logger.info("Hours spent retrieved successfully for studentId: {}", studentId);
 		return ResponseEntity.ok(response);
 	}
+	// ================= UPDATE TASK =================
+
+	@PutMapping("/updatetask")
+	public ResponseEntity<StudentTaskResponse> updateStudentTask(@Valid @RequestBody StudentTaskUpdateRequest request) {
+
+		logger.info("Received update task request for studentId: {} and topicId: {}", request.getStudentId(),
+				request.getTopicId());
+
+		StudentTaskResponse response = studentTaskService.updateTask(request);
+
+		return ResponseEntity.ok(response);
+	}
+
+	// ================= DELETE TASK =================
+
+	@DeleteMapping("/deletetask")
+	public ResponseEntity<String> deleteTask(@RequestParam String studentId, @RequestParam Long topicId) {
+
+		logger.info("Received delete task request for studentId: {} and topicId: {}", studentId, topicId);
+
+		String response = studentTaskService.deleteTask(studentId, topicId);
+
+		return ResponseEntity.ok(response);
+	}
+
+	// ================= GET STUDENT TASKS =================
+	@GetMapping
+	public ResponseEntity<StudentTaskListResponse> getStudentTasks(@RequestParam String studentId,
+			@Parameter(schema = @Schema(allowableValues = { "ACTIVE",
+					"COMPLETED" })) @RequestParam(required = false) String status) {
+
+		logger.info("Received get tasks request for studentId: {} with status: {}", studentId, status);
+
+		StudentTaskListResponse response = studentTaskService.getStudentTasks(studentId, status);
+
+		logger.info("Fetched {} tasks successfully for studentId: {}", response.getCount(), studentId);
+
+		return ResponseEntity.ok(response);
+	}
+
+	// ================= MARK TASK COMPLETED =================
+	@PatchMapping("/{taskId}/complete")
+	public ResponseEntity<StudentTaskResponse> markTaskCompleted(@PathVariable Long taskId,
+			@RequestParam String studentId) {
+
+		logger.info("PATCH /api/student-tasks/{}/complete - Marking task completed for studentId: {}", taskId,
+				studentId);
+
+		StudentTaskResponse response = studentTaskService.markTaskCompleted(taskId, studentId);
+
+		return ResponseEntity.ok(response);
+	}
+
 }
