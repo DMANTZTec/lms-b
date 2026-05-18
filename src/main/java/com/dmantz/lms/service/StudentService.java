@@ -13,7 +13,7 @@ public interface StudentService {
 
     StudentLoginResponse login(StudentLoginRequest request);
 
-    OtpVerifyResponse verifyOtp(OtpVerifyRequest request);
+    StudentLoginResponse verifyLoginOtp(OtpVerifyRequest request);
 
     List<StudentResponse> getAllStudents();
 

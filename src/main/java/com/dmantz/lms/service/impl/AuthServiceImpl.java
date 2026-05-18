@@ -60,7 +60,8 @@ public class AuthServiceImpl implements AuthService {
 
 		String username = request.getUsername();
 
-		Student student = studentRepository.findByEmailIdOrMobileNumOrLoginId(username, username, username);
+		Student student = studentRepository
+				.findByEmailIdOrMobileNumOrLoginId(username, username, username);
 
 		// INVALID USER
 		if (student == null) {
@@ -74,51 +75,35 @@ public class AuthServiceImpl implements AuthService {
 			throw new RuntimeException("Account disabled");
 		}
 
+		// PASSWORD CHECK
 		if (!passwordEncoder.matches(request.getPassword(), student.getPassword())) {
-
 			logger.warn("Wrong password attempt for studentId: {}", student.getStudentId());
-
 			throw new RuntimeException("Invalid Credentials");
 		}
 
-		// GENERATE JWT TOKEN
-		String token = jwtUtil.generateToken(student.getEmailId(), "STUDENT", student.getStudentId());
-
-		// GENERATE OTP
 		StudentOtp otp = generateOtp(student);
 
 		try {
-
-			// SEND OTP EMAIL
 			emailService.sendOtpEmail(student.getEmailId(), otp.getOtp(), OtpPurpose.LOGIN);
-
 			otp.setStatus(OtpStatus.SENT);
 			otp.setUpdatedDt(LocalDateTime.now());
-
 			otpRepository.save(otp);
 
 			logger.info("Login OTP sent successfully to email: {}", student.getEmailId());
 
 		} catch (Exception e) {
-
 			logger.error("Failed to send login OTP to email: {}", student.getEmailId(), e);
-
 			otp.setStatus(OtpStatus.FAILED);
-
 			otpRepository.save(otp);
-
 			throw new RuntimeException("Failed to send OTP");
 		}
 
 		StudentLoginResponse response = new StudentLoginResponse();
-
-		response.setRole("STUDENT");
 		response.setStudentId(student.getStudentId());
 		response.setEmail(student.getEmailId());
-		response.setToken(token);
-
-		response.setMessage("Login Successful. OTP sent to registered email.");
-
+		response.setRole("STUDENT");
+		response.setToken(null);
+		response.setMessage("OTP sent successfully to registered email");
 		return response;
 	}
 

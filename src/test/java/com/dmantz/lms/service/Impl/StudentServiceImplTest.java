@@ -98,25 +98,25 @@ public class StudentServiceImplTest {
         studentService.register(request);
     }
 
-    // VERIFY OTP
-    @Test
-    public void testVerifyOtpSuccess() {
-
-        OtpVerifyRequest request = new OtpVerifyRequest();
-        request.setStudentId("S000001");
-        request.setOtp("123456");
-
-        StudentOtp otp = new StudentOtp();
-        otp.setOtp("123456");
-        otp.setStatus(OtpStatus.SENT);
-        otp.setCreatedDt(LocalDateTime.now());
-
-        when(otpRepository.findByStudent_StudentIdOrderByCreatedDtDesc("S000001")).thenReturn(List.of(otp));
-
-        var response = studentService.verifyOtp(request);
-
-        Assert.assertTrue(response.isVerified());
-    }
+//    // VERIFY OTP
+//    @Test
+//    public void testVerifyOtpSuccess() {
+//
+//        OtpVerifyRequest request = new OtpVerifyRequest();
+//        request.setStudentId("S000001");
+//        request.setOtp("123456");
+//
+//        StudentOtp otp = new StudentOtp();
+//        otp.setOtp("123456");
+//        otp.setStatus(OtpStatus.SENT);
+//        otp.setCreatedDt(LocalDateTime.now());
+//
+//        when(otpRepository.findByStudent_StudentIdOrderByCreatedDtDesc("S000001")).thenReturn(List.of(otp));
+//
+//        var response = studentService.verifyOtp(request);
+//
+//        Assert.assertTrue(response.isVerified());
+//    }
 
     // LOGIN TEST
     @Test

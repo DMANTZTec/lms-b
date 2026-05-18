@@ -64,13 +64,14 @@ public class StudentController {
 
 	// ================= VERIFY OTP =================
 	@PostMapping("/otp-verify")
-	public ResponseEntity<OtpVerifyResponse> verifyOtp(
+	public ResponseEntity<StudentLoginResponse> verifyOtp(
 			@RequestBody OtpVerifyRequest request) {
 
 		logger.info("OTP verification request received for studentId: {}",
 				request.getStudentId());
 
-		OtpVerifyResponse response = studentService.verifyOtp(request);
+		StudentLoginResponse response =
+				studentService.verifyLoginOtp(request);
 
 		logger.info("OTP verified successfully for studentId: {}",
 				request.getStudentId());

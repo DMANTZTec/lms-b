@@ -1,5 +1,6 @@
 package com.dmantz.lms.service.impl;
 
+import com.dmantz.lms.config.JwtUtil;
 import com.dmantz.lms.dto.request.*;
 import com.dmantz.lms.dto.response.OtpVerifyResponse;
 import com.dmantz.lms.dto.response.StudentLoginResponse;
@@ -39,17 +40,20 @@ public class StudentServiceImpl implements StudentService {
 	private final BCryptPasswordEncoder passwordEncoder;
 	private final EmailService emailService;
 	private final StudentOtpRepository studentOtpRepository;
+	private final JwtUtil jwtUtil;
+
 
 	public StudentServiceImpl(StudentRepository studentRepository, StudentOtpRepository otpRepository,
-			StudentMapper studentMapper, BCryptPasswordEncoder passwordEncoder, EmailService emailService,
-			StudentOtpRepository studentOtpRepository) {
+                              StudentMapper studentMapper, BCryptPasswordEncoder passwordEncoder, EmailService emailService,
+                              StudentOtpRepository studentOtpRepository, JwtUtil jwtUtil) {
 		this.studentRepository = studentRepository;
 		this.otpRepository = otpRepository;
 		this.studentMapper = studentMapper;
 		this.passwordEncoder = passwordEncoder;
 		this.emailService = emailService;
 		this.studentOtpRepository = studentOtpRepository;
-	}
+        this.jwtUtil = jwtUtil;
+    }
 
 	@Override
 	public StudentResponse register(StudentRegistrationRequest request) {
@@ -171,55 +175,56 @@ public class StudentServiceImpl implements StudentService {
 	}
 
 	@Override
-	public OtpVerifyResponse verifyOtp(OtpVerifyRequest request) {
+	public StudentLoginResponse verifyLoginOtp(OtpVerifyRequest request) {
 
 		logger.info("OTP verification started for studentId: {}", request.getStudentId());
 
-		StudentOtp otp = studentOtpRepository
-				.findByStudent_StudentIdOrderByCreatedDtDesc(request.getStudentId())
-				.stream()
-				.findFirst()
+		Student student = studentRepository.findByStudentId(request.getStudentId())
 				.orElseThrow(() -> {
-					logger.error("OTP not found for studentId: {}", request.getStudentId());
-					return new OtpNotFoundException("OTP not found");
+					logger.warn("Student not found with studentId: {}", request.getStudentId());
+					return new RuntimeException("Student not found");
 				});
 
-		if (otp.getStatus() != OtpStatus.SENT) {
-			logger.warn("Invalid OTP status for studentId: {}", request.getStudentId());
-			throw new OtpInvalidException("OTP is not valid");
-		}
+		// GET LATEST OTP
+		StudentOtp otp = otpRepository.findTopByStudentOrderByCreatedDtDesc(student)
+				.orElseThrow(() -> {
+					logger.warn("OTP not found for studentId: {}", student.getStudentId());
+					return new RuntimeException("OTP not found");
+				});
 
-		// Expiry check (5 mins)
-		if (otp.getCreatedDt().isBefore(LocalDateTime.now().minusMinutes(5))) {
-			otp.setStatus(OtpStatus.EXPIRED);
-			otp.setUpdatedDt(LocalDateTime.now());
-			studentOtpRepository.save(otp);
-
-			logger.warn("OTP expired for studentId: {}", request.getStudentId());
-			throw new OtpExpiredException("OTP expired");
-		}
-
-		// Match OTP
+		// INVALID OTP
 		if (!otp.getOtp().equals(request.getOtp())) {
+			logger.warn("Invalid OTP for studentId: {}", student.getStudentId());
+
 			otp.setAttemptsNum(otp.getAttemptsNum() + 1);
 			otp.setUpdatedDt(LocalDateTime.now());
-			studentOtpRepository.save(otp);
-
-			logger.warn("Invalid OTP entered for studentId: {}", request.getStudentId());
-			throw new OtpInvalidException("Invalid OTP");
+			otpRepository.save(otp);
+			throw new RuntimeException("Invalid OTP");
 		}
 
-		// Success
+		// OTP EXPIRED
+		if (otp.getCreatedDt().plusMinutes(5).isBefore(LocalDateTime.now())) {
+			logger.warn("OTP expired for studentId: {}", student.getStudentId());
+			throw new RuntimeException("OTP expired");
+		}
+		// OTP VERIFIED
 		otp.setStatus(OtpStatus.VERIFIED);
 		otp.setUpdatedDt(LocalDateTime.now());
-		studentOtpRepository.save(otp);
+		otpRepository.save(otp);
+		logger.info("OTP verified successfully for studentId: {}", student.getStudentId());
 
-		logger.info("OTP verified successfully for studentId: {}", request.getStudentId());
+		// GENERATE TOKEN
+		String token = jwtUtil.generateToken(
+				student.getEmailId(),
+				"STUDENT",
+				student.getStudentId());
 
-		OtpVerifyResponse response = new OtpVerifyResponse();
-		response.setVerified(true);
-		response.setMessage("OTP verified successfully");
-
+		StudentLoginResponse response = new StudentLoginResponse();
+		response.setStudentId(student.getStudentId());
+		response.setEmail(student.getEmailId());
+		response.setRole("STUDENT");
+		response.setToken(token);
+		response.setMessage("Login successful");
 		return response;
 	}
 

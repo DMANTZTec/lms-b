@@ -34,7 +34,19 @@ public class SecurityConfig {
 				.authorizeHttpRequests(auth -> auth
 
 						// AUTH APIs
-						.requestMatchers("/api/auth/student/login", "/api/auth/staff/login").permitAll()
+						.requestMatchers("/api/auth/student/login",
+								"/api/auth/staff/login").permitAll()
+
+						.requestMatchers(
+								"/api/student/register",
+								"/api/student/login",
+								"/api/student/otp-verify",
+								"/api/student/forgot-password",
+								"/api/student/reset-password"
+						).permitAll()
+
+						// STUDENT APIs
+						.requestMatchers("/api/student/**").hasRole("STUDENT")
 
 						// SWAGGER APIs
 						.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
@@ -47,9 +59,6 @@ public class SecurityConfig {
 
 						// STAFF REGISTER - ADMIN ONLY
 						.requestMatchers("/api/staff/register").hasRole("ADMIN")
-
-						// STUDENT APIs
-						.requestMatchers("/api/student/**").hasRole("STUDENT")
 
 						// STAFF APIs
 						.requestMatchers("/api/staff/**").hasAnyRole("STAFF", "ADMIN", "FACULTY")
