@@ -58,11 +58,11 @@ public class StaffController {
 	}
 
 	@PostMapping("/verify-otp")
-	public ResponseEntity<OtpVerifyResponse> verifyOtp(@RequestBody StaffOtpVerifyRequest request) {
+	public ResponseEntity<StaffLoginResponse> verifyOtp(@RequestBody StaffOtpVerifyRequest request) {
 
 		logger.info("OTP verification request received for staffId: {}", request.getStaffId());
 
-		OtpVerifyResponse response = staffService.verifyStaffOtp(request);
+		StaffLoginResponse response = staffService.verifyStaffOtp(request);
 
 		logger.info("OTP verified successfully for staffId: {}", request.getStaffId());
 

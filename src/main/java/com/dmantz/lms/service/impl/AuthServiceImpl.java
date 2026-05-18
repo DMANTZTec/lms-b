@@ -157,78 +157,84 @@ public class AuthServiceImpl implements AuthService {
 	@Override
 	public StaffLoginResponse staffLogin(StaffLoginRequest request) {
 
-		logger.info("Staff login attempt for username: {}", request.getUsername());
+	    logger.info("Staff login attempt for username: {}", request.getUsername());
 
-		String username = request.getUsername();
+	    String username = request.getUsername();
 
-		Staff staff = staffRepository.findByLoginId(username).orElseThrow(() -> {
+	    Staff staff = staffRepository.findByLoginId(username)
+	            .orElseThrow(() -> {
 
-			logger.warn("Invalid credentials for username: {}", username);
+	                logger.warn("Invalid credentials for username: {}", username);
 
-			return new RuntimeException("Invalid Credentials");
-		});
+	                return new RuntimeException("Invalid Credentials");
+	            });
 
-		// ACCOUNT DISABLED
-		if (!"Y".equals(staff.getEnabled())) {
+	    // ACCOUNT DISABLED
+	    if (!"Y".equals(staff.getEnabled())) {
 
-			logger.warn("Disabled account for staffId: {}", staff.getStaffId());
+	        logger.warn("Disabled account for staffId: {}", staff.getStaffId());
 
-			throw new RuntimeException("Account disabled");
-		}
+	        throw new RuntimeException("Account disabled");
+	    }
 
-		// PASSWORD CHECK
-		if (!passwordEncoder.matches(request.getPassword(), staff.getPassword())) {
+	    // PASSWORD CHECK
+	    if (!passwordEncoder.matches(request.getPassword(), staff.getPassword())) {
 
-			logger.warn("Wrong password for staffId: {}", staff.getStaffId());
+	        logger.warn("Wrong password for staffId: {}", staff.getStaffId());
 
-			throw new RuntimeException("Invalid Credentials");
-		}
+	        throw new RuntimeException("Invalid Credentials");
+	    }
 
-		// ROLE
-		String role = staff.getRoles().stream().findFirst().map(r -> r.getRoleNm()).orElse("STAFF");
+	    // ROLE
+	    String role = staff.getRoles().stream()
+	            .findFirst()
+	            .map(r -> r.getRoleNm())
+	            .orElse("STAFF");
 
-		// JWT TOKEN
-		String token = jwtUtil.generateToken(staff.getEmailId(), role, staff.getStaffId());
+	    // GENERATE OTP
+	    StaffOtp otp = generateStaffOtp(staff);
 
-		// GENERATE OTP
-		StaffOtp otp = generateStaffOtp(staff);
+	    try {
 
-		try {
+	        // SEND OTP EMAIL
+	        emailService.sendOtpEmail(
+	                staff.getEmailId(),
+	                otp.getOtp(),
+	                OtpPurpose.LOGIN);
 
-			// SEND OTP EMAIL
-			emailService.sendOtpEmail(staff.getEmailId(), otp.getOtp(), OtpPurpose.LOGIN);
+	        otp.setStatus(OtpStatus.SENT);
 
-			otp.setStatus(OtpStatus.SENT);
+	        otp.setUpdatedDt(LocalDateTime.now());
 
-			otp.setUpdatedDt(LocalDateTime.now());
+	        staffOtpRepository.save(otp);
 
-			staffOtpRepository.save(otp);
+	        logger.info("Login OTP sent successfully to email: {}", staff.getEmailId());
 
-			logger.info("Login OTP sent successfully to email: {}", staff.getEmailId());
+	    } catch (Exception e) {
 
-		} catch (Exception e) {
+	        logger.error("Failed to send login OTP to email: {}", staff.getEmailId(), e);
 
-			logger.error("Failed to send login OTP to email: {}", staff.getEmailId(), e);
+	        otp.setStatus(OtpStatus.FAILED);
 
-			otp.setStatus(OtpStatus.FAILED);
+	        staffOtpRepository.save(otp);
 
-			staffOtpRepository.save(otp);
+	        throw new RuntimeException("Failed to send OTP");
+	    }
 
-			throw new RuntimeException("Failed to send OTP");
-		}
+	    // RESPONSE
+	    StaffLoginResponse response = new StaffLoginResponse();
 
-		// RESPONSE
-		StaffLoginResponse response = new StaffLoginResponse();
+	    response.setRole(role);
+	    response.setStaffId(staff.getStaffId());
+	    response.setEmail(staff.getEmailId());
 
-		response.setRole(role);
-		response.setStaffId(staff.getStaffId());
-		response.setEmail(staff.getEmailId());
-		response.setToken(token);
+	    // TOKEN SHOULD BE NULL BEFORE OTP VERIFICATION
+	    response.setToken(null);
 
-		response.setMessage("Login Successful. OTP sent to registered email.");
+	    response.setMessage("OTP sent successfully to registered email");
 
-		logger.info("Staff login successful for staffId: {}", staff.getStaffId());
+	    logger.info("OTP sent successfully for staffId: {}", staff.getStaffId());
 
-		return response;
+	    return response;
 	}
-}
+	}

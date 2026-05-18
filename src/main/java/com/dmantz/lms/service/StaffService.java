@@ -17,7 +17,7 @@ public interface StaffService {
 
     Optional<Staff> findByStaffId(String staffId);
 
-    OtpVerifyResponse verifyStaffOtp(StaffOtpVerifyRequest request);
+	 StaffLoginResponse verifyStaffOtp(StaffOtpVerifyRequest request);
 
     StaffPasswordResponse forgotPassword(ForgotPasswordRequest request);
 
@@ -29,5 +29,6 @@ public interface StaffService {
 
     @Transactional
     StaffResponse registerInitialAdmin(StaffRegistrationRequest request);
+
 }
 

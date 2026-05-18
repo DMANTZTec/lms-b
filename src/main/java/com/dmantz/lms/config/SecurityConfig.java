@@ -44,6 +44,15 @@ public class SecurityConfig {
 								"/api/student/forgot-password",
 								"/api/student/reset-password"
 						).permitAll()
+						
+						   // ================= STAFF PUBLIC APIs =================
+
+				        .requestMatchers(
+				                "/api/staff/admin-register",
+				                "/api/staff/verify-otp",
+				                "/api/staff/forgot-password",
+				                "/api/staff/reset-password"
+				        ).permitAll()
 
 						// STUDENT APIs
 						.requestMatchers("/api/student/**").hasRole("STUDENT")
