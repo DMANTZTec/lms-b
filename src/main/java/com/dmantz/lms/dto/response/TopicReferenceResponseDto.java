@@ -1,60 +1,31 @@
 package com.dmantz.lms.dto.response;
 
-import java.util.Map;
-
 public class TopicReferenceResponseDto {
-    private Long id;
-    private Long topicId;
-    private String refType;
-    private Map<String, Object> refValue;
-    private String refBy;
-    private Long refById;
+	private boolean success;
+	private String message;
+	private TopicReferenceDataDto data;
 
-    public Long getId() {
-        return id;
-    }
+	public boolean isSuccess() {
+		return success;
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public void setSuccess(boolean success) {
+		this.success = success;
+	}
 
-    public Long getTopicId() {
-        return topicId;
-    }
+	public String getMessage() {
+		return message;
+	}
 
-    public void setTopicId(Long topicId) {
-        this.topicId = topicId;
-    }
+	public void setMessage(String message) {
+		this.message = message;
+	}
 
-    public String getRefType() {
-        return refType;
-    }
+	public TopicReferenceDataDto getData() {
+		return data;
+	}
 
-    public void setRefType(String refType) {
-        this.refType = refType;
-    }
-
-    public Map<String, Object> getRefValue() {
-        return refValue;
-    }
-
-    public void setRefValue(Map<String, Object> refValue) {
-        this.refValue = refValue;
-    }
-
-    public String getRefBy() {
-        return refBy;
-    }
-
-    public void setRefBy(String refBy) {
-        this.refBy = refBy;
-    }
-
-    public Long getRefById() {
-        return refById;
-    }
-
-    public void setRefById(Long refById) {
-        this.refById = refById;
-    }
+	public void setData(TopicReferenceDataDto data) {
+		this.data = data;
+	}
 }

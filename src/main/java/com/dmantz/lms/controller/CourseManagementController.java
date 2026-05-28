@@ -8,6 +8,7 @@ import com.dmantz.lms.dto.response.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +18,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.dmantz.lms.service.CourseManagementService;
 
@@ -303,46 +306,37 @@ public class CourseManagementController {
 		return ResponseEntity.ok("Topic moved successfully");
 	}
 
-	// ========================== Add URL Reference =============================
 
-	@PostMapping("topics/{topicId}/references/url")
-	public ResponseEntity<TopicReferenceResponseDto> addUrl(@PathVariable Long topicId,
-			@RequestBody TopicReferenceRequestDto dto) {
-
-		logger.info("POST /topics/{}/references/url - Adding URL reference", topicId);
-
-		TopicReferenceResponseDto response = courseManagementService.addUrlReference(topicId, dto);
-
-		logger.info("URL reference added successfully to topicId: {}", topicId);
-		return ResponseEntity.ok(response);
-	}
-
-	// ========================= Add Video Reference =============================
-
-	@PostMapping("topics/{topicId}/references/video")
-	public ResponseEntity<TopicReferenceResponseDto> addVideo(@PathVariable Long topicId,
-			@RequestBody TopicReferenceRequestDto dto) {
-
-		logger.info("POST /topics/{}/references/video - Adding VIDEO reference", topicId);
-
-		TopicReferenceResponseDto response = courseManagementService.addVideoReference(topicId, dto);
-
-		logger.info("VIDEO reference added successfully to topicId: {}", topicId);
-		return ResponseEntity.ok(response);
-	}
-
-	// ========================= Add Document Reference
-
-	@PostMapping("topics/{topicId}/references/document")
+	@PostMapping(value = "topics/{topicId}/references/document", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<TopicReferenceResponseDto> addDocument(@PathVariable Long topicId,
-			@RequestBody TopicReferenceRequestDto dto) {
+			@RequestParam("documentName") String documentName, @RequestParam("refBy") String refBy,
+			@RequestParam("refById") Long refById, @RequestPart("file") MultipartFile file) throws Exception {
 
-		logger.info("POST /topics/{}/references/document - Adding DOCUMENT reference", topicId);
+		logger.info("POST /topics/{}/references/document", topicId);
 
-		TopicReferenceResponseDto response = courseManagementService.addDocumentReference(topicId, dto);
+		TopicReferenceRequestDto dto = new TopicReferenceRequestDto();
+		dto.setDocumentName(documentName);
+		dto.setRefBy(refBy);
+		dto.setRefById(refById);
 
-		logger.info("DOCUMENT reference added successfully to topicId: {}", topicId);
-		return ResponseEntity.ok(response);
+		return ResponseEntity.status(HttpStatus.CREATED)
+				.body(courseManagementService.addDocumentReference(topicId, dto, file));
+	}
+
+	@PostMapping(value = "topics/{topicId}/references/video", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<TopicReferenceResponseDto> addVideo(@PathVariable Long topicId,
+			@RequestParam("documentName") String documentName, @RequestParam("refBy") String refBy,
+			@RequestParam("refById") Long refById, @RequestPart("file") MultipartFile file) throws Exception {
+
+		logger.info("POST /topics/{}/references/video", topicId);
+
+		TopicReferenceRequestDto dto = new TopicReferenceRequestDto();
+		dto.setDocumentName(documentName);
+		dto.setRefBy(refBy);
+		dto.setRefById(refById);
+
+		return ResponseEntity.status(HttpStatus.CREATED)
+				.body(courseManagementService.addVideoReference(topicId, dto, file));
 	}
 
 //	========================= Add course to program =============================
@@ -425,23 +419,18 @@ public class CourseManagementController {
 		logger.info("Program deleted successfully with id: {}", id);
 		return ResponseEntity.ok("Program deleted successfully");
 	}
-	
-	
+
 	// ====================== GET COMPLETE COURSE DETAILS ======================
 
 	@GetMapping("/coursedetails/{courseId}")
-	public ResponseEntity<CourseDetailsResponse> getCourseDetails(
-	        @PathVariable String courseId) {
+	public ResponseEntity<CourseDetailsResponse> getCourseDetails(@PathVariable String courseId) {
 
-	    logger.info("GET /course/details/{} - Fetching complete course details",
-	            courseId);
+		logger.info("GET /course/details/{} - Fetching complete course details", courseId);
 
-	    CourseDetailsResponse response =
-	            courseManagementService.getCourseDetails(courseId);
+		CourseDetailsResponse response = courseManagementService.getCourseDetails(courseId);
 
-	    logger.info("Course details fetched successfully for courseId: {}",
-	            courseId);
+		logger.info("Course details fetched successfully for courseId: {}", courseId);
 
-	    return ResponseEntity.ok(response);
+		return ResponseEntity.ok(response);
 	}
 }

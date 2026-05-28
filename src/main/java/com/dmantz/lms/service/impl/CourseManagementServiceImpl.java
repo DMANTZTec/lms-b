@@ -1,8 +1,11 @@
 package com.dmantz.lms.service.impl;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -14,12 +17,25 @@ import com.dmantz.lms.repository.*;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.dmantz.lms.exceptions.DuplicateValuesException;
 import com.dmantz.lms.exceptions.InvalidPositionException;
 import com.dmantz.lms.exceptions.ResourceNotFoundException;
 import com.dmantz.lms.service.CourseManagementService;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.transaction.Transactional;
 
@@ -28,6 +44,11 @@ import jakarta.transaction.Transactional;
 public class CourseManagementServiceImpl implements CourseManagementService {
 
 	private static final Logger logger = LogManager.getLogger(CourseManagementServiceImpl.class);
+	
+	@Value("${strapi.url}")
+	private String strapiUrl;
+
+	private final RestTemplate restTemplate = new RestTemplate();
 
 	private final SubjectRepository subjectRepository;
 	private final StaffRepository staffRepository;
@@ -692,39 +713,89 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 		logger.info("TopicId: {} moved to position: {} successfully", topicId, targetPosition);
 	}
 
-// =============================== Add Topic References ======================================
-	@Override
-	public TopicReferenceResponseDto addUrlReference(Long topicId, TopicReferenceRequestDto dto) {
-		logger.info("Adding URL reference to topicId: {}", topicId);
-		return saveReference(topicId, dto, "URL");
+	private TopicReferenceResponseDto buildAndSaveReference(
+	        Long topicId,
+	        TopicReferenceRequestDto dto,
+	        MultipartFile file,
+	        String refType) throws Exception {
+
+	    logger.info("Adding {} reference with media upload to topicId: {}", refType, topicId);
+
+	    // Step 1 — Upload to Strapi
+	    File tempFile = File.createTempFile("upload-", file.getOriginalFilename());
+	    file.transferTo(tempFile);
+
+	    MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+	    body.add("files", new FileSystemResource(tempFile));
+
+	    HttpHeaders headers = new HttpHeaders();
+	    headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+	    ResponseEntity<String> strapiResponse = restTemplate.exchange(
+	            strapiUrl + "/api/upload",
+	            HttpMethod.POST,
+	            new HttpEntity<>(body, headers),
+	            String.class
+	    );
+
+	    tempFile.delete();
+
+	    // Step 2 — Parse Strapi response
+	    ObjectMapper objectMapper = new ObjectMapper();
+	    JsonNode root = objectMapper.readTree(strapiResponse.getBody());
+
+	    String fileUrl  = strapiUrl + root.get(0).get("url").asText();
+	    String fileName = root.get(0).get("name").asText();
+	    String fileType = file.getContentType();
+	    Long   fileSize = file.getSize();
+
+	    // Step 3 — Build refValue
+	    String documentName = (dto.getDocumentName() != null && !dto.getDocumentName().isBlank())
+	            ? dto.getDocumentName()
+	            : fileName;
+
+	    Map<String, Object> refValue = new HashMap<>();
+	    refValue.put("documentName", documentName);
+	    refValue.put("fileUrl",      fileUrl);
+	    refValue.put("fileName",     fileName);
+	    refValue.put("fileType",     fileType);
+	    refValue.put("fileSize",     fileSize);
+
+	    // Step 4 — Save to DB
+	    Topic topic = topicRepository.findById(topicId).orElseThrow(() -> {
+	        logger.warn("Topic not found with id: {}", topicId);
+	        return new ResourceNotFoundException("Topic not found");
+	    });
+
+	    TopicReference entity = topicReferenceMapper.toEntity(dto);
+	    entity.setRefType(refType);
+	    entity.setRefValue(refValue);
+	    entity.setTopic(topic);
+
+	    TopicReference saved = topicReferenceRepository.save(entity);
+	    logger.info("{} reference saved with id: {} for topicId: {}", refType, saved.getId(), topicId);
+
+	    // Step 5 — Build response
+	    TopicReferenceDataDto dataDto = topicReferenceMapper.toDataDto(saved);
+
+	    TopicReferenceResponseDto response = new TopicReferenceResponseDto();
+	    response.setSuccess(true);
+	    response.setMessage(refType.charAt(0) + refType.substring(1).toLowerCase() + " Uploaded Successfully");
+	    response.setData(dataDto);
+
+	    return response;
 	}
 
 	@Override
-	public TopicReferenceResponseDto addVideoReference(Long topicId, TopicReferenceRequestDto dto) {
-		logger.info("Adding VIDEO reference to topicId: {}", topicId);
-		return saveReference(topicId, dto, "VIDEO");
+	public TopicReferenceResponseDto addDocumentReference(
+	        Long topicId, TopicReferenceRequestDto dto, MultipartFile file) throws Exception {
+	    return buildAndSaveReference(topicId, dto, file, "DOCUMENT");
 	}
 
 	@Override
-	public TopicReferenceResponseDto addDocumentReference(Long topicId, TopicReferenceRequestDto dto) {
-		logger.info("Adding DOCUMENT reference to topicId: {}", topicId);
-		return saveReference(topicId, dto, "DOCUMENT");
-	}
-
-	private TopicReferenceResponseDto saveReference(Long topicId, TopicReferenceRequestDto dto, String type) {
-		logger.debug("Saving reference of type: {} for topicId: {}", type, topicId);
-		Topic topic = topicRepository.findById(topicId).orElseThrow(() -> {
-			logger.warn("Topic not found with id: {} while saving reference", topicId);
-			return new ResourceNotFoundException("Topic not found");
-		});
-
-		TopicReference entity = topicReferenceMapper.toEntity(dto);
-		entity.setRefType(type);
-		entity.setTopic(topic);
-
-		TopicReference saved = topicReferenceRepository.save(entity);
-		logger.info("Reference saved with id: {}, type: {} for topicId: {}", saved.getId(), type, topicId);
-		return topicReferenceMapper.toDto(saved);
+	public TopicReferenceResponseDto addVideoReference(
+	        Long topicId, TopicReferenceRequestDto dto, MultipartFile file) throws Exception {
+	    return buildAndSaveReference(topicId, dto, file, "VIDEO");
 	}
 
 //	  create program
@@ -974,27 +1045,26 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 				TopicReferencesDetailResponse resources = new TopicReferencesDetailResponse();
 
 				// DOCUMENTS
-
-				List<TopicReferenceResponseDto> documents = references.stream()
-						.filter(ref -> "DOCUMENT".equalsIgnoreCase(ref.getRefType())).map(topicReferenceMapper::toDto)
-						.collect(Collectors.toList());
+				List<TopicReferenceDataDto> documents = references.stream()
+				        .filter(ref -> "DOCUMENT".equalsIgnoreCase(ref.getRefType()))
+				        .map(topicReferenceMapper::toDataDto)
+				        .collect(Collectors.toList());
 
 				// VIDEOS
-
-				List<TopicReferenceResponseDto> videos = references.stream()
-						.filter(ref -> "VIDEO".equalsIgnoreCase(ref.getRefType())).map(topicReferenceMapper::toDto)
-						.collect(Collectors.toList());
+				List<TopicReferenceDataDto> videos = references.stream()
+				        .filter(ref -> "VIDEO".equalsIgnoreCase(ref.getRefType()))
+				        .map(topicReferenceMapper::toDataDto)
+				        .collect(Collectors.toList());
 
 				// URLS
-
-				List<TopicReferenceResponseDto> urls = references.stream()
-						.filter(ref -> "URL".equalsIgnoreCase(ref.getRefType())).map(topicReferenceMapper::toDto)
-						.collect(Collectors.toList());
+				List<TopicReferenceDataDto> urls = references.stream()
+				        .filter(ref -> "URL".equalsIgnoreCase(ref.getRefType()))
+				        .map(topicReferenceMapper::toDataDto)
+				        .collect(Collectors.toList());
 
 				resources.setDocuments(documents);
 				resources.setVideos(videos);
 				resources.setUrls(urls);
-
 				topicDto.setResources(resources);
 
 				return topicDto;
@@ -1013,4 +1083,5 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 
 		return response;
 	}
+
 }

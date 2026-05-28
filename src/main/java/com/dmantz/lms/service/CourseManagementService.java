@@ -2,6 +2,8 @@ package com.dmantz.lms.service;
 
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.dmantz.lms.dto.request.*;
 import com.dmantz.lms.dto.response.*;
 
@@ -69,11 +71,13 @@ public interface CourseManagementService {
 //	move topic
 	void moveTopic(Long topicId, int targetPosition);
 
-	TopicReferenceResponseDto addUrlReference(Long topicId, TopicReferenceRequestDto dto);
+//	TopicReferenceResponseDto addUrlReference(Long topicId, TopicReferenceRequestDto dto);
 
-	TopicReferenceResponseDto addVideoReference(Long topicId, TopicReferenceRequestDto dto);
+	TopicReferenceResponseDto addDocumentReference(Long topicId, TopicReferenceRequestDto dto, MultipartFile file)
+			throws Exception;
 
-	TopicReferenceResponseDto addDocumentReference(Long topicId, TopicReferenceRequestDto dto);
+	TopicReferenceResponseDto addVideoReference(Long topicId, TopicReferenceRequestDto dto, MultipartFile file)
+			throws Exception;
 
 	List<ProgramCourseResponse> addCoursesToProgram(ProgramCourseRequest request);
 
@@ -88,11 +92,9 @@ public interface CourseManagementService {
 	ProgramResponse getProgramById(Long id);
 
 	ProgramResponse createProgram(ProgramRequest request);
-	
+
 	List<ChapterResponse> getChaptersByCourseStringId(String courseId);
-	
+
 	CourseDetailsResponse getCourseDetails(String courseId);
-
-
 
 }
