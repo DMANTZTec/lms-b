@@ -10,4 +10,6 @@ public interface TopicReferenceRepository extends JpaRepository<TopicReference, 
 	
 	List<TopicReference> findByTopicId(Long topicId);
 	
+	 List<TopicReference> findByTopicIdAndRefType(Long topicId, String refType);
+	
 }

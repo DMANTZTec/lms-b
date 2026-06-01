@@ -71,14 +71,24 @@ public interface CourseManagementService {
 //	move topic
 	void moveTopic(Long topicId, int targetPosition);
 
-	TopicReferenceResponseDto addDocumentReference(Long topicId, TopicReferenceRequestDto dto, MultipartFile file)
+	TopicReferenceResponseDto addDocumentReference(Long topicId, DocumentReferenceRequestDto dto, MultipartFile file)
 			throws Exception;
 
-	TopicReferenceResponseDto addVideoReference(Long topicId, TopicReferenceRequestDto dto, MultipartFile file)
+	TopicReferenceResponseDto addVideoReference(Long topicId, VideoReferenceRequestDto dto, MultipartFile file)
 			throws Exception;
 	
 	TopicReferenceResponseDto addUrlReference(Long topicId, TopicUrlReferenceRequestDto dto) throws Exception;
+	
+	List<TopicReferenceDataDto> getDocumentsByTopicId(Long topicId);
 
+	List<TopicReferenceDataDto> getVideosByTopicId(Long topicId);
+	
+	List<TopicReferenceDataDto> getUrlsByTopicId(Long topicId);
+	
+	String deleteDocument(Long referenceId);
+
+	String deleteVideo(Long referenceId);
+	
 	List<ProgramCourseResponse> addCoursesToProgram(ProgramCourseRequest request);
 
 	void deleteProgramCourse(Long programCourseId);
@@ -97,5 +107,5 @@ public interface CourseManagementService {
 
 	CourseDetailsResponse getCourseDetails(String courseId);
 
-
+	
 }

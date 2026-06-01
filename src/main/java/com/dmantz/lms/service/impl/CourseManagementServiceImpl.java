@@ -713,90 +713,258 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 		logger.info("TopicId: {} moved to position: {} successfully", topicId, targetPosition);
 	}
 
-	private TopicReferenceResponseDto buildAndSaveReference(
-	        Long topicId,
-	        TopicReferenceRequestDto dto,
-	        MultipartFile file,
-	        String refType) throws Exception {
+//	========================= ADD DOCUMENT REFERENCE TO TOPIC =========================
+	@Override
+	public TopicReferenceResponseDto addDocumentReference(Long topicId, DocumentReferenceRequestDto dto,
+			MultipartFile file) throws Exception {
 
-	    logger.info("Adding {} reference with media upload to topicId: {}", refType, topicId);
+		logger.info("Adding DOCUMENT reference for topicId: {} by refById: {}", topicId, dto.getRefById());
 
-	    // Step 1 — Upload to Strapi
-	    File tempFile = File.createTempFile("upload-", file.getOriginalFilename());
-	    file.transferTo(tempFile);
+		if (!"ADMIN".equalsIgnoreCase(dto.getRefBy()) && !"STAFF".equalsIgnoreCase(dto.getRefBy())) {
+			throw new IllegalArgumentException("refBy must be ADMIN or STAFF");
+		}
 
-	    MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-	    body.add("files", new FileSystemResource(tempFile));
+		Topic topic = topicRepository.findById(topicId)
+				.orElseThrow(() -> new ResourceNotFoundException("Topic not found"));
 
-	    HttpHeaders headers = new HttpHeaders();
-	    headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+		staffRepository.findByStaffId(dto.getRefById())
+				.orElseThrow(() -> new ResourceNotFoundException("Staff not found"));
 
-	    ResponseEntity<String> strapiResponse = restTemplate.exchange(
-	            strapiUrl + "/api/upload",
-	            HttpMethod.POST,
-	            new HttpEntity<>(body, headers),
-	            String.class
-	    );
+		File tempFile = File.createTempFile("upload-", file.getOriginalFilename());
+		file.transferTo(tempFile);
 
-	    tempFile.delete();
+		MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+		body.add("files", new FileSystemResource(tempFile));
 
-	    // Step 2 — Parse Strapi response
-	    ObjectMapper objectMapper = new ObjectMapper();
-	    JsonNode root = objectMapper.readTree(strapiResponse.getBody());
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-	    String fileUrl  = strapiUrl + root.get(0).get("url").asText();
-	    String fileName = root.get(0).get("name").asText();
-	    String fileType = file.getContentType();
-	    Long   fileSize = file.getSize();
+		ResponseEntity<String> response = restTemplate.exchange(strapiUrl + "/api/upload", HttpMethod.POST,
+				new HttpEntity<>(body, headers), String.class);
 
-	    // Step 3 — Build refValue
-	    String documentName = (dto.getDocumentName() != null && !dto.getDocumentName().isBlank())
-	            ? dto.getDocumentName()
-	            : fileName;
+		tempFile.delete();
 
-	    Map<String, Object> refValue = new HashMap<>();
-	    refValue.put("documentName", documentName);
-	    refValue.put("fileUrl",      fileUrl);
-	    refValue.put("fileName",     fileName);
-	    refValue.put("fileType",     fileType);
-	    refValue.put("fileSize",     fileSize);
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode root = mapper.readTree(response.getBody());
+		JsonNode fileNode = root.get(0);
 
-	    // Step 4 — Save to DB
-	    Topic topic = topicRepository.findById(topicId).orElseThrow(() -> {
-	        logger.warn("Topic not found with id: {}", topicId);
-	        return new ResourceNotFoundException("Topic not found");
-	    });
+		if (fileNode == null) {
+			throw new RuntimeException("Invalid Strapi response");
+		}
 
-	    TopicReference entity = topicReferenceMapper.toEntity(dto);
-	    entity.setRefType(refType);
-	    entity.setRefValue(refValue);
-	    entity.setTopic(topic);
+		String fileUrl = strapiUrl + fileNode.get("url").asText();
+		String fileName = fileNode.get("name").asText();
 
-	    TopicReference saved = topicReferenceRepository.save(entity);
-	    logger.info("{} reference saved with id: {} for topicId: {}", refType, saved.getId(), topicId);
+		Map<String, Object> refValue = new HashMap<>();
+		refValue.put("documentName", dto.getDocumentName());
+		refValue.put("fileUrl", fileUrl);
+		refValue.put("fileName", fileName);
+		refValue.put("fileType", file.getContentType());
+		refValue.put("fileSize", file.getSize());
 
-	    // Step 5 — Build response
-	    TopicReferenceDataDto dataDto = topicReferenceMapper.toDataDto(saved);
+		TopicReference entity = new TopicReference();
+		entity.setRefType("DOCUMENT");
+		entity.setRefValue(refValue);
+		entity.setRefBy(dto.getRefBy());
+		entity.setRefById(dto.getRefById());
+		entity.setTopic(topic);
 
-	    TopicReferenceResponseDto response = new TopicReferenceResponseDto();
-	    response.setSuccess(true);
-	    response.setMessage(refType.charAt(0) + refType.substring(1).toLowerCase() + " Uploaded Successfully");
-	    response.setData(dataDto);
+		TopicReference saved = topicReferenceRepository.save(entity);
 
-	    return response;
+		TopicReferenceResponseDto responseDto = new TopicReferenceResponseDto();
+		responseDto.setSuccess(true);
+		responseDto.setMessage("Document uploaded successfully");
+		responseDto.setData(topicReferenceMapper.toDataDto(saved));
+
+		return responseDto;
 	}
+
+//=============================== ADD VIDEO REFERENCE TO TOPIC =========================
+	@Override
+	public TopicReferenceResponseDto addVideoReference(Long topicId, VideoReferenceRequestDto dto, MultipartFile file)
+			throws Exception {
+
+		logger.info("Adding VIDEO reference for topicId: {}", topicId);
+
+		if (!"ADMIN".equalsIgnoreCase(dto.getRefBy()) && !"STAFF".equalsIgnoreCase(dto.getRefBy())) {
+			throw new IllegalArgumentException("refBy must be ADMIN or STAFF");
+		}
+
+		if (!"video/mp4".equalsIgnoreCase(file.getContentType())) {
+			throw new IllegalArgumentException("Only MP4 allowed");
+		}
+
+		Topic topic = topicRepository.findById(topicId)
+				.orElseThrow(() -> new ResourceNotFoundException("Topic not found"));
+
+		staffRepository.findByStaffId(dto.getRefById())
+				.orElseThrow(() -> new ResourceNotFoundException("Staff not found"));
+
+		File tempFile = File.createTempFile("upload-", file.getOriginalFilename());
+		file.transferTo(tempFile);
+
+		MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+		body.add("files", new FileSystemResource(tempFile));
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+		ResponseEntity<String> response = restTemplate.exchange(strapiUrl + "/api/upload", HttpMethod.POST,
+				new HttpEntity<>(body, headers), String.class);
+
+		tempFile.delete();
+
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode root = mapper.readTree(response.getBody());
+		JsonNode fileNode = root.get(0);
+
+		if (fileNode == null) {
+			throw new RuntimeException("Invalid Strapi response");
+		}
+
+		String fileUrl = strapiUrl + fileNode.get("url").asText();
+		String fileName = fileNode.get("name").asText();
+
+		Map<String, Object> refValue = new HashMap<>();
+		refValue.put("videoTitle", dto.getVideoTitle());
+		refValue.put("fileUrl", fileUrl);
+		refValue.put("fileName", fileName);
+		refValue.put("fileType", file.getContentType());
+		refValue.put("fileSize", file.getSize());
+
+		TopicReference entity = new TopicReference();
+		entity.setRefType("VIDEO");
+		entity.setRefValue(refValue);
+		entity.setRefBy(dto.getRefBy());
+		entity.setRefById(dto.getRefById());
+		entity.setTopic(topic);
+
+		TopicReference saved = topicReferenceRepository.save(entity);
+
+		TopicReferenceResponseDto responseDto = new TopicReferenceResponseDto();
+		responseDto.setSuccess(true);
+		responseDto.setMessage("Video uploaded successfully");
+		responseDto.setData(topicReferenceMapper.toDataDto(saved));
+
+		return responseDto;
+	}
+
+//=============================== GET DOCUMENT REFERENCES BY TOPIC ID =========================
+	@Override
+	public List<TopicReferenceDataDto> getDocumentsByTopicId(Long topicId) {
+
+		logger.info("Fetching DOCUMENT references for topicId: {}", topicId);
+
+		topicRepository.findById(topicId).orElseThrow(() -> {
+			logger.warn("Topic not found with id: {}", topicId);
+			return new ResourceNotFoundException("Topic not found with id: " + topicId);
+		});
+
+		List<TopicReference> documents = topicReferenceRepository.findByTopicIdAndRefType(topicId, "DOCUMENT");
+		logger.debug("Found {} document(s) for topicId: {}", documents.size(), topicId);
+
+		return documents.stream().map(topicReferenceMapper::toDataDto).toList();
+	}
+
+//=============================== GET VIDEO REFERENCES BY TOPIC ID =========================
+	@Override
+	public List<TopicReferenceDataDto> getVideosByTopicId(Long topicId) {
+
+		logger.info("Fetching VIDEO references for topicId: {}", topicId);
+
+		topicRepository.findById(topicId).orElseThrow(() -> {
+			logger.warn("Topic not found with id: {}", topicId);
+			return new ResourceNotFoundException("Topic not found with id: " + topicId);
+		});
+
+		List<TopicReference> videos = topicReferenceRepository.findByTopicIdAndRefType(topicId, "VIDEO");
+		logger.debug("Found {} video(s) for topicId: {}", videos.size(), topicId);
+
+		return videos.stream().map(topicReferenceMapper::toDataDto).toList();
+	}
+
+//	=============================== DELETE DOCUMENT REFERENCE BY ID =========================
 
 	@Override
-	public TopicReferenceResponseDto addDocumentReference(
-	        Long topicId, TopicReferenceRequestDto dto, MultipartFile file) throws Exception {
-	    return buildAndSaveReference(topicId, dto, file, "DOCUMENT");
+	public String deleteDocument(Long referenceId) {
+
+		logger.info("Deleting DOCUMENT reference id: {}", referenceId);
+
+		TopicReference reference = topicReferenceRepository.findById(referenceId)
+				.orElseThrow(() -> new ResourceNotFoundException("Reference not found"));
+
+		if (!"DOCUMENT".equalsIgnoreCase(reference.getRefType())) {
+			throw new IllegalArgumentException("Not a document");
+		}
+
+		String fileName = reference.getRefValue().get("fileName").toString();
+
+		deleteFromStrapiByFileName(fileName);
+
+		topicReferenceRepository.delete(reference);
+
+		return "Document deleted successfully";
 	}
 
+//	=============================== DELETE VIDEO REFERENCE BY ID =========================
 	@Override
-	public TopicReferenceResponseDto addVideoReference(
-	        Long topicId, TopicReferenceRequestDto dto, MultipartFile file) throws Exception {
-	    return buildAndSaveReference(topicId, dto, file, "VIDEO");
+	public String deleteVideo(Long referenceId) {
+
+		logger.info("Deleting VIDEO reference id: {}", referenceId);
+
+		TopicReference reference = topicReferenceRepository.findById(referenceId)
+				.orElseThrow(() -> new ResourceNotFoundException("Reference not found"));
+
+		if (!"VIDEO".equalsIgnoreCase(reference.getRefType())) {
+			throw new IllegalArgumentException("Not a video");
+		}
+
+		String fileName = reference.getRefValue().get("fileName").toString();
+
+		deleteFromStrapiByFileName(fileName);
+
+		topicReferenceRepository.delete(reference);
+
+		return "Video deleted successfully";
 	}
+
+	private void deleteFromStrapiByFileName(String fileName) {
+
+		try {
+			// Step 1: Find file ID by fileName
+			String searchUrl = strapiUrl + "/api/upload/files?filters[name][$eq]=" + fileName;
+
+			logger.info("Searching file in Strapi by fileName: {}", fileName);
+
+			ResponseEntity<String> searchResponse = restTemplate.exchange(searchUrl, HttpMethod.GET,
+					new HttpEntity<>(new HttpHeaders()), String.class);
+
+			ObjectMapper mapper = new ObjectMapper();
+			JsonNode root = mapper.readTree(searchResponse.getBody());
+
+			if (root == null || !root.isArray() || root.size() == 0) {
+				logger.warn("File not found in Strapi, skipping Strapi delete: {}", fileName);
+				return;
+			}
+
+			Long strapiFileId = root.get(0).get("id").asLong();
+
+			logger.info("Found strapiFileId: {} for fileName: {}", strapiFileId, fileName);
+
+			// Step 2: Delete by ID
+			String deleteUrl = strapiUrl + "/api/upload/files/" + strapiFileId;
+
+			HttpHeaders headers = new HttpHeaders();
+			restTemplate.exchange(deleteUrl, HttpMethod.DELETE, new HttpEntity<>(headers), String.class);
+
+			logger.info("File deleted from Strapi: {}", fileName);
+
+		} catch (Exception e) {
+			logger.error("Failed to delete file from Strapi: {}", fileName, e);
+			throw new RuntimeException("Failed to delete file from Strapi: " + fileName, e);
+		}
+	}
+
 	
 	// ServiceImpl
 	@Override
@@ -834,6 +1002,20 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 	    response.setData(topicReferenceMapper.toDataDto(saved));
 
 	    return response;
+	}
+	
+	
+	//=============================== GET URL REFERENCES BY TOPIC ID =========================
+	@Override
+	public List<TopicReferenceDataDto> getUrlsByTopicId(Long topicId) {
+	    logger.info("Fetching URL references for topicId: {}", topicId);
+	    topicRepository.findById(topicId).orElseThrow(() -> {
+	        logger.warn("Topic not found with id: {}", topicId);
+	        return new ResourceNotFoundException("Topic not found with id: " + topicId);
+	    });
+	    List<TopicReference> urls = topicReferenceRepository.findByTopicIdAndRefType(topicId, "URL");
+	    logger.debug("Found {} url(s) for topicId: {}", urls.size(), topicId);
+	    return urls.stream().map(topicReferenceMapper::toDataDto).toList();
 	}
 //	  create program
 	@Override
