@@ -338,6 +338,15 @@ public class CourseManagementController {
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.body(courseManagementService.addVideoReference(topicId, dto, file));
 	}
+	
+	@PostMapping("/topics/{topicId}/references/url")
+	public ResponseEntity<TopicReferenceResponseDto> addUrl(@PathVariable Long topicId,
+			@RequestBody TopicUrlReferenceRequestDto dto) throws Exception {
+
+		logger.info("POST /topics/{}/references/url - Adding URL reference", topicId);
+
+		return ResponseEntity.status(HttpStatus.CREATED).body(courseManagementService.addUrlReference(topicId, dto));
+	}
 
 //	========================= Add course to program =============================
 	@PostMapping("/add/course/program")

@@ -797,7 +797,39 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 	        Long topicId, TopicReferenceRequestDto dto, MultipartFile file) throws Exception {
 	    return buildAndSaveReference(topicId, dto, file, "VIDEO");
 	}
+	
+	// ServiceImpl
+	@Override
+	public TopicReferenceResponseDto addUrlReference(
+	        Long topicId, TopicUrlReferenceRequestDto dto) throws Exception {
 
+	    logger.info("Adding URL reference to topicId: {}", topicId);
+
+	    Map<String, Object> refValue = new HashMap<>();
+	    refValue.put("url", dto.getUrl());
+
+	    Topic topic = topicRepository.findById(topicId).orElseThrow(() -> {
+	        logger.warn("Topic not found with id: {}", topicId);
+	        return new ResourceNotFoundException("Topic not found");
+	    });
+
+	    TopicReference entity = new TopicReference();
+	    entity.setRefType("URL");
+	    entity.setRefValue(refValue);
+	    entity.setRefBy(dto.getRefBy());
+	    entity.setRefById(dto.getRefById());
+	    entity.setTopic(topic);
+
+	    TopicReference saved = topicReferenceRepository.save(entity);
+	    logger.info("URL reference saved with id: {} for topicId: {}", saved.getId(), topicId);
+
+	    TopicReferenceResponseDto response = new TopicReferenceResponseDto();
+	    response.setSuccess(true);
+	    response.setMessage("Url Added Successfully");
+	    response.setData(topicReferenceMapper.toDataDto(saved));
+
+	    return response;
+	}
 //	  create program
 	@Override
 	public ProgramResponse createProgram(ProgramRequest request) {
