@@ -39,5 +39,14 @@
                 constraintName="fk_topic_reference_topic"/>
 
     </changeSet>
+    
+    <changeSet id="202605291508" author="Tejaswini">
+
+    <modifyDataType
+            tableName="topic_reference"
+            columnName="ref_by_id"
+            newDataType="VARCHAR(255)"/>
+
+</changeSet>
 
 </databaseChangeLog>

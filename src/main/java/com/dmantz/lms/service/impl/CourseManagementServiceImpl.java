@@ -812,12 +812,17 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 	        logger.warn("Topic not found with id: {}", topicId);
 	        return new ResourceNotFoundException("Topic not found");
 	    });
+	    
 
-	    TopicReference entity = new TopicReference();
+	    // Step 2 — Validate Staff
+	    Staff staff = staffRepository.findByStaffId(dto.getRefById()).orElseThrow(() -> {
+	        logger.warn("Staff not found with id: {}", dto.getRefById());
+	        return new ResourceNotFoundException("Staff not found with id: " + dto.getRefById());
+	    });
+
+	    TopicReference entity = topicReferenceMapper.toEntity(dto);
 	    entity.setRefType("URL");
-	    entity.setRefValue(refValue);
-	    entity.setRefBy(dto.getRefBy());
-	    entity.setRefById(dto.getRefById());
+	    entity.setRefValue(Map.of("url", dto.getUrl()));
 	    entity.setTopic(topic);
 
 	    TopicReference saved = topicReferenceRepository.save(entity);

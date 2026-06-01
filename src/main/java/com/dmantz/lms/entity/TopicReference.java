@@ -32,7 +32,7 @@ public class TopicReference {
 	private String refBy;
 
 	@Column(name = "ref_by_id")
-	private Long refById;
+	private String refById;
 
 	@ManyToOne
 	@JoinColumn(name = "topic_id")
@@ -70,11 +70,11 @@ public class TopicReference {
 		this.refBy = refBy;
 	}
 
-	public Long getRefById() {
+	public String getRefById() {
 		return refById;
 	}
 
-	public void setRefById(Long refById) {
+	public void setRefById(String refById) {
 		this.refById = refById;
 	}
 

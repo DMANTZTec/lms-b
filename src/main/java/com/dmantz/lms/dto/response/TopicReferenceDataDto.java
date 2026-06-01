@@ -8,7 +8,7 @@ public class TopicReferenceDataDto {
 	private String refType;
 	private Map<String, Object> refValue;
 	private String refBy;
-	private Long refById;
+	private String refById;
 
 	public Long getId() {
 		return id;
@@ -50,11 +50,11 @@ public class TopicReferenceDataDto {
 		this.refBy = refBy;
 	}
 
-	public Long getRefById() {
+	public String getRefById() {
 		return refById;
 	}
 
-	public void setRefById(Long refById) {
+	public void setRefById(String refById) {
 		this.refById = refById;
 	}
 }

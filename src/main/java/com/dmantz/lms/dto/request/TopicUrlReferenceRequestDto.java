@@ -3,7 +3,7 @@ public class TopicUrlReferenceRequestDto {
     private String title;      // display name for the URL
     private String url;        // the actual URL
     private String refBy;
-    private Long refById;
+    private String refById;
 	public String getTitle() {
 		return title;
 	}
@@ -22,10 +22,10 @@ public class TopicUrlReferenceRequestDto {
 	public void setRefBy(String refBy) {
 		this.refBy = refBy;
 	}
-	public Long getRefById() {
+	public String getRefById() {
 		return refById;
 	}
-	public void setRefById(Long refById) {
+	public void setRefById(String refById) {
 		this.refById = refById;
 	}
     
