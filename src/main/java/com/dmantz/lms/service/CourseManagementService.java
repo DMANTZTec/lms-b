@@ -89,6 +89,8 @@ public interface CourseManagementService {
 
 	String deleteVideo(Long referenceId);
 	
+	String deleteUrl(Long referenceId);
+	
 	List<ProgramCourseResponse> addCoursesToProgram(ProgramCourseRequest request);
 
 	void deleteProgramCourse(Long programCourseId);

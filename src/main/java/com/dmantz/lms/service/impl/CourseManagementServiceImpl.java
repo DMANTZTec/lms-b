@@ -973,28 +973,26 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 
 	    logger.info("Adding URL reference to topicId: {}", topicId);
 
-	    Map<String, Object> refValue = new HashMap<>();
-	    refValue.put("url", dto.getUrl());
-
 	    Topic topic = topicRepository.findById(topicId).orElseThrow(() -> {
 	        logger.warn("Topic not found with id: {}", topicId);
 	        return new ResourceNotFoundException("Topic not found");
 	    });
-	    
 
-	    // Step 2 — Validate Staff
-	    Staff staff = staffRepository.findByStaffId(dto.getRefById()).orElseThrow(() -> {
+	    staffRepository.findByStaffId(dto.getRefById()).orElseThrow(() -> {
 	        logger.warn("Staff not found with id: {}", dto.getRefById());
 	        return new ResourceNotFoundException("Staff not found with id: " + dto.getRefById());
 	    });
 
+	    Map<String, Object> refValue = new HashMap<>();
+	    refValue.put("url", dto.getUrl());
+	    refValue.put("title", dto.getTitle());
+
 	    TopicReference entity = topicReferenceMapper.toEntity(dto);
 	    entity.setRefType("URL");
-	    entity.setRefValue(Map.of("url", dto.getUrl()));
+	    entity.setRefValue(refValue);
 	    entity.setTopic(topic);
 
 	    TopicReference saved = topicReferenceRepository.save(entity);
-	    logger.info("URL reference saved with id: {} for topicId: {}", saved.getId(), topicId);
 
 	    TopicReferenceResponseDto response = new TopicReferenceResponseDto();
 	    response.setSuccess(true);
@@ -1003,7 +1001,25 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 
 	    return response;
 	}
-	
+	// =============================== DELETE URL REFERENCE BY ID =========================
+	@Override
+	public String deleteUrl(Long referenceId) {
+
+	    logger.info("Deleting URL reference id: {}", referenceId);
+
+	    TopicReference reference = topicReferenceRepository.findById(referenceId)
+	            .orElseThrow(() -> new ResourceNotFoundException("Reference not found"));
+
+	    if (!"URL".equalsIgnoreCase(reference.getRefType())) {
+	        throw new IllegalArgumentException("Not a URL reference");
+	    }
+
+	    topicReferenceRepository.delete(reference);
+
+	    logger.info("URL reference deleted successfully with id: {}", referenceId);
+
+	    return "URL deleted successfully";
+	}
 	
 	//=============================== GET URL REFERENCES BY TOPIC ID =========================
 	@Override

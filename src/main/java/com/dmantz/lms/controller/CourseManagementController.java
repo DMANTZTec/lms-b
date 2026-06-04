@@ -405,6 +405,19 @@ public class CourseManagementController {
 
 	    return ResponseEntity.ok(courseManagementService.getUrlsByTopicId(topicId));
 	}
+	
+	// ============================= delete URL for topic reference =============================
+	@DeleteMapping("/references/url/{referenceId}")
+	public ResponseEntity<String> deleteUrl(@PathVariable Long referenceId) {
+
+	    logger.info("DELETE /references/url/{}", referenceId);
+
+	    String response = courseManagementService.deleteUrl(referenceId);
+
+	    logger.info("URL deleted successfully with id: {}", referenceId);
+
+	    return ResponseEntity.ok(response);
+	}
 
 //	========================= Add course to program =============================
 	@PostMapping("/add/course/program")
