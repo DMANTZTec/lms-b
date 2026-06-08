@@ -30,11 +30,11 @@ public class CourseResponse {
 	private String introVideo;
 
 	private Long createdBy;
-	
+
 	private LocalDateTime createdDt;
-	
+
 	private Long updatedBy;
-	
+
 	private LocalDateTime updatedDt;
 
 	public Long getId() {

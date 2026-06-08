@@ -21,13 +21,13 @@ public interface CourseManagementService {
 	void deleteSubject(Long subjectId, String staffId);
 
 //	create a course
-	CourseResponse createCourse(CourseRequest requestDto, String staffId);
+	CourseResponse createCourse(CourseRequest requestDto, String staffId) throws Exception;
 
 //	 view all courses
 	List<CourseResponse> viewAllCourses();
 
 //	 update an existing course
-	CourseResponse updateCourse(Long courseId, CourseRequest request, String staffId);
+	CourseResponse updateCourse(Long courseId, CourseRequest request, String staffId) throws Exception;
 
 //		delete subject
 	void deleteCourse(Long courseId, String staffId);
@@ -76,21 +76,21 @@ public interface CourseManagementService {
 
 	TopicReferenceResponseDto addVideoReference(Long topicId, VideoReferenceRequestDto dto, MultipartFile file)
 			throws Exception;
-	
+
 	TopicReferenceResponseDto addUrlReference(Long topicId, TopicUrlReferenceRequestDto dto) throws Exception;
-	
+
 	List<TopicReferenceDataDto> getDocumentsByTopicId(Long topicId);
 
 	List<TopicReferenceDataDto> getVideosByTopicId(Long topicId);
-	
+
 	List<TopicReferenceDataDto> getUrlsByTopicId(Long topicId);
-	
+
 	String deleteDocument(Long referenceId);
 
 	String deleteVideo(Long referenceId);
-	
+
 	String deleteUrl(Long referenceId);
-	
+
 	List<ProgramCourseResponse> addCoursesToProgram(ProgramCourseRequest request);
 
 	void deleteProgramCourse(Long programCourseId);
@@ -109,5 +109,4 @@ public interface CourseManagementService {
 
 	CourseDetailsResponse getCourseDetails(String courseId);
 
-	
 }

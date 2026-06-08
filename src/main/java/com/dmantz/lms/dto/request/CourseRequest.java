@@ -2,6 +2,8 @@ package com.dmantz.lms.dto.request;
 
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.dmantz.lms.entity.CourseLevel;
 
 import jakarta.validation.constraints.NotBlank;
@@ -33,16 +35,14 @@ public class CourseRequest {
 
 	@NotNull(message = "Provider ID is required")
 	private Long providerId;
-	
+
 	@NotNull(message = "Course level is required")
 	private CourseLevel level;
-	
-	@Size(max = 500, message = "Course image URL must be at most 500 characters")
-	private String courseImage;
-	
-	@Size(max = 500, message = "Intro video URL must be at most 500 characters")
-	private String introVideo;
-	
+
+	private MultipartFile courseImage;
+
+	private MultipartFile introVideo;
+
 	public String getCourseTitle() {
 		return courseTitle;
 	}
@@ -90,33 +90,29 @@ public class CourseRequest {
 	public void setProviderId(Long providerId) {
 		this.providerId = providerId;
 	}
-	
+
 	public CourseLevel getLevel() {
 		return level;
 	}
-	
+
 	public void setLevel(CourseLevel level) {
 		this.level = level;
 	}
-	
-	public String getCourseImage() {
+
+	public MultipartFile getCourseImage() {
 		return courseImage;
 	}
-	
-	public void setCourseImage(String courseImage) {
+
+	public void setCourseImage(MultipartFile courseImage) {
 		this.courseImage = courseImage;
 	}
-	
-	public String getIntroVideo() {
+
+	public MultipartFile getIntroVideo() {
 		return introVideo;
 	}
-	
-	public void setIntroVideo(String introVideo) {
+
+	public void setIntroVideo(MultipartFile introVideo) {
 		this.introVideo = introVideo;
 	}
-	
-	
-	
 
 }
-

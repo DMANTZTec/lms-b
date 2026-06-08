@@ -1,5 +1,4 @@
 
-
 package com.dmantz.lms.mapper;
 
 import java.util.List;
@@ -27,8 +26,6 @@ public interface CourseMapper {
 	@Mapping(source = "language", target = "language")
 	@Mapping(target = "skills", expression = "java(toJson(request.getSkills()))")
 	@Mapping(source = "level", target = "level")
-	@Mapping(source = "courseImage", target = "courseImage")
-	@Mapping(source = "introVideo", target = "introVideo")
 	Course toEntity(CourseRequest request);
 
 	// ---------- Entity → Response ----------
@@ -58,8 +55,6 @@ public interface CourseMapper {
 	@Mapping(source = "language", target = "language")
 	@Mapping(target = "skills", expression = "java(toJson(request.getSkills()))")
 	@Mapping(source = "level", target = "level")
-	@Mapping(source = "courseImage", target = "courseImage")
-	@Mapping(source = "introVideo", target = "introVideo")
 	void updateCourseFromRequest(CourseRequest request, @MappingTarget Course course);
 
 //	json format conversion

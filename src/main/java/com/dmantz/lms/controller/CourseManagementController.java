@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -85,15 +86,19 @@ public class CourseManagementController {
 		return ResponseEntity.ok("Subject deleted successfully");
 	}
 
-	@PostMapping("/course/create")
-	public ResponseEntity<CourseResponse> createCourse(@Valid @RequestBody CourseRequest request,
-			@RequestParam String staffId) {
+	@PostMapping(
+	        value = "/course/create",
+	        consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<CourseResponse> createCourse(
+	        @Valid @ModelAttribute CourseRequest request,
+	        @RequestParam String staffId)
+	        throws Exception {
 
-		logger.info("POST /course/create - Creating course: {} by staffId: {}", request.getCourseTitle(), staffId);
+	    logger.info("POST /course/create - Creating course: {} by staffId: {}", request.getCourseTitle(), staffId);
 
-		CourseResponse response = courseManagementService.createCourse(request, staffId);
-		logger.info("Course created successfully with title: {}", request.getCourseTitle());
-		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+	    CourseResponse response = courseManagementService.createCourse(request, staffId);
+
+	    return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
 	@GetMapping("/course/view-courses")
@@ -107,15 +112,22 @@ public class CourseManagementController {
 		return ResponseEntity.ok(courses);
 	}
 
-	@PutMapping("/course/update/{courseId}")
-	public ResponseEntity<CourseResponse> updateCourse(@PathVariable Long courseId,
-			@Valid @RequestBody CourseRequest request, @RequestParam String staffId) {
-		logger.info("PUT /course/update/{} - Updating course by staffId: {}", courseId, staffId);
+	@PutMapping(
+	        value = "/course/update/{courseId}",
+	        consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<CourseResponse> updateCourse(
 
-		CourseResponse response = courseManagementService.updateCourse(courseId, request, staffId);
+	        @PathVariable Long courseId,
+	        @Valid @ModelAttribute CourseRequest request,
+	        @RequestParam String staffId)
 
-		logger.info("Course updated successfully with id: {}", courseId);
-		return ResponseEntity.ok(response);
+	        throws Exception{
+
+	    logger.info("PUT /course/update/{} by staffId: {}", courseId, staffId);
+
+	    CourseResponse response = courseManagementService.updateCourse(courseId, request, staffId);
+
+	    return ResponseEntity.ok(response);
 	}
 
 	@DeleteMapping("/course/delete/{courseId}")
