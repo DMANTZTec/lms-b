@@ -7,20 +7,21 @@ import com.dmantz.lms.dto.response.StudentResponse;
 
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 public interface StudentService {
 
-    StudentResponse register(StudentRegistrationRequest request);
+	StudentResponse register(StudentRegistrationRequest request);
 
-    StudentLoginResponse login(StudentLoginRequest request);
+	StudentLoginResponse login(StudentLoginRequest request);
 
-    StudentLoginResponse verifyLoginOtp(OtpVerifyRequest request);
+	StudentLoginResponse verifyLoginOtp(OtpVerifyRequest request);
 
-    List<StudentResponse> getAllStudents();
+	List<StudentResponse> getAllStudents();
 
-    void forgotPassword(ForgotPasswordRequest request);
+	void forgotPassword(ForgotPasswordRequest request);
 
-    void resetPassword(ResetPasswordRequest request);
-    
+	void resetPassword(ResetPasswordRequest request);
+
 	StudentResponse updateStudentProfile(String studentId, StudentUpdateRequest request);
-
 }

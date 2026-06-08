@@ -1,6 +1,5 @@
 package com.dmantz.lms.dto.request;
 
-
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -8,180 +7,191 @@ import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.multipart.MultipartFile;
+
 public class StudentRegistrationRequest {
 
-    @NotBlank(message = "First name is required")
-    private String firstNm;
+	@NotBlank(message = "First name is required")
+	private String firstNm;
 
-    private String lastNm;
+	private String lastNm;
 
-    @NotBlank(message = "Gender is required")
-    private String gender;  // MALE / FEMALE / OTHER
+	@NotBlank(message = "Gender is required")
+	private String gender; // MALE / FEMALE / OTHER
 
-    @NotNull(message = "Date of birth is required")
-    private LocalDate dob;
+	@NotNull(message = "Date of birth is required")
+	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+	private LocalDate dob;
 
-    private String addr1;
-    private String addr2;
-    private String city;
-    private String state;
-    private String country;
-    private String pin;
+	private String addr1;
+	private String addr2;
+	private String city;
+	private String state;
+	private String country;
+	private String pin;
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Invalid email format")
-    private String emailId;
+	private String currentStatus;
+	@NotBlank(message = "Email is required")
+	@Email(message = "Invalid email format")
+	private String emailId;
 
-    @NotBlank(message = "Mobile number is required")
-    @Size(min = 10, max = 15, message = "Mobile number must be 10-15 digits")
-    private String mobileNum;
+	@NotBlank(message = "Mobile number is required")
+	@Size(min = 10, max = 15, message = "Mobile number must be 10-15 digits")
+	private String mobileNum;
 
-    @NotBlank(message = "Password is required")
-    @Size(min = 6, max = 100, message = "Password must be at least 6 characters")
-    private String password;
+	@NotBlank(message = "Password is required")
+	@Size(min = 6, max = 100, message = "Password must be at least 6 characters")
+	private String password;
 
-    private String emergencyContactNm;
-    private String emergencyContactNum;
+	private String emergencyContactNm;
+	private String emergencyContactNum;
 
-    private String profileImg;
+	private MultipartFile profileImg;
 
+	public String getFirstNm() {
+		return firstNm;
+	}
 
-    public String getFirstNm() {
-        return firstNm;
-    }
+	public void setFirstNm(String firstNm) {
+		this.firstNm = firstNm;
+	}
 
-    public void setFirstNm(String firstNm) {
-        this.firstNm = firstNm;
-    }
+	public String getLastNm() {
+		return lastNm;
+	}
 
-    public String getLastNm() {
-        return lastNm;
-    }
+	public void setLastNm(String lastNm) {
+		this.lastNm = lastNm;
+	}
 
-    public void setLastNm(String lastNm) {
-        this.lastNm = lastNm;
-    }
+	public String getGender() {
+		return gender;
+	}
 
-    public String getGender() {
-        return gender;
-    }
+	public void setGender(String gender) {
+		this.gender = gender;
+	}
 
-    public void setGender(String gender) {
-        this.gender = gender;
-    }
+	public LocalDate getDob() {
+		return dob;
+	}
 
-    public LocalDate getDob() {
-        return dob;
-    }
+	public void setDob(LocalDate dob) {
+		this.dob = dob;
+	}
 
-    public void setDob(LocalDate dob) {
-        this.dob = dob;
-    }
+	public String getAddr1() {
+		return addr1;
+	}
 
-    public String getAddr1() {
-        return addr1;
-    }
+	public void setAddr1(String addr1) {
+		this.addr1 = addr1;
+	}
 
-    public void setAddr1(String addr1) {
-        this.addr1 = addr1;
-    }
+	public String getAddr2() {
+		return addr2;
+	}
 
-    public String getAddr2() {
-        return addr2;
-    }
+	public void setAddr2(String addr2) {
+		this.addr2 = addr2;
+	}
 
-    public void setAddr2(String addr2) {
-        this.addr2 = addr2;
-    }
+	public String getCity() {
+		return city;
+	}
 
-    public String getCity() {
-        return city;
-    }
+	public void setCity(String city) {
+		this.city = city;
+	}
 
-    public void setCity(String city) {
-        this.city = city;
-    }
+	public String getState() {
+		return state;
+	}
 
-    public String getState() {
-        return state;
-    }
+	public void setState(String state) {
+		this.state = state;
+	}
 
-    public void setState(String state) {
-        this.state = state;
-    }
+	public String getCountry() {
+		return country;
+	}
 
-    public String getCountry() {
-        return country;
-    }
+	public void setCountry(String country) {
+		this.country = country;
+	}
 
-    public void setCountry(String country) {
-        this.country = country;
-    }
+	public String getPin() {
+		return pin;
+	}
 
-    public String getPin() {
-        return pin;
-    }
+	public void setPin(String pin) {
+		this.pin = pin;
+	}
 
-    public void setPin(String pin) {
-        this.pin = pin;
-    }
+	public String getEmailId() {
+		return emailId;
+	}
 
-    public String getEmailId() {
-        return emailId;
-    }
+	public void setEmailId(String emailId) {
+		this.emailId = emailId;
+	}
 
-    public void setEmailId(String emailId) {
-        this.emailId = emailId;
-    }
+	public String getMobileNum() {
+		return mobileNum;
+	}
 
-    public String getMobileNum() {
-        return mobileNum;
-    }
+	public void setMobileNum(String mobileNum) {
+		this.mobileNum = mobileNum;
+	}
 
-    public void setMobileNum(String mobileNum) {
-        this.mobileNum = mobileNum;
-    }
+	public String getPassword() {
+		return password;
+	}
 
-    public String getPassword() {
-        return password;
-    }
+	public void setPassword(String password) {
+		this.password = password;
+	}
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+	public String getEmergencyContactNm() {
+		return emergencyContactNm;
+	}
 
-    public String getEmergencyContactNm() {
-        return emergencyContactNm;
-    }
+	public void setEmergencyContactNm(String emergencyContactNm) {
+		this.emergencyContactNm = emergencyContactNm;
+	}
 
-    public void setEmergencyContactNm(String emergencyContactNm) {
-        this.emergencyContactNm = emergencyContactNm;
-    }
+	public String getEmergencyContactNum() {
+		return emergencyContactNum;
+	}
 
-    public String getEmergencyContactNum() {
-        return emergencyContactNum;
-    }
+	public void setEmergencyContactNum(String emergencyContactNum) {
+		this.emergencyContactNum = emergencyContactNum;
+	}
 
-    public void setEmergencyContactNum(String emergencyContactNum) {
-        this.emergencyContactNum = emergencyContactNum;
-    }
-
-	public String getProfileImg() {
+	public MultipartFile getProfileImg() {
 		return profileImg;
 	}
 
-	public void setProfileImg(String profileImg) {
+	public void setProfileImg(MultipartFile profileImg) {
 		this.profileImg = profileImg;
+	}
+
+	public String getCurrentStatus() {
+		return currentStatus;
+	}
+
+	public void setCurrentStatus(String currentStatus) {
+		this.currentStatus = currentStatus;
 	}
 
 	@Override
 	public String toString() {
 		return "StudentRegistrationRequest [firstNm=" + firstNm + ", lastNm=" + lastNm + ", gender=" + gender + ", dob="
 				+ dob + ", addr1=" + addr1 + ", addr2=" + addr2 + ", city=" + city + ", state=" + state + ", country="
-				+ country + ", pin=" + pin + ", emailId=" + emailId + ", mobileNum=" + mobileNum + ", password="
-				+ password + ", emergencyContactNm=" + emergencyContactNm + ", emergencyContactNum="
-				+ emergencyContactNum + ", profileImg=" + profileImg + "]";
+				+ country + ", pin=" + pin + ", currentStatus=" + currentStatus + ", emailId=" + emailId
+				+ ", mobileNum=" + mobileNum + ", password=" + password + ", emergencyContactNm=" + emergencyContactNm
+				+ ", emergencyContactNum=" + emergencyContactNum + ", profileImg=" + profileImg + "]";
 	}
 
-   
 }

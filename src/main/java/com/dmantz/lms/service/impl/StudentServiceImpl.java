@@ -17,12 +17,27 @@ import com.dmantz.lms.repository.StudentOtpRepository;
 import com.dmantz.lms.repository.StudentRepository;
 import com.dmantz.lms.service.EmailService;
 import com.dmantz.lms.service.StudentService;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
@@ -31,8 +46,7 @@ import java.util.stream.Collectors;
 @Service
 public class StudentServiceImpl implements StudentService {
 
-	private static final Logger logger =
-			LogManager.getLogger(StudentServiceImpl.class);
+	private static final Logger logger = LogManager.getLogger(StudentServiceImpl.class);
 
 	private final StudentRepository studentRepository;
 	private final StudentOtpRepository otpRepository;
@@ -41,19 +55,25 @@ public class StudentServiceImpl implements StudentService {
 	private final EmailService emailService;
 	private final StudentOtpRepository studentOtpRepository;
 	private final JwtUtil jwtUtil;
+	@Value("${strapi.url}")
+	private String strapiUrl;
 
+	@Value("${strapi.api.token}")
+	private String strapiApiToken;
+
+	private final RestTemplate restTemplate = new RestTemplate();
 
 	public StudentServiceImpl(StudentRepository studentRepository, StudentOtpRepository otpRepository,
-                              StudentMapper studentMapper, BCryptPasswordEncoder passwordEncoder, EmailService emailService,
-                              StudentOtpRepository studentOtpRepository, JwtUtil jwtUtil) {
+			StudentMapper studentMapper, BCryptPasswordEncoder passwordEncoder, EmailService emailService,
+			StudentOtpRepository studentOtpRepository, JwtUtil jwtUtil) {
 		this.studentRepository = studentRepository;
 		this.otpRepository = otpRepository;
 		this.studentMapper = studentMapper;
 		this.passwordEncoder = passwordEncoder;
 		this.emailService = emailService;
 		this.studentOtpRepository = studentOtpRepository;
-        this.jwtUtil = jwtUtil;
-    }
+		this.jwtUtil = jwtUtil;
+	}
 
 	@Override
 	public StudentResponse register(StudentRegistrationRequest request) {
@@ -70,23 +90,107 @@ public class StudentServiceImpl implements StudentService {
 		}
 
 		Student student = studentMapper.toEntity(request);
-
 		student.setStudentId(generateStudentId());
 		student.setLoginId(request.getEmailId());
-
-		student.setPassword(passwordEncoder.encode(request.getPassword())); // Encrypt password
-
+		student.setPassword(passwordEncoder.encode(request.getPassword()));
 		student.setStatus("ACTIVE");
 		student.setEnabled("Y");
-		student.setProfileImg(request.getProfileImg());
+
+		MultipartFile profileImg = request.getProfileImg();
+		if (profileImg != null && !profileImg.isEmpty()) {
+			String imgUrl = uploadToStrapi(profileImg);
+			student.setProfileImg(imgUrl);
+		}
 
 		Student savedStudent = studentRepository.save(student);
+		logger.info("Student registered successfully with studentId: {}", savedStudent.getStudentId());
 
-		logger.info("Student registered successfully with studentId: {}",
-				savedStudent.getStudentId());
+		// Generate OTP and send via email
+		StudentOtp otp = generateOtp(savedStudent);
 
-		generateOtp(savedStudent);
+		try {
+			emailService.sendOtpEmail(savedStudent.getEmailId(), otp.getOtp(), OtpPurpose.REGISTRATION);
+
+			otp.setStatus(OtpStatus.SENT);
+			otp.setUpdatedDt(LocalDateTime.now());
+			otpRepository.save(otp);
+
+			logger.info("Registration OTP sent successfully to email: {}", savedStudent.getEmailId());
+
+		} catch (Exception e) {
+			logger.error("Failed to send registration OTP to email: {}", savedStudent.getEmailId(), e);
+
+			otp.setStatus(OtpStatus.FAILED);
+			otpRepository.save(otp);
+		}
+
 		return studentMapper.toResponse(savedStudent);
+	}
+
+	private String uploadToStrapi(MultipartFile file) {
+		try {
+			File tempFile = File.createTempFile("upload-", file.getOriginalFilename());
+			file.transferTo(tempFile);
+			try {
+				MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+				body.add("files", new FileSystemResource(tempFile));
+
+				HttpHeaders headers = new HttpHeaders();
+				headers.set("Authorization", "Bearer " + strapiApiToken);
+				headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+				ResponseEntity<String> response = restTemplate.exchange(strapiUrl + "/api/upload", HttpMethod.POST,
+						new HttpEntity<>(body, headers), String.class);
+
+				JsonNode root = new ObjectMapper().readTree(response.getBody());
+				JsonNode fileNode = root.get(0);
+
+				if (fileNode == null) {
+					throw new RuntimeException("Invalid Strapi upload response: " + response.getBody());
+				}
+
+				String fileUrl = strapiUrl + fileNode.get("url").asText();
+				logger.info("Profile image uploaded to Strapi: {}", fileUrl);
+				return fileUrl;
+
+			} finally {
+				tempFile.delete();
+			}
+		} catch (Exception e) {
+			logger.error("Failed to upload profile image to Strapi", e);
+			throw new RuntimeException("Failed to upload profile image to Strapi", e);
+		}
+	}
+
+	private void deleteFromStrapiByUrl(String fileUrl) {
+		try {
+			String urlPath = fileUrl.replace(strapiUrl, "");
+			String searchUrl = strapiUrl + "/api/upload/files?filters[url][$eq]=" + urlPath;
+
+			HttpHeaders headers = new HttpHeaders();
+			headers.set("Authorization", "Bearer " + strapiApiToken);
+
+			ResponseEntity<String> searchResponse = restTemplate.exchange(searchUrl, HttpMethod.GET,
+					new HttpEntity<>(headers), String.class);
+
+			JsonNode root = new ObjectMapper().readTree(searchResponse.getBody());
+
+			if (root == null || !root.isArray() || root.size() == 0) {
+				logger.warn("Profile image not found in Strapi by URL: {}", urlPath);
+				return;
+			}
+
+			Long strapiFileId = root.get(0).get("id").asLong();
+			String deleteUrl = strapiUrl + "/api/upload/files/" + strapiFileId;
+
+			restTemplate.exchange(deleteUrl, HttpMethod.DELETE, new HttpEntity<>(headers), String.class);
+
+			logger.info("Profile image deleted from Strapi: {}", urlPath);
+
+		} catch (Exception e) {
+			logger.error("Failed to delete profile image from Strapi. URL: {}", fileUrl, e);
+			// Not re-throwing — delete failure should not block the update
+		}
 	}
 
 	private String generateStudentId() {
@@ -112,8 +216,7 @@ public class StudentServiceImpl implements StudentService {
 
 		StudentOtp savedOtp = otpRepository.save(otp);
 
-		logger.info("OTP generated successfully for studentId: {}",
-				student.getStudentId());
+		logger.info("OTP generated successfully for studentId: {}", student.getStudentId());
 
 		return savedOtp;
 	}
@@ -125,8 +228,7 @@ public class StudentServiceImpl implements StudentService {
 
 		String username = request.getUsername();
 
-		Student student = studentRepository
-				.findByEmailIdOrMobileNumOrLoginId(username, username, username);
+		Student student = studentRepository.findByEmailIdOrMobileNumOrLoginId(username, username, username);
 
 		if (student == null) {
 			logger.warn("Invalid login credentials for username: {}", username);
@@ -146,23 +248,17 @@ public class StudentServiceImpl implements StudentService {
 		StudentOtp otp = generateOtp(student);
 
 		try {
-			emailService.sendOtpEmail(
-					student.getEmailId(),
-					otp.getOtp(),
-					OtpPurpose.LOGIN
-			);
+			emailService.sendOtpEmail(student.getEmailId(), otp.getOtp(), OtpPurpose.LOGIN);
 
 			otp.setStatus(OtpStatus.SENT);
 			otp.setUpdatedDt(LocalDateTime.now());
 			otpRepository.save(otp);
 
-			logger.info("Login OTP sent successfully to email: {}",
-					student.getEmailId());
+			logger.info("Login OTP sent successfully to email: {}", student.getEmailId());
 
 		} catch (Exception e) {
 
-			logger.error("Failed to send login OTP to email: {}",
-					student.getEmailId(), e);
+			logger.error("Failed to send login OTP to email: {}", student.getEmailId(), e);
 
 			otp.setStatus(OtpStatus.FAILED);
 			otpRepository.save(otp);
@@ -179,18 +275,16 @@ public class StudentServiceImpl implements StudentService {
 
 		logger.info("OTP verification started for studentId: {}", request.getStudentId());
 
-		Student student = studentRepository.findByStudentId(request.getStudentId())
-				.orElseThrow(() -> {
-					logger.warn("Student not found with studentId: {}", request.getStudentId());
-					return new RuntimeException("Student not found");
-				});
+		Student student = studentRepository.findByStudentId(request.getStudentId()).orElseThrow(() -> {
+			logger.warn("Student not found with studentId: {}", request.getStudentId());
+			return new RuntimeException("Student not found");
+		});
 
 		// GET LATEST OTP
-		StudentOtp otp = otpRepository.findTopByStudentOrderByCreatedDtDesc(student)
-				.orElseThrow(() -> {
-					logger.warn("OTP not found for studentId: {}", student.getStudentId());
-					return new RuntimeException("OTP not found");
-				});
+		StudentOtp otp = otpRepository.findTopByStudentOrderByCreatedDtDesc(student).orElseThrow(() -> {
+			logger.warn("OTP not found for studentId: {}", student.getStudentId());
+			return new RuntimeException("OTP not found");
+		});
 
 		// INVALID OTP
 		if (!otp.getOtp().equals(request.getOtp())) {
@@ -214,10 +308,7 @@ public class StudentServiceImpl implements StudentService {
 		logger.info("OTP verified successfully for studentId: {}", student.getStudentId());
 
 		// GENERATE TOKEN
-		String token = jwtUtil.generateToken(
-				student.getEmailId(),
-				"STUDENT",
-				student.getStudentId());
+		String token = jwtUtil.generateToken(student.getEmailId(), "STUDENT", student.getStudentId());
 
 		StudentLoginResponse response = new StudentLoginResponse();
 		response.setStudentId(student.getStudentId());
@@ -233,9 +324,7 @@ public class StudentServiceImpl implements StudentService {
 
 		logger.info("Fetching all students");
 
-		List<StudentResponse> students = studentRepository.findAll()
-				.stream()
-				.map(studentMapper::toResponse)
+		List<StudentResponse> students = studentRepository.findAll().stream().map(studentMapper::toResponse)
 				.collect(Collectors.toList());
 
 		logger.info("Total students fetched: {}", students.size());
@@ -248,20 +337,15 @@ public class StudentServiceImpl implements StudentService {
 
 		logger.info("Forgot password request started for email: {}", request.getEmail());
 
-		Student student = studentRepository.findByEmailId(request.getEmail())
-				.orElseThrow(() -> {
-					logger.error("Student not found for email: {}", request.getEmail());
-					return new RuntimeException("Student not found");
-				});
+		Student student = studentRepository.findByEmailId(request.getEmail()).orElseThrow(() -> {
+			logger.error("Student not found for email: {}", request.getEmail());
+			return new RuntimeException("Student not found");
+		});
 
 		StudentOtp otp = generateOtp(student);
 
 		try {
-			emailService.sendOtpEmail(
-					student.getLoginId(),
-					otp.getOtp(),
-					OtpPurpose.FORGOT_PASSWORD
-			);
+			emailService.sendOtpEmail(student.getLoginId(), otp.getOtp(), OtpPurpose.FORGOT_PASSWORD);
 
 			otp.setStatus(OtpStatus.SENT);
 			otp.setUpdatedDt(LocalDateTime.now());
@@ -286,9 +370,7 @@ public class StudentServiceImpl implements StudentService {
 
 		String studentId = request.getStudentId();
 
-		StudentOtp studentOtp = otpRepository.findLatestOtpByStudentId(studentId)
-				.stream()
-				.findFirst()
+		StudentOtp studentOtp = otpRepository.findLatestOtpByStudentId(studentId).stream().findFirst()
 				.orElseThrow(() -> {
 					logger.error("OTP not found for studentId: {}", studentId);
 					return new RuntimeException("OTP not found");
@@ -312,11 +394,10 @@ public class StudentServiceImpl implements StudentService {
 			throw new RuntimeException("Invalid OTP");
 		}
 
-		Student student = studentRepository.findByStudentId(studentId)
-				.orElseThrow(() -> {
-					logger.error("Student not found for studentId: {}", studentId);
-					return new RuntimeException("Student not found");
-				});
+		Student student = studentRepository.findByStudentId(studentId).orElseThrow(() -> {
+			logger.error("Student not found for studentId: {}", studentId);
+			return new RuntimeException("Student not found");
+		});
 
 		student.setPassword(passwordEncoder.encode(request.getNewPassword()));
 		studentRepository.save(student);
@@ -325,11 +406,7 @@ public class StudentServiceImpl implements StudentService {
 		studentOtp.setUpdatedDt(LocalDateTime.now());
 		otpRepository.save(studentOtp);
 
-		emailService.sendOtpEmail(
-				student.getEmailId(),
-				null,
-				OtpPurpose.PASSWORD_RESET_SUCCESS
-		);
+		emailService.sendOtpEmail(student.getEmailId(), null, OtpPurpose.PASSWORD_RESET_SUCCESS);
 
 		logger.info("Password reset successful for studentId: {}", studentId);
 	}
@@ -339,11 +416,21 @@ public class StudentServiceImpl implements StudentService {
 
 		logger.info("Updating student profile for studentId: {}", studentId);
 
-		Student student = studentRepository.findByStudentId(studentId)
-				.orElseThrow(() -> {
-					logger.error("Student not found for studentId: {}", studentId);
-					return new RuntimeException("Student not found");
-				});
+		Student student = studentRepository.findByStudentId(studentId).orElseThrow(() -> {
+			logger.error("Student not found for studentId: {}", studentId);
+			return new RuntimeException("Student not found");
+		});
+
+		// Read profileImg directly from request
+		MultipartFile profileImg = request.getProfileImg();
+		if (profileImg != null && !profileImg.isEmpty()) {
+			String oldImgUrl = student.getProfileImg();
+			if (oldImgUrl != null && !oldImgUrl.isBlank()) {
+				deleteFromStrapiByUrl(oldImgUrl);
+			}
+			String newImgUrl = uploadToStrapi(profileImg);
+			student.setProfileImg(newImgUrl); // set directly on entity, not via request
+		}
 
 		studentMapper.updateStudentFromDto(request, student);
 		studentRepository.save(student);

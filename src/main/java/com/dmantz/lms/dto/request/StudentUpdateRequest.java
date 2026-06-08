@@ -1,5 +1,7 @@
 package com.dmantz.lms.dto.request;
 
+import org.springframework.web.multipart.MultipartFile;
+
 public class StudentUpdateRequest {
 	private String firstNm;
 	private String lastNm;
@@ -13,7 +15,8 @@ public class StudentUpdateRequest {
 	private String mobileNum;
 	private String emergencyContactNm;
 	private String emergencyContactNum;
-	private String profileImg;
+	private MultipartFile profileImg;
+
 	public String getFirstNm() {
 		return firstNm;
 	}
@@ -110,11 +113,11 @@ public class StudentUpdateRequest {
 		this.emergencyContactNum = emergencyContactNum;
 	}
 
-	public String getProfileImg() {
+	public MultipartFile getProfileImg() {
 		return profileImg;
 	}
 
-	public void setProfileImg(String profileImg) {
+	public void setProfileImg(MultipartFile profileImg) {
 		this.profileImg = profileImg;
 	}
 
@@ -126,5 +129,4 @@ public class StudentUpdateRequest {
 				+ ", emergencyContactNum=" + emergencyContactNum + ", profileImg=" + profileImg + "]";
 	}
 
-	
 }
