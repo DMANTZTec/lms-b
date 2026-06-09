@@ -92,7 +92,7 @@ public class StudentServiceImpl implements StudentService {
 		student.setStudentId(generateStudentId());
 		student.setLoginId(request.getEmailId());
 		student.setPassword(passwordEncoder.encode(request.getPassword()));
-		student.setStatus(request.getCurrentStatus() != null ? request.getCurrentStatus() : "ACTIVE");
+		student.setStatus(request.getCurrentStatus());
 		student.setEnabled("N");
 
 		student.setGender("NOT_SET");
@@ -147,6 +147,7 @@ public class StudentServiceImpl implements StudentService {
 
 		// ✅ Activate the account
 		student.setEnabled("Y");
+
 		studentRepository.save(student);
 
 		otp.setStatus(OtpStatus.VERIFIED);
