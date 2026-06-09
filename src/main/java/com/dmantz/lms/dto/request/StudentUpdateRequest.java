@@ -1,6 +1,11 @@
 package com.dmantz.lms.dto.request;
 
+import java.time.LocalDate;
+
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
+
+import jakarta.validation.constraints.NotNull;
 
 public class StudentUpdateRequest {
 	private String firstNm;
@@ -15,6 +20,10 @@ public class StudentUpdateRequest {
 	private String mobileNum;
 	private String emergencyContactNm;
 	private String emergencyContactNum;
+
+	@NotNull(message = "Date of birth is required")
+	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+	private LocalDate dob;
 	private MultipartFile profileImg;
 
 	public String getFirstNm() {
@@ -119,6 +128,14 @@ public class StudentUpdateRequest {
 
 	public void setProfileImg(MultipartFile profileImg) {
 		this.profileImg = profileImg;
+	}
+
+	public LocalDate getDob() {
+		return dob;
+	}
+
+	public void setDob(LocalDate dob) {
+		this.dob = dob;
 	}
 
 	@Override

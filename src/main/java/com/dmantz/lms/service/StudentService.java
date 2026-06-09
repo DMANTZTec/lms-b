@@ -13,6 +13,8 @@ public interface StudentService {
 
 	StudentResponse register(StudentRegistrationRequest request);
 
+	void verifyRegistrationOtp(OtpVerifyRequest request);
+
 	StudentLoginResponse login(StudentLoginRequest request);
 
 	StudentLoginResponse verifyLoginOtp(OtpVerifyRequest request);

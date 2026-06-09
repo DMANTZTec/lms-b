@@ -38,6 +38,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
@@ -81,50 +82,78 @@ public class StudentServiceImpl implements StudentService {
 		logger.info("Student registration started for email: {}", request.getEmailId());
 
 		if (studentRepository.existsByEmailId(request.getEmailId())) {
-			logger.error("Email already exists: {}", request.getEmailId());
-			throw new RuntimeException("email already exists");
+			throw new RuntimeException("Email already exists");
 		}
 		if (studentRepository.existsByMobileNum(request.getMobileNum())) {
-			logger.error("Mobile number already exists: {}", request.getMobileNum());
-			throw new RuntimeException("mobile number already exists");
+			throw new RuntimeException("Mobile number already exists");
 		}
 
 		Student student = studentMapper.toEntity(request);
 		student.setStudentId(generateStudentId());
 		student.setLoginId(request.getEmailId());
 		student.setPassword(passwordEncoder.encode(request.getPassword()));
-		student.setStatus("ACTIVE");
-		student.setEnabled("Y");
+		student.setStatus(request.getCurrentStatus() != null ? request.getCurrentStatus() : "ACTIVE");
+		student.setEnabled("N");
 
-		MultipartFile profileImg = request.getProfileImg();
-		if (profileImg != null && !profileImg.isEmpty()) {
-			String imgUrl = uploadToStrapi(profileImg);
-			student.setProfileImg(imgUrl);
-		}
+		student.setGender("NOT_SET");
+		student.setDob(LocalDate.of(2000, 1, 1));
+		student.setAddr1("NOT_SET");
+		student.setCity("NOT_SET");
+		student.setState("NOT_SET");
+		student.setCountry("NOT_SET");
 
 		Student savedStudent = studentRepository.save(student);
-		logger.info("Student registered successfully with studentId: {}", savedStudent.getStudentId());
+		logger.info("Student saved with studentId: {}", savedStudent.getStudentId());
 
-		// Generate OTP and send via email
 		StudentOtp otp = generateOtp(savedStudent);
-
 		try {
 			emailService.sendOtpEmail(savedStudent.getEmailId(), otp.getOtp(), OtpPurpose.REGISTRATION);
-
 			otp.setStatus(OtpStatus.SENT);
 			otp.setUpdatedDt(LocalDateTime.now());
 			otpRepository.save(otp);
-
-			logger.info("Registration OTP sent successfully to email: {}", savedStudent.getEmailId());
-
 		} catch (Exception e) {
-			logger.error("Failed to send registration OTP to email: {}", savedStudent.getEmailId(), e);
-
+			logger.error("Failed to send registration OTP", e);
 			otp.setStatus(OtpStatus.FAILED);
 			otpRepository.save(otp);
 		}
 
 		return studentMapper.toResponse(savedStudent);
+	}
+
+	@Override
+	@Transactional
+	public void verifyRegistrationOtp(OtpVerifyRequest request) {
+
+		logger.info("Registration OTP verification for studentId: {}", request.getStudentId());
+
+		Student student = studentRepository.findByStudentId(request.getStudentId())
+				.orElseThrow(() -> new RuntimeException("Student not found"));
+
+		StudentOtp otp = otpRepository.findTopByStudentOrderByCreatedDtDesc(student)
+				.orElseThrow(() -> new RuntimeException("OTP not found"));
+
+		if (!otp.getOtp().equals(request.getOtp())) {
+			otp.setAttemptsNum(otp.getAttemptsNum() + 1);
+			otp.setUpdatedDt(LocalDateTime.now());
+			otpRepository.save(otp);
+			throw new RuntimeException("Invalid OTP");
+		}
+
+		if (otp.getCreatedDt().plusMinutes(5).isBefore(LocalDateTime.now())) {
+			otp.setStatus(OtpStatus.EXPIRED);
+			otpRepository.save(otp);
+			throw new RuntimeException("OTP expired");
+		}
+
+		// ✅ Activate the account
+		student.setEnabled("Y");
+		studentRepository.save(student);
+
+		otp.setStatus(OtpStatus.VERIFIED);
+		otp.setUpdatedDt(LocalDateTime.now());
+		otpRepository.save(otp);
+
+		logger.info("Registration OTP verified. Account activated for studentId: {}", student.getStudentId());
 	}
 
 	private String uploadToStrapi(MultipartFile file) {
@@ -189,7 +218,7 @@ public class StudentServiceImpl implements StudentService {
 
 		} catch (Exception e) {
 			logger.error("Failed to delete profile image from Strapi. URL: {}", fileUrl, e);
-			// Not re-throwing — delete failure should not block the update
+
 		}
 	}
 

@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -31,18 +32,15 @@ public class StudentController {
 		this.studentService = studentService;
 	}
 
-	// ================= REGISTER STUDENT =================
-	// ================= REGISTER STUDENT =================
-	@PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<StudentResponse> registerStudent(@Valid @ModelAttribute StudentRegistrationRequest request) {
+	@PostMapping("/register")
+	public ResponseEntity<StudentResponse> register(@Valid @RequestBody StudentRegistrationRequest request) {
+		return ResponseEntity.ok(studentService.register(request));
+	}
 
-		logger.info("Student registration request received for email: {}", request.getEmailId());
-
-		StudentResponse response = studentService.register(request);
-
-		logger.info("Student registered successfully with studentId: {}", response.getStudentId());
-
-		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+	@PostMapping("/verify-registration-otp")
+	public ResponseEntity<String> verifyRegistrationOtp(@RequestBody OtpVerifyRequest request) {
+		studentService.verifyRegistrationOtp(request);
+		return ResponseEntity.ok("Account verified successfully. You can now log in.");
 	}
 
 	// ================= LOGIN =================
@@ -112,16 +110,32 @@ public class StudentController {
 
 	// ================= UPDATE STUDENT PROFILE =================
 	@PutMapping(value = "/update/{studentId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<StudentResponse> updateStudentProfile(@PathVariable String studentId,
-			@ModelAttribute StudentUpdateRequest request) {
+	public ResponseEntity<StudentResponse> updateProfile(@PathVariable String studentId,
+			@RequestParam(value = "profileImg", required = false) MultipartFile profileImg,
+			@RequestParam String firstNm, @RequestParam String lastNm, @RequestParam String gender,
+			@RequestParam String dob, @RequestParam(required = false) String addr1,
+			@RequestParam(required = false) String addr2, @RequestParam(required = false) String city,
+			@RequestParam(required = false) String state, @RequestParam(required = false) String country,
+			@RequestParam(required = false) String pin, @RequestParam(required = false) String mobileNum,
+			@RequestParam(required = false) String emergencyContactNm,
+			@RequestParam(required = false) String emergencyContactNum) {
 
-		logger.info("Update student profile request received for studentId: {}", studentId);
+		StudentUpdateRequest request = new StudentUpdateRequest();
+		request.setFirstNm(firstNm);
+		request.setLastNm(lastNm);
+		request.setGender(gender);
+		request.setDob(LocalDate.parse(dob));
+		request.setAddr1(addr1);
+		request.setAddr2(addr2);
+		request.setCity(city);
+		request.setState(state);
+		request.setCountry(country);
+		request.setPin(pin);
+		request.setMobileNum(mobileNum);
+		request.setEmergencyContactNm(emergencyContactNm);
+		request.setEmergencyContactNum(emergencyContactNum);
+		request.setProfileImg(profileImg);
 
-		StudentResponse response = studentService.updateStudentProfile(studentId, request);
-
-		logger.info("Student profile updated successfully for studentId: {}", studentId);
-
-		return ResponseEntity.ok(response);
+		return ResponseEntity.ok(studentService.updateStudentProfile(studentId, request));
 	}
-
 }
