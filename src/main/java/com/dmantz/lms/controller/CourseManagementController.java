@@ -112,24 +112,42 @@ public class CourseManagementController {
 		return ResponseEntity.ok(courses);
 	}
 
-	@PutMapping(
-	        value = "/course/update/{courseId}",
-	        consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PutMapping("/course/update/{courseId}")
 	public ResponseEntity<CourseResponse> updateCourse(
-
 	        @PathVariable Long courseId,
-	        @Valid @ModelAttribute CourseRequest request,
-	        @RequestParam String staffId)
-
-	        throws Exception{
+	        @Valid @RequestBody UpdateCourseRequest request,
+	        @RequestParam String staffId) {
 
 	    logger.info("PUT /course/update/{} by staffId: {}", courseId, staffId);
 
-	    CourseResponse response = courseManagementService.updateCourse(courseId, request, staffId);
-
-	    return ResponseEntity.ok(response);
+	    return ResponseEntity.ok(courseManagementService.updateCourse(courseId, request, staffId));
 	}
 
+	@PutMapping(
+	        value = "/course/update/{courseId}/image",
+	        consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<CourseResponse> updateCourseImage(
+	        @PathVariable Long courseId,
+	        @RequestParam MultipartFile courseImage,
+	        @RequestParam String staffId) throws Exception {
+
+	    logger.info("PUT /course/update/{}/image by staffId: {}", courseId, staffId);
+
+	    return ResponseEntity.ok(courseManagementService.updateCourseImage(courseId, courseImage, staffId));
+	}
+
+	@PutMapping(
+	        value = "/course/update/{courseId}/intro-video",
+	        consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<CourseResponse> updateCourseIntroVideo(
+	        @PathVariable Long courseId,
+	        @RequestParam MultipartFile introVideo,
+	        @RequestParam String staffId) throws Exception {
+
+	    logger.info("PUT /course/update/{}/intro-video by staffId: {}", courseId, staffId);
+
+	    return ResponseEntity.ok(courseManagementService.updateCourseIntroVideo(courseId, introVideo, staffId));
+	}
 	@DeleteMapping("/course/delete/{courseId}")
 	public ResponseEntity<String> deleteCourse(@PathVariable Long courseId, @RequestParam String staffId) {
 		logger.info("DELETE /course/delete/{} - Deleting course by staffId: {}", courseId, staffId);
