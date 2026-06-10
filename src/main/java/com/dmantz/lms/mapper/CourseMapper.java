@@ -9,6 +9,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 import com.dmantz.lms.dto.request.CourseRequest;
+import com.dmantz.lms.dto.request.UpdateCourseRequest;
 import com.dmantz.lms.dto.response.CourseResponse;
 import com.dmantz.lms.entity.Course;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -48,14 +49,13 @@ public interface CourseMapper {
 	@Mapping(source = "updatedDt", target = "updatedDt")
 	CourseResponse toDto(Course course);
 
-	// Update existing entity (UPDATE)
 	@BeanMapping(ignoreByDefault = true)
 	@Mapping(source = "courseTitle", target = "courseTitle")
 	@Mapping(source = "description", target = "description")
 	@Mapping(source = "language", target = "language")
 	@Mapping(target = "skills", expression = "java(toJson(request.getSkills()))")
 	@Mapping(source = "level", target = "level")
-	void updateCourseFromRequest(CourseRequest request, @MappingTarget Course course);
+	void updateCourseFromUpdateRequest(UpdateCourseRequest request, @MappingTarget Course course);
 
 //	json format conversion
 	default String toJson(List<String> skills) {

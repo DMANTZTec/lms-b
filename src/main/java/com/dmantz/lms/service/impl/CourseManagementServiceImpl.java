@@ -318,99 +318,104 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 
 //--------------------------UPDATE COURSE-----------------------------
 	@Override
-	public CourseResponse updateCourse(Long courseId, CourseRequest request, String staffId) throws Exception {
+	public CourseResponse updateCourse(Long courseId, UpdateCourseRequest request, String staffId) {
 
-		logger.info("Updating course with id: {} by staffId: {}", courseId, staffId);
+	    logger.info("Updating course with id: {} by staffId: {}", courseId, staffId);
 
-		// Validate staff
-		if (!staffRepository.existsByStaffId(staffId)) {
-			throw new ResourceNotFoundException("Staff with ID " + staffId + " does not exist");
-		}
+	    if (!staffRepository.existsByStaffId(staffId)) {
+	        throw new ResourceNotFoundException("Staff with ID " + staffId + " does not exist");
+	    }
 
-		// Existing course
-		Course course = courseRepository.findById(courseId)
-				.orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
+	    Course course = courseRepository.findById(courseId)
+	            .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
 
-		// Subject
-		Subject subject = subjectRepository.findById(request.getSubjectId()).orElseThrow(
-				() -> new ResourceNotFoundException("Subject not found with id: " + request.getSubjectId()));
+	    Subject subject = subjectRepository.findById(request.getSubjectId())
+	            .orElseThrow(() -> new ResourceNotFoundException("Subject not found with id: " + request.getSubjectId()));
 
-		// Provider
-		Provider provider = providerRepository.findById(request.getProviderId()).orElseThrow(
-				() -> new ResourceNotFoundException("Provider not found with id: " + request.getProviderId()));
+	    Provider provider = providerRepository.findById(request.getProviderId())
+	            .orElseThrow(() -> new ResourceNotFoundException("Provider not found with id: " + request.getProviderId()));
 
-		// Duplicate check
-		boolean exists = courseRepository.existsByCourseTitleAndSubject_IdAndProvider_IdAndLanguage(
-				request.getCourseTitle(), subject.getId(), provider.getId(), request.getLanguage());
+	    boolean exists = courseRepository.existsByCourseTitleAndSubject_IdAndProvider_IdAndLanguage(
+	            request.getCourseTitle(), subject.getId(), provider.getId(), request.getLanguage());
 
-		if (exists && !(course.getCourseTitle().equals(request.getCourseTitle())
-				&& course.getSubject().getId().equals(subject.getId())
-				&& course.getProvider().getId().equals(provider.getId())
-				&& course.getLanguage().equals(request.getLanguage()))) {
+	    if (exists && !(course.getCourseTitle().equals(request.getCourseTitle())
+	            && course.getSubject().getId().equals(subject.getId())
+	            && course.getProvider().getId().equals(provider.getId())
+	            && course.getLanguage().equals(request.getLanguage()))) {
+	        throw new DuplicateValuesException("Another course already exists with same title, subject, provider and language");
+	    }
 
-			throw new DuplicateValuesException(
-					"Another course already exists with same title, subject, provider and language");
-		}
+	    courseMapper.updateCourseFromUpdateRequest(request, course);
+	    course.setSubject(subject);
+	    course.setProvider(provider);
 
-		// Update fields
-		courseMapper.updateCourseFromRequest(request, course);
+	    Course updatedCourse = courseRepository.save(course);
 
-		course.setSubject(subject);
-		course.setProvider(provider);
+	    logger.info("Course updated successfully: {}", updatedCourse.getCourseId());
 
-		// ================= IMAGE =================
-
-		MultipartFile courseImage = request.getCourseImage();
-
-		if (courseImage != null && !courseImage.isEmpty()) {
-
-			// delete old image
-			if (course.getCourseImage() != null && !course.getCourseImage().isBlank()) {
-
-				deleteCourseFileFromStrapi(course.getCourseImage()); // ← full URL passed directly
-			}
-
-			JsonNode imageNode = uploadToStrapi(courseImage);
-
-			String imageUrl = strapiUrl + imageNode.get("url").asText();
-
-			course.setCourseImage(imageUrl);
-
-			logger.info("New course image uploaded: {}", imageUrl);
-		}
-
-		// ================= VIDEO =================
-
-		MultipartFile introVideo = request.getIntroVideo();
-
-		if (introVideo != null && !introVideo.isEmpty()) {
-
-			if (!"video/mp4".equalsIgnoreCase(introVideo.getContentType())) {
-
-				throw new IllegalArgumentException("Intro video must be MP4 format");
-			}
-
-			// delete old video
-			if (course.getIntroVideo() != null && !course.getIntroVideo().isBlank()) {
-
-				deleteCourseFileFromStrapi(course.getIntroVideo()); // ← full URL passed directly
-			}
-			JsonNode videoNode = uploadToStrapi(introVideo);
-
-			String videoUrl = strapiUrl + videoNode.get("url").asText();
-
-			course.setIntroVideo(videoUrl);
-
-			logger.info("New intro video uploaded: {}", videoUrl);
-		}
-
-		Course updatedCourse = courseRepository.save(course);
-
-		logger.info("Course updated successfully: {}", updatedCourse.getCourseId());
-
-		return courseMapper.toDto(updatedCourse);
+	    return courseMapper.toDto(updatedCourse);
 	}
+//	======================== UPDATE COURSE IMAGE ============================
+	@Override
+	public CourseResponse updateCourseImage(Long courseId, MultipartFile courseImage, String staffId) throws Exception {
 
+	    logger.info("Updating course image for courseId: {} by staffId: {}", courseId, staffId);
+
+	    if (!staffRepository.existsByStaffId(staffId)) {
+	        throw new ResourceNotFoundException("Staff with ID " + staffId + " does not exist");
+	    }
+
+	    Course course = courseRepository.findById(courseId)
+	            .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
+
+	    if (courseImage == null || courseImage.isEmpty()) {
+	        throw new IllegalArgumentException("Course image file is required");
+	    }
+
+	    if (course.getCourseImage() != null && !course.getCourseImage().isBlank()) {
+	        deleteCourseFileFromStrapi(course.getCourseImage());
+	    }
+
+	    JsonNode imageNode = uploadToStrapi(courseImage);
+	    course.setCourseImage(strapiUrl + imageNode.get("url").asText());
+
+	    logger.info("Course image updated: {}", course.getCourseImage());
+
+	    return courseMapper.toDto(courseRepository.save(course));
+	}
+//===================== UPDATE COURSE INTRO VIDEO ============================
+	@Override
+	public CourseResponse updateCourseIntroVideo(Long courseId, MultipartFile introVideo, String staffId) throws Exception {
+
+	    logger.info("Updating intro video for courseId: {} by staffId: {}", courseId, staffId);
+
+	    if (!staffRepository.existsByStaffId(staffId)) {
+	        throw new ResourceNotFoundException("Staff with ID " + staffId + " does not exist");
+	    }
+
+	    Course course = courseRepository.findById(courseId)
+	            .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
+
+	    if (introVideo == null || introVideo.isEmpty()) {
+	        throw new IllegalArgumentException("Intro video file is required");
+	    }
+
+	    if (!"video/mp4".equalsIgnoreCase(introVideo.getContentType())) {
+	        throw new IllegalArgumentException("Intro video must be MP4 format");
+	    }
+
+	    if (course.getIntroVideo() != null && !course.getIntroVideo().isBlank()) {
+	        deleteCourseFileFromStrapi(course.getIntroVideo());
+	    }
+
+	    JsonNode videoNode = uploadToStrapi(introVideo);
+	    course.setIntroVideo(strapiUrl + videoNode.get("url").asText());
+
+	    logger.info("Intro video updated: {}", course.getIntroVideo());
+
+	    return courseMapper.toDto(courseRepository.save(course));
+	}
+	
 	private void deleteCourseFileFromStrapi(String fileUrl) {
 
 		if (fileUrl == null || fileUrl.isBlank()) {

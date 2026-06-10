@@ -25,6 +25,7 @@ public class Staff extends AuditFields {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+    @Column(name = "staff_id", unique = true, nullable = false)
 	private String staffId;
 
 	@Column(name = "first_nm")

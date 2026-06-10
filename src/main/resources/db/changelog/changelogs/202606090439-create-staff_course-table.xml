@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+           http://www.liquibase.org/xml/ns/dbchangelog
+           http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.15.xsd">
+
+    <changeSet id="202606090439" author="Afsheen">
+
+        <createTable tableName="staff_course">
+
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <!-- String business IDs -->
+            <column name="staff_id" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="course_id" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_by" type="BIGINT"/>
+
+            <column name="created_dt"
+                    type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP"/>
+
+            <column name="updated_by" type="BIGINT"/>
+
+            <column name="updated_dt"
+                    type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP"/>
+
+        </createTable>
+
+        <!-- Unique constraint - prevent duplicate mapping -->
+        <addUniqueConstraint
+                tableName="staff_course"
+                columnNames="staff_id, course_id"
+                constraintName="uk_staff_course_staff_id_course_id"/>
+
+    </changeSet>
+
+</databaseChangeLog>
