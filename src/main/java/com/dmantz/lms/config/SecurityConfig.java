@@ -13,69 +13,73 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
 
-	private final JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
 
-	public SecurityConfig(JwtUtil jwtUtil) {
-		this.jwtUtil = jwtUtil;
-	}
+    public SecurityConfig(JwtUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
+    }
 
-	@Bean
-	public BCryptPasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
-	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-		http.csrf(csrf -> csrf.disable())
+        http.csrf(csrf -> csrf.disable())
 
-				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-				.authorizeHttpRequests(auth -> auth
+                .authorizeHttpRequests(auth -> auth
 
-						// AUTH APIs
-						.requestMatchers("/api/auth/student/login",
-								"/api/auth/staff/login").permitAll()
+                        // AUTH APIs
+                        .requestMatchers(
+                                "/api/auth/student/login",
+                                "/api/auth/staff/login"
+                        ).permitAll()
 
-						.requestMatchers(
-								"/api/student/register",
-								"/api/student/login",
-								"/api/student/otp-verify",
-								"/api/student/forgot-password",
-								"/api/student/reset-password"
-						).permitAll()
-						
-						   // ================= STAFF PUBLIC APIs =================
+                        // STUDENT PUBLIC APIs
+                        .requestMatchers(
+                                "/api/student/register",
+                                "/api/student/login",
+                                "/api/student/otp-verify",
+                                "/api/student/forgot-password",
+                                "/api/student/reset-password"
+                        ).permitAll()
 
-				        .requestMatchers(
-				                "/api/staff/admin-register",
-				                "/api/staff/verify-otp",
-				                "/api/staff/forgot-password",
-				                "/api/staff/reset-password"
-				        ).permitAll()
+                        // STAFF PUBLIC APIs
+                        .requestMatchers(
+                                "/api/staff/admin-register",
+                                "/api/staff/register",
+                                "/api/staff/verify-otp",
+                                "/api/staff/forgot-password",
+                                "/api/staff/reset-password"
+                        ).permitAll()
 
-						// STUDENT APIs
-						.requestMatchers("/api/student/**").hasRole("STUDENT")
+                        // SWAGGER APIs
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui.html"
+                        ).permitAll()
 
-						// SWAGGER APIs
-						.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+                        // STUDENT PROTECTED APIs
+                        .requestMatchers("/api/student/**")
+                        .hasRole("STUDENT")
 
-						// STUDENT REGISTER
-						.requestMatchers("/api/student/register").permitAll()
+                        // STAFF PROTECTED APIs
+                        .requestMatchers("/api/staff/**")
+                        .hasAnyRole("STAFF", "ADMIN", "FACULTY")
 
-						// FIRST ADMIN REGISTER
-						.requestMatchers("/api/staff/admin-register").permitAll()
+                        .anyRequest().authenticated())
 
-						// STAFF REGISTER - ADMIN ONLY
-						.requestMatchers("/api/staff/register").hasRole("ADMIN")
+                .addFilterBefore(
+                        new JwtFilter(jwtUtil),
+                        UsernamePasswordAuthenticationFilter.class
+                );
 
-						// STAFF APIs
-						.requestMatchers("/api/staff/**").hasAnyRole("STAFF", "ADMIN", "FACULTY")
-
-						.anyRequest().authenticated())
-
-				.addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
-
-		return http.build();
-	}
+        return http.build();
+    }
 }
