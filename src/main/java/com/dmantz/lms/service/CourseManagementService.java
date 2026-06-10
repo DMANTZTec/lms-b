@@ -26,8 +26,13 @@ public interface CourseManagementService {
 //	 view all courses
 	List<CourseResponse> viewAllCourses();
 
-//	 update an existing course
-	CourseResponse updateCourse(Long courseId, CourseRequest request, String staffId) throws Exception;
+	
+	CourseResponse updateCourse(Long courseId, UpdateCourseRequest request, String staffId);
+
+	
+	CourseResponse updateCourseImage(Long courseId, MultipartFile courseImage, String staffId) throws Exception;
+
+	CourseResponse updateCourseIntroVideo(Long courseId, MultipartFile introVideo, String staffId) throws Exception;
 
 //		delete subject
 	void deleteCourse(Long courseId, String staffId);
