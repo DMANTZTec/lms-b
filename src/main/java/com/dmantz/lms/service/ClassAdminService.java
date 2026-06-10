@@ -9,33 +9,37 @@ import jakarta.transaction.Transactional;
 
 public interface ClassAdminService {
 
-   ClassResponse addClass(String courseId, CreateClassRequest request);
+	ClassResponse addClass(String courseId, CreateClassRequest request);
 
-   ClassResponse modifyClass(Long batchId, UpdateClassRequest request);
+	ClassResponse modifyClass(Long batchId, UpdateClassRequest request);
 
-   ClassResponse cancelClass(Long batchId);
+	ClassResponse cancelClass(Long batchId);
 
-   ClassScheduleResponse addScheduleToClass(ClassScheduleRequest request);
+	ClassScheduleResponse addScheduleToClass(ClassScheduleRequest request);
 
-   ClassScheduleResponse modifySchedule(Long scheduleId, ClassScheduleRequest request);
+	ClassScheduleResponse modifySchedule(Long scheduleId, ClassScheduleRequest request);
 
-   ClassScheduleResponse cancelSchedule(Long scheduleId);
-   
-   ClassAdminStudentDetailsResponse viewStudentDetails(String studentId);
-   
-   List<ClassAdminStudentDetailsResponse> viewStudents();
+	ClassScheduleResponse cancelSchedule(Long scheduleId);
 
-   List<ClassScheduleResponse> getSchedulesByStaffId(String staffId);
+	ClassAdminStudentDetailsResponse viewStudentDetails(String studentId);
 
-   List<ClassScheduleResponse> getStaffDailySchedule(String staffId, LocalDate date);
+	List<ClassAdminStudentDetailsResponse> viewStudents();
 
-   void addTopicsToClass(Long batchId, AddClassTopicRequest request);
+	List<ClassScheduleResponse> getSchedulesByStaffId(String staffId);
 
-   void removeTopicsFromClass(Long batchId, RemoveClassTopicRequest request);
+	List<ClassScheduleResponse> getStaffDailySchedule(String staffId, LocalDate date);
 
-   List<ClassTopicResponse> getTopicsByBatchId(Long batchId);
+	void addTopicsToClass(Long batchId, AddClassTopicRequest request);
 
-   StudentCourseResponse assignCourseToStudent(String studentId, String courseId);
+	void removeTopicsFromClass(Long batchId, RemoveClassTopicRequest request);
 
+	List<ClassTopicResponse> getTopicsByBatchId(Long batchId);
+
+	StudentCourseResponse assignCourseToStudent(String studentId, String courseId);
+
+// Add these 2 new methods
+	List<ClassResponse> getClassesByCourse(String courseId);
+
+	List<ClassScheduleResponse> getSchedulesByBatch(Long batchId);
 
 }

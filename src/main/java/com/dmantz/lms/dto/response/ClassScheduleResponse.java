@@ -5,131 +5,83 @@ import java.time.LocalTime;
 
 public class ClassScheduleResponse {
 
-    private Long scheduleId;
+	private Long scheduleId;
+	private Long batchId;
+	private String className;
+	private LocalDate classDate;
+	private String dayOfWeek;
+	private LocalTime startTime;
+	private LocalTime endTime;
+	private String staffId;
+	private String staffName;
+	private String mode;
+	private String meetingLink;
+	private String location;
+	private String status;
 
-    private Long classId;
-    private String className;
+	public Long getScheduleId() {
+		return scheduleId;
+	}
 
-    private Long courseId;
-    private String courseName;
+	public void setScheduleId(Long scheduleId) {
+		this.scheduleId = scheduleId;
+	}
 
-    private Long staffId;
-    
-    private String staffName;
+	public Long getBatchId() {
+		return batchId;
+	}
 
-    private LocalDate classDate;
-    private LocalTime startTime;
-    private LocalTime endTime;
+	public void setBatchId(Long batchId) {
+		this.batchId = batchId;
+	}
 
-    private String mode;
-    private String status;
+	public String getClassName() {
+		return className;
+	}
 
-    private String meetingLink;
-    private String location;
+	public void setClassName(String className) {
+		this.className = className;
+	}
 
-    public Long getScheduleId() {
-        return scheduleId;
-    }
+	public LocalDate getClassDate() {
+		return classDate;
+	}
 
-    public void setScheduleId(Long scheduleId) {
-        this.scheduleId = scheduleId;
-    }
+	public void setClassDate(LocalDate classDate) {
+		this.classDate = classDate;
+	}
 
-    public Long getClassId() {
-        return classId;
-    }
+	public String getDayOfWeek() {
+		return dayOfWeek;
+	}
 
-    public void setClassId(Long classId) {
-        this.classId = classId;
-    }
+	public void setDayOfWeek(String dayOfWeek) {
+		this.dayOfWeek = dayOfWeek;
+	}
 
-    public String getClassName() {
-        return className;
-    }
+	public LocalTime getStartTime() {
+		return startTime;
+	}
 
-    public void setClassName(String className) {
-        this.className = className;
-    }
+	public void setStartTime(LocalTime startTime) {
+		this.startTime = startTime;
+	}
 
-    public Long getCourseId() {
-        return courseId;
-    }
+	public LocalTime getEndTime() {
+		return endTime;
+	}
 
-    public void setCourseId(Long courseId) {
-        this.courseId = courseId;
-    }
+	public void setEndTime(LocalTime endTime) {
+		this.endTime = endTime;
+	}
 
-    public String getCourseName() {
-        return courseName;
-    }
+	public String getStaffId() {
+		return staffId;
+	}
 
-    public void setCourseName(String courseName) {
-        this.courseName = courseName;
-    }
-
-    public Long getStaffId() {
-        return staffId;
-    }
-
-    public void setStaffId(Long staffId) {
-        this.staffId = staffId;
-    }
-
-    public LocalDate getClassDate() {
-        return classDate;
-    }
-
-    public void setClassDate(LocalDate classDate) {
-        this.classDate = classDate;
-    }
-
-    public LocalTime getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(LocalTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public LocalTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalTime endTime) {
-        this.endTime = endTime;
-    }
-
-    public String getMode() {
-        return mode;
-    }
-
-    public void setMode(String mode) {
-        this.mode = mode;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getMeetingLink() {
-        return meetingLink;
-    }
-
-    public void setMeetingLink(String meetingLink) {
-        this.meetingLink = meetingLink;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
+	public void setStaffId(String staffId) {
+		this.staffId = staffId;
+	}
 
 	public String getStaffName() {
 		return staffName;
@@ -139,15 +91,35 @@ public class ClassScheduleResponse {
 		this.staffName = staffName;
 	}
 
-	@Override
-	public String toString() {
-		return "ClassScheduleResponse [scheduleId=" + scheduleId + ", classId=" + classId + ", className=" + className
-				+ ", courseId=" + courseId + ", courseName=" + courseName + ", staffId=" + staffId + ", staffName="
-				+ staffName + ", classDate=" + classDate + ", startTime=" + startTime + ", endTime=" + endTime
-				+ ", mode=" + mode + ", status=" + status + ", meetingLink=" + meetingLink + ", location=" + location
-				+ "]";
+	public String getMode() {
+		return mode;
 	}
 
-    
-	
+	public void setMode(String mode) {
+		this.mode = mode;
+	}
+
+	public String getMeetingLink() {
+		return meetingLink;
+	}
+
+	public void setMeetingLink(String meetingLink) {
+		this.meetingLink = meetingLink;
+	}
+
+	public String getLocation() {
+		return location;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
 }

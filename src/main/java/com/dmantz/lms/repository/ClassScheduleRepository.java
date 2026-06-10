@@ -47,5 +47,8 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
     List<ClassSchedule> findByStaff_StaffId(String staffId);
 
     List<ClassSchedule> findByStaffStaffIdAndClassDate(String staffId, LocalDate classDate);
+    
+ // ClassScheduleRepository
+ 	List<ClassSchedule> findByClassBatch_Id(Long batchId);
 
 }

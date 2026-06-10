@@ -9,30 +9,31 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
-
-@Mapper(componentModel = "spring",
-        unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(
+        componentModel = "spring",
+        unmappedTargetPolicy = ReportingPolicy.IGNORE
+)
 public interface ClassBatchMapper {
-
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "course", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(source = "batchName", target = "className")
+    @Mapping(source = "beginDate", target = "startDate")
     ClassBatch toEntity(CreateClassRequest request);
 
-    @Mapping(source = "id", target = "batchId")   // ✅ FIXED
-    @Mapping(source = "course.id", target = "courseId")
+    @Mapping(source = "id", target = "batchId")
+    @Mapping(source = "course.courseId", target = "courseId")
     @Mapping(source = "course.courseTitle", target = "courseName")
     ClassResponse toResponse(ClassBatch entity);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "course", ignore = true)
-    void updateClassFromDto(UpdateClassRequest request,
-                            @MappingTarget ClassBatch entity);
+    void updateClassFromDto(
+            UpdateClassRequest request,
+            @MappingTarget ClassBatch entity);
 
-
-    @Mapping(source = "course.id", target = "courseId")
+    @Mapping(source = "course.courseId", target = "courseId")
     @Mapping(source = "course.courseTitle", target = "courseName")
     StudentClassResponse toDto(ClassBatch entity);
-
 }
-

@@ -18,10 +18,6 @@ public class ClassScheduleRequest {
     private LocalTime startTime;
     private LocalTime endTime;
     private String staffName;
-    private String mode;
-    private String meetingLink;
-    private String location;
-
     public Long getScheduleId() {
         return scheduleId;
     }
@@ -70,22 +66,6 @@ public class ClassScheduleRequest {
         this.staffName = staffName;
     }
 
-    public String getMode() {
-        return mode;
-    }
-
-    public void setMode(String mode) {
-        this.mode = mode;
-    }
-
-    public String getMeetingLink() {
-        return meetingLink;
-    }
-
-    public void setMeetingLink(String meetingLink) {
-        this.meetingLink = meetingLink;
-    }
-
     public Long getClassId() {
         return classId;
     }
@@ -102,11 +82,4 @@ public class ClassScheduleRequest {
         this.staffId = staffId;
     }
 
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
 }

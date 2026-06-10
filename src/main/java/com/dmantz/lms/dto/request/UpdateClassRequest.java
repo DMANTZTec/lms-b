@@ -7,8 +7,6 @@ public class UpdateClassRequest {
     private String className;
     private LocalDate startDate;
     private LocalDate endDate;
-    private Integer capacity;
-
     public String getClassName() {
         return className;
     }
@@ -33,11 +31,5 @@ public class UpdateClassRequest {
         this.endDate = endDate;
     }
 
-    public Integer getCapacity() {
-        return capacity;
-    }
-
-    public void setCapacity(Integer capacity) {
-        this.capacity = capacity;
-    }
+  
 }
