@@ -6,12 +6,14 @@ import com.dmantz.lms.dto.response.StaffCourseResponse;
 import com.dmantz.lms.entity.Course;
 import com.dmantz.lms.entity.Staff;
 import com.dmantz.lms.entity.StaffCourse;
+import com.dmantz.lms.entity.StaffRole;
 import com.dmantz.lms.exceptions.CourseNotFoundException;
 import com.dmantz.lms.exceptions.ResourceNotFoundException;
 import com.dmantz.lms.mapper.StaffCourseMapper;
 import com.dmantz.lms.repository.CourseRepository;
 import com.dmantz.lms.repository.StaffCourseRepository;
 import com.dmantz.lms.repository.StaffRepository;
+import com.dmantz.lms.repository.StaffRoleRepository;
 import com.dmantz.lms.service.StaffCourseService;
 import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
@@ -30,13 +32,15 @@ public class StaffCourseServiceImpl implements StaffCourseService {
 	private final StaffRepository staffRepository;
 	private final CourseRepository courseRepository;
 	private final StaffCourseMapper staffCourseMapper;
+	private final StaffRoleRepository staffRoleRepository;
 
 	public StaffCourseServiceImpl(StaffCourseRepository staffCourseRepository, StaffRepository staffRepository,
-			CourseRepository courseRepository, StaffCourseMapper staffCourseMapper) {
+			CourseRepository courseRepository, StaffCourseMapper staffCourseMapper, StaffRoleRepository staffRoleRepository) {
 		this.staffCourseRepository = staffCourseRepository;
 		this.staffRepository = staffRepository;
 		this.courseRepository = courseRepository;
 		this.staffCourseMapper = staffCourseMapper;
+		this.staffRoleRepository = staffRoleRepository;
 	}
 
 	@Override
@@ -157,5 +161,25 @@ public class StaffCourseServiceImpl implements StaffCourseService {
 		logger.info("Returning {} course(s) for staffId: {}", response.size(), staffId);
 
 		return response;
+	}
+	
+	@Override
+	public List<InstructorResponse> getAllInstructors() {
+
+	    List<Staff> instructors =
+	            staffRoleRepository.findByRoleNm("INSTRUCTOR");
+
+	    return instructors.stream()
+	            .map(staff -> {
+	                InstructorResponse response = new InstructorResponse();
+
+	                response.setStaffId(staff.getStaffId());
+	                response.setFirstNm(staff.getFirstNm());
+	                response.setLastNm(staff.getLastNm());
+	                response.setDesignation(staff.getDesignation());
+
+	                return response;
+	            })
+	            .toList();
 	}
 }

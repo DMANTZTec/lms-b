@@ -20,4 +20,6 @@ public interface StaffCourseService {
 
     // Get all courses assigned to a staff
     List<StaffCourseResponse> getCoursesByStaff(String staffId);
+    
+    List<InstructorResponse> getAllInstructors();
 }

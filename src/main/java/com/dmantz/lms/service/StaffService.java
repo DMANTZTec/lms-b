@@ -30,6 +30,7 @@ public interface StaffService {
     @Transactional
     StaffResponse registerInitialAdmin(StaffRegistrationRequest request);
     
+    
 
 }
 

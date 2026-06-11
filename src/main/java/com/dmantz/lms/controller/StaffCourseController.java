@@ -89,4 +89,11 @@ public class StaffCourseController {
                 response.size(), staffId);
         return ResponseEntity.ok(response);
     }
+    
+    @GetMapping("/instructors")
+    public ResponseEntity<List<InstructorResponse>> getAllInstructors() {
+
+        return ResponseEntity.ok(
+        		staffCourseService.getAllInstructors());
+    }
 }
