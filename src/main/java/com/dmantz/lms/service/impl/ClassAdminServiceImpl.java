@@ -560,5 +560,14 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 			return sr;
 		}).toList();
 	}
+	
+	@Override
+	public List<ClassScheduleResponse> getAllSchedules() {
+
+	    List<ClassSchedule> schedules =
+	            classScheduleRepository.findAll();
+
+	    return classScheduleMapper.toDtoList(schedules);
+	}
 
 }

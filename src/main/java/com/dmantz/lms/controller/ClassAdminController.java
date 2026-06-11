@@ -214,4 +214,17 @@ public class ClassAdminController {
 		logger.info("Returning {} schedule(s) for batchId: {}", response.size(), batchId);
 		return ResponseEntity.ok(response);
 	}
+	
+	@GetMapping("/schedules")
+	public ResponseEntity<List<ClassScheduleResponse>> getAllSchedules() {
+
+	    logger.info("GET /schedules - Fetching all schedules");
+
+	    List<ClassScheduleResponse> response =
+	            classAdminService.getAllSchedules();
+
+	    logger.info("Returning {} schedule(s)", response.size());
+
+	    return ResponseEntity.ok(response);
+	}
 }

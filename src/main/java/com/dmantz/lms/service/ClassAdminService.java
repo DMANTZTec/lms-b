@@ -41,5 +41,7 @@ public interface ClassAdminService {
 	List<ClassResponse> getClassesByCourse(String courseId);
 
 	List<ClassScheduleResponse> getSchedulesByBatch(Long batchId);
+	
+	List<ClassScheduleResponse> getAllSchedules();
 
 }
