@@ -43,6 +43,7 @@ public class SecurityConfig {
                         // STUDENT PUBLIC APIs
                         .requestMatchers(
                                 "/api/student/register",
+                                "/api/student/verify-registration-otp",
                                 "/api/student/login",
                                 "/api/student/otp-verify",
                                 "/api/student/forgot-password",
