@@ -69,17 +69,32 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<String> handleEmailSending(EmailSendingException ex) {
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
 	}
-	
+
 	@ExceptionHandler(InvalidPositionException.class)
 	public ResponseEntity<String> handleInvalidPosition(InvalidPositionException ex) {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
 	}
-	
+
 	@ExceptionHandler(MaxUploadSizeExceededException.class)
 	public ResponseEntity<String> handleMaxUploadSizeExceeded(MaxUploadSizeExceededException ex) {
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 				.body("File size exceeds the maximum allowed limit of 500 MB");
+	}
+
+	@ExceptionHandler(SmsSendingException.class)
+	public ResponseEntity<String> handleSmsSending(SmsSendingException ex) {
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+	}
+
+	@ExceptionHandler(InvalidOtpChannelException.class)
+	public ResponseEntity<String> handleInvalidOtpChannel(InvalidOtpChannelException ex) {
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+	}
+
+	@ExceptionHandler(OtpSendingException.class)
+	public ResponseEntity<String> handleOtpSending(OtpSendingException ex) {
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
 	}
 
 }

@@ -1,10 +1,13 @@
 package com.dmantz.lms.dto.request;
 
+import com.dmantz.lms.entity.OtpChannel;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
- public class StudentRegistrationRequest {
+public class StudentRegistrationRequest {
 
 	@NotBlank(message = "First name is required")
 	private String firstNm;
@@ -24,6 +27,9 @@ import jakarta.validation.constraints.Size;
 	private String password;
 
 	private String currentStatus;
+
+	@NotNull(message = "OTP channel is required (EMAIL or MOBILE)")
+	private OtpChannel otpChannel;
 
 	public String getFirstNm() {
 		return firstNm;
@@ -71,6 +77,14 @@ import jakarta.validation.constraints.Size;
 
 	public void setCurrentStatus(String currentStatus) {
 		this.currentStatus = currentStatus;
+	}
+
+	public OtpChannel getOtpChannel() {
+		return otpChannel;
+	}
+
+	public void setOtpChannel(OtpChannel otpChannel) {
+		this.otpChannel = otpChannel;
 	}
 
 }
