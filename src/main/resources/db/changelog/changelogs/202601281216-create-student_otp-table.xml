@@ -63,23 +63,30 @@
 
     <changeSet id="202606120108" author="shivashankar">
 
+        <preConditions onFail="MARK_RAN">
+            <columnExists
+                    tableName="student_otp"
+                    columnName="student_id"/>
+        </preConditions>
+
         <dropColumn
                 tableName="student_otp"
                 columnName="student_id"/>
 
     </changeSet>
-    
-  <changeSet id="202606131001" author="shivashankar">
 
-    <dropForeignKeyConstraint
-            baseTableName="student_otp"
-            constraintName="fk_student_otp_student"/>
+    <changeSet id="202606131001" author="shivashankar">
 
-    <dropColumn
-            tableName="student_otp"
-            columnName="student_id"/>
+        <preConditions onFail="MARK_RAN">
+            <foreignKeyConstraintExists
+                    foreignKeyName="fk_student_otp_student"/>
+        </preConditions>
 
-</changeSet>
+        <dropForeignKeyConstraint
+                baseTableName="student_otp"
+                constraintName="fk_student_otp_student"/>
+
+    </changeSet>
 
 
 </databaseChangeLog>
