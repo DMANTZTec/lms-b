@@ -34,7 +34,7 @@
     <include file="db/changelog/changelogs/202601291355-create-topic_reference-table.xml"/>
 
     <!-- Student OTP table -->
-    <include file="db/changelog/changelogs/202601281216-create-student_otp-table.xml"/>
+    <include file="db/changelog/changelogs/202606130346-create-student_otp-table.xml"/>
 
     <!-- Staff OTP table -->
     <include file="db/changelog/changelogs/202601241041-create-staff_otp-table.xml"/>
