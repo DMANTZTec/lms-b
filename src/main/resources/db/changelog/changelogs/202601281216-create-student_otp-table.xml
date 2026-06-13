@@ -68,6 +68,18 @@
                 columnName="student_id"/>
 
     </changeSet>
+    
+  <changeSet id="202606131001" author="shivashankar">
+
+    <dropForeignKeyConstraint
+            baseTableName="student_otp"
+            constraintName="fk_student_otp_student"/>
+
+    <dropColumn
+            tableName="student_otp"
+            columnName="student_id"/>
+
+</changeSet>
 
 
 </databaseChangeLog>
