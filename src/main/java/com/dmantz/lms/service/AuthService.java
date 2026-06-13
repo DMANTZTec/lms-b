@@ -7,8 +7,8 @@ import com.dmantz.lms.dto.response.StudentLoginResponse;
 
 public interface AuthService {
 
-    StudentLoginResponse studentLogin(
-            StudentLoginRequest studentLoginRequest);
+//    StudentLoginResponse studentLogin(
+//            StudentLoginRequest studentLoginRequest);
 
     StaffLoginResponse staffLogin(
             StaffLoginRequest request);

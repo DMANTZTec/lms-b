@@ -2,6 +2,7 @@ package com.dmantz.lms.service;
 
 import com.dmantz.lms.dto.request.*;
 import com.dmantz.lms.dto.response.OtpVerifyResponse;
+import com.dmantz.lms.dto.response.RegistrationResponse;
 import com.dmantz.lms.dto.response.StudentLoginResponse;
 import com.dmantz.lms.dto.response.StudentResponse;
 
@@ -11,9 +12,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface StudentService {
 
-	StudentResponse register(StudentRegistrationRequest request);
+	RegistrationResponse register(StudentRegistrationRequest request);
 
-	void verifyRegistrationOtp(OtpVerifyRequest request);
+	StudentResponse verifyOtp(OtpVerifyRequest request);
 
 	StudentLoginResponse login(StudentLoginRequest request);
 

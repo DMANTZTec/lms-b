@@ -73,7 +73,10 @@
     <include file="/db/changelog/changelogs/202604141227-create-student_task_mentor-table.xml"/>
     
     <!-- Staff Course table -->
-<include file="db/changelog/changelogs/202606090439-create-staff_course-table.xml"/>
+    <include file="db/changelog/changelogs/202606090439-create-staff_course-table.xml"/>
+
+    <!-- Student Registration otp table -->
+    <include file="/db/changelog/changelogs/202606121240-create-student_registration_otp-table.xml"/>
 
 
 </databaseChangeLog>

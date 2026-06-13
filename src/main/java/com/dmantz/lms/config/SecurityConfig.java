@@ -43,9 +43,9 @@ public class SecurityConfig {
                         // STUDENT PUBLIC APIs
                         .requestMatchers(
                                 "/api/student/register",
-                                "/api/student/verify-registration-otp",
+                                "/api/student/registration/verify-otp",
                                 "/api/student/login",
-                                "/api/student/otp-verify",
+                                "/api/student/verify-login-otp",
                                 "/api/student/forgot-password",
                                 "/api/student/reset-password"
                         ).permitAll()

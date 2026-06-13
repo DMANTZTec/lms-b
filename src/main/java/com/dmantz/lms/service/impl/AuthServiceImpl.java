@@ -53,82 +53,82 @@ public class AuthServiceImpl implements AuthService {
 		this.emailService = emailService;
 	}
 
-	@Override
-	public StudentLoginResponse studentLogin(StudentLoginRequest request) {
+//	@Override
+//	public StudentLoginResponse studentLogin(StudentLoginRequest request) {
+//
+//		logger.info("Login attempt for username: {}", request.getUsername());
+//
+//		String username = request.getUsername();
+//
+//		Student student = studentRepository
+//				.findByEmailIdOrMobileNumOrLoginId(username, username, username);
+//
+//		// INVALID USER
+//		if (student == null) {
+//			logger.warn("Invalid login credentials for username: {}", username);
+//			throw new RuntimeException("Invalid Credentials");
+//		}
+//
+//		// ACCOUNT DISABLED
+//		if (!"Y".equals(student.getEnabled())) {
+//			logger.warn("Account disabled for studentId: {}", student.getStudentId());
+//			throw new RuntimeException("Account disabled");
+//		}
+//
+//		// PASSWORD CHECK
+//		if (!passwordEncoder.matches(request.getPassword(), student.getPassword())) {
+//			logger.warn("Wrong password attempt for studentId: {}", student.getStudentId());
+//			throw new RuntimeException("Invalid Credentials");
+//		}
+//
+//		StudentOtp otp = generateOtp(student);
+//
+//		try {
+//			emailService.sendOtpEmail(student.getEmailId(), otp.getOtp(), OtpPurpose.LOGIN);
+//			otp.setStatus(OtpStatus.SENT);
+//			otp.setUpdatedDt(LocalDateTime.now());
+//			otpRepository.save(otp);
+//
+//			logger.info("Login OTP sent successfully to email: {}", student.getEmailId());
+//
+//		} catch (Exception e) {
+//			logger.error("Failed to send login OTP to email: {}", student.getEmailId(), e);
+//			otp.setStatus(OtpStatus.FAILED);
+//			otpRepository.save(otp);
+//			throw new RuntimeException("Failed to send OTP");
+//		}
+//
+//		StudentLoginResponse response = new StudentLoginResponse();
+//		response.setStudentId(student.getStudentId());
+//		response.setEmail(student.getEmailId());
+//		response.setRole("STUDENT");
+//		response.setToken(null);
+//		response.setMessage("OTP sent successfully to registered email");
+//		return response;
+//	}
 
-		logger.info("Login attempt for username: {}", request.getUsername());
-
-		String username = request.getUsername();
-
-		Student student = studentRepository
-				.findByEmailIdOrMobileNumOrLoginId(username, username, username);
-
-		// INVALID USER
-		if (student == null) {
-			logger.warn("Invalid login credentials for username: {}", username);
-			throw new RuntimeException("Invalid Credentials");
-		}
-
-		// ACCOUNT DISABLED
-		if (!"Y".equals(student.getEnabled())) {
-			logger.warn("Account disabled for studentId: {}", student.getStudentId());
-			throw new RuntimeException("Account disabled");
-		}
-
-		// PASSWORD CHECK
-		if (!passwordEncoder.matches(request.getPassword(), student.getPassword())) {
-			logger.warn("Wrong password attempt for studentId: {}", student.getStudentId());
-			throw new RuntimeException("Invalid Credentials");
-		}
-
-		StudentOtp otp = generateOtp(student);
-
-		try {
-			emailService.sendOtpEmail(student.getEmailId(), otp.getOtp(), OtpPurpose.LOGIN);
-			otp.setStatus(OtpStatus.SENT);
-			otp.setUpdatedDt(LocalDateTime.now());
-			otpRepository.save(otp);
-
-			logger.info("Login OTP sent successfully to email: {}", student.getEmailId());
-
-		} catch (Exception e) {
-			logger.error("Failed to send login OTP to email: {}", student.getEmailId(), e);
-			otp.setStatus(OtpStatus.FAILED);
-			otpRepository.save(otp);
-			throw new RuntimeException("Failed to send OTP");
-		}
-
-		StudentLoginResponse response = new StudentLoginResponse();
-		response.setStudentId(student.getStudentId());
-		response.setEmail(student.getEmailId());
-		response.setRole("STUDENT");
-		response.setToken(null);
-		response.setMessage("OTP sent successfully to registered email");
-		return response;
-	}
-
-	public StudentOtp generateOtp(Student student) {
-
-		logger.info("Generating OTP for studentId: {}", student.getStudentId());
-
-		StudentOtp otp = new StudentOtp();
-
-		otp.setStudent(student);
-
-		otp.setOtp(String.valueOf(new Random().nextInt(900000) + 100000));
-
-		otp.setStatus(OtpStatus.NEW);
-
-		otp.setAttemptsNum(0);
-
-		otp.setCreatedDt(LocalDateTime.now());
-
-		StudentOtp savedOtp = otpRepository.save(otp);
-
-		logger.info("OTP generated successfully for studentId: {}", student.getStudentId());
-
-		return savedOtp;
-	}
+//	public StudentOtp generateOtp(Student student) {
+//
+//		logger.info("Generating OTP for studentId: {}", student.getStudentId());
+//
+//		StudentOtp otp = new StudentOtp();
+//
+//		otp.setStudent(student);
+//
+//		otp.setOtp(String.valueOf(new Random().nextInt(900000) + 100000));
+//
+//		otp.setStatus(OtpStatus.NEW);
+//
+//		otp.setAttemptsNum(0);
+//
+//		otp.setCreatedDt(LocalDateTime.now());
+//
+//		StudentOtp savedOtp = otpRepository.save(otp);
+//
+//		logger.info("OTP generated successfully for studentId: {}", student.getStudentId());
+//
+//		return savedOtp;
+//	}
 
 	// STAFF OTP METHOD
 	public StaffOtp generateStaffOtp(Staff staff) {
@@ -153,6 +153,11 @@ public class AuthServiceImpl implements AuthService {
 
 		return savedOtp;
 	}
+
+//	@Override
+//	public StudentLoginResponse studentLogin(StudentLoginRequest studentLoginRequest) {
+//		return null;
+//	}
 
 	@Override
 	public StaffLoginResponse staffLogin(StaffLoginRequest request) {

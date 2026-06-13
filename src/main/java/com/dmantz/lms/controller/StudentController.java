@@ -2,6 +2,7 @@ package com.dmantz.lms.controller;
 
 import com.dmantz.lms.dto.request.*;
 import com.dmantz.lms.dto.response.OtpVerifyResponse;
+import com.dmantz.lms.dto.response.RegistrationResponse;
 import com.dmantz.lms.dto.response.StudentLoginResponse;
 import com.dmantz.lms.dto.response.StudentResponse;
 import com.dmantz.lms.service.StudentService;
@@ -33,40 +34,35 @@ public class StudentController {
 	}
 
 	@PostMapping("/register")
-	public ResponseEntity<StudentResponse> register(@Valid @RequestBody StudentRegistrationRequest request) {
+	public ResponseEntity<RegistrationResponse> register(@Valid @RequestBody StudentRegistrationRequest request) {
 		return ResponseEntity.ok(studentService.register(request));
 	}
 
-	@PostMapping("/verify-registration-otp")
-	public ResponseEntity<String> verifyRegistrationOtp(@RequestBody OtpVerifyRequest request) {
-		studentService.verifyRegistrationOtp(request);
-		return ResponseEntity.ok("Account verified successfully. You can now log in.");
+	@PostMapping("/registration/verify-otp")
+	public ResponseEntity<StudentResponse> verifyOtp(@RequestBody OtpVerifyRequest request) {
+		logger.info("OTP verification request received for email: {}",
+				request.getEmailId());
+		return ResponseEntity.ok(studentService.verifyOtp(request));
 	}
 
-	// ================= LOGIN =================
 	@PostMapping("/login")
-	public ResponseEntity<StudentLoginResponse> login(@Valid @RequestBody StudentLoginRequest request) {
+	public ResponseEntity<StudentLoginResponse> login(
+			@RequestBody StudentLoginRequest request) {
 
-		logger.info("Student login request received for loginId: {}", request.getUsername());
-
-		StudentLoginResponse response = studentService.login(request);
-
-		logger.info("OTP sent successfully for student loginId: {}", request.getUsername());
+		StudentLoginResponse response =
+				studentService.login(request);
 
 		return ResponseEntity.ok(response);
 	}
 
-	// ================= VERIFY OTP =================
-	@PostMapping("/otp-verify")
-	public ResponseEntity<StudentLoginResponse> verifyOtp(@RequestBody OtpVerifyRequest request) {
+	@PostMapping("/verify-login-otp")
+	public ResponseEntity<StudentLoginResponse> verifyLoginOtp(
+			@RequestBody OtpVerifyRequest request) {
 
-		logger.info("OTP verification request received for studentId: {}", request.getStudentId());
+		StudentLoginResponse response =
+				studentService.verifyLoginOtp(request);
 
-		StudentLoginResponse response = studentService.verifyLoginOtp(request);
-
-		logger.info("OTP verified successfully for studentId: {}", request.getStudentId());
-
-		return new ResponseEntity<>(response, HttpStatus.OK);
+		return ResponseEntity.ok(response);
 	}
 
 	// ================= GET ALL STUDENTS =================

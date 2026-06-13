@@ -50,4 +50,24 @@
                 referencedColumnNames="student_id"/>
     </changeSet>
 
+    <changeSet id="202606121253" author="shivashankar">
+
+        <addColumn tableName="student_otp">
+
+            <column name="email_id" type="VARCHAR(255)"/>
+            <column name="mobile_num" type="VARCHAR(20)"/>
+
+        </addColumn>
+
+    </changeSet>
+
+    <changeSet id="202606120108" author="shivashankar">
+
+        <dropColumn
+                tableName="student_otp"
+                columnName="student_id"/>
+
+    </changeSet>
+
+
 </databaseChangeLog>

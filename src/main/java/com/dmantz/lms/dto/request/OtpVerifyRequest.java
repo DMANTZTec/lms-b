@@ -3,16 +3,17 @@ package com.dmantz.lms.dto.request;
 import com.dmantz.lms.entity.OtpChannel;
 
 public class OtpVerifyRequest {
-	private String studentId;
+
+	private String emailId;
 	private String otp;
 	private OtpChannel channel;
 
-	public String getStudentId() {
-		return studentId;
+	public String getEmailId() {
+		return emailId;
 	}
 
-	public void setStudentId(String studentId) {
-		this.studentId = studentId;
+	public void setEmailId(String emailId) {
+		this.emailId = emailId;
 	}
 
 	public String getOtp() {
@@ -30,11 +31,4 @@ public class OtpVerifyRequest {
 	public void setChannel(OtpChannel channel) {
 		this.channel = channel;
 	}
-
-	@Override
-	public String toString() {
-		return "OtpVerifyRequest{" + "studentId='" + studentId + '\'' + ", otp='" + otp + '\'' + ", channel=" + channel
-				+ '}';
-	}
-
 }

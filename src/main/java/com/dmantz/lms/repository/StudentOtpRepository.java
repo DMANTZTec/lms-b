@@ -1,5 +1,6 @@
 package com.dmantz.lms.repository;
 
+import com.dmantz.lms.entity.OtpPurpose;
 import com.dmantz.lms.entity.Student;
 import com.dmantz.lms.entity.StudentOtp;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,10 +16,15 @@ import java.util.UUID;
 public interface StudentOtpRepository extends JpaRepository<StudentOtp, UUID> {
 
 
-    List<StudentOtp> findByStudent_StudentIdOrderByCreatedDtDesc(String studentId);
+//    List<StudentOtp> findByStudent_StudentIdOrderByCreatedDtDesc(String studentId);
+//
+//    Optional<StudentOtp> findTopByStudentOrderByCreatedDtDesc(Student student);
+//
+//    @Query("SELECT o FROM StudentOtp o WHERE o.student.studentId = :studentId ORDER BY o.createdDt DESC")
+//    List<StudentOtp> findLatestOtpByStudentId(@Param("studentId") String studentId);
 
-    Optional<StudentOtp> findTopByStudentOrderByCreatedDtDesc(Student student);
+    Optional<StudentOtp> findTopByEmailIdOrderByCreatedDtDesc(String emailId);
 
-    @Query("SELECT o FROM StudentOtp o WHERE o.student.studentId = :studentId ORDER BY o.createdDt DESC")
-    List<StudentOtp> findLatestOtpByStudentId(@Param("studentId") String studentId);
+
+
 }

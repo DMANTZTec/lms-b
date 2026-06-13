@@ -23,11 +23,17 @@ public class StudentOtp extends AuditFields {
     @Column(name = "id", length = 36, nullable = false, updatable = false)
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "student_id",
-            referencedColumnName = "studentId",
-            nullable = false)
-    private Student student;
+//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+//    @JoinColumn(name = "student_id",
+//            referencedColumnName = "studentId",
+//            nullable = false)
+//    private Student student;
+
+    @Column(name = "email_id")
+    private String emailId;
+
+    @Column(name = "mobile_num")
+    private String mobileNum;
 
     @Column(name = "otp", nullable = false, length = 10)
     private String otp;
@@ -47,12 +53,20 @@ public class StudentOtp extends AuditFields {
         this.id = id;
     }
 
-    public Student getStudent() {
-        return student;
+    public String getEmailId() {
+        return emailId;
     }
 
-    public void setStudent(Student student) {
-        this.student = student;
+    public void setEmailId(String emailId) {
+        this.emailId = emailId;
+    }
+
+    public String getMobileNum() {
+        return mobileNum;
+    }
+
+    public void setMobileNum(String mobileNum) {
+        this.mobileNum = mobileNum;
     }
 
     public String getOtp() {
@@ -83,7 +97,8 @@ public class StudentOtp extends AuditFields {
     public String toString() {
         return "StudentOtp{" +
                 "id=" + id +
-                ", student=" + student +
+                ", emailId='" + emailId + '\'' +
+                ", mobileNum='" + mobileNum + '\'' +
                 ", otp='" + otp + '\'' +
                 ", attemptsNum=" + attemptsNum +
                 ", status=" + status +

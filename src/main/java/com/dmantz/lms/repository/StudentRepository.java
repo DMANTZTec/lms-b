@@ -44,6 +44,7 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     """)
     int deleteUnverifiedStudents(@Param("cutoffTime") LocalDateTime cutoffTime);
 
+    Optional<Object> findByMobileNum(String mobileNum);
 }
 
 

@@ -25,16 +25,16 @@ public class AuthController {
 		this.authService = authService;
 	}
 
-	@PostMapping("/student/login")
-	public ResponseEntity<StudentLoginResponse> studentLogin(
-			@RequestBody StudentLoginRequest request) {
-
-		logger.info("OTP verification API called for studentId: {}",
-				request.getUsername());
-		StudentLoginResponse response = authService.studentLogin(request);
-
-		return ResponseEntity.ok(response);
-	}
+//	@PostMapping("/student/login")
+//	public ResponseEntity<StudentLoginResponse> studentLogin(
+//			@RequestBody StudentLoginRequest request) {
+//
+//		logger.info("OTP verification API called for studentId: {}",
+//				request.getUsername());
+//		StudentLoginResponse response = authService.studentLogin(request);
+//
+//		return ResponseEntity.ok(response);
+//	}
 
 	@PostMapping("/staff/login")
 	public ResponseEntity<StaffLoginResponse> staffLogin(@RequestBody StaffLoginRequest request) {
