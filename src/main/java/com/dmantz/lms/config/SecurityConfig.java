@@ -46,6 +46,8 @@ public class SecurityConfig {
                                 "/api/student/registration/verify-otp",
                                 "/api/student/login",
                                 "/api/student/verify-login-otp",
+                                "/api/student/*",
+                                "/api/student/view-students",
                                 "/api/student/forgot-password",
                                 "/api/student/reset-password"
                         ).permitAll()

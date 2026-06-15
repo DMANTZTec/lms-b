@@ -134,17 +134,15 @@ public class StudentController {
 
 		return ResponseEntity.ok(studentService.updateStudentProfile(studentId, request));
 	}
-//	=================== GET STUDENT BY StudentId =================
-	
+
+
+    // GET STUDENT BY StudentId
 	@GetMapping("/{studentId}")
 	public ResponseEntity<StudentResponse> getStudentById(@PathVariable String studentId) {
-
 	    logger.info("Request received to fetch student with studentId: {}", studentId);
-
 	    StudentResponse response = studentService.getStudentById(studentId);
-
 	    logger.info("Student fetched successfully for studentId: {}", studentId);
-
 	    return ResponseEntity.ok(response);
 	}
+
 }
