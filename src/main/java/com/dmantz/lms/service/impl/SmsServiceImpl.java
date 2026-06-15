@@ -15,93 +15,93 @@ import org.springframework.stereotype.Service;
 @Service
 public class SmsServiceImpl implements SmsService {
 
-    private static final Logger logger = LogManager.getLogger(SmsServiceImpl.class);
+	private static final Logger logger = LogManager.getLogger(SmsServiceImpl.class);
 
-    @Value("${twilio.account.sid}")
-    private String accountSid;
+	@Value("${twilio.account.sid}")
+	private String accountSid;
 
-    @Value("${twilio.auth.token}")
-    private String authToken;
+	@Value("${twilio.auth.token}")
+	private String authToken;
 
-    @Value("${twilio.from.number}")
-    private String twilioFromNumber;
+	@Value("${twilio.from.number}")
+	private String twilioFromNumber;
 
-    @PostConstruct
-    public void init() {
-        Twilio.init(accountSid, authToken);
-        logger.info("Twilio SMS initialized successfully");
-    }
+	@PostConstruct
+	public void init() {
+		Twilio.init(accountSid, authToken);
+		logger.info("Twilio SMS initialized successfully");
+	}
 
-    @Override
-    public void sendOtpSms(String mobileNumber, String otp, OtpPurpose purpose) {
+	@Override
+	public void sendOtpSms(String mobileNumber, String otp, OtpPurpose purpose) {
 
-        if (mobileNumber == null || mobileNumber.isBlank()) {
-            throw new SmsSendingException("Mobile number must not be null or blank");
-        }
+		if (mobileNumber == null || mobileNumber.isBlank()) {
+			throw new SmsSendingException("Mobile number must not be null or blank");
+		}
 
-        if (purpose == null) {
-            throw new SmsSendingException("OTP purpose must not be null");
-        }
+		if (purpose == null) {
+			throw new SmsSendingException("OTP purpose must not be null");
+		}
 
-        String messageBody;
+		String messageBody;
 
-        switch (purpose) {
+		switch (purpose) {
 
-            case REGISTRATION:
-                messageBody = "Welcome to LMS! Your account verification OTP is: " + otp
-                        + ". Valid for 5 minutes. Do not share this with anyone.";
-                break;
+		case REGISTRATION:
+			messageBody = "Welcome to LMS! Your account verification OTP is: " + otp
+					+ ". Valid for 5 minutes. Do not share this with anyone.";
+			break;
 
-            case LOGIN:
-                messageBody = "Your LMS login OTP is: " + otp
-                        + ". Valid for 5 minutes. Do not share this with anyone.";
-                break;
+		case LOGIN:
+			messageBody = "Your LMS login OTP is: " + otp + ". Valid for 5 minutes. Do not share this with anyone.";
+			break;
 
-            case FORGOT_PASSWORD:
-                messageBody = "Your LMS password reset OTP is: " + otp
-                        + ". Valid for 10 minutes. If you did not request this, ignore this message.";
-                break;
+		case FORGOT_PASSWORD:
+			messageBody = "Your LMS password reset OTP is: " + otp
+					+ ". Valid for 10 minutes. If you did not request this, ignore this message.";
+			break;
 
-            case STAFF_LOGIN:
-                messageBody = "Your LMS Staff login OTP is: " + otp
-                        + ". Valid for 5 minutes. Do not share this with anyone.";
-                break;
+		case STAFF_LOGIN:
+			messageBody = "Your LMS Staff login OTP is: " + otp
+					+ ". Valid for 5 minutes. Do not share this with anyone.";
+			break;
 
-            case STAFF_FORGOT_PASSWORD:
-                messageBody = "Your LMS Staff password reset OTP is: " + otp
-                        + ". Valid for 10 minutes. If you did not request this, ignore this message.";
-                break;
+		case STAFF_FORGOT_PASSWORD:
+			messageBody = "Your LMS Staff password reset OTP is: " + otp
+					+ ". Valid for 10 minutes. If you did not request this, ignore this message.";
+			break;
 
-            default:
-                throw new SmsSendingException("Unsupported OTP purpose for SMS: " + purpose);
-        }
+		case PASSWORD_RESET_SUCCESS:
+			messageBody = "Your LMS password has been reset successfully. "
+					+ "If this wasn't you, please contact support immediately.";
+			break;
 
-        try {
-            String formattedNumber = formatToE164(mobileNumber);
+		default:
+			throw new SmsSendingException("Unsupported OTP purpose for SMS: " + purpose);
+		}
 
-            Message message = Message.creator(
-                    new PhoneNumber(formattedNumber),
-                    new PhoneNumber(twilioFromNumber),
-                    messageBody
-            ).create();
+		try {
+			String formattedNumber = formatToE164(mobileNumber);
 
-            logger.info("OTP SMS sent successfully to {} | SID: {} | Purpose: {}",
-                    formattedNumber, message.getSid(), purpose);
+			Message message = Message
+					.creator(new PhoneNumber(formattedNumber), new PhoneNumber(twilioFromNumber), messageBody).create();
 
-        } catch (Exception ex) {
-            logger.error("Failed to send OTP SMS to {} for purpose {}: {}",
-                    mobileNumber, purpose, ex.getMessage(), ex);
-            throw new SmsSendingException("Failed to send OTP SMS to " + mobileNumber + ": " + ex.getMessage(), ex);
-        }
-    }
+			logger.info("OTP SMS sent successfully to {} | SID: {} | Purpose: {}", formattedNumber, message.getSid(),
+					purpose);
 
-    private String formatToE164(String mobile) {
-        if (mobile.startsWith("+")) {
-            return mobile;
-        }
-        if (mobile.length() == 10) {
-            return "+91" + mobile;  // India prefix — adjust if multi-country
-        }
-        return "+" + mobile;
-    }
+		} catch (Exception ex) {
+			logger.error("Failed to send OTP SMS to {} for purpose {}: {}", mobileNumber, purpose, ex.getMessage(), ex);
+			throw new SmsSendingException("Failed to send OTP SMS to " + mobileNumber + ": " + ex.getMessage(), ex);
+		}
+	}
+
+	private String formatToE164(String mobile) {
+		if (mobile.startsWith("+")) {
+			return mobile;
+		}
+		if (mobile.length() == 10) {
+			return "+91" + mobile; // India prefix — adjust if multi-country
+		}
+		return "+" + mobile;
+	}
 }

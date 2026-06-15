@@ -77,31 +77,31 @@ public class StudentController {
 
 		return ResponseEntity.ok(students);
 	}
-
 	// ================= FORGOT PASSWORD =================
 	@PostMapping("/forgot-password")
-	public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+	public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
 
-		logger.info("Forgot password request received for email: {}", request.getEmail());
+	    logger.info("Forgot password request received for identifier: {} via channel: {}",
+	            request.getGetEmailIdOrMobileNo(), request.getOtpChannel());
 
-		studentService.forgotPassword(request);
+	    studentService.forgotPassword(request);
 
-		logger.info("Forgot password OTP sent successfully for email: {}", request.getEmail());
+	    logger.info("Forgot password OTP sent successfully for identifier: {}", request.getGetEmailIdOrMobileNo());
 
-		return ResponseEntity.ok("OTP sent successfully");
+	    return ResponseEntity.ok("OTP sent successfully via " + request.getOtpChannel());
 	}
 
 	// ================= RESET PASSWORD =================
 	@PostMapping("/reset-password")
-	public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest request) {
+	public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
 
-		logger.info("Reset password request received for studentId: {}", request.getStudentId());
+	    logger.info("Reset password request received for studentId: {}", request.getStudentId());
 
-		studentService.resetPassword(request);
+	    studentService.resetPassword(request);
 
-		logger.info("Password reset successfully for studentId: {}", request.getStudentId());
+	    logger.info("Password reset successfully for studentId: {}", request.getStudentId());
 
-		return ResponseEntity.ok("Password reset successful");
+	    return ResponseEntity.ok("Password reset successful");
 	}
 
 	// ================= UPDATE STUDENT PROFILE =================
@@ -133,5 +133,18 @@ public class StudentController {
 		request.setProfileImg(profileImg);
 
 		return ResponseEntity.ok(studentService.updateStudentProfile(studentId, request));
+	}
+//	=================== GET STUDENT BY StudentId =================
+	
+	@GetMapping("/{studentId}")
+	public ResponseEntity<StudentResponse> getStudentById(@PathVariable String studentId) {
+
+	    logger.info("Request received to fetch student with studentId: {}", studentId);
+
+	    StudentResponse response = studentService.getStudentById(studentId);
+
+	    logger.info("Student fetched successfully for studentId: {}", studentId);
+
+	    return ResponseEntity.ok(response);
 	}
 }

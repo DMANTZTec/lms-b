@@ -195,90 +195,80 @@ public class StaffServiceImpl implements StaffService {
 
 		return savedOtp;
 	}
+
 	@Override
 	public StaffLoginResponse verifyStaffOtp(StaffOtpVerifyRequest request) {
 
-	    logger.info("OTP verification started for staffId: {}", request.getStaffId());
+		logger.info("OTP verification started for staffId: {}", request.getStaffId());
 
-	    StaffOtp otp = staffOtpRepository
-	            .findTopByStaffIdOrderByCreatedDtDesc(request.getStaffId())
-	            .orElseThrow(() -> {
+		StaffOtp otp = staffOtpRepository.findTopByStaffIdOrderByCreatedDtDesc(request.getStaffId()).orElseThrow(() -> {
 
-	                logger.error("OTP not found for staffId: {}", request.getStaffId());
+			logger.error("OTP not found for staffId: {}", request.getStaffId());
 
-	                return new OtpNotFoundException("OTP not found");
-	            });
+			return new OtpNotFoundException("OTP not found");
+		});
 
-	    // CHECK OTP STATUS
-	    if (otp.getStatus() != OtpStatus.SENT) {
+		// CHECK OTP STATUS
+		if (otp.getStatus() != OtpStatus.SENT) {
 
-	        logger.warn("Invalid OTP status for staffId: {}", request.getStaffId());
+			logger.warn("Invalid OTP status for staffId: {}", request.getStaffId());
 
-	        throw new OtpInvalidException("OTP is not valid");
-	    }
+			throw new OtpInvalidException("OTP is not valid");
+		}
 
-	    // CHECK OTP EXPIRY
-	    if (otp.getCreatedDt().isBefore(LocalDateTime.now().minusMinutes(5))) {
+		// CHECK OTP EXPIRY
+		if (otp.getCreatedDt().isBefore(LocalDateTime.now().minusMinutes(5))) {
 
-	        otp.setStatus(OtpStatus.EXPIRED);
+			otp.setStatus(OtpStatus.EXPIRED);
 
-	        otp.setUpdatedDt(LocalDateTime.now());
+			otp.setUpdatedDt(LocalDateTime.now());
 
-	        staffOtpRepository.save(otp);
+			staffOtpRepository.save(otp);
 
-	        logger.warn("OTP expired for staffId: {}", request.getStaffId());
+			logger.warn("OTP expired for staffId: {}", request.getStaffId());
 
-	        throw new OtpExpiredException("OTP expired");
-	    }
+			throw new OtpExpiredException("OTP expired");
+		}
 
-	    // INVALID OTP
-	    if (!otp.getOtp().equals(request.getOtp())) {
+		// INVALID OTP
+		if (!otp.getOtp().equals(request.getOtp())) {
 
-	        otp.setAttemptsNum(otp.getAttemptsNum() + 1);
+			otp.setAttemptsNum(otp.getAttemptsNum() + 1);
 
-	        otp.setUpdatedDt(LocalDateTime.now());
+			otp.setUpdatedDt(LocalDateTime.now());
 
-	        staffOtpRepository.save(otp);
+			staffOtpRepository.save(otp);
 
-	        logger.warn("Invalid OTP entered for staffId: {}", request.getStaffId());
+			logger.warn("Invalid OTP entered for staffId: {}", request.getStaffId());
 
-	        throw new OtpInvalidException("Invalid OTP");
-	    }
+			throw new OtpInvalidException("Invalid OTP");
+		}
 
-	    // FETCH STAFF
-	    Staff staff = staffRepository
-	            .findByStaffId(request.getStaffId())
-	            .orElseThrow(() -> {
+		// FETCH STAFF
+		Staff staff = staffRepository.findByStaffId(request.getStaffId()).orElseThrow(() -> {
 
-	                logger.error("Staff not found for staffId: {}", request.getStaffId());
+			logger.error("Staff not found for staffId: {}", request.getStaffId());
 
-	                return new ResourceNotFoundException("Staff not found");
-	            });
+			return new ResourceNotFoundException("Staff not found");
+		});
 
-	    // GET ROLE
-	    String role = staff.getRoles()
-	            .stream()
-	            .findFirst()
-	            .map(r -> r.getRoleNm())
-	            .orElse("STAFF");
+		// GET ROLE
+		String role = staff.getRoles().stream().findFirst().map(r -> r.getRoleNm()).orElse("STAFF");
 
-	    // GENERATE JWT TOKEN AFTER OTP VERIFICATION
-	    String token = jwtUtil.generateToken(
-	            staff.getEmailId(),
-	            role,
-	            staff.getStaffId());
+		// GENERATE JWT TOKEN AFTER OTP VERIFICATION
+		String token = jwtUtil.generateToken(staff.getEmailId(), role, staff.getStaffId());
 
-	    // UPDATE OTP STATUS
-	    otp.setStatus(OtpStatus.VERIFIED);
+		// UPDATE OTP STATUS
+		otp.setStatus(OtpStatus.VERIFIED);
 
-	    otp.setUpdatedDt(LocalDateTime.now());
+		otp.setUpdatedDt(LocalDateTime.now());
 
-	    staffOtpRepository.save(otp);
+		staffOtpRepository.save(otp);
 
-	    logger.info("OTP verified successfully for staffId: {}", request.getStaffId());
+		logger.info("OTP verified successfully for staffId: {}", request.getStaffId());
 
-	    // RESPONSE
-	    StaffLoginResponse response = new StaffLoginResponse();
+		// RESPONSE
+		StaffLoginResponse response = new StaffLoginResponse();
 		response.setStaffId(staff.getStaffId());
 		response.setEmail(staff.getEmailId());
 		response.setRole("STAFF");
@@ -286,41 +276,43 @@ public class StaffServiceImpl implements StaffService {
 		response.setMessage("Login successful");
 		return response;
 	}
+
 	@Override
 	public StaffPasswordResponse forgotPassword(ForgotPasswordRequest request) {
 
-		logger.info("Forgot password started for email: {}", request.getEmail());
-
-		Staff staff = staffRepository.findByEmailId(request.getEmail()).orElseThrow(() -> {
-
-			logger.error("Staff not found for email: {}", request.getEmail());
-
-			return new ResourceNotFoundException("Staff not found");
-		});
-
-		staffOtpRepository.expireActiveOtps(staff.getStaffId(), OtpStatus.EXPIRED,
-				List.of(OtpStatus.NEW, OtpStatus.SENT));
-
-		StaffOtp otp = new StaffOtp();
-
-		otp.setStaffId(staff.getStaffId());
-
-		otp.setOtp(String.valueOf(100000 + new Random().nextInt(900000)));
-
-		otp.setStatus(OtpStatus.SENT);
-		otp.setCreatedDt(LocalDateTime.now());
-
-		staffOtpRepository.save(otp);
-
-		emailService.sendOtpEmail(staff.getEmailId(), otp.getOtp(), OtpPurpose.STAFF_FORGOT_PASSWORD);
-
-		logger.info("Forgot password OTP sent successfully to: {}", staff.getEmailId());
-
-		StaffPasswordResponse response = staffMapper.toPasswordResponse(staff);
-
-		response.setMessage("OTP sent to your registered email.");
-
-		return response;
+//		logger.info("Forgot password started for email: {}", request.getEmail());
+//
+//		Staff staff = staffRepository.findByEmailId(request.getEmail()).orElseThrow(() -> {
+//
+//			logger.error("Staff not found for email: {}", request.getEmail());
+//
+//			return new ResourceNotFoundException("Staff not found");
+//		});
+//
+//		staffOtpRepository.expireActiveOtps(staff.getStaffId(), OtpStatus.EXPIRED,
+//				List.of(OtpStatus.NEW, OtpStatus.SENT));
+//
+//		StaffOtp otp = new StaffOtp();
+//
+//		otp.setStaffId(staff.getStaffId());
+//
+//		otp.setOtp(String.valueOf(100000 + new Random().nextInt(900000)));
+//
+//		otp.setStatus(OtpStatus.SENT);
+//		otp.setCreatedDt(LocalDateTime.now());
+//
+//		staffOtpRepository.save(otp);
+//
+//		emailService.sendOtpEmail(staff.getEmailId(), otp.getOtp(), OtpPurpose.STAFF_FORGOT_PASSWORD);
+//
+//		logger.info("Forgot password OTP sent successfully to: {}", staff.getEmailId());
+//
+//		StaffPasswordResponse response = staffMapper.toPasswordResponse(staff);
+//
+//		response.setMessage("OTP sent to your registered email.");
+//
+//		return response;
+		return null;
 	}
 
 	@Override
@@ -481,7 +473,5 @@ public class StaffServiceImpl implements StaffService {
 
 		return staffMapper.toResponse(savedStaff);
 	}
-	
 
-	
 }

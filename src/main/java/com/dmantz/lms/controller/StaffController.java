@@ -72,13 +72,14 @@ public class StaffController {
 	@PostMapping("/forgot-password")
 	public ResponseEntity<StaffPasswordResponse> forgotPassword(@RequestBody ForgotPasswordRequest request) {
 
-		logger.info("Forgot password request received for email: {}", request.getEmail());
-
-		StaffPasswordResponse response = staffService.forgotPassword(request);
-
-		logger.info("Forgot password OTP sent successfully to email: {}", request.getEmail());
-
-		return ResponseEntity.ok(response);
+//		logger.info("Forgot password request received for email: {}", request.getEmail());
+//
+//		StaffPasswordResponse response = staffService.forgotPassword(request);
+//
+//		logger.info("Forgot password OTP sent successfully to email: {}", request.getEmail());
+//
+//		return ResponseEntity.ok(response);
+		return null;
 	}
 
 	@PostMapping("/reset-password")

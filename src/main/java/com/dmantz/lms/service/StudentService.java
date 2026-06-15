@@ -27,4 +27,6 @@ public interface StudentService {
 	void resetPassword(ResetPasswordRequest request);
 
 	StudentResponse updateStudentProfile(String studentId, StudentUpdateRequest request);
+	
+	StudentResponse getStudentById(String studentId);
 }

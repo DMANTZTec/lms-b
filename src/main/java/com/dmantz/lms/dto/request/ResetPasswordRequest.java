@@ -1,9 +1,20 @@
 package com.dmantz.lms.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 public class ResetPasswordRequest {
 
     private String studentId;
+    
+    @NotBlank(message = "Email or Mobile number is required")
+    private String emailIdOrMobileNo;
+    
+    @NotBlank(message = "OTP is required")
     private String otp;
+    
+    @NotBlank(message = "New password is required")
+    @Size(min = 6, max = 100, message = "Password must be at least 6 characters")
     private String newPassword;
 
     public String getStudentId() {
@@ -30,12 +41,13 @@ public class ResetPasswordRequest {
         this.newPassword = newPassword;
     }
 
-    @Override
-    public String toString() {
-        return "ResetPasswordRequest{" +
-                "studentId='" + studentId + '\'' +
-                ", otp='" + otp + '\'' +
-                ", newPassword='" + newPassword + '\'' +
-                '}';
-    }
+	public String getEmailIdOrMobileNo() {
+		return emailIdOrMobileNo;
+	}
+
+	public void setEmailIdOrMobileNo(String emailIdOrMobileNo) {
+		this.emailIdOrMobileNo = emailIdOrMobileNo;
+	}
+
+    
 }
