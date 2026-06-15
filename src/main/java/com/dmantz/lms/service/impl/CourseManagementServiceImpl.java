@@ -1359,21 +1359,33 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 	}
 
 	// ========================= delete course from program
-	@Override
-	public void deleteProgramCourse(Long programCourseId) {
+		@Override
+		public void deleteProgramCourse(DeleteProgramCourseRequest request) {
+			logger.info("Removing course {} from program {}",
+		            request.getCourseId(),
+		            request.getProgramId());
 
-		logger.info("Removing programCourse mapping with id: {}", programCourseId);
+		    ProgramCourse programCourse = programCourseRepository
+		            .findByProgram_ProgramIdAndCourse_CourseId(
+		                    request.getProgramId(),
+		                    request.getCourseId())
+		            .orElseThrow(() -> {
+		                logger.warn("Course {} does not belong to program {}",
+		                        request.getCourseId(),
+		                        request.getProgramId());
 
-		ProgramCourse programCourse = programCourseRepository.findById(programCourseId).orElseThrow(() -> {
-			logger.warn("ProgramCourse not found with id: {}", programCourseId);
+		                return new ResourceNotFoundException(
+		                        "Course " + request.getCourseId()
+		                                + " is not associated with Program "
+		                                + request.getProgramId());
+		            });
 
-			return new ResourceNotFoundException("ProgramCourse not found with id: " + programCourseId);
-		});
+		    programCourseRepository.delete(programCourse);
 
-		programCourseRepository.delete(programCourse);
-
-		logger.info("ProgramCourse mapping deleted successfully with id: {}", programCourseId);
-	}
+		    logger.info("Course {} removed successfully from program {}",
+		            request.getCourseId(),
+		            request.getProgramId());
+		}
 
 	@Override
 	public CourseDetailsResponse getCourseDetails(String courseId) {

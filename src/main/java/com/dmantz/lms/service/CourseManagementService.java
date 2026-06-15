@@ -98,7 +98,7 @@ public interface CourseManagementService {
 
 	List<ProgramCourseResponse> addCoursesToProgram(ProgramCourseRequest request);
 
-	void deleteProgramCourse(Long programCourseId);
+	void deleteProgramCourse(DeleteProgramCourseRequest request);
 
 	void deleteProgram(Long programId);
 
