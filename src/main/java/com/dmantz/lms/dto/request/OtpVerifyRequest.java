@@ -4,16 +4,17 @@ import com.dmantz.lms.entity.OtpChannel;
 
 public class OtpVerifyRequest {
 
-	private String emailId;
+	private String emailIdOrMobileNo;
 	private String otp;
 	private OtpChannel channel;
 
-	public String getEmailId() {
-		return emailId;
+	
+	public String getEmailIdOrMobileNo() {
+		return emailIdOrMobileNo;
 	}
 
-	public void setEmailId(String emailId) {
-		this.emailId = emailId;
+	public void setEmailIdOrMobileNo(String emailIdOrMobileNo) {
+		this.emailIdOrMobileNo = emailIdOrMobileNo;
 	}
 
 	public String getOtp() {

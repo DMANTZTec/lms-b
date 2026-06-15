@@ -15,16 +15,8 @@ import java.util.UUID;
 @Repository
 public interface StudentOtpRepository extends JpaRepository<StudentOtp, UUID> {
 
+	Optional<StudentOtp> findTopByEmailIdOrderByCreatedDtDesc(String emailId);
 
-//    List<StudentOtp> findByStudent_StudentIdOrderByCreatedDtDesc(String studentId);
-//
-//    Optional<StudentOtp> findTopByStudentOrderByCreatedDtDesc(Student student);
-//
-//    @Query("SELECT o FROM StudentOtp o WHERE o.student.studentId = :studentId ORDER BY o.createdDt DESC")
-//    List<StudentOtp> findLatestOtpByStudentId(@Param("studentId") String studentId);
-
-    Optional<StudentOtp> findTopByEmailIdOrderByCreatedDtDesc(String emailId);
-
-
+	Optional<StudentOtp> findTopByEmailIdOrMobileNumOrderByCreatedDtDesc(String emailId, String mobileNum);
 
 }

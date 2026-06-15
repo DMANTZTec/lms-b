@@ -7,8 +7,10 @@ import com.dmantz.lms.dto.response.StudentLoginResponse;
 import com.dmantz.lms.dto.response.StudentResponse;
 import com.dmantz.lms.entity.*;
 import com.dmantz.lms.exceptions.DuplicateValuesException;
+import com.dmantz.lms.exceptions.InvalidOtpChannelException;
 import com.dmantz.lms.exceptions.OtpSendingException;
 import com.dmantz.lms.exceptions.ResourceNotFoundException;
+import com.dmantz.lms.exceptions.StudentNotFoundException;
 import com.dmantz.lms.mapper.StudentMapper;
 import com.dmantz.lms.mapper.StudentRegistrationOtpMapper;
 import com.dmantz.lms.repository.StudentOtpRepository;
@@ -84,79 +86,110 @@ public class StudentServiceImpl implements StudentService {
     }
 
 	@Override
-	@Transactional
-	public RegistrationResponse register(StudentRegistrationRequest request) {
+    @Transactional
+    public RegistrationResponse register(StudentRegistrationRequest request) {
 
-		logger.info("Registration started for email: {}", request.getEmailId());
+        logger.info("Registration started for email: {}", request.getEmailId());
 
-		if (studentRepository.existsByEmailId(request.getEmailId())) {
-			throw new DuplicateValuesException("Email already exists");
-		}
+        if (studentRepository.existsByEmailId(request.getEmailId())) {
+            throw new DuplicateValuesException("Email already exists");
+        }
 
-		if (studentRepository.existsByMobileNum(request.getMobileNum())) {
-			throw new DuplicateValuesException("Mobile number already exists");
-		}
+        if (studentRepository.existsByMobileNum(request.getMobileNum())) {
+            throw new DuplicateValuesException("Mobile number already exists");
+        }
 
-		StudentRegistrationOTP registration = studentRegistrationOtpMapper.toEntity(request);
-		registration.setPassword(passwordEncoder.encode(request.getPassword()));
-		registration.setCurrentStatus(request.getCurrentStatus());
+        OtpChannel channel = request.getOtpChannel();
+        if (channel == null) {
+            throw new InvalidOtpChannelException("OTP channel must be specified: EMAIL or MOBILE");
+        }
+        
+     // NEW: remove any old/stale pending registration rows for this email or mobile
+        List<StudentRegistrationOTP> oldPending = studentRegistrationOtpRepository
+                .findAllByEmailIdOrMobileNum(request.getEmailId(), request.getMobileNum());
+        if (!oldPending.isEmpty()) {
+            studentRegistrationOtpRepository.deleteAll(oldPending);
+            logger.info("Removed {} stale pending registration(s) for email/mobile: {} / {}",
+                    oldPending.size(), request.getEmailId(), request.getMobileNum());
+        }
 
-		StudentRegistrationOTP savedRegistration =
-				studentRegistrationOtpRepository.save(registration);
+        // Save registration data
+        StudentRegistrationOTP registration = studentRegistrationOtpMapper.toEntity(request);
+        registration.setPassword(passwordEncoder.encode(request.getPassword()));
+        registration.setCurrentStatus(request.getCurrentStatus());
+        StudentRegistrationOTP savedRegistration = studentRegistrationOtpRepository.save(registration);
+        logger.info("Registration data saved for email: {}", savedRegistration.getEmailId());
 
-		logger.info("Registration data saved for email: {}",
-				savedRegistration.getEmailId());
+        // Generate OTP
+        StudentOtp otp = generateOtp(savedRegistration);
 
-		StudentOtp otp = generateOtp(savedRegistration);
+        try {
+            switch (channel) {
 
-		try {
-			// Email OTP
-			emailService.sendOtpEmail(savedRegistration.getEmailId(),
-					otp.getOtp(),
-					OtpPurpose.REGISTRATION);
+                case EMAIL:
+                    if (savedRegistration.getEmailId() == null || savedRegistration.getEmailId().isBlank()) {
+                        throw new InvalidOtpChannelException("Email not provided. Cannot send OTP via EMAIL.");
+                    }
+                    emailService.sendOtpEmail(
+                            savedRegistration.getEmailId(),
+                            otp.getOtp(),
+                            OtpPurpose.REGISTRATION
+                    );
+                    logger.info("Registration OTP sent via EMAIL to: {}", savedRegistration.getEmailId());
+                    break;
 
-//			// SMS OTP
-//			smsService.sendOtp(
-//					savedRegistration.getMobileNum(),
-//					otp.getOtp());
+                case MOBILE:
+                    if (savedRegistration.getMobileNum() == null || savedRegistration.getMobileNum().isBlank()) {
+                        throw new InvalidOtpChannelException("Mobile number not provided. Cannot send OTP via MOBILE.");
+                    }
+                    smsService.sendOtpSms(
+                            savedRegistration.getMobileNum(),
+                            otp.getOtp(),
+                            OtpPurpose.REGISTRATION
+                    );
+                    logger.info("Registration OTP sent via MOBILE to: {}", savedRegistration.getMobileNum());
+                    break;
 
-			otp.setStatus(OtpStatus.SENT);
-			otp.setUpdatedDt(LocalDateTime.now());
+                default:
+                    throw new InvalidOtpChannelException("Invalid OTP channel: " + channel);
+            }
 
-			otpRepository.save(otp);
+            otp.setStatus(OtpStatus.SENT);
+            otp.setUpdatedDt(LocalDateTime.now());
+            otpRepository.save(otp);
 
-			logger.info("OTP sent successfully to email {} and mobile {}",
-					savedRegistration.getEmailId(),
-					savedRegistration.getMobileNum());
+        } catch (InvalidOtpChannelException ex) {
+            otp.setStatus(OtpStatus.FAILED);
+            otp.setUpdatedDt(LocalDateTime.now());
+            otpRepository.save(otp);
+            logger.error("Invalid channel during registration OTP send: {}", ex.getMessage());
+            throw ex;
 
-		} catch (Exception ex) {
+        } catch (Exception ex) {
+            otp.setStatus(OtpStatus.FAILED);
+            otp.setUpdatedDt(LocalDateTime.now());
+            otpRepository.save(otp);
+            logger.error("Failed to send OTP via {} during registration: {}", channel, ex.getMessage(), ex);
+            throw new OtpSendingException("Failed to send OTP via " + channel + ": " + ex.getMessage(), ex);
+        }
 
-			otp.setStatus(OtpStatus.FAILED);
-			otp.setUpdatedDt(LocalDateTime.now());
-			otpRepository.save(otp);
-			logger.error("Failed to send OTP", ex);
-
-			throw new OtpSendingException("Failed to send OTP: " + ex.getMessage(), ex);
-		}
-
-		RegistrationResponse response = new RegistrationResponse();
-
-		response.setEmailId(savedRegistration.getEmailId());
-		response.setMobileNum(savedRegistration.getMobileNum());
-		response.setStatus("SUCCESS");
-		response.setMessage("OTP sent successfully");
-		return response;
-	}
-
+        RegistrationResponse response = new RegistrationResponse();
+        response.setEmailId(savedRegistration.getEmailId());
+        response.setMobileNum(savedRegistration.getMobileNum());
+        response.setStatus("SUCCESS");
+        response.setMessage("OTP sent successfully via " + channel);
+        return response;
+    }
 	@Override
 	@Transactional
 	public StudentResponse verifyOtp(OtpVerifyRequest request) {
 
-		logger.info("OTP verification started for email: {}", request.getEmailId());
+		 String identifier = request.getEmailIdOrMobileNo();
+		    logger.info("OTP verification started for identifier: {}", identifier);
 
-		StudentOtp otpEntity = otpRepository
-				.findTopByEmailIdOrderByCreatedDtDesc(request.getEmailId())
-				.orElseThrow(() -> new ResourceNotFoundException("OTP not found"));
+		    StudentOtp otpEntity = otpRepository
+		            .findTopByEmailIdOrMobileNumOrderByCreatedDtDesc(identifier, identifier)
+		            .orElseThrow(() -> new ResourceNotFoundException("OTP not found"));
 
 		if (!otpEntity.getOtp().equals(request.getOtp())) {
 
@@ -165,10 +198,11 @@ public class StudentServiceImpl implements StudentService {
 			throw new RuntimeException("Invalid OTP");
 		}
 
-		StudentRegistrationOTP registration =
-				studentRegistrationOtpRepository.findByEmailId(request.getEmailId())
-						.orElseThrow(() -> new ResourceNotFoundException("Registration data not found"));
 
+		StudentRegistrationOTP registration = studentRegistrationOtpRepository
+		        .findFirstByEmailIdOrMobileNumOrderByIdDesc(identifier, identifier)
+		        .orElseThrow(() -> new ResourceNotFoundException("Registration data not found"));
+	    
 		Student student = new Student();
 		student.setStudentId(generateStudentId());
 		student.setLoginId(registration.getEmailId());
@@ -293,18 +327,21 @@ public class StudentServiceImpl implements StudentService {
 	@Transactional
 	public StudentLoginResponse verifyLoginOtp(OtpVerifyRequest request) {
 
-		logger.info("Verifying login OTP for email: {}", request.getEmailId());
+		 String identifier = request.getEmailIdOrMobileNo();
+		    logger.info("Verifying login OTP for identifier: {}", identifier);
 
-		Student student = studentRepository.findByEmailId(request.getEmailId())
-				.orElseThrow(() -> new RuntimeException("Student not found"));
+		    Student student = studentRepository.findByEmailIdOrMobileNumOrLoginId(identifier, identifier, identifier);
+		    if (student == null) {
+		        throw new StudentNotFoundException("Student not found");
+		    }
 
 		if (student == null) {
 			throw new RuntimeException("Student not found");
 		}
 
-		StudentOtp otp = otpRepository
-				.findTopByEmailIdOrderByCreatedDtDesc(request.getEmailId())
-				.orElseThrow(() -> new RuntimeException("OTP not found"));
+		  StudentOtp otp = otpRepository
+		            .findTopByEmailIdOrMobileNumOrderByCreatedDtDesc(identifier, identifier)
+		            .orElseThrow(() -> new RuntimeException("OTP not found"));
 
 		if (otp == null) {
 			throw new RuntimeException("OTP not found");

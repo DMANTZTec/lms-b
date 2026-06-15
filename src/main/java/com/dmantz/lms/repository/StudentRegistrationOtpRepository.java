@@ -4,6 +4,7 @@ import com.dmantz.lms.entity.StudentRegistrationOTP;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -13,4 +14,9 @@ public interface StudentRegistrationOtpRepository extends JpaRepository<StudentR
 
     Optional<StudentRegistrationOTP> findByMobileNum(String mobileNum);
 
+    Optional<StudentRegistrationOTP> findByEmailIdOrMobileNum(String emailId, String mobileNum);
+    
+    Optional<StudentRegistrationOTP> findFirstByEmailIdOrMobileNumOrderByIdDesc(String emailId, String mobileNum);
+
+    List<StudentRegistrationOTP> findAllByEmailIdOrMobileNum(String emailId, String mobileNum);
 }

@@ -41,7 +41,7 @@ public class StudentController {
 	@PostMapping("/registration/verify-otp")
 	public ResponseEntity<StudentResponse> verifyOtp(@RequestBody OtpVerifyRequest request) {
 		logger.info("OTP verification request received for email: {}",
-				request.getEmailId());
+				request.getEmailIdOrMobileNo());
 		return ResponseEntity.ok(studentService.verifyOtp(request));
 	}
 
