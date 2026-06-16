@@ -621,4 +621,75 @@ public class StudentServiceImpl implements StudentService {
 
 	    return studentMapper.toResponse(student);
 	}
+
+	@Override
+	@Transactional
+	public RegistrationResponse resendOtp(ResendOtpRequest request) {
+
+		logger.info("Resend OTP requested for purpose: {}", request.getPurpose());
+
+		String emailId = request.getEmailId();
+		String mobileNum = request.getMobileNum();
+
+		if ((emailId == null || emailId.isBlank())
+				&& (mobileNum == null || mobileNum.isBlank())) {
+			throw new IllegalArgumentException("Either emailId or mobileNum must be provided");
+		}
+
+		OtpChannel channel = request.getOtpChannel();
+		if (channel == null) {
+			throw new InvalidOtpChannelException("OTP channel must be specified");
+		}
+
+		// Generate new OTP
+		StudentOtp otp = generateOtp(emailId, mobileNum, request.getPurpose());
+
+		try {
+			switch (channel) {
+				case EMAIL:
+					if (emailId == null || emailId.isBlank()) {
+						throw new InvalidOtpChannelException(
+								"Email not provided");
+					}
+
+					emailService.sendOtpEmail(emailId, otp.getOtp(), request.getPurpose());
+					logger.info("OTP resent via EMAIL to {}", emailId);
+					break;
+
+				case MOBILE:
+					if (mobileNum == null || mobileNum.isBlank()) {
+						throw new InvalidOtpChannelException(
+								"Mobile number not provided");
+					}
+
+					smsService.sendOtpSms(mobileNum, otp.getOtp(), request.getPurpose());
+					logger.info("OTP resent via MOBILE to {}", mobileNum);
+					break;
+
+				default:
+					throw new InvalidOtpChannelException("Invalid OTP channel");
+			}
+
+			otp.setStatus(OtpStatus.SENT);
+			otp.setUpdatedDt(LocalDateTime.now());
+			otpRepository.save(otp);
+
+		} catch (Exception ex) {
+
+			otp.setStatus(OtpStatus.FAILED);
+			otp.setUpdatedDt(LocalDateTime.now());
+			otpRepository.save(otp);
+
+			logger.error("Failed to resend OTP", ex);
+
+			throw new OtpSendingException("Failed to resend OTP: " + ex.getMessage(), ex);
+		}
+
+		RegistrationResponse response = new RegistrationResponse();
+		response.setEmailId(emailId);
+		response.setMobileNum(mobileNum);
+		response.setStatus("SUCCESS");
+		response.setMessage("OTP resent successfully via " + channel);
+		return response;
+	}
 }

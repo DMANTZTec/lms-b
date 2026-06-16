@@ -145,4 +145,12 @@ public class StudentController {
 	    return ResponseEntity.ok(response);
 	}
 
+	@PostMapping("/resend-otp")
+	public ResponseEntity<RegistrationResponse> resendOtp(
+			@RequestBody ResendOtpRequest request) {
+
+		RegistrationResponse response = studentService.resendOtp(request);
+		return ResponseEntity.ok(response);
+	}
+
 }

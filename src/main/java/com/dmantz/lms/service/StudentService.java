@@ -29,4 +29,7 @@ public interface StudentService {
 	StudentResponse updateStudentProfile(String studentId, StudentUpdateRequest request);
 	
 	StudentResponse getStudentById(String studentId);
+
+	RegistrationResponse resendOtp(ResendOtpRequest request);
+
 }
