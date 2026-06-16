@@ -1,6 +1,11 @@
 package com.dmantz.lms.controller;
 
-import com.dmantz.lms.dto.request.*;
+import com.dmantz.lms.dto.request.ForgotPasswordRequest;
+import com.dmantz.lms.dto.request.OtpVerifyRequest;
+import com.dmantz.lms.dto.request.ResetPasswordRequest;
+import com.dmantz.lms.dto.request.StudentLoginRequest;
+import com.dmantz.lms.dto.request.StudentRegistrationRequest;
+import com.dmantz.lms.dto.request.StudentUpdateRequest;
 import com.dmantz.lms.dto.response.OtpVerifyResponse;
 import com.dmantz.lms.dto.response.RegistrationResponse;
 import com.dmantz.lms.dto.response.StudentLoginResponse;
@@ -81,7 +86,7 @@ public class StudentController {
 	@PostMapping("/forgot-password")
 	public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
 
-	    logger.info("Forgot password request received for identifier: {} via channel: {}",
+	    logger.info("Forgot password request received for iudentifier: {} via channel: {}",
 	            request.getGetEmailIdOrMobileNo(), request.getOtpChannel());
 
 	    studentService.forgotPassword(request);

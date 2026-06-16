@@ -462,15 +462,16 @@ public class CourseManagementController {
 		return ResponseEntity.ok(response);
 	}
 
-//========================= delete course from program =============================
-	@DeleteMapping("/remove/course/{id}")
-	public ResponseEntity<String> removeCourse(@PathVariable Long id) {
+	//========================= delete course from program =============================
+		@DeleteMapping("/delete/course/program")
+		public ResponseEntity<String> deleteProgramCourse(
+		        @Valid @RequestBody DeleteProgramCourseRequest request) {
 
-		logger.info("DELETE /remove/course/{} - Removing program-course mapping", id);
-		courseManagementService.deleteProgramCourse(id);
-		logger.info("Program-Course mapping removed successfully with id: {}", id);
-		return ResponseEntity.ok("Program-Course mapping removed successfully");
-	}
+			courseManagementService.deleteProgramCourse(request);
+
+		    return ResponseEntity.ok
+		            ("Course removed from program successfully");
+		}
 
 	// ================= CREATE =================
 	@PostMapping("/add/program")
