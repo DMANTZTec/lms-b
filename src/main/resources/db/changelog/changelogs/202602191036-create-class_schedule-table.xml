@@ -82,5 +82,17 @@
                 onUpdate="CASCADE"/>
 
     </changeSet>
+    
+    <changeSet id="2026061601-add-class-name-to-class-schedule" author="afsheen">
+
+    <addColumn tableName="class_schedule">
+
+        <column name="class_name" type="VARCHAR(255)" defaultValue="">
+            <constraints nullable="false"/>
+        </column>
+
+    </addColumn>
+
+</changeSet>
 
 </databaseChangeLog>

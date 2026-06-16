@@ -15,13 +15,14 @@ import java.util.List;
 )
 public interface ClassScheduleMapper {
 
-    @Mapping(source = "id", target = "scheduleId")
-    @Mapping(source = "classBatch.id", target = "batchId")
-    @Mapping(source = "classBatch.className", target = "className")
-    @Mapping(source = "staff.staffId", target = "staffId")
-    @Mapping(target = "staffName",
-            expression = "java(getStaffFullName(entity))")
-    ClassScheduleResponse toResponse(ClassSchedule entity);
+	@Mapping(source = "id", target = "scheduleId")
+	@Mapping(source = "classBatch.id", target = "batchId")
+	@Mapping(source = "classBatch.className", target = "batchName")
+	@Mapping(source = "className", target = "className")
+	@Mapping(source = "staff.staffId", target = "staffId")
+	@Mapping(target = "staffName",
+	        expression = "java(getStaffFullName(entity))")
+	ClassScheduleResponse toResponse(ClassSchedule entity);
 
     List<ClassScheduleResponse> toDtoList(
             List<ClassSchedule> schedules);

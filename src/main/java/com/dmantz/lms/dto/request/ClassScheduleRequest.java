@@ -8,6 +8,7 @@ import java.time.LocalTime;
 public class ClassScheduleRequest {
 
     private Long scheduleId;
+    private String className;
     private String courseName;
     @NotNull
     private Long classId;        // ID of ClassBatch
@@ -81,5 +82,13 @@ public class ClassScheduleRequest {
     public void setStaffId(Long staffId) {
         this.staffId = staffId;
     }
+    
+    public String getClassName() {
+		return className;
+	}
+    
+    	public void setClassName(String className) {
+		this.className = className;
+	}
 
 }

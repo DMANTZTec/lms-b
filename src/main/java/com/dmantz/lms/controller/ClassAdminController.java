@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.apache.coyote.BadRequestException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
@@ -226,5 +227,14 @@ public class ClassAdminController {
 	    logger.info("Returning {} schedule(s)", response.size());
 
 	    return ResponseEntity.ok(response);
+	}
+	@PostMapping("/{scheduleId}/assign-instructor")
+	public ResponseEntity<String> assignInstructor(
+	        @PathVariable Long scheduleId,
+	        @Valid @RequestBody AssignInstructorRequest request) throws BadRequestException {
+
+		classAdminService.assignInstructor(scheduleId, request);
+
+	    return ResponseEntity.ok("Instructor assigned successfully");
 	}
 }

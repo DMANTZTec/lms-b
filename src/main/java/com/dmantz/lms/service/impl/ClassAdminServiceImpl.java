@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.coyote.BadRequestException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -569,5 +570,52 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 
 	    return classScheduleMapper.toDtoList(schedules);
 	}
+	
+	@Override
+	@Transactional
+	public void assignInstructor(Long scheduleId,
+	                             AssignInstructorRequest request) throws BadRequestException {
 
+	    logger.info("Assigning instructor {} to schedule {}",
+	            request.getStaffId(), scheduleId);
+
+	    // 1. Validate schedule
+	    ClassSchedule schedule = classScheduleRepository
+	            .findById(scheduleId)
+	            .orElseThrow(() ->
+	                    new ResourceNotFoundException(
+	                            "Schedule not found"));
+
+	    // 2. Get batch
+	    ClassBatch batch = schedule.getClassBatch();
+
+	    // 3. Get course id from batch
+	    String courseId = batch.getCourse().getCourseId();
+
+	    // 4. Validate instructor assigned to course
+	    boolean assignedToCourse =
+	            staffCourseRepository
+	                    .existsByStaff_StaffIdAndCourse_CourseId(
+	                            request.getStaffId(),
+	                            courseId);
+
+	    if (!assignedToCourse) {
+	        throw new BadRequestException(
+	                "Instructor is not assigned to this course");
+	    }
+
+	    // 5. Validate staff exists
+	    Staff staff = staffRepository
+	            .findByStaffId(request.getStaffId())
+	            .orElseThrow(() ->
+	                    new ResourceNotFoundException(
+	                            "Instructor not found"));
+
+	    // 6. Assign instructor
+	    schedule.setStaff(staff);
+
+	    classScheduleRepository.save(schedule);
+
+	    logger.info("Instructor assigned successfully");
+	}
 }

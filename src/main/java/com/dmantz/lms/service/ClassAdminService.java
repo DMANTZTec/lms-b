@@ -3,6 +3,8 @@ package com.dmantz.lms.service;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.apache.coyote.BadRequestException;
+
 import com.dmantz.lms.dto.request.*;
 import com.dmantz.lms.dto.response.*;
 import jakarta.transaction.Transactional;
@@ -43,5 +45,8 @@ public interface ClassAdminService {
 	List<ClassScheduleResponse> getSchedulesByBatch(Long batchId);
 	
 	List<ClassScheduleResponse> getAllSchedules();
+	
+	void assignInstructor(Long scheduleId,
+            AssignInstructorRequest request) throws BadRequestException;
 
 }

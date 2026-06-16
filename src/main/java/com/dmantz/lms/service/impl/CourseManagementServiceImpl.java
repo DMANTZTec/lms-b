@@ -15,6 +15,7 @@ import com.dmantz.lms.entity.*;
 import com.dmantz.lms.mapper.*;
 import com.dmantz.lms.repository.*;
 
+import org.apache.coyote.BadRequestException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -60,6 +61,7 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 	private final CourseRepository courseRepository;
 	private final CourseMapper courseMapper;
 	private final ProviderRepository providerRepository;
+	private final ClassBatchRepository classBatchRepository;
 
 	private final ChapterRepository chapterRepository;
 	private final ChapterMapper chapterMapper;
@@ -81,7 +83,7 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 			TopicRepository topicRepository, TopicMapper topicMapper, TopicReferenceRepository topicReferenceRepository,
 			TopicReferenceMapper topicReferenceMapper, ProgramRepository programRepository,
 			ProgramCourseRepository programCourseRepository, ProgramCourseMapper programcourseMapper,
-			ProgramMapper programMapper) {
+			ProgramMapper programMapper, ClassBatchRepository classBatchRepository) {
 		super();
 		this.subjectRepository = subjectRepository;
 		this.staffRepository = staffRepository;
@@ -99,6 +101,7 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 		this.programCourseRepository = programCourseRepository;
 		this.programcourseMapper = programcourseMapper;
 		this.programMapper = programMapper;
+		this.classBatchRepository = classBatchRepository;
 	}
 
 	// ------------------ CREATE SUBJECT ------------------
@@ -465,7 +468,7 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 
 //--------------------------DELETE COURSE-----------------------------
 	@Override
-	public void deleteCourse(Long courseId, String staffId) {
+	public void deleteCourse(Long courseId, String staffId) throws BadRequestException {
 
 		logger.info("Deleting course id: {} by staffId: {}", courseId, staffId);
 
@@ -475,6 +478,12 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 
 		Course course = courseRepository.findById(courseId)
 				.orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+		
+		 // Check Batch Mapping
+	    if (classBatchRepository.existsByCourse(course)) {
+	        throw new BadRequestException(
+	                "Course has active batches and cannot be deleted.");
+	    }
 
 		// ===== DELETE COURSE IMAGE FROM STRAPI =====
 		if (course.getCourseImage() != null && !course.getCourseImage().isBlank()) {

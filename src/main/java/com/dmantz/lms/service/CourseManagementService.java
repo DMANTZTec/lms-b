@@ -2,6 +2,7 @@ package com.dmantz.lms.service;
 
 import java.util.List;
 
+import org.apache.coyote.BadRequestException;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.dmantz.lms.dto.request.*;
@@ -35,7 +36,7 @@ public interface CourseManagementService {
 	CourseResponse updateCourseIntroVideo(Long courseId, MultipartFile introVideo, String staffId) throws Exception;
 
 //		delete subject
-	void deleteCourse(Long courseId, String staffId);
+	void deleteCourse(Long courseId, String staffId) throws BadRequestException;
 
 //	view Courses by subjects 
 	List<CourseResponse> viewCoursesBySubject(Long subjectId);

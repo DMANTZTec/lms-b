@@ -7,6 +7,7 @@ public class ClassScheduleResponse {
 
 	private Long scheduleId;
 	private Long batchId;
+	private String batchName;
 	private String className;
 	private LocalDate classDate;
 	private String dayOfWeek;
@@ -122,4 +123,13 @@ public class ClassScheduleResponse {
 	public void setStatus(String status) {
 		this.status = status;
 	}
+
+	public String getBatchName() {
+		return batchName;
+	}
+
+	public void setBatchName(String batchName) {
+		this.batchName = batchName;
+	}
+	
 }

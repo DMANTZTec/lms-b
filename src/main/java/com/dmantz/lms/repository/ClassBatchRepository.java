@@ -2,6 +2,7 @@ package com.dmantz.lms.repository;
 
 import com.dmantz.lms.entity.ClassBatch;
 import com.dmantz.lms.entity.ClassSchedule;
+import com.dmantz.lms.entity.Course;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -21,5 +22,7 @@ public interface ClassBatchRepository extends JpaRepository<ClassBatch, Long> {
 
 	// ClassBatchRepository
 	List<ClassBatch> findByCourse_CourseId(String courseId);
+
+	boolean existsByCourse(Course course);
 
 }

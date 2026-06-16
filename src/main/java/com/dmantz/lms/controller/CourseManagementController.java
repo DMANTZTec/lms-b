@@ -5,6 +5,7 @@ import java.util.List;
 import com.dmantz.lms.dto.request.*;
 import com.dmantz.lms.dto.response.*;
 
+import org.apache.coyote.BadRequestException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
@@ -149,7 +150,7 @@ public class CourseManagementController {
 	    return ResponseEntity.ok(courseManagementService.updateCourseIntroVideo(courseId, introVideo, staffId));
 	}
 	@DeleteMapping("/course/delete/{courseId}")
-	public ResponseEntity<String> deleteCourse(@PathVariable Long courseId, @RequestParam String staffId) {
+	public ResponseEntity<String> deleteCourse(@PathVariable Long courseId, @RequestParam String staffId) throws BadRequestException {
 		logger.info("DELETE /course/delete/{} - Deleting course by staffId: {}", courseId, staffId);
 
 		courseManagementService.deleteCourse(courseId, staffId);

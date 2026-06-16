@@ -21,6 +21,9 @@ public class ClassSchedule extends AuditFields {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "staff_id", nullable = false)
     private Staff staff;
+    
+    @Column(nullable = false)
+    private String className;
 
     @Column(nullable = false)
     private LocalDate classDate;
@@ -125,7 +128,15 @@ public class ClassSchedule extends AuditFields {
         this.status = status;
     }
 
-    @Override
+    public String getClassName() {
+		return className;
+	}
+
+	public void setClassName(String className) {
+		this.className = className;
+	}
+
+	@Override
     public String toString() {
         return "ClassSchedule{" +
                 "id=" + id +
