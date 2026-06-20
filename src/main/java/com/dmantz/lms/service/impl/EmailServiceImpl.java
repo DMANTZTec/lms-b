@@ -85,6 +85,14 @@ public class EmailServiceImpl implements EmailService {
 					+ "Your OTP to verify your account is: " + otp + "\n" + "Please use this OTP within 5 minutes.\n\n"
 					+ "Thank you,\nLMS Team";
 			break;
+		
+		case PASSWORD_CHANGE_SUCCESS:
+		    subject = "LMS Password Changed";
+		    body = "Hello Student,\n\n"
+		         + "Your LMS password has been changed successfully.\n"
+		         + "If this was not you, please contact support immediately.\n\n"
+		         + "Regards,\nLMS Team";
+		    break;
 
 		default:
 			logger.error("Unsupported OTP purpose received: {}", purpose);

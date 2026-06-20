@@ -8,6 +8,7 @@ import com.dmantz.lms.dto.response.StudentResponse;
 import com.dmantz.lms.entity.*;
 import com.dmantz.lms.exceptions.DuplicateValuesException;
 import com.dmantz.lms.exceptions.InvalidOtpChannelException;
+import com.dmantz.lms.exceptions.InvalidPasswordException;
 import com.dmantz.lms.exceptions.OtpSendingException;
 import com.dmantz.lms.exceptions.ResourceNotFoundException;
 import com.dmantz.lms.exceptions.StudentNotFoundException;
@@ -691,5 +692,63 @@ public class StudentServiceImpl implements StudentService {
 		response.setStatus("SUCCESS");
 		response.setMessage("OTP resent successfully via " + channel);
 		return response;
+	}
+	
+	@Override
+	@Transactional
+	public void changePassword(ChangePasswordRequest request) {
+
+		String studentId = request.getStudentId();
+		logger.info("Change password requested for studentId: {}", studentId);
+
+		Student student = studentRepository.findByStudentId(studentId).orElseThrow(() -> {
+			logger.error("Student not found for studentId: {}", studentId);
+			return new StudentNotFoundException("Student not found for studentId: " + studentId);
+		});
+
+		if (!"Y".equalsIgnoreCase(student.getEnabled())) {
+			logger.warn("Change password blocked - account disabled for studentId: {}", studentId);
+			throw new InvalidPasswordException("Account is disabled");
+		}
+
+		if (!passwordEncoder.matches(request.getOldPassword(), student.getPassword())) {
+			logger.warn("Change password failed - incorrect old password for studentId: {}", studentId);
+			throw new InvalidPasswordException("Old password is incorrect");
+		}
+
+		if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+			logger.warn("Change password failed - new password and confirm password do not match for studentId: {}", studentId);
+			throw new InvalidPasswordException("New password and confirm password do not match");
+		}
+
+		if (passwordEncoder.matches(request.getNewPassword(), student.getPassword())) {
+			logger.warn("Change password failed - new password same as old password for studentId: {}", studentId);
+			throw new InvalidPasswordException("New password must be different from old password");
+		}
+
+		student.setPassword(passwordEncoder.encode(request.getNewPassword()));
+		studentRepository.save(student);
+
+		logger.info("Password changed successfully for studentId: {}", studentId);
+
+		// Notify via EMAIL if available
+		if (student.getEmailId() != null && !student.getEmailId().isBlank()) {
+			try {
+				emailService.sendOtpEmail(student.getEmailId(), null, OtpPurpose.PASSWORD_CHANGE_SUCCESS);
+				logger.info("Password change notification email sent to: {}", student.getEmailId());
+			} catch (Exception ex) {
+				logger.error("Failed to send password change notification email to: {}", student.getEmailId(), ex);
+			}
+		}
+
+		// Notify via SMS if available
+		if (student.getMobileNum() != null && !student.getMobileNum().isBlank()) {
+			try {
+				smsService.sendOtpSms(student.getMobileNum(), null, OtpPurpose.PASSWORD_CHANGE_SUCCESS);
+				logger.info("Password change notification SMS sent to: {}", student.getMobileNum());
+			} catch (Exception ex) {
+				logger.error("Failed to send password change notification SMS to: {}", student.getMobileNum(), ex);
+			}
+		}
 	}
 }

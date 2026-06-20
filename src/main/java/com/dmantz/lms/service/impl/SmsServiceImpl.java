@@ -75,6 +75,10 @@ public class SmsServiceImpl implements SmsService {
 			messageBody = "Your LMS password has been reset successfully. "
 					+ "If this wasn't you, please contact support immediately.";
 			break;
+			
+		case PASSWORD_CHANGE_SUCCESS:
+			messageBody = "Your LMS password has been changed successfully. If this wasn't you, please contact support immediately.";
+		    break;
 
 		default:
 			throw new SmsSendingException("Unsupported OTP purpose for SMS: " + purpose);

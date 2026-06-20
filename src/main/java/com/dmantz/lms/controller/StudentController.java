@@ -152,5 +152,18 @@ public class StudentController {
 		RegistrationResponse response = studentService.resendOtp(request);
 		return ResponseEntity.ok(response);
 	}
+	
+	// ================= CHANGE PASSWORD =================
+	@PostMapping("/change-password")
+	public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+
+		logger.info("Change password request received for studentId: {}", request.getStudentId());
+
+		studentService.changePassword(request);
+
+		logger.info("Password changed successfully for studentId: {}", request.getStudentId());
+
+		return ResponseEntity.ok("Password changed successfully");
+	}
 
 }

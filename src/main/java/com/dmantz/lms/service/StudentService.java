@@ -31,5 +31,6 @@ public interface StudentService {
 	StudentResponse getStudentById(String studentId);
 
 	RegistrationResponse resendOtp(ResendOtpRequest request);
-
+	
+	void changePassword(ChangePasswordRequest request);
 }

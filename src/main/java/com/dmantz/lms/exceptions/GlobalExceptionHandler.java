@@ -96,5 +96,9 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<String> handleOtpSending(OtpSendingException ex) {
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
 	}
-
+	
+	@ExceptionHandler(InvalidPasswordException.class)
+	public ResponseEntity<Object> handleInvalidPassword(InvalidPasswordException ex) {
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+	}
 }

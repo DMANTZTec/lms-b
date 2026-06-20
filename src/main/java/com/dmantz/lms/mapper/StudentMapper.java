@@ -33,6 +33,7 @@ public interface StudentMapper {
 	@Mapping(target = "mobileNum", source = "mobileNum")
 	@Mapping(target = "emergencyContactNm", source = "emergencyContactNm")
 	@Mapping(target = "emergencyContactNum", source = "emergencyContactNum")
+	@Mapping(target="dob", source = "dob", dateFormat = "yyyy-MM-dd")
 	void updateStudentFromDto(StudentUpdateRequest request, @MappingTarget Student entity);
 
 	// ================= RESPONSE =================
