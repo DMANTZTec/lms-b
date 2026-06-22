@@ -18,5 +18,13 @@ public interface StudentOtpRepository extends JpaRepository<StudentOtp, UUID> {
 	Optional<StudentOtp> findTopByEmailIdOrderByCreatedDtDesc(String emailId);
 
 	Optional<StudentOtp> findTopByEmailIdOrMobileNumOrderByCreatedDtDesc(String emailId, String mobileNum);
+	
+	@Query(value = """
+            SELECT * FROM student_otp
+            WHERE email_id = :identifier OR mobile_num = :identifier
+            ORDER BY created_dt DESC
+            LIMIT 1
+            """, nativeQuery = true)
+    Optional<StudentOtp> findLatestByIdentifier(@Param("identifier") String identifier);
 
 }

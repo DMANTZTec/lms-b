@@ -274,90 +274,132 @@ public class StudentServiceImpl implements StudentService {
 		return savedOtp;
 	}
 
-	@Override
-	@Transactional
-	public StudentLoginResponse login(StudentLoginRequest request) {
+	 	@Override
+	    @Transactional
+	    public StudentLoginResponse login(StudentLoginRequest request) {
 
-		logger.info("Login attempt for username: {}", request.getUsername());
+	        logger.info("Login attempt for username: {}", request.getUsername());
 
-		String username = request.getUsername();
-		Student student = studentRepository.findByEmailIdOrMobileNumOrLoginId(username, username, username);
+	        // ── 1. Validate channel ──────────────────────────────────
+	        OtpChannel channel = request.getOtpChannel();
+	        if (channel == null) {
+	            throw new InvalidOtpChannelException("OTP channel must be specified: EMAIL or MOBILE");
+	        }
 
-		if (student == null) {
-			throw new RuntimeException("Invalid credentials");
-		}
+	        // ── 2. Look up student ───────────────────────────────────
+	        String username = request.getUsername();
+	        Student student = studentRepository.findByEmailIdOrMobileNumOrLoginId(username, username, username);
 
-		if (!"Y".equalsIgnoreCase(student.getEnabled())) {
-			throw new RuntimeException("Account is disabled");
-		}
+	        if (student == null) {
+	            throw new RuntimeException("Invalid credentials");
+	        }
 
-		if (!passwordEncoder.matches(request.getPassword(), student.getPassword())) {
-			throw new RuntimeException("Invalid credentials");
-		}
+	        if (!"Y".equalsIgnoreCase(student.getEnabled())) {
+	            throw new RuntimeException("Account is disabled");
+	        }
 
-		StudentOtp otp = generateOtp(student.getEmailId(), student.getMobileNum(), OtpPurpose.LOGIN);
-		try {
-			emailService.sendOtpEmail(student.getEmailId(), otp.getOtp(), OtpPurpose.LOGIN);
-			otp.setStatus(OtpStatus.SENT);
-			otp.setUpdatedDt(LocalDateTime.now());
-			otpRepository.save(otp);
-			logger.info("Login OTP sent successfully");
+	        // ── 3. Verify password ───────────────────────────────────
+	        if (!passwordEncoder.matches(request.getPassword(), student.getPassword())) {
+	            throw new RuntimeException("Invalid credentials");
+	        }
 
-		} catch (Exception e) {
-			otp.setStatus(OtpStatus.FAILED);
-			otpRepository.save(otp);
-			throw new RuntimeException("Failed to send OTP");
-		}
+	        // ── 4. Generate OTP ──────────────────────────────────────
+	        StudentOtp otp = generateOtp(student.getEmailId(), student.getMobileNum(), OtpPurpose.LOGIN);
 
-		StudentLoginResponse response = studentMapper.toLoginResponse(student);
-		response.setMessage("OTP sent successfully");
-		return response;
-	}
+	        // ── 5. Send OTP via requested channel ────────────────────
+	        try {
+	            switch (channel) {
+	                case EMAIL:
+	                    if (student.getEmailId() == null || student.getEmailId().isBlank()) {
+	                        throw new InvalidOtpChannelException(
+	                                "Email not available for this account. Cannot send OTP via EMAIL.");
+	                    }
+	                    emailService.sendOtpEmail(student.getEmailId(), otp.getOtp(), OtpPurpose.LOGIN);
+	                    logger.info("Login OTP sent via EMAIL to: {}", student.getEmailId());
+	                    break;
 
-	@Override
-	@Transactional
-	public StudentLoginResponse verifyLoginOtp(OtpVerifyRequest request) {
+	                case MOBILE:
+	                    if (student.getMobileNum() == null || student.getMobileNum().isBlank()) {
+	                        throw new InvalidOtpChannelException(
+	                                "Mobile number not available for this account. Cannot send OTP via MOBILE.");
+	                    }
+	                    smsService.sendOtpSms(student.getMobileNum(), otp.getOtp(), OtpPurpose.LOGIN);
+	                    logger.info("Login OTP sent via MOBILE to: {}", student.getMobileNum());
+	                    break;
 
-		String identifier = request.getEmailIdOrMobileNo();
-		logger.info("Verifying login OTP for identifier: {}", identifier);
+	                default:
+	                    throw new InvalidOtpChannelException("Invalid OTP channel: " + channel);
+	            }
 
-		Student student = studentRepository.findByEmailIdOrMobileNumOrLoginId(identifier, identifier, identifier);
-		if (student == null) {
-			throw new StudentNotFoundException("Student not found");
-		}
+	            otp.setStatus(OtpStatus.SENT);
+	            otp.setUpdatedDt(LocalDateTime.now());
+	            otpRepository.save(otp);
 
-		if (student == null) {
-			throw new RuntimeException("Student not found");
-		}
+	        } catch (InvalidOtpChannelException ex) {
+	            otp.setStatus(OtpStatus.FAILED);
+	            otp.setUpdatedDt(LocalDateTime.now());
+	            otpRepository.save(otp);
+	            logger.error("Invalid channel during login OTP send: {}", ex.getMessage());
+	            throw ex;
 
-		StudentOtp otp = otpRepository.findTopByEmailIdOrMobileNumOrderByCreatedDtDesc(identifier, identifier)
-				.orElseThrow(() -> new RuntimeException("OTP not found"));
+	        } catch (Exception ex) {
+	            otp.setStatus(OtpStatus.FAILED);
+	            otp.setUpdatedDt(LocalDateTime.now());
+	            otpRepository.save(otp);
+	            logger.error("Failed to send login OTP via {}: {}", channel, ex.getMessage(), ex);
+	            throw new OtpSendingException("Failed to send OTP via " + channel + ": " + ex.getMessage(), ex);
+	        }
 
-		if (otp == null) {
-			throw new RuntimeException("OTP not found");
-		}
+	        // ── 6. Build response ────────────────────────────────────
+	        StudentLoginResponse response = studentMapper.toLoginResponse(student);
+	        response.setMessage("OTP sent successfully via " + channel);
+	        return response;
+	    }
 
-		if (OtpStatus.VERIFIED.equals(otp.getStatus())) {
-			throw new RuntimeException("OTP already used");
-		}
+	 @Override
+	    @Transactional
+	    public StudentLoginResponse verifyLoginOtp(OtpVerifyRequest request) {
 
-		if (!otp.getOtp().equals(request.getOtp())) {
-			otp.setAttemptsNum(otp.getAttemptsNum() == null ? 1 : otp.getAttemptsNum() + 1);
-			otpRepository.save(otp);
-			throw new RuntimeException("Invalid OTP");
-		}
+	        String identifier = request.getEmailIdOrMobileNo();
+	        logger.info("Verifying login OTP for identifier: {}", identifier);
 
-		otp.setStatus(OtpStatus.VERIFIED);
-		otp.setUpdatedDt(LocalDateTime.now());
-		otpRepository.save(otp);
+	        // ── 1. Find student ──────────────────────────────────────
+	        Student student = studentRepository.findByEmailIdOrMobileNumOrLoginId(identifier, identifier, identifier);
+	        if (student == null) {
+	            throw new StudentNotFoundException("Student not found");
+	        }
 
-		String token = jwtUtil.generateToken(student.getEmailId(), "STUDENT", String.valueOf(student.getStudentId()));
+	        // ── 2. Find latest OTP ───────────────────────────────────
+	        StudentOtp otp = otpRepository
+	                .findLatestByIdentifier(identifier)
+	                .orElseThrow(() -> new RuntimeException("OTP not found"));
 
-		StudentLoginResponse response = studentMapper.toLoginResponse(student);
-		response.setToken(token);
-		response.setMessage("Login successful");
-		return response;
-	}
+	        // ── 3. Check already used ────────────────────────────────
+	        if (OtpStatus.VERIFIED.equals(otp.getStatus())) {
+	            throw new RuntimeException("OTP already used");
+	        }
+
+	        // ── 4. Validate OTP value ────────────────────────────────
+	        if (!otp.getOtp().equals(request.getOtp())) {
+	            otp.setAttemptsNum(otp.getAttemptsNum() == null ? 1 : otp.getAttemptsNum() + 1);
+	            otpRepository.save(otp);
+	            throw new RuntimeException("Invalid OTP");
+	        }
+
+	        // ── 5. Mark verified and generate JWT ────────────────────
+	        otp.setStatus(OtpStatus.VERIFIED);
+	        otp.setUpdatedDt(LocalDateTime.now());
+	        otpRepository.save(otp);
+
+	        String token = jwtUtil.generateToken(
+	                student.getEmailId(), "STUDENT", String.valueOf(student.getStudentId()));
+
+	        StudentLoginResponse response = studentMapper.toLoginResponse(student);
+	        response.setToken(token);
+	        response.setMessage("Login successful");
+	        return response;
+	    }
+
 
 	private String uploadToStrapi(MultipartFile file) {
 		try {

@@ -45,25 +45,30 @@ public class StudentController {
 		return ResponseEntity.ok(studentService.verifyOtp(request));
 	}
 
-	@PostMapping("/login")
-	public ResponseEntity<StudentLoginResponse> login(
-			@RequestBody StudentLoginRequest request) {
+	 @PostMapping("/login")
+	    public ResponseEntity<StudentLoginResponse> login(@RequestBody StudentLoginRequest request) {
 
-		StudentLoginResponse response =
-				studentService.login(request);
+	        logger.info("Login request received for username: {} via channel: {}",
+	                request.getUsername(), request.getOtpChannel());
 
-		return ResponseEntity.ok(response);
-	}
+	        StudentLoginResponse response = studentService.login(request);
 
-	@PostMapping("/verify-login-otp")
-	public ResponseEntity<StudentLoginResponse> verifyLoginOtp(
-			@RequestBody OtpVerifyRequest request) {
+	        logger.info("Login OTP sent successfully for username: {}", request.getUsername());
 
-		StudentLoginResponse response =
-				studentService.verifyLoginOtp(request);
+	        return ResponseEntity.ok(response);
+	    }
 
-		return ResponseEntity.ok(response);
-	}
+	 @PostMapping("/verify-login-otp")
+	    public ResponseEntity<StudentLoginResponse> verifyLoginOtp(@RequestBody OtpVerifyRequest request) {
+
+	        logger.info("Login OTP verification request received for identifier: {}", request.getEmailIdOrMobileNo());
+
+	        StudentLoginResponse response = studentService.verifyLoginOtp(request);
+
+	        logger.info("Login OTP verified successfully for identifier: {}", request.getEmailIdOrMobileNo());
+
+	        return ResponseEntity.ok(response);
+	    }
 
 	// ================= GET ALL STUDENTS =================
 	@GetMapping("view-students")
