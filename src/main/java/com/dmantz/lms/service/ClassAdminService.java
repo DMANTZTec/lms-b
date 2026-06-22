@@ -48,5 +48,8 @@ public interface ClassAdminService {
             AssignInstructorRequest request) throws BadRequestException;
 
 	ClassScheduleResponse modifySchedule(Long scheduleId, AddScheduleRequest request);
+	
+	// ClassAdminService.java
+	List<BatchInstructorResponse> getInstructorsByBatchId(Long batchId);
 
 }

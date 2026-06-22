@@ -237,4 +237,15 @@ public class ClassAdminController {
 
 	    return ResponseEntity.ok("Instructor assigned successfully");
 	}
+	
+	@GetMapping("/courseschedule/classes/{batchId}/instructors")
+	public ResponseEntity<List<BatchInstructorResponse>> getInstructorsByBatchId(@PathVariable Long batchId) {
+
+	    logger.info("GET /courseschedule/classes/{}/instructors - Fetching instructors", batchId);
+
+	    List<BatchInstructorResponse> response = classAdminService.getInstructorsByBatchId(batchId);
+
+	    logger.debug("Returning {} instructor(s) for batchId: {}", response.size(), batchId);
+	    return ResponseEntity.ok(response);
+	}
 }

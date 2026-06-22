@@ -4,6 +4,8 @@ import com.dmantz.lms.entity.base.AuditFields;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "class_batch")
@@ -31,6 +33,17 @@ public class ClassBatch extends AuditFields {
 
     @Column(name = "capacity")
     private Integer capacity;   // Maximum students (nullable)
+    
+    @ManyToMany
+    @JoinTable(
+            name = "class_batch_instructor",
+            joinColumns = @JoinColumn(name = "batch_id"),
+            inverseJoinColumns = @JoinColumn(
+                    name = "staff_id",
+                    referencedColumnName = "staff_id"
+            )
+    )
+    private Set<Staff> instructors = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -87,8 +100,17 @@ public class ClassBatch extends AuditFields {
     public void setStatus(String status) {
         this.status = status;
     }
+    
 
-    @Override
+    public Set<Staff> getInstructors() {
+		return instructors;
+	}
+
+	public void setInstructors(Set<Staff> instructors) {
+		this.instructors = instructors;
+	}
+
+	@Override
     public String toString() {
         return "ClassBatch{" +
                 "id=" + id +

@@ -20,9 +20,11 @@ import java.time.LocalDate;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.coyote.BadRequestException;
 import org.apache.logging.log4j.LogManager;
@@ -92,10 +94,12 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 
 	    logger.info("ClassBatch created with id: {}", savedBatch.getId());
 
-	    // 3. Validate instructors belong to selected course (validation only — not used to assign staff to schedules)
+	    // 3. Validate instructors belong to selected course AND attach them to the batch
+	    Set<Staff> instructors = new HashSet<>();
+
 	    for (String staffId : request.getSelectedInstructors()) {
 
-	        staffRepository.findByStaffId(staffId)
+	        Staff staff = staffRepository.findByStaffId(staffId)
 	                .orElseThrow(() -> {
 	                    logger.warn("Staff not found: {}", staffId);
 	                    return new ResourceNotFoundException(
@@ -118,7 +122,14 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 	                            + " is not assigned to course "
 	                            + courseId);
 	        }
+
+	        instructors.add(staff);
 	    }
+
+	    savedBatch.setInstructors(instructors);
+	    classBatchRepository.save(savedBatch);
+
+	    logger.info("{} instructor(s) attached to batchId: {}", instructors.size(), savedBatch.getId());
 
 	    // 4. Generate schedules — one row per date, no staff assigned
 	    List<ClassSchedule> generatedSchedules = new ArrayList<>();
@@ -143,15 +154,13 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 	                ClassSchedule schedule = new ClassSchedule();
 
 	                schedule.setClassBatch(savedBatch);
-	                schedule.setStaff(null);              // no auto-assignment
+	                schedule.setStaff(null);
 	                schedule.setClassDate(current);
 	                schedule.setStartTime(slot.getStart());
 	                schedule.setEndTime(slot.getEnd());
 
-	                // Schedule Name
 	                schedule.setClassName("Session " + sessionNo);
 
-	                // Default values
 	                schedule.setMode(ClassMode.ONLINE);
 	                schedule.setMeetingLink("N/A");
 	                schedule.setLocation("N/A");
@@ -185,18 +194,12 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 	            generatedSchedules.stream()
 	                    .map(s -> {
 
-	                        ClassScheduleResponse sr =
-	                                new ClassScheduleResponse();
+	                        ClassScheduleResponse sr = new ClassScheduleResponse();
 
 	                        sr.setBatchId(savedBatch.getId());
 	                        sr.setScheduleId(s.getId());
-
-	                        // Batch Name
 	                        sr.setBatchName(savedBatch.getClassName());
-
-	                        // Schedule/Class Name
 	                        sr.setClassName(s.getClassName());
-
 	                        sr.setClassDate(s.getClassDate());
 
 	                        sr.setDayOfWeek(
@@ -209,7 +212,6 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 	                        sr.setStartTime(s.getStartTime());
 	                        sr.setEndTime(s.getEndTime());
 
-	                        // null-safe — staff not assigned yet at creation time
 	                        sr.setStaffId(
 	                                s.getStaff() != null
 	                                        ? s.getStaff().getStaffId()
@@ -670,5 +672,28 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 	    classScheduleRepository.save(schedule);
 
 	    logger.info("Instructor assigned successfully");
+	}
+	
+	// ClassAdminServiceImpl.java
+	@Override
+	public List<BatchInstructorResponse> getInstructorsByBatchId(Long batchId) {
+
+	    logger.info("Fetching instructors for batchId: {}", batchId);
+
+	    ClassBatch batch = classBatchRepository.findById(batchId)
+	            .orElseThrow(() -> {
+	                logger.warn("ClassBatch not found with id: {} during getInstructorsByBatchId", batchId);
+	                return new ResourceNotFoundException("Class not found with id: " + batchId);
+	            });
+
+	    return batch.getInstructors().stream()
+	            .map(staff -> {
+	                BatchInstructorResponse r = new BatchInstructorResponse();
+	                r.setStaffId(staff.getStaffId());
+	                r.setFirstNm(staff.getFirstNm());
+	                r.setLastNm(staff.getLastNm());
+	                return r;
+	            })
+	            .toList();
 	}
 }
