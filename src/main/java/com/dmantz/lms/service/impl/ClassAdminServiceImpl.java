@@ -313,6 +313,7 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 		schedule.setMode(ClassMode.ONLINE);
 		schedule.setMeetingLink("N/A");
 		schedule.setLocation("N/A");
+		schedule.setStaff(null);
 
 		ClassSchedule saved = classScheduleRepository.save(schedule);
 
@@ -610,8 +611,15 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 			sr.setDayOfWeek(s.getClassDate().getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.ENGLISH));
 			sr.setStartTime(s.getStartTime());
 			sr.setEndTime(s.getEndTime());
-			sr.setStaffId(s.getStaff().getStaffId());
-			sr.setStaffName(s.getStaff().getFirstNm() + " " + s.getStaff().getLastNm());
+			sr.setStaffId(
+			        s.getStaff() != null
+			                ? s.getStaff().getStaffId()
+			                : null);
+
+			sr.setStaffName(
+			        s.getStaff() != null
+			                ? s.getStaff().getFirstNm() + " " + s.getStaff().getLastNm()
+			                : null);
 			sr.setStatus(s.getStatus().name());
 			return sr;
 		}).toList();
