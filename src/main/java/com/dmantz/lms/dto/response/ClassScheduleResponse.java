@@ -4,8 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 public class ClassScheduleResponse {
-
-	private Long scheduleId;
+    private Long scheduleId;
 	private Long batchId;
 	private String batchName;
 	private String className;
@@ -20,13 +19,6 @@ public class ClassScheduleResponse {
 	private String location;
 	private String status;
 
-	public Long getScheduleId() {
-		return scheduleId;
-	}
-
-	public void setScheduleId(Long scheduleId) {
-		this.scheduleId = scheduleId;
-	}
 
 	public Long getBatchId() {
 		return batchId;
@@ -34,14 +26,6 @@ public class ClassScheduleResponse {
 
 	public void setBatchId(Long batchId) {
 		this.batchId = batchId;
-	}
-
-	public String getClassName() {
-		return className;
-	}
-
-	public void setClassName(String className) {
-		this.className = className;
 	}
 
 	public LocalDate getClassDate() {
@@ -130,6 +114,22 @@ public class ClassScheduleResponse {
 
 	public void setBatchName(String batchName) {
 		this.batchName = batchName;
+	}
+	
+	public String getClassName() {
+		return className;
+	}
+	
+	public void setClassName(String className) {
+		this.className = className;
+	}
+	
+	public Long getScheduleId() {
+		return scheduleId;
+	}
+	
+	public void setScheduleId(Long scheduleId) {
+		this.scheduleId = scheduleId;
 	}
 	
 }

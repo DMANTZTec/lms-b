@@ -69,23 +69,23 @@ public class ClassAdminController {
 
 	// Add schedule
 	@PostMapping("/addschedule-to-class")
-	public ResponseEntity<ClassScheduleResponse> addScheduleToClass(@Valid @RequestBody ClassScheduleRequest request) {
+	public ResponseEntity<ClassScheduleResponse> addScheduleToClass(@Valid @RequestBody AddScheduleRequest request) {
 
 		logger.info("POST /addschedule-to-class - Adding schedule to classId: {} with staffId: {}",
-				request.getClassId(), request.getStaffId());
+				request.getBatchId(), request.getStaffId());
 
 		ClassScheduleResponse response = classAdminService.addScheduleToClass(request);
 
-		logger.info("Schedule added successfully to classId: {}", request.getClassId());
+		logger.info("Schedule added successfully to classId: {}", request.getBatchId());
 		return ResponseEntity.ok(response);
 	}
 
 	// Modify schedule
 	@PutMapping("/courseschedule/{scheduleId}")
 	public ResponseEntity<ClassScheduleResponse> modifySchedule(@PathVariable Long scheduleId,
-			@RequestBody ClassScheduleRequest request) {
+			@RequestBody AddScheduleRequest request) {
 
-		logger.info("PUT /schedules/{} - Modifying schedule", scheduleId);
+		logger.info("PUT /schedules/{} - Mosdifying schedule", scheduleId);
 
 		ClassScheduleResponse response = classAdminService.modifySchedule(scheduleId, request);
 

@@ -14,7 +14,7 @@ public class ClassResponse {
     private String courseName;
     private String status;
 
-    private String className;
+    private String batchName;
     private LocalDate startDate;
     private LocalDate endDate;
     private Integer totalSchedulesGenerated;
@@ -43,13 +43,9 @@ public class ClassResponse {
         this.courseName = courseName;
     }
 
-    public String getClassName() {
-        return className;
-    }
-
-    public void setClassName(String className) {
-        this.className = className;
-    }
+    public String getBatchName() {
+		return batchName;
+	}
 
     public LocalDate getStartDate() {
         return startDate;
@@ -66,7 +62,6 @@ public class ClassResponse {
     public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
-
 
     public Integer getTotalSchedulesGenerated() {
 		return totalSchedulesGenerated;
@@ -92,16 +87,9 @@ public class ClassResponse {
 		this.status = status;
 	}
 
-	@Override
-    public String toString() {
-        return "ClassResponse{" +
-                "batchId=" + batchId +
-                ", courseId=" + courseId +
-                ", courseName='" + courseName + '\'' +
-                ", className='" + className + '\'' +
-                ", startDate=" + startDate +
-                ", endDate=" + endDate +
+	public void setBatchName(String batchName) {
+		this.batchName = batchName;
+	}
 
-                '}';
-    }
+	
 }

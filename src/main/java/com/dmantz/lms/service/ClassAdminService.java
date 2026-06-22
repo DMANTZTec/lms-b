@@ -17,9 +17,7 @@ public interface ClassAdminService {
 
 	ClassResponse cancelClass(Long batchId);
 
-	ClassScheduleResponse addScheduleToClass(ClassScheduleRequest request);
-
-	ClassScheduleResponse modifySchedule(Long scheduleId, ClassScheduleRequest request);
+	ClassScheduleResponse addScheduleToClass(AddScheduleRequest request);
 
 	ClassScheduleResponse cancelSchedule(Long scheduleId);
 
@@ -48,5 +46,7 @@ public interface ClassAdminService {
 	
 	void assignInstructor(Long scheduleId,
             AssignInstructorRequest request) throws BadRequestException;
+
+	ClassScheduleResponse modifySchedule(Long scheduleId, AddScheduleRequest request);
 
 }

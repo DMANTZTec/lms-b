@@ -95,4 +95,13 @@
 
 </changeSet>
 
+<changeSet id="2026062201-make-staff-id-nullable-class-schedule" author="afsheen">
+
+        <dropNotNullConstraint
+                tableName="class_schedule"
+                columnName="staff_id"
+                columnDataType="BIGINT"/>
+
+    </changeSet>
+
 </databaseChangeLog>

@@ -5,8 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-public class ClassScheduleRequest {
-	private Long scheduleId;
+public class AddScheduleRequest {
 	private String className;
 	private String courseName;
 	@NotNull
@@ -83,12 +82,5 @@ public class ClassScheduleRequest {
 		this.className = className;
 	}
 
-	public Long getScheduleId() {
-		return scheduleId;
-	}
-
-	public void setScheduleId(Long scheduleId) {
-		this.scheduleId = scheduleId;
-	}
 
 }

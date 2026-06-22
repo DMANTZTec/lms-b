@@ -19,7 +19,7 @@ public class ClassSchedule extends AuditFields {
     private ClassBatch classBatch;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "staff_id", nullable = false)
+    @JoinColumn(name = "staff_id", nullable = true)
     private Staff staff;
     
     @Column(nullable = false)
