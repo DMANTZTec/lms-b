@@ -704,4 +704,41 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 	            })
 	            .toList();
 	}
+	
+	@Override
+	public ClassScheduleResponse getScheduleById(Long scheduleId) {
+
+	    logger.info("Fetching schedule with id: {}", scheduleId);
+
+	    ClassSchedule schedule = classScheduleRepository.findById(scheduleId)
+	            .orElseThrow(() -> {
+	                logger.warn("Schedule not found with id: {} during getScheduleById", scheduleId);
+	                return new ResourceNotFoundException("Schedule not found with id: " + scheduleId);
+	            });
+
+	    logger.debug("Schedule fetched successfully for id: {}", scheduleId);
+	    return classScheduleMapper.toResponse(schedule);
+	}
+	
+	@Override
+	public ClassResponse getBatchById(Long batchId) {
+
+	    logger.info("Fetching batch with id: {}", batchId);
+
+	    ClassBatch batch = classBatchRepository.findById(batchId)
+	            .orElseThrow(() -> {
+	                logger.warn("ClassBatch not found with id: {} during getBatchById", batchId);
+	                return new ResourceNotFoundException("Class not found with id: " + batchId);
+	            });
+
+	    ClassResponse response = classBatchMapper.toResponse(batch);
+	    response.setBatchName(batch.getClassName());
+
+	    List<ClassSchedule> schedules = classScheduleRepository.findByClassBatch_Id(batchId);
+	    response.setTotalSchedulesGenerated(schedules.size());
+	    response.setSchedules(classScheduleMapper.toDtoList(schedules));   // ✅ add this
+
+	    logger.debug("Batch fetched successfully for id: {}", batchId);
+	    return response;
+	}
 }

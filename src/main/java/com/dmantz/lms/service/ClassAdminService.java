@@ -51,5 +51,9 @@ public interface ClassAdminService {
 	
 	// ClassAdminService.java
 	List<BatchInstructorResponse> getInstructorsByBatchId(Long batchId);
+	
+	ClassScheduleResponse getScheduleById(Long scheduleId);
+	
+	ClassResponse getBatchById(Long batchId);
 
 }

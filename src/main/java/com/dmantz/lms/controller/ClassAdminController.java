@@ -248,4 +248,26 @@ public class ClassAdminController {
 	    logger.debug("Returning {} instructor(s) for batchId: {}", response.size(), batchId);
 	    return ResponseEntity.ok(response);
 	}
+	
+	@GetMapping("/schedules/{scheduleId}")
+	public ResponseEntity<ClassScheduleResponse> getScheduleById(@PathVariable Long scheduleId) {
+
+	    logger.info("GET /schedules/{} - Fetching schedule", scheduleId);
+
+	    ClassScheduleResponse response = classAdminService.getScheduleById(scheduleId);
+
+	    logger.debug("Returning schedule details for id: {}", scheduleId);
+	    return ResponseEntity.ok(response);
+	}
+	
+	@GetMapping("/courseschedule/classes/{batchId}")
+	public ResponseEntity<ClassResponse> getBatchById(@PathVariable Long batchId) {
+
+	    logger.info("GET /courseschedule/classes/{} - Fetching batch", batchId);
+
+	    ClassResponse response = classAdminService.getBatchById(batchId);
+
+	    logger.debug("Returning batch details for batchId: {}", batchId);
+	    return ResponseEntity.ok(response);
+	}
 }
