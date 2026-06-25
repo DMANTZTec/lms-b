@@ -78,7 +78,10 @@
     <!-- Student Registration otp table -->
     <include file="/db/changelog/changelogs/202606121240-create-student_registration_otp-table.xml"/>
     
-<!-- Class Batch Instructor table -->
-<include file="db/changelog/changelogs/202606220307-create-class-batch-instructor-table.xml"/>
+    <!-- Class Batch Instructor table -->
+    <include file="db/changelog/changelogs/202606220307-create-class-batch-instructor-table.xml"/>
+
+    <!-- Student Program table -->
+    <include file="db/changelog/changelogs/202606250936-create-student_program-table.xml"/>
 
 </databaseChangeLog>
