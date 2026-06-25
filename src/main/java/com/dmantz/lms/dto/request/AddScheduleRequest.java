@@ -12,7 +12,7 @@ public class AddScheduleRequest {
 	private Long BatchId;
 
 	@NotNull
-	private Long staffId;
+	private String staffId;
 	private LocalDate classDate;
 	private LocalTime startTime;
 	private LocalTime endTime;
@@ -66,11 +66,11 @@ public class AddScheduleRequest {
 		BatchId = batchId;
 	}
 
-	public Long getStaffId() {
+	public String getStaffId() {
 		return staffId;
 	}
 
-	public void setStaffId(Long staffId) {
+	public void setStaffId(String staffId) {
 		this.staffId = staffId;
 	}
 

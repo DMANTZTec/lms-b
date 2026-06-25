@@ -1,4 +1,4 @@
-package com.dmantz.lms.dto.response;
+package com.dmantz.lms.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 

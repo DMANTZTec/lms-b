@@ -270,4 +270,32 @@ public class ClassAdminController {
 	    logger.debug("Returning batch details for batchId: {}", batchId);
 	    return ResponseEntity.ok(response);
 	}
+	
+	// Add extra instructors (appends to existing set)
+	@PostMapping("/courseschedule/classes/{batchId}/instructors")
+	public ResponseEntity<List<BatchInstructorResponse>> addInstructorsToBatch(
+	        @PathVariable Long batchId,
+	        @RequestBody BatchInstructorRequest request) {
+
+	    logger.info("POST /courseschedule/classes/{}/instructors - Adding instructors", batchId);
+
+	    List<BatchInstructorResponse> response = classAdminService.addInstructorsToBatch(batchId, request);
+
+	    logger.debug("Returning {} instructor(s) for batchId: {}", response.size(), batchId);
+	    return ResponseEntity.ok(response);
+	}
+
+	// Replace instructors entirely
+	@PutMapping("/courseschedule/classes/{batchId}/instructors")
+	public ResponseEntity<List<BatchInstructorResponse>> updateInstructorsForBatch(
+	        @PathVariable Long batchId,
+	        @RequestBody BatchInstructorRequest request) {
+
+	    logger.info("PUT /courseschedule/classes/{}/instructors - Updating instructors", batchId);
+
+	    List<BatchInstructorResponse> response = classAdminService.updateInstructorsForBatch(batchId, request);
+
+	    logger.debug("Returning {} instructor(s) for batchId: {}", response.size(), batchId);
+	    return ResponseEntity.ok(response);
+	}
 }

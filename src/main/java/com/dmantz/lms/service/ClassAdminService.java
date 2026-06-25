@@ -55,5 +55,8 @@ public interface ClassAdminService {
 	ClassScheduleResponse getScheduleById(Long scheduleId);
 	
 	ClassResponse getBatchById(Long batchId);
+	
+	List<BatchInstructorResponse> addInstructorsToBatch(Long batchId, BatchInstructorRequest request);
+	List<BatchInstructorResponse> updateInstructorsForBatch(Long batchId, BatchInstructorRequest request);
 
 }

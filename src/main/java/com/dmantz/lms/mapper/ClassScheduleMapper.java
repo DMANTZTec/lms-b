@@ -8,7 +8,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 
+import java.time.format.TextStyle;
 import java.util.List;
+import java.util.Locale;
 
 @Mapper(
         componentModel = "spring",
@@ -22,16 +24,15 @@ public interface ClassScheduleMapper {
     @Mapping(source = "className", target = "className")
     @Mapping(source = "staff.staffId", target = "staffId")
     @Mapping(target = "staffName", expression = "java(getStaffFullName(entity))")
+    @Mapping(target = "dayOfWeek", expression = "java(getDayOfWeek(entity))")
     ClassScheduleResponse toResponse(ClassSchedule entity);
 
     List<ClassScheduleResponse> toDtoList(List<ClassSchedule> schedules);
 
     @Mapping(source = "batchId", target = "classBatch.id")
-    @Mapping(source = "staffId", target = "staff.id")
     ClassSchedule toEntity(ClassScheduleRequest request);
 
     @Mapping(source = "batchId", target = "classBatch.id")
-    @Mapping(source = "staffId", target = "staff.id")
     ClassSchedule toEntity(AddScheduleRequest request);
 
     default String getStaffFullName(ClassSchedule entity) {
@@ -41,5 +42,14 @@ public interface ClassScheduleMapper {
         String first = entity.getStaff().getFirstNm() == null ? "" : entity.getStaff().getFirstNm();
         String last = entity.getStaff().getLastNm() == null ? "" : entity.getStaff().getLastNm();
         return (first + " " + last).trim();
+    }
+
+    default String getDayOfWeek(ClassSchedule entity) {
+        if (entity.getClassDate() == null) {
+            return null;
+        }
+        return entity.getClassDate()
+                .getDayOfWeek()
+                .getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
     }
 }

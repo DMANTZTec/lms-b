@@ -301,7 +301,7 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 			return new ResourceNotFoundException("Class not found with id: " + request.getBatchId());
 		});
 
-		Staff staff = staffRepository.findById(request.getStaffId()).orElseThrow(() -> {
+		Staff staff = staffRepository.findByStaffId(request.getStaffId()).orElseThrow(() -> {
 			logger.warn("Staff not found with id: {}", request.getStaffId());
 			return new ResourceNotFoundException("Staff not found with id: " + request.getStaffId());
 		});
@@ -339,7 +339,7 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 		// update staff if changed
 		if (request.getStaffId() != null) {
 			logger.debug("Updating staff to id: {} for scheduleId: {}", request.getStaffId(), scheduleId);
-			Staff staff = staffRepository.findById(request.getStaffId()).orElseThrow(() -> {
+			Staff staff = staffRepository.findByStaffId(request.getStaffId()).orElseThrow(() -> {
 				logger.warn("Staff not found with id: {} during modifySchedule", request.getStaffId());
 				return new ResourceNotFoundException("Staff not found with id: " + request.getStaffId());
 			});
@@ -740,5 +740,100 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 
 	    logger.debug("Batch fetched successfully for id: {}", batchId);
 	    return response;
+	}
+	
+	@Override
+	public List<BatchInstructorResponse> addInstructorsToBatch(Long batchId, BatchInstructorRequest request) {
+
+	    logger.info("Adding {} instructor(s) to batchId: {}", request.getStaffIds().size(), batchId);
+
+	    ClassBatch batch = classBatchRepository.findById(batchId)
+	            .orElseThrow(() -> {
+	                logger.warn("ClassBatch not found with id: {} during addInstructorsToBatch", batchId);
+	                return new ResourceNotFoundException("Class not found with id: " + batchId);
+	            });
+
+	    String courseId = batch.getCourse().getCourseId();
+
+	    for (String staffId : request.getStaffIds()) {
+
+	        Staff staff = staffRepository.findByStaffId(staffId)
+	                .orElseThrow(() -> {
+	                    logger.warn("Staff not found: {}", staffId);
+	                    return new ResourceNotFoundException("Staff not found: " + staffId);
+	                });
+
+	        boolean assignedToCourse =
+	                staffCourseRepository.existsByStaff_StaffIdAndCourse_CourseId(staffId, courseId);
+
+	        if (!assignedToCourse) {
+	            logger.warn("Instructor {} is not assigned to course {}", staffId, courseId);
+	            throw new ResourceNotFoundException(
+	                    "Instructor " + staffId + " is not assigned to course " + courseId);
+	        }
+
+	        batch.getInstructors().add(staff);
+	    }
+
+	    classBatchRepository.save(batch);
+
+	    logger.info("Instructors added successfully to batchId: {}", batchId);
+
+	    return batch.getInstructors().stream()
+	            .map(this::toBatchInstructorResponse)
+	            .toList();
+	}
+
+	@Override
+	public List<BatchInstructorResponse> updateInstructorsForBatch(Long batchId, BatchInstructorRequest request) {
+
+	    logger.info("Updating instructors for batchId: {} to {}", batchId, request.getStaffIds());
+
+	    ClassBatch batch = classBatchRepository.findById(batchId)
+	            .orElseThrow(() -> {
+	                logger.warn("ClassBatch not found with id: {} during updateInstructorsForBatch", batchId);
+	                return new ResourceNotFoundException("Class not found with id: " + batchId);
+	            });
+
+	    String courseId = batch.getCourse().getCourseId();
+
+	    Set<Staff> newInstructors = new HashSet<>();
+
+	    for (String staffId : request.getStaffIds()) {
+
+	        Staff staff = staffRepository.findByStaffId(staffId)
+	                .orElseThrow(() -> {
+	                    logger.warn("Staff not found: {}", staffId);
+	                    return new ResourceNotFoundException("Staff not found: " + staffId);
+	                });
+
+	        boolean assignedToCourse =
+	                staffCourseRepository.existsByStaff_StaffIdAndCourse_CourseId(staffId, courseId);
+
+	        if (!assignedToCourse) {
+	            logger.warn("Instructor {} is not assigned to course {}", staffId, courseId);
+	            throw new ResourceNotFoundException(
+	                    "Instructor " + staffId + " is not assigned to course " + courseId);
+	        }
+
+	        newInstructors.add(staff);
+	    }
+
+	    batch.setInstructors(newInstructors);   // ✅ replaces, not appends
+	    classBatchRepository.save(batch);
+
+	    logger.info("Instructors updated successfully for batchId: {}", batchId);
+
+	    return batch.getInstructors().stream()
+	            .map(this::toBatchInstructorResponse)
+	            .toList();
+	}
+
+	private BatchInstructorResponse toBatchInstructorResponse(Staff staff) {
+	    BatchInstructorResponse r = new BatchInstructorResponse();
+	    r.setStaffId(staff.getStaffId());
+	    r.setFirstNm(staff.getFirstNm());
+	    r.setLastNm(staff.getLastNm());
+	    return r;
 	}
 }
