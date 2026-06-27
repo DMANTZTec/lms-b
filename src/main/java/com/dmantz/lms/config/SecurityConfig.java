@@ -40,6 +40,9 @@ public class SecurityConfig {
                                 "/api/auth/staff/login"
                         ).permitAll()
 
+                        // CONTACT US PUBLIC APIs
+                        .requestMatchers("/api/contact-us/**").permitAll()
+
                         // STUDENT PUBLIC APIs
                         .requestMatchers(
                                 "/api/student/register",
@@ -56,11 +59,16 @@ public class SecurityConfig {
                         // STAFF PUBLIC APIs
                         .requestMatchers(
                                 "/api/staff/admin-register",
-                                "/api/staff/register",
                                 "/api/staff/verify-otp",
                                 "/api/staff/forgot-password",
-                                "/api/staff/reset-password"
+                                "/api/staff/reset-password",
+                                "/api/staff/resend-otp"
                         ).permitAll()
+
+                        // Only ADMIN can create staff/instructors
+                        .requestMatchers(
+                                "/api/staff/register"
+                        ).hasRole("ADMIN")
 
                         // SWAGGER APIs
                         .requestMatchers(

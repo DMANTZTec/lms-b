@@ -84,4 +84,7 @@
     <!-- Student Program table -->
     <include file="db/changelog/changelogs/202606250936-create-student_program-table.xml"/>
 
+    <!-- contactus table -->
+    <include file="db/changelog/changelogs/202606271027-create-contactus-table.xml"/>
+
 </databaseChangeLog>
