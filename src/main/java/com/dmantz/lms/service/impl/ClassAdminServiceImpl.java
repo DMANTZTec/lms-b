@@ -75,178 +75,139 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 	@Override
 	public ClassResponse addClass(String courseId, CreateClassRequest request) {
 
-	    logger.info("Creating class for courseId: {}", courseId);
+		logger.info("Creating class for courseId: {}", courseId);
 
-	    // 1. Fetch course
-	    Course course = courseRepository.findByCourseId(courseId)
-	            .orElseThrow(() -> {
-	                logger.warn("Course not found: {}", courseId);
-	                return new CourseNotFoundException(
-	                        "Course not found with ID: " + courseId);
-	            });
+		// 1. Fetch course
+		Course course = courseRepository.findByCourseId(courseId).orElseThrow(() -> {
+			logger.warn("Course not found: {}", courseId);
+			return new CourseNotFoundException("Course not found with ID: " + courseId);
+		});
 
-	    // 2. Create ClassBatch
-	    ClassBatch classBatch = classBatchMapper.toEntity(request);
-	    classBatch.setCourse(course);
-	    classBatch.setStatus(ClassStatus.SCHEDULED.name());
+		// 2. Create ClassBatch
+		ClassBatch classBatch = classBatchMapper.toEntity(request);
+		classBatch.setCourse(course);
+		classBatch.setStatus(ClassStatus.SCHEDULED.name());
 
-	    final ClassBatch savedBatch = classBatchRepository.save(classBatch);
+		final ClassBatch savedBatch = classBatchRepository.save(classBatch);
 
-	    logger.info("ClassBatch created with id: {}", savedBatch.getId());
+		logger.info("ClassBatch created with id: {}", savedBatch.getId());
 
-	    // 3. Validate instructors belong to selected course AND attach them to the batch
-	    Set<Staff> instructors = new HashSet<>();
+		// 3. Validate instructors belong to selected course AND attach them to the
+		// batch
+		Set<Staff> instructors = new HashSet<>();
 
-	    for (String staffId : request.getSelectedInstructors()) {
+		for (String staffId : request.getSelectedInstructors()) {
 
-	        Staff staff = staffRepository.findByStaffId(staffId)
-	                .orElseThrow(() -> {
-	                    logger.warn("Staff not found: {}", staffId);
-	                    return new ResourceNotFoundException(
-	                            "Staff not found: " + staffId);
-	                });
+			Staff staff = staffRepository.findByStaffId(staffId).orElseThrow(() -> {
+				logger.warn("Staff not found: {}", staffId);
+				return new ResourceNotFoundException("Staff not found: " + staffId);
+			});
 
-	        boolean assignedToCourse =
-	                staffCourseRepository.existsByStaff_StaffIdAndCourse_CourseId(
-	                        staffId, courseId);
+			boolean assignedToCourse = staffCourseRepository.existsByStaff_StaffIdAndCourse_CourseId(staffId, courseId);
 
-	        if (!assignedToCourse) {
+			if (!assignedToCourse) {
 
-	            logger.warn(
-	                    "Instructor {} is not assigned to course {}",
-	                    staffId,
-	                    courseId);
+				logger.warn("Instructor {} is not assigned to course {}", staffId, courseId);
 
-	            throw new ResourceNotFoundException(
-	                    "Instructor " + staffId
-	                            + " is not assigned to course "
-	                            + courseId);
-	        }
+				throw new ResourceNotFoundException("Instructor " + staffId + " is not assigned to course " + courseId);
+			}
 
-	        instructors.add(staff);
-	    }
+			instructors.add(staff);
+		}
 
-	    savedBatch.setInstructors(instructors);
-	    classBatchRepository.save(savedBatch);
+		savedBatch.setInstructors(instructors);
+		classBatchRepository.save(savedBatch);
 
-	    logger.info("{} instructor(s) attached to batchId: {}", instructors.size(), savedBatch.getId());
+		logger.info("{} instructor(s) attached to batchId: {}", instructors.size(), savedBatch.getId());
 
-	    // 4. Generate schedules — one row per date, no staff assigned
-	    List<ClassSchedule> generatedSchedules = new ArrayList<>();
+		// 4. Generate schedules — one row per date, no staff assigned
+		List<ClassSchedule> generatedSchedules = new ArrayList<>();
 
-	    LocalDate current = request.getBeginDate();
-	    LocalDate endDate = request.getEndDate();
+		LocalDate current = request.getBeginDate();
+		LocalDate endDate = request.getEndDate();
 
-	    int sessionNo = 1;
+		int sessionNo = 1;
 
-	    while (!current.isAfter(endDate)) {
+		while (!current.isAfter(endDate)) {
 
-	        String dayName = current.getDayOfWeek()
-	                .getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
+			String dayName = current.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
 
-	        if (request.getSelectedDays().contains(dayName)) {
+			if (request.getSelectedDays().contains(dayName)) {
 
-	            CreateClassRequest.DayTimeSlot slot =
-	                    request.getDayTimes().get(dayName);
+				CreateClassRequest.DayTimeSlot slot = request.getDayTimes().get(dayName);
 
-	            if (slot != null) {
+				if (slot != null) {
 
-	                ClassSchedule schedule = new ClassSchedule();
+					ClassSchedule schedule = new ClassSchedule();
 
-	                schedule.setClassBatch(savedBatch);
-	                schedule.setStaff(null);
-	                schedule.setClassDate(current);
-	                schedule.setStartTime(slot.getStart());
-	                schedule.setEndTime(slot.getEnd());
+					schedule.setClassBatch(savedBatch);
+					schedule.setStaff(null);
+					schedule.setClassDate(current);
+					schedule.setStartTime(slot.getStart());
+					schedule.setEndTime(slot.getEnd());
 
-	                schedule.setClassName("Session " + sessionNo);
+					schedule.setClassName("Session " + sessionNo);
 
-	                schedule.setMode(ClassMode.ONLINE);
-	                schedule.setMeetingLink("N/A");
-	                schedule.setLocation("N/A");
+					schedule.setMode(ClassMode.ONLINE);
+					schedule.setMeetingLink("N/A");
+					schedule.setLocation("N/A");
 
-	                schedule.setStatus(ClassStatus.SCHEDULED);
+					schedule.setStatus(ClassStatus.SCHEDULED);
 
-	                ClassSchedule saved =
-	                        classScheduleRepository.save(schedule);
+					ClassSchedule saved = classScheduleRepository.save(schedule);
 
-	                generatedSchedules.add(saved);
+					generatedSchedules.add(saved);
 
-	                logger.debug(
-	                        "Schedule created: date={} batchId={} (no staff assigned)",
-	                        current,
-	                        savedBatch.getId());
+					logger.debug("Schedule created: date={} batchId={} (no staff assigned)", current,
+							savedBatch.getId());
 
-	                sessionNo++;
-	            }
-	        }
+					sessionNo++;
+				}
+			}
 
-	        current = current.plusDays(1);
-	    }
+			current = current.plusDays(1);
+		}
 
-	    logger.info(
-	            "Total {} schedule(s) generated for batchId: {}",
-	            generatedSchedules.size(),
-	            savedBatch.getId());
+		logger.info("Total {} schedule(s) generated for batchId: {}", generatedSchedules.size(), savedBatch.getId());
 
-	    // 5. Build schedule response
-	    List<ClassScheduleResponse> scheduleResponses =
-	            generatedSchedules.stream()
-	                    .map(s -> {
+		// 5. Build schedule response
+		List<ClassScheduleResponse> scheduleResponses = generatedSchedules.stream().map(s -> {
 
-	                        ClassScheduleResponse sr = new ClassScheduleResponse();
+			ClassScheduleResponse sr = new ClassScheduleResponse();
 
-	                        sr.setBatchId(savedBatch.getId());
-	                        sr.setScheduleId(s.getId());
-	                        sr.setBatchName(savedBatch.getClassName());
-	                        sr.setClassName(s.getClassName());
-	                        sr.setClassDate(s.getClassDate());
+			sr.setBatchId(savedBatch.getId());
+			sr.setScheduleId(s.getId());
+			sr.setBatchName(savedBatch.getClassName());
+			sr.setClassName(s.getClassName());
+			sr.setClassDate(s.getClassDate());
 
-	                        sr.setDayOfWeek(
-	                                s.getClassDate()
-	                                        .getDayOfWeek()
-	                                        .getDisplayName(
-	                                                TextStyle.SHORT,
-	                                                Locale.ENGLISH));
+			sr.setDayOfWeek(s.getClassDate().getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.ENGLISH));
 
-	                        sr.setStartTime(s.getStartTime());
-	                        sr.setEndTime(s.getEndTime());
+			sr.setStartTime(s.getStartTime());
+			sr.setEndTime(s.getEndTime());
 
-	                        sr.setStaffId(
-	                                s.getStaff() != null
-	                                        ? s.getStaff().getStaffId()
-	                                        : null);
+			sr.setStaffId(s.getStaff() != null ? s.getStaff().getStaffId() : null);
 
-	                        sr.setStaffName(
-	                                s.getStaff() != null
-	                                        ? s.getStaff().getFirstNm() + " " + s.getStaff().getLastNm()
-	                                        : null);
+			sr.setStaffName(s.getStaff() != null ? s.getStaff().getFirstNm() + " " + s.getStaff().getLastNm() : null);
 
-	                        sr.setMode(
-	                                s.getMode() != null
-	                                        ? s.getMode().name()
-	                                        : null);
+			sr.setMode(s.getMode() != null ? s.getMode().name() : null);
 
-	                        sr.setMeetingLink(s.getMeetingLink());
-	                        sr.setLocation(s.getLocation());
+			sr.setMeetingLink(s.getMeetingLink());
+			sr.setLocation(s.getLocation());
 
-	                        sr.setStatus(
-	                                s.getStatus() != null
-	                                        ? s.getStatus().name()
-	                                        : null);
+			sr.setStatus(s.getStatus() != null ? s.getStatus().name() : null);
 
-	                        return sr;
-	                    })
-	                    .toList();
+			return sr;
+		}).toList();
 
-	    // 6. Build batch response
-	    ClassResponse response = classBatchMapper.toResponse(savedBatch);
+		// 6. Build batch response
+		ClassResponse response = classBatchMapper.toResponse(savedBatch);
 
-	    response.setBatchName(savedBatch.getClassName());
-	    response.setTotalSchedulesGenerated(generatedSchedules.size());
-	    response.setSchedules(scheduleResponses);
+		response.setBatchName(savedBatch.getClassName());
+		response.setTotalSchedulesGenerated(generatedSchedules.size());
+		response.setSchedules(scheduleResponses);
 
-	    return response;
+		return response;
 	}
 
 	@Override
@@ -332,11 +293,22 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 			return new ResourceNotFoundException("Schedule not found with id: " + scheduleId);
 		});
 
-		// update fields
-		schedule.setStartTime(request.getStartTime());
-		schedule.setEndTime(request.getEndTime());
+		if (request.getClassName() != null) {
+			schedule.setClassName(request.getClassName());
+		}
 
-		// update staff if changed
+		if (request.getClassDate() != null) {
+			schedule.setClassDate(request.getClassDate());
+		}
+
+		if (request.getStartTime() != null) {
+			schedule.setStartTime(request.getStartTime());
+		}
+
+		if (request.getEndTime() != null) {
+			schedule.setEndTime(request.getEndTime());
+		}
+
 		if (request.getStaffId() != null) {
 			logger.debug("Updating staff to id: {} for scheduleId: {}", request.getStaffId(), scheduleId);
 			Staff staff = staffRepository.findByStaffId(request.getStaffId()).orElseThrow(() -> {
@@ -344,16 +316,6 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 				return new ResourceNotFoundException("Staff not found with id: " + request.getStaffId());
 			});
 			schedule.setStaff(staff);
-		}
-
-		// update class if changed
-		if (request.getBatchId() != null) {
-			logger.debug("Updating class to id: {} for scheduleId: {}", request.getBatchId(), scheduleId);
-			ClassBatch batch = classBatchRepository.findById(request.getBatchId()).orElseThrow(() -> {
-				logger.warn("ClassBatch not found with id: {} during modifySchedule", request.getBatchId());
-				return new ResourceNotFoundException("Class not found with id: " + request.getBatchId());
-			});
-			schedule.setClassBatch(batch);
 		}
 
 		ClassSchedule updated = classScheduleRepository.save(schedule);
@@ -605,235 +567,199 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 		return schedules.stream().map(s -> {
 			ClassScheduleResponse sr = new ClassScheduleResponse();
 			sr.setBatchId(batchId);
-            sr.setScheduleId(s.getId());           // ✅ add this
+			sr.setScheduleId(s.getId()); // ✅ add this
 			sr.setClassName(s.getClassBatch().getClassName());
 			sr.setClassDate(s.getClassDate());
 			sr.setDayOfWeek(s.getClassDate().getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.ENGLISH));
 			sr.setStartTime(s.getStartTime());
 			sr.setEndTime(s.getEndTime());
-			sr.setStaffId(
-			        s.getStaff() != null
-			                ? s.getStaff().getStaffId()
-			                : null);
+			sr.setStaffId(s.getStaff() != null ? s.getStaff().getStaffId() : null);
 
-			sr.setStaffName(
-			        s.getStaff() != null
-			                ? s.getStaff().getFirstNm() + " " + s.getStaff().getLastNm()
-			                : null);
+			sr.setStaffName(s.getStaff() != null ? s.getStaff().getFirstNm() + " " + s.getStaff().getLastNm() : null);
 			sr.setStatus(s.getStatus().name());
 			return sr;
 		}).toList();
 	}
-	
+
 	@Override
 	public List<ClassScheduleResponse> getAllSchedules() {
 
-	    List<ClassSchedule> schedules =
-	            classScheduleRepository.findAll();
+		List<ClassSchedule> schedules = classScheduleRepository.findAll();
 
-	    return classScheduleMapper.toDtoList(schedules);
+		return classScheduleMapper.toDtoList(schedules);
 	}
-	
+
 	@Override
 	@Transactional
-	public void assignInstructor(Long scheduleId,
-	                             AssignInstructorRequest request) throws BadRequestException {
+	public void assignInstructor(Long scheduleId, AssignInstructorRequest request) throws BadRequestException {
 
-	    logger.info("Assigning instructor {} to schedule {}",
-	            request.getStaffId(), scheduleId);
+		logger.info("Assigning instructor {} to schedule {}", request.getStaffId(), scheduleId);
 
-	    // 1. Validate schedule
-	    ClassSchedule schedule = classScheduleRepository
-	            .findById(scheduleId)
-	            .orElseThrow(() ->
-	                    new ResourceNotFoundException(
-	                            "Schedule not found"));
+		// 1. Validate schedule
+		ClassSchedule schedule = classScheduleRepository.findById(scheduleId)
+				.orElseThrow(() -> new ResourceNotFoundException("Schedule not found"));
 
-	    // 2. Get batch
-	    ClassBatch batch = schedule.getClassBatch();
+		// 2. Get batch
+		ClassBatch batch = schedule.getClassBatch();
 
-	    // 3. Get course id from batch
-	    String courseId = batch.getCourse().getCourseId();
+		// 3. Get course id from batch
+		String courseId = batch.getCourse().getCourseId();
 
-	    // 4. Validate instructor assigned to course
-	    boolean assignedToCourse =
-	            staffCourseRepository
-	                    .existsByStaff_StaffIdAndCourse_CourseId(
-	                            request.getStaffId(),
-	                            courseId);
+		// 4. Validate instructor assigned to course
+		boolean assignedToCourse = staffCourseRepository.existsByStaff_StaffIdAndCourse_CourseId(request.getStaffId(),
+				courseId);
 
-	    if (!assignedToCourse) {
-	        throw new BadRequestException(
-	                "Instructor is not assigned to this course");
-	    }
+		if (!assignedToCourse) {
+			throw new BadRequestException("Instructor is not assigned to this course");
+		}
 
-	    // 5. Validate staff exists
-	    Staff staff = staffRepository
-	            .findByStaffId(request.getStaffId())
-	            .orElseThrow(() ->
-	                    new ResourceNotFoundException(
-	                            "Instructor not found"));
+		// 5. Validate staff exists
+		Staff staff = staffRepository.findByStaffId(request.getStaffId())
+				.orElseThrow(() -> new ResourceNotFoundException("Instructor not found"));
 
-	    // 6. Assign instructor
-	    schedule.setStaff(staff);
+		// 6. Assign instructor
+		schedule.setStaff(staff);
 
-	    classScheduleRepository.save(schedule);
+		classScheduleRepository.save(schedule);
 
-	    logger.info("Instructor assigned successfully");
+		logger.info("Instructor assigned successfully");
 	}
-	
+
 	// ClassAdminServiceImpl.java
 	@Override
 	public List<BatchInstructorResponse> getInstructorsByBatchId(Long batchId) {
 
-	    logger.info("Fetching instructors for batchId: {}", batchId);
+		logger.info("Fetching instructors for batchId: {}", batchId);
 
-	    ClassBatch batch = classBatchRepository.findById(batchId)
-	            .orElseThrow(() -> {
-	                logger.warn("ClassBatch not found with id: {} during getInstructorsByBatchId", batchId);
-	                return new ResourceNotFoundException("Class not found with id: " + batchId);
-	            });
+		ClassBatch batch = classBatchRepository.findById(batchId).orElseThrow(() -> {
+			logger.warn("ClassBatch not found with id: {} during getInstructorsByBatchId", batchId);
+			return new ResourceNotFoundException("Class not found with id: " + batchId);
+		});
 
-	    return batch.getInstructors().stream()
-	            .map(staff -> {
-	                BatchInstructorResponse r = new BatchInstructorResponse();
-	                r.setStaffId(staff.getStaffId());
-	                r.setFirstNm(staff.getFirstNm());
-	                r.setLastNm(staff.getLastNm());
-	                return r;
-	            })
-	            .toList();
+		return batch.getInstructors().stream().map(staff -> {
+			BatchInstructorResponse r = new BatchInstructorResponse();
+			r.setStaffId(staff.getStaffId());
+			r.setFirstNm(staff.getFirstNm());
+			r.setLastNm(staff.getLastNm());
+			return r;
+		}).toList();
 	}
-	
+
 	@Override
 	public ClassScheduleResponse getScheduleById(Long scheduleId) {
 
-	    logger.info("Fetching schedule with id: {}", scheduleId);
+		logger.info("Fetching schedule with id: {}", scheduleId);
 
-	    ClassSchedule schedule = classScheduleRepository.findById(scheduleId)
-	            .orElseThrow(() -> {
-	                logger.warn("Schedule not found with id: {} during getScheduleById", scheduleId);
-	                return new ResourceNotFoundException("Schedule not found with id: " + scheduleId);
-	            });
+		ClassSchedule schedule = classScheduleRepository.findById(scheduleId).orElseThrow(() -> {
+			logger.warn("Schedule not found with id: {} during getScheduleById", scheduleId);
+			return new ResourceNotFoundException("Schedule not found with id: " + scheduleId);
+		});
 
-	    logger.debug("Schedule fetched successfully for id: {}", scheduleId);
-	    return classScheduleMapper.toResponse(schedule);
+		logger.debug("Schedule fetched successfully for id: {}", scheduleId);
+		return classScheduleMapper.toResponse(schedule);
 	}
-	
+
 	@Override
 	public ClassResponse getBatchById(Long batchId) {
 
-	    logger.info("Fetching batch with id: {}", batchId);
+		logger.info("Fetching batch with id: {}", batchId);
 
-	    ClassBatch batch = classBatchRepository.findById(batchId)
-	            .orElseThrow(() -> {
-	                logger.warn("ClassBatch not found with id: {} during getBatchById", batchId);
-	                return new ResourceNotFoundException("Class not found with id: " + batchId);
-	            });
+		ClassBatch batch = classBatchRepository.findById(batchId).orElseThrow(() -> {
+			logger.warn("ClassBatch not found with id: {} during getBatchById", batchId);
+			return new ResourceNotFoundException("Class not found with id: " + batchId);
+		});
 
-	    ClassResponse response = classBatchMapper.toResponse(batch);
-	    response.setBatchName(batch.getClassName());
+		ClassResponse response = classBatchMapper.toResponse(batch);
+		response.setBatchName(batch.getClassName());
 
-	    List<ClassSchedule> schedules = classScheduleRepository.findByClassBatch_Id(batchId);
-	    response.setTotalSchedulesGenerated(schedules.size());
-	    response.setSchedules(classScheduleMapper.toDtoList(schedules));   // ✅ add this
+		List<ClassSchedule> schedules = classScheduleRepository.findByClassBatch_Id(batchId);
+		response.setTotalSchedulesGenerated(schedules.size());
+		response.setSchedules(classScheduleMapper.toDtoList(schedules)); // ✅ add this
 
-	    logger.debug("Batch fetched successfully for id: {}", batchId);
-	    return response;
+		logger.debug("Batch fetched successfully for id: {}", batchId);
+		return response;
 	}
-	
+
 	@Override
 	public List<BatchInstructorResponse> addInstructorsToBatch(Long batchId, BatchInstructorRequest request) {
 
-	    logger.info("Adding {} instructor(s) to batchId: {}", request.getStaffIds().size(), batchId);
+		logger.info("Adding {} instructor(s) to batchId: {}", request.getStaffIds().size(), batchId);
 
-	    ClassBatch batch = classBatchRepository.findById(batchId)
-	            .orElseThrow(() -> {
-	                logger.warn("ClassBatch not found with id: {} during addInstructorsToBatch", batchId);
-	                return new ResourceNotFoundException("Class not found with id: " + batchId);
-	            });
+		ClassBatch batch = classBatchRepository.findById(batchId).orElseThrow(() -> {
+			logger.warn("ClassBatch not found with id: {} during addInstructorsToBatch", batchId);
+			return new ResourceNotFoundException("Class not found with id: " + batchId);
+		});
 
-	    String courseId = batch.getCourse().getCourseId();
+		String courseId = batch.getCourse().getCourseId();
 
-	    for (String staffId : request.getStaffIds()) {
+		for (String staffId : request.getStaffIds()) {
 
-	        Staff staff = staffRepository.findByStaffId(staffId)
-	                .orElseThrow(() -> {
-	                    logger.warn("Staff not found: {}", staffId);
-	                    return new ResourceNotFoundException("Staff not found: " + staffId);
-	                });
+			Staff staff = staffRepository.findByStaffId(staffId).orElseThrow(() -> {
+				logger.warn("Staff not found: {}", staffId);
+				return new ResourceNotFoundException("Staff not found: " + staffId);
+			});
 
-	        boolean assignedToCourse =
-	                staffCourseRepository.existsByStaff_StaffIdAndCourse_CourseId(staffId, courseId);
+			boolean assignedToCourse = staffCourseRepository.existsByStaff_StaffIdAndCourse_CourseId(staffId, courseId);
 
-	        if (!assignedToCourse) {
-	            logger.warn("Instructor {} is not assigned to course {}", staffId, courseId);
-	            throw new ResourceNotFoundException(
-	                    "Instructor " + staffId + " is not assigned to course " + courseId);
-	        }
+			if (!assignedToCourse) {
+				logger.warn("Instructor {} is not assigned to course {}", staffId, courseId);
+				throw new ResourceNotFoundException("Instructor " + staffId + " is not assigned to course " + courseId);
+			}
 
-	        batch.getInstructors().add(staff);
-	    }
+			batch.getInstructors().add(staff);
+		}
 
-	    classBatchRepository.save(batch);
+		classBatchRepository.save(batch);
 
-	    logger.info("Instructors added successfully to batchId: {}", batchId);
+		logger.info("Instructors added successfully to batchId: {}", batchId);
 
-	    return batch.getInstructors().stream()
-	            .map(this::toBatchInstructorResponse)
-	            .toList();
+		return batch.getInstructors().stream().map(this::toBatchInstructorResponse).toList();
 	}
 
 	@Override
 	public List<BatchInstructorResponse> updateInstructorsForBatch(Long batchId, BatchInstructorRequest request) {
 
-	    logger.info("Updating instructors for batchId: {} to {}", batchId, request.getStaffIds());
+		logger.info("Updating instructors for batchId: {} to {}", batchId, request.getStaffIds());
 
-	    ClassBatch batch = classBatchRepository.findById(batchId)
-	            .orElseThrow(() -> {
-	                logger.warn("ClassBatch not found with id: {} during updateInstructorsForBatch", batchId);
-	                return new ResourceNotFoundException("Class not found with id: " + batchId);
-	            });
+		ClassBatch batch = classBatchRepository.findById(batchId).orElseThrow(() -> {
+			logger.warn("ClassBatch not found with id: {} during updateInstructorsForBatch", batchId);
+			return new ResourceNotFoundException("Class not found with id: " + batchId);
+		});
 
-	    String courseId = batch.getCourse().getCourseId();
+		String courseId = batch.getCourse().getCourseId();
 
-	    Set<Staff> newInstructors = new HashSet<>();
+		Set<Staff> newInstructors = new HashSet<>();
 
-	    for (String staffId : request.getStaffIds()) {
+		for (String staffId : request.getStaffIds()) {
 
-	        Staff staff = staffRepository.findByStaffId(staffId)
-	                .orElseThrow(() -> {
-	                    logger.warn("Staff not found: {}", staffId);
-	                    return new ResourceNotFoundException("Staff not found: " + staffId);
-	                });
+			Staff staff = staffRepository.findByStaffId(staffId).orElseThrow(() -> {
+				logger.warn("Staff not found: {}", staffId);
+				return new ResourceNotFoundException("Staff not found: " + staffId);
+			});
 
-	        boolean assignedToCourse =
-	                staffCourseRepository.existsByStaff_StaffIdAndCourse_CourseId(staffId, courseId);
+			boolean assignedToCourse = staffCourseRepository.existsByStaff_StaffIdAndCourse_CourseId(staffId, courseId);
 
-	        if (!assignedToCourse) {
-	            logger.warn("Instructor {} is not assigned to course {}", staffId, courseId);
-	            throw new ResourceNotFoundException(
-	                    "Instructor " + staffId + " is not assigned to course " + courseId);
-	        }
+			if (!assignedToCourse) {
+				logger.warn("Instructor {} is not assigned to course {}", staffId, courseId);
+				throw new ResourceNotFoundException("Instructor " + staffId + " is not assigned to course " + courseId);
+			}
 
-	        newInstructors.add(staff);
-	    }
+			newInstructors.add(staff);
+		}
 
-	    batch.setInstructors(newInstructors);   // ✅ replaces, not appends
-	    classBatchRepository.save(batch);
+		batch.setInstructors(newInstructors); // ✅ replaces, not appends
+		classBatchRepository.save(batch);
 
-	    logger.info("Instructors updated successfully for batchId: {}", batchId);
+		logger.info("Instructors updated successfully for batchId: {}", batchId);
 
-	    return batch.getInstructors().stream()
-	            .map(this::toBatchInstructorResponse)
-	            .toList();
+		return batch.getInstructors().stream().map(this::toBatchInstructorResponse).toList();
 	}
 
 	private BatchInstructorResponse toBatchInstructorResponse(Staff staff) {
-	    BatchInstructorResponse r = new BatchInstructorResponse();
-	    r.setStaffId(staff.getStaffId());
-	    r.setFirstNm(staff.getFirstNm());
-	    r.setLastNm(staff.getLastNm());
-	    return r;
+		BatchInstructorResponse r = new BatchInstructorResponse();
+		r.setStaffId(staff.getStaffId());
+		r.setFirstNm(staff.getFirstNm());
+		r.setLastNm(staff.getLastNm());
+		return r;
 	}
 }
