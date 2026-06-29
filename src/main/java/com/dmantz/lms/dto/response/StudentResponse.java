@@ -17,6 +17,7 @@ public class StudentResponse {
 	private LocalDate dob;
 
 	private String addr1;
+	private String addr2;
 	private String city;
 	private String state;
 	private String country;
@@ -224,17 +225,29 @@ public class StudentResponse {
 	public void setUpdatedDt(LocalDateTime updatedDt) {
 		this.updatedDt = updatedDt;
 	}
+	
+	
+
+	public String getAddr2() {
+		return addr2;
+	}
+
+	public void setAddr2(String addr2) {
+		this.addr2 = addr2;
+	}
 
 	@Override
 	public String toString() {
 		return "StudentResponse [id=" + id + ", studentId=" + studentId + ", loginId=" + loginId + ", firstNm="
 				+ firstNm + ", lastNm=" + lastNm + ", gender=" + gender + ", dob=" + dob + ", addr1=" + addr1
-				+ ", city=" + city + ", state=" + state + ", country=" + country + ", pin=" + pin + ", emailId="
-				+ emailId + ", mobileNum=" + mobileNum + ", status=" + status + ", enabled=" + enabled
+				+ ", addr2=" + addr2 + ", city=" + city + ", state=" + state + ", country=" + country + ", pin=" + pin
+				+ ", emailId=" + emailId + ", mobileNum=" + mobileNum + ", status=" + status + ", enabled=" + enabled
 				+ ", emergencyContactNm=" + emergencyContactNm + ", emergencyContactNum=" + emergencyContactNum
 				+ ", profileImg=" + profileImg + ", createdBy=" + createdBy + ", createdDt=" + createdDt
 				+ ", updatedBy=" + updatedBy + ", updatedDt=" + updatedDt + "]";
 	}
+
+
 
 	
 }
