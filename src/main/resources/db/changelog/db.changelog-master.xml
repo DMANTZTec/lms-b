@@ -86,5 +86,8 @@
 
     <!-- contactus table -->
     <include file="db/changelog/changelogs/202606271027-create-contactus-table.xml"/>
+    
+    <!-- course_fee table -->
+    <include file="db/changelog/changelogs/202606291520-create-course_fee-table.xml"/>
 
 </databaseChangeLog>
