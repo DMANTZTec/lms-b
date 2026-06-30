@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ClassBatchRepository extends JpaRepository<ClassBatch, Long> {
@@ -24,5 +25,9 @@ public interface ClassBatchRepository extends JpaRepository<ClassBatch, Long> {
 	List<ClassBatch> findByCourse_CourseId(String courseId);
 
 	boolean existsByCourse(Course course);
+
+	Optional<ClassBatch> findTopByCourse_CourseIdAndStatusOrderByStartDateDesc(String courseId, String status);
+
+	Optional<ClassBatch> findTopByCourse_CourseIdOrderByStartDateDesc(String courseId);
 
 }
