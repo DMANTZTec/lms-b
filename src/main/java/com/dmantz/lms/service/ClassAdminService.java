@@ -35,8 +35,6 @@ public interface ClassAdminService {
 
 	List<ClassTopicResponse> getTopicsByBatchId(Long batchId);
 
-	StudentCourseResponse assignCourseToStudent(String studentId, String courseId);
-
 // Add these 2 new methods
 	List<ClassResponse> getClassesByCourse(String courseId);
 

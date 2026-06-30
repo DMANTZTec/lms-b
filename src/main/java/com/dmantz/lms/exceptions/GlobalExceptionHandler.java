@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 public class GlobalExceptionHandler {
 
 	@ExceptionHandler(StudentNotFoundException.class)
-	public ResponseEntity<String> handleNotFound(StudentNotFoundException ex) {
+	public ResponseEntity<String> handleStudentNotFound(StudentNotFoundException ex) {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
 	}
 
@@ -101,4 +101,20 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<Object> handleInvalidPassword(InvalidPasswordException ex) {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
 	}
+
+	@ExceptionHandler(ProgramNotFoundException.class)
+	public ResponseEntity<String> handleProgramNotFound(ProgramNotFoundException ex) {
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+	}
+
+	@ExceptionHandler(CourseNotFoundException.class)
+	public ResponseEntity<String> handleCourseNotFound(CourseNotFoundException ex) {
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+	}
+
+	@ExceptionHandler(DuplicateEnrollmentException.class)
+	public ResponseEntity<String> handleDuplicateEnrollment(DuplicateEnrollmentException ex) {
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+	}
+
 }

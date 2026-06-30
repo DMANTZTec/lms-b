@@ -53,7 +53,8 @@ public class SecurityConfig {
                                 "/api/student/*",
                                 "/api/student/view-students",
                                 "/api/student/forgot-password",
-                                "/api/student/reset-password"
+                                "/api/student/reset-password",
+                                "/api/student-programs/**"
                         ).permitAll()
 
                         // STAFF PUBLIC APIs

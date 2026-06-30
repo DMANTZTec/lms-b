@@ -3,7 +3,6 @@ package com.dmantz.lms.service.impl;
 import com.dmantz.lms.dto.request.*;
 import com.dmantz.lms.dto.response.*;
 import com.dmantz.lms.entity.*;
-import com.dmantz.lms.exceptions.CourseAlreadyAssignedException;
 import com.dmantz.lms.exceptions.CourseNotFoundException;
 import com.dmantz.lms.exceptions.ResourceNotFoundException;
 import com.dmantz.lms.exceptions.StudentNotFoundException;
@@ -15,15 +14,12 @@ import com.dmantz.lms.repository.*;
 import com.dmantz.lms.service.ClassAdminService;
 import jakarta.transaction.Transactional;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.coyote.BadRequestException;
@@ -484,40 +480,6 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 
 		logger.debug("Found {} topic(s) for batchId: {}", classTopics.size(), batchId);
 		return classTopicMapper.toResponseList(classTopics);
-	}
-
-	@Override
-	public StudentCourseResponse assignCourseToStudent(String studentId, String courseId) {
-		logger.info("Assigning courseId: {} to studentId: {}", courseId, studentId);
-
-		Student student = studentRepository.findByStudentId(studentId).orElseThrow(() -> {
-			logger.warn("Student not found with id: {} during assignCourseToStudent", studentId);
-			return new StudentNotFoundException("Student not found: " + studentId);
-		});
-
-		Course course = courseRepository.findByCourseId(courseId).orElseThrow(() -> {
-			logger.warn("Course not found with courseId: {} during assignCourseToStudent", courseId);
-			return new CourseNotFoundException("Course not found: " + courseId);
-		});
-
-		// Check if already assigned
-		boolean exists = studentCourseRepository.existsByStudent_StudentIdAndCourse_CourseId(studentId, courseId);
-
-		if (exists) {
-			logger.warn("CourseId: {} is already assigned to studentId: {}", courseId, studentId);
-			throw new CourseAlreadyAssignedException("Course already assigned to student: " + courseId);
-		}
-
-		// Create enrollment
-		StudentCourse studentCourse = new StudentCourse();
-		studentCourse.setStudent(student);
-		studentCourse.setCourse(course);
-		studentCourse.setStatus(CourseStatus.PLANNED);
-
-		var saved = studentCourseRepository.save(studentCourse);
-
-		logger.info("CourseId: {} assigned successfully to studentId: {}", courseId, studentId);
-		return studentCourseMapper.toResponse(saved);
 	}
 
 	@Override

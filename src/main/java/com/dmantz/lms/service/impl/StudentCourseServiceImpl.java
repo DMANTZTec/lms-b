@@ -6,6 +6,7 @@ import com.dmantz.lms.entity.Course;
 import com.dmantz.lms.entity.CourseStatus;
 import com.dmantz.lms.entity.Student;
 import com.dmantz.lms.entity.StudentCourse;
+import com.dmantz.lms.exceptions.DuplicateEnrollmentException;
 import com.dmantz.lms.exceptions.DuplicateValuesException;
 import com.dmantz.lms.exceptions.ResourceNotFoundException;
 import com.dmantz.lms.mapper.StudentCourseMapper;
@@ -71,7 +72,7 @@ public class StudentCourseServiceImpl implements StudentCourseService {
 			logger.error("Student already enrolled in course. studentId: {}, courseId: {}", request.getStudentId(),
 					request.getCourseId());
 
-			throw new DuplicateValuesException("Student already enrolled in this course");
+			throw new DuplicateEnrollmentException("Student already enrolled in this course");
 		});
 
 		StudentCourse entity = new StudentCourse();

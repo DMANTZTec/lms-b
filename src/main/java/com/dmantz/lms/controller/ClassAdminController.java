@@ -186,18 +186,6 @@ public class ClassAdminController {
 		return ResponseEntity.ok(topics);
 	}
 
-	@PostMapping("/students/{studentId}/courses")
-	public ResponseEntity<StudentCourseResponse> assignCourseToStudent(@PathVariable String studentId,
-			@RequestBody AssignCourseRequest request) {
-
-		logger.info("POST /students/{}/courses - Assigning courseId: {} to student", studentId, request.getCourseId());
-
-		StudentCourseResponse response = classAdminService.assignCourseToStudent(studentId, request.getCourseId());
-
-		logger.info("Course {} assigned successfully to studentId: {}", request.getCourseId(), studentId);
-		return ResponseEntity.ok(response);
-	}
-
 	@GetMapping("/courseschedule/{courseId}/classes")
 	public ResponseEntity<List<ClassResponse>> getClassesByCourse(@PathVariable String courseId) {
 
