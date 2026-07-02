@@ -9,9 +9,7 @@ public class CourseFeeSettingResponse {
     private String subjectNm;
 
     private String courseDuration;
-    private String batchClassName;
-    private String batchStatus;
-
+    
     private CourseFeeHistoryResponse currentFee;
     private List<CourseFeeHistoryResponse> feeHistory;
     private int totalHistoryRecords;
@@ -49,22 +47,6 @@ public class CourseFeeSettingResponse {
 	public void setCourseDuration(String courseDuration) {
 		this.courseDuration = courseDuration;
 	}
-
-	public String getBatchClassName() {
-        return batchClassName;
-    }
-
-    public void setBatchClassName(String batchClassName) {
-        this.batchClassName = batchClassName;
-    }
-
-    public String getBatchStatus() {
-        return batchStatus;
-    }
-
-    public void setBatchStatus(String batchStatus) {
-        this.batchStatus = batchStatus;
-    }
 
     public CourseFeeHistoryResponse getCurrentFee() {
         return currentFee;

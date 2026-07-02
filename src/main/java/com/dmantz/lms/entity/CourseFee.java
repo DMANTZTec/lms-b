@@ -7,6 +7,8 @@ import com.dmantz.lms.entity.base.AuditFields;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -26,6 +28,18 @@ public class CourseFee extends AuditFields {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "course_id", referencedColumnName = "course_id", nullable = false)
 	private Course course;
+	
+	@Enumerated(EnumType.STRING)
+	@Column(name = "course_duration")
+	private CourseDuration courseDuration;
+
+	public CourseDuration getCourseDuration() {
+	    return courseDuration;
+	}
+
+	public void setCourseDuration(CourseDuration courseDuration) {
+	    this.courseDuration = courseDuration;
+	}
 
 	@Column(name = "effective_date", nullable = false)
 	private LocalDate effectiveDate;

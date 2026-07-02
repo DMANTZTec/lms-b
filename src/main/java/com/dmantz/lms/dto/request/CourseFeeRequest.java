@@ -3,6 +3,8 @@ package com.dmantz.lms.dto.request;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import com.dmantz.lms.entity.CourseDuration;
+
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 
@@ -17,6 +19,8 @@ public class CourseFeeRequest {
 
     @DecimalMin(value = "0.00", message = "Discount cannot be negative")
     private BigDecimal discount;
+
+    private CourseDuration courseDuration;
 
     public LocalDate getEffectiveDate() {
         return effectiveDate;
@@ -40,5 +44,13 @@ public class CourseFeeRequest {
 
     public void setDiscount(BigDecimal discount) {
         this.discount = discount;
+    }
+
+    public CourseDuration getCourseDuration() {
+        return courseDuration;
+    }
+
+    public void setCourseDuration(CourseDuration courseDuration) {
+        this.courseDuration = courseDuration;
     }
 }

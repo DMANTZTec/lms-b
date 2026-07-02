@@ -60,5 +60,14 @@
 			constraintName="uk_course_fee_course_effective_date" />
 
 	</changeSet>
+	
+	<changeSet id="202506291500" author="afsheen">
+    <addColumn tableName="course_fee">
+        <column name="course_duration" type="VARCHAR(20)">
+            <constraints nullable="true"/>
+        </column>
+    </addColumn>
+</changeSet>
+	
 
 </databaseChangeLog>
