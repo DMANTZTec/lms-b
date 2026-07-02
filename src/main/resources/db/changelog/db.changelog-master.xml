@@ -89,5 +89,8 @@
     
     <!-- course_fee table -->
     <include file="db/changelog/changelogs/202606291520-create-course_fee-table.xml"/>
+    
+     <!-- program_fee table -->
+    <include file="db/changelog/changelogs/202607021258-create-program_fee-table.xml"/>
 
 </databaseChangeLog>
