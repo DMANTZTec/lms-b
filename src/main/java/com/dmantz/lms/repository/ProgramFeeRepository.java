@@ -10,9 +10,11 @@ import com.dmantz.lms.entity.ProgramFee;
 
 public interface ProgramFeeRepository extends JpaRepository<ProgramFee, Long> {
 
-    List<ProgramFee> findByProgram_IdOrderByEffectiveDateAsc(Long programId);
+	List<ProgramFee> findByProgram_IdOrderByEffectiveDateAsc(Long programId);
 
-    Optional<ProgramFee> findTopByProgram_IdOrderByEffectiveDateDesc(Long programId);
+	Optional<ProgramFee> findTopByProgram_IdOrderByEffectiveDateDesc(Long programId);
 
-    boolean existsByProgram_IdAndEffectiveDate(Long programId, LocalDate effectiveDate);
+	boolean existsByProgram_IdAndEffectiveDate(Long programId, LocalDate effectiveDate);
+
+	Optional<ProgramFee> findByProgram_IdAndEffectiveDate(Long programId, LocalDate effectiveDate);
 }

@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -90,17 +91,27 @@ public class ProgramFeeServiceImpl implements ProgramFeeService {
 			throw new DuplicateValuesException("Program fee already exists. Use update API to add a new fee version.");
 		}
 
-		// Check duplicate effective date
-		if (programFeeRepository.existsByProgram_IdAndEffectiveDate(program.getId(), request.getEffectiveDate())) {
-			logger.warn("Fee already exists for effective date: {} and programId: {}", request.getEffectiveDate(),
-					programId);
-			throw new DuplicateValuesException("Fee already exists for effective date: " + request.getEffectiveDate());
+		// Upsert — update if exists for same date, else create new
+		Optional<ProgramFee> existing = programFeeRepository
+		        .findByProgram_IdAndEffectiveDate(program.getId(), request.getEffectiveDate());
+
+		ProgramFee programFee;
+
+		if (existing.isPresent()) {
+		    logger.info("Fee exists for effective date: {}, updating it", request.getEffectiveDate());
+		    programFee = existing.get();
+		} else {
+		    programFee = new ProgramFee();
+		    programFee.setProgram(program);
+		    programFee.setEffectiveDate(request.getEffectiveDate());
 		}
 
-		// Create Program Fee
-		ProgramFee programFee = new ProgramFee();
-		programFee.setProgram(program);
-		programFee.setEffectiveDate(request.getEffectiveDate());
+		programFee.setFee(request.getFee());
+		programFee.setDiscount(discount);
+		programFee.setDuration(request.getDuration());
+		programFee.setSetBy(staff);
+
+		
 		programFee.setFee(request.getFee());
 		programFee.setDiscount(discount);
 		programFee.setDuration(request.getDuration());

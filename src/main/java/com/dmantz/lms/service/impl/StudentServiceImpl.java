@@ -584,24 +584,26 @@ public class StudentServiceImpl implements StudentService {
 	@Transactional
 	public void resetPassword(ResetPasswordRequest request) {
 
-	    logger.info("Reset password started for studentId: {}", request.getStudentId());
+	    logger.info("Reset password started for emailIdOrMobileNo: {}", request.getEmailIdOrMobileNo());
 
-	    String studentId = request.getStudentId();
+	    String emailIdOrMobileNo = request.getEmailIdOrMobileNo();
 
-	    Student student = studentRepository.findByStudentId(studentId).orElseThrow(() -> {
-	        logger.error("Student not found for studentId: {}", studentId);
-	        return new RuntimeException("Student not found");
-	    });
+	    Student student = studentRepository
+	            .findByEmailIdOrMobileNum(emailIdOrMobileNo, emailIdOrMobileNo)
+	            .orElseThrow(() -> {
+	                logger.error("Student not found for emailIdOrMobileNo: {}", emailIdOrMobileNo);
+	                return new RuntimeException("Student not found");
+	            });
 
 	    StudentOtp studentOtp = otpRepository
 	            .findTopByEmailIdOrMobileNumOrderByCreatedDtDesc(student.getEmailId(), student.getMobileNum())
 	            .orElseThrow(() -> {
-	                logger.error("OTP not found for studentId: {}", studentId);
+	                logger.error("OTP not found for emailIdOrMobileNo: {}", emailIdOrMobileNo);
 	                return new RuntimeException("OTP not found");
 	            });
 
 	    if (studentOtp.getStatus() == OtpStatus.VERIFIED) {
-	        logger.warn("OTP already used for studentId: {}", studentId);
+	        logger.warn("OTP already used for emailIdOrMobileNo: {}", emailIdOrMobileNo);
 	        throw new RuntimeException("OTP already used");
 	    }
 
@@ -610,12 +612,12 @@ public class StudentServiceImpl implements StudentService {
 	        studentOtp.setUpdatedDt(LocalDateTime.now());
 	        otpRepository.save(studentOtp);
 
-	        logger.warn("OTP expired for studentId: {}", studentId);
+	        logger.warn("OTP expired for emailIdOrMobileNo: {}", emailIdOrMobileNo);
 	        throw new RuntimeException("OTP expired");
 	    }
 
 	    if (!studentOtp.getOtp().equals(request.getOtp())) {
-	        logger.warn("Invalid OTP entered for password reset, studentId: {}", studentId);
+	        logger.warn("Invalid OTP entered for password reset, emailIdOrMobileNo: {}", emailIdOrMobileNo);
 	        throw new RuntimeException("Invalid OTP");
 	    }
 
@@ -646,9 +648,8 @@ public class StudentServiceImpl implements StudentService {
 	        }
 	    }
 
-	    logger.info("Password reset successful for studentId: {}", studentId);
+	    logger.info("Password reset successful for emailIdOrMobileNo: {}", emailIdOrMobileNo);
 	}
-
 	@Override
 	public StudentResponse getStudentById(String studentId) {
 

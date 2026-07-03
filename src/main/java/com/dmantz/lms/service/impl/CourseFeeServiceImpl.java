@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -115,51 +116,54 @@ public class CourseFeeServiceImpl implements CourseFeeService {
 	}
 	@Override
 	public CourseFeeSettingResponse updateCourseFee(String courseId, CourseFeeRequest request, String staffId) {
-		logger.info("Updating course fee for courseId: {} by staffId: {}", courseId, staffId);
+	    logger.info("Updating course fee for courseId: {} by staffId: {}", courseId, staffId);
 
-		// Validate Staff
-		if (!staffRepository.existsByStaffId(staffId)) {
-			logger.error("Staff not found with staffId: {}", staffId);
-			throw new ResourceNotFoundException("Staff with ID " + staffId + " does not exist");
-		}
+	    // Validate Staff
+	    if (!staffRepository.existsByStaffId(staffId)) {
+	        logger.error("Staff not found with staffId: {}", staffId);
+	        throw new ResourceNotFoundException("Staff with ID " + staffId + " does not exist");
+	    }
 
-		// Validate Course
-		Course course = courseRepository.findByCourseId(courseId).orElseThrow(() -> {
-			logger.error("Course not found with courseId: {}", courseId);
-			return new ResourceNotFoundException("Course not found with courseId: " + courseId);
-		});
+	    // Validate Course
+	    Course course = courseRepository.findByCourseId(courseId).orElseThrow(() -> {
+	        logger.error("Course not found with courseId: {}", courseId);
+	        return new ResourceNotFoundException("Course not found with courseId: " + courseId);
+	    });
 
-		// Validate Discount
-		BigDecimal discount = request.getDiscount() != null ? request.getDiscount() : BigDecimal.ZERO;
+	    // Validate Discount
+	    BigDecimal discount = request.getDiscount() != null ? request.getDiscount() : BigDecimal.ZERO;
 
-		if (discount.compareTo(request.getFee()) > 0) {
-			logger.error("Discount {} is greater than fee {} for courseId: {}", discount, request.getFee(), courseId);
-			throw new IllegalArgumentException("Discount cannot be greater than fee");
-		}
+	    if (discount.compareTo(request.getFee()) > 0) {
+	        logger.error("Discount {} is greater than fee {} for courseId: {}", discount, request.getFee(), courseId);
+	        throw new IllegalArgumentException("Discount cannot be greater than fee");
+	    }
 
-		// Check duplicate effective date
-		if (courseFeeRepository.existsByCourse_IdAndEffectiveDate(course.getId(), request.getEffectiveDate())) {
-			logger.warn("Fee already exists for effective date: {} and courseId: {}", request.getEffectiveDate(), courseId);
-			throw new DuplicateValuesException("Fee already exists for effective date: " + request.getEffectiveDate());
-		}
+	    // Upsert — update if exists for same date, else create new
+	    Optional<CourseFee> existing = courseFeeRepository
+	            .findByCourse_IdAndEffectiveDate(course.getId(), request.getEffectiveDate());
 
-		// Create new fee version
-		CourseFee courseFee = new CourseFee();
-		courseFee.setCourse(course);
-		courseFee.setCourseDuration(request.getCourseDuration()); 
-		courseFee.setEffectiveDate(request.getEffectiveDate());
-		courseFee.setFee(request.getFee());
-		courseFee.setDiscount(discount);
+	    CourseFee courseFee;
 
-		courseFeeRepository.save(courseFee);
+	    if (existing.isPresent()) {
+	        logger.info("Fee exists for effective date: {}, updating it", request.getEffectiveDate());
+	        courseFee = existing.get();
+	    } else {
+	        courseFee = new CourseFee();
+	        courseFee.setCourse(course);
+	        courseFee.setEffectiveDate(request.getEffectiveDate());
+	    }
 
-		logger.info("New course fee version added successfully for courseId: {}", courseId);
+	    courseFee.setFee(request.getFee());
+	    courseFee.setDiscount(discount);
+	    courseFee.setCourseDuration(request.getCourseDuration());
 
-		List<CourseFee> feeRecords = courseFeeRepository.findByCourse_IdOrderByEffectiveDateAsc(course.getId());
+	    courseFeeRepository.save(courseFee);
 
-		logger.info("Course fee updated successfully for courseId: {}", courseId);
+	    logger.info("Course fee updated successfully for courseId: {}", courseId);
 
-		return courseFeeMapper.toSettingResponse(course, feeRecords);
+	    List<CourseFee> feeRecords = courseFeeRepository.findByCourse_IdOrderByEffectiveDateAsc(course.getId());
+
+	    return courseFeeMapper.toSettingResponse(course, feeRecords);
 	}
 
 	@Override

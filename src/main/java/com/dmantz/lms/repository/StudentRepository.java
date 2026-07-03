@@ -1,6 +1,8 @@
 package com.dmantz.lms.repository;
 
 import com.dmantz.lms.entity.Student;
+import com.dmantz.lms.entity.StudentOtp;
+
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -45,6 +47,8 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     int deleteUnverifiedStudents(@Param("cutoffTime") LocalDateTime cutoffTime);
 
     Optional<Object> findByMobileNum(String mobileNum);
+
+	Optional<Student> findByEmailIdOrMobileNum(String emailIdOrMobileNo, String emailIdOrMobileNo2);
 }
 
 

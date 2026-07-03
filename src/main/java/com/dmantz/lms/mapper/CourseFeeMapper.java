@@ -1,5 +1,6 @@
 package com.dmantz.lms.mapper;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,7 +48,13 @@ public interface CourseFeeMapper {
         response.setFeeHistory(history);
         response.setTotalHistoryRecords(history.size());
 
-        CourseFeeHistoryResponse currentFee = history.isEmpty() ? null : history.get(history.size() - 1);
+        // Current fee = latest fee where effectiveDate <= today
+        LocalDate today = LocalDate.now();
+        CourseFeeHistoryResponse currentFee = history.stream()
+                .filter(h -> !h.getEffectiveDate().isAfter(today))
+                .reduce((first, second) -> second)
+                .orElse(null);
+
         response.setCurrentFee(currentFee);
 
         if (currentFee != null && currentFee.getCourseDurationLabel() != null) {

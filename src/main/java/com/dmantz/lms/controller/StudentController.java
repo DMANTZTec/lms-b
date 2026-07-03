@@ -100,11 +100,9 @@ public class StudentController {
 	@PostMapping("/reset-password")
 	public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
 
-	    logger.info("Reset password request received for studentId: {}", request.getStudentId());
 
 	    studentService.resetPassword(request);
 
-	    logger.info("Password reset successfully for studentId: {}", request.getStudentId());
 
 	    return ResponseEntity.ok("Password reset successful");
 	}

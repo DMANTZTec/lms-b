@@ -1,5 +1,6 @@
 package com.dmantz.lms.mapper;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,25 +28,30 @@ public interface ProgramFeeMapper {
 	@Mapping(source = "programId", target = "programId")
 	@Mapping(source = "programTitle", target = "programTitle")
 	void updateSettingFromProgram(Program program, @MappingTarget ProgramFeeSettingResponse response);
-
 	default ProgramFeeSettingResponse toSettingResponse(Program program, List<ProgramFee> feeRecords) {
-		List<ProgramFeeHistoryResponse> history = new ArrayList<>();
-		for (ProgramFee feeRecord : feeRecords) {
-			history.add(toHistoryResponse(feeRecord));
-		}
+	    List<ProgramFeeHistoryResponse> history = new ArrayList<>();
+	    for (ProgramFee feeRecord : feeRecords) {
+	        history.add(toHistoryResponse(feeRecord));
+	    }
 
-		ProgramFeeSettingResponse response = new ProgramFeeSettingResponse();
-		updateSettingFromProgram(program, response);
-		response.setFeeHistory(history);
-		response.setTotalHistoryRecords(history.size());
+	    ProgramFeeSettingResponse response = new ProgramFeeSettingResponse();
+	    updateSettingFromProgram(program, response);
+	    response.setFeeHistory(history);
+	    response.setTotalHistoryRecords(history.size());
 
-		ProgramFeeHistoryResponse currentFee = history.isEmpty() ? null : history.get(history.size() - 1);
-		response.setCurrentFee(currentFee);
+	    // Current fee = latest fee where effectiveDate <= today
+	    LocalDate today = LocalDate.now();
+	    ProgramFeeHistoryResponse currentFee = history.stream()
+	            .filter(h -> !h.getEffectiveDate().isAfter(today))
+	            .reduce((first, second) -> second)
+	            .orElse(null);
 
-		if (currentFee != null && currentFee.getDurationLabel() != null) {
-			response.setDuration(currentFee.getDurationLabel());
-		}
+	    response.setCurrentFee(currentFee);
 
-		return response;
+	    if (currentFee != null && currentFee.getDurationLabel() != null) {
+	        response.setDuration(currentFee.getDurationLabel());
+	    }
+
+	    return response;
 	}
 }
