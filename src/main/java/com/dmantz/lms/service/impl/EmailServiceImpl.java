@@ -119,4 +119,88 @@ public class EmailServiceImpl implements EmailService {
 			throw new RuntimeException("An unexpected error occurred while sending email.", ex);
 		}
 	}
+
+	@Override
+	public void sendStaffPasswordSetupMail(String toEmail, String staffName, String token) {
+
+		logger.info("Preparing staff password setup email for: {}", toEmail);
+
+		if (toEmail == null || toEmail.isBlank()) {
+			logger.error("Recipient email is null or blank");
+			throw new IllegalArgumentException("Recipient email must not be null or blank");
+		}
+
+		if (token == null || token.isBlank()) {
+			logger.error("Password setup token is null or blank");
+			throw new IllegalArgumentException("Password setup token must not be null or blank");
+		}
+
+
+		String subject = "Welcome to LMS - Set Your Staff Password";
+
+
+		String setupLink =
+				"http://localhost:3000/staff/set-password?token=" + token;
+
+
+		String body =
+				"Hello " + staffName + ",\n\n"
+						+ "Welcome to the LMS team.\n\n"
+						+ "Your staff account has been created successfully.\n"
+						+ "Please set your password using the below link:\n\n"
+						+ setupLink
+						+ "\n\n"
+						+ "This link is valid for 24 hours.\n\n"
+						+ "After setting your password, you can login to the LMS portal.\n\n"
+						+ "Regards,\n"
+						+ "LMS Team";
+
+
+		try {
+
+			SimpleMailMessage message = new SimpleMailMessage();
+
+			message.setTo(toEmail);
+			message.setSubject(subject);
+			message.setText(body);
+
+
+			logger.debug(
+					"Sending staff password setup email - To: {}, Subject: {}",
+					toEmail,
+					subject
+			);
+
+
+			mailSender.send(message);
+
+
+			logger.info(
+					"Staff password setup email sent successfully to: {}",
+					toEmail
+			);
+
+
+		} catch (MailException ex) {
+
+			logger.error(
+					"Mail delivery failure while sending staff password setup email to: {}",
+					toEmail,
+					ex
+			);
+
+			throw new RuntimeException(
+					"Failed to send staff password setup email",
+					ex
+			);
+
+		} catch (Exception ex) {
+
+			logger.error("Unexpected error while sending staff password setup email to: {}", toEmail, ex
+			);
+
+			throw new RuntimeException("Unexpected error while sending staff password setup email", ex
+			);
+		}
+	}
 }

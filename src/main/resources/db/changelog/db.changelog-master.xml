@@ -93,4 +93,7 @@
      <!-- program_fee table -->
     <include file="db/changelog/changelogs/202607021258-create-program_fee-table.xml"/>
 
+    <!-- staff_password_token table -->
+    <include file="db/changelog/changelogs/202607101029-create-staff_password_token-table.xml"/>
+
 </databaseChangeLog>

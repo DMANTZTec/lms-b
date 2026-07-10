@@ -13,6 +13,8 @@ import jakarta.validation.Valid;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,32 +32,32 @@ public class StaffController {
 		this.staffService = staffService;
 	}
 
-	@PostMapping("/register")
-	public ResponseEntity<StaffResponse> registerStaff(@RequestBody StaffRegistrationRequest request,
-			@RequestParam(required = false) String loggedInStaffId) {
-
-		logger.info("Received request to register staff with email: {}", request.getEmailId());
-
-		Staff loggedInStaff = null;
-
-		if (loggedInStaffId != null) {
-
-			logger.info("Fetching logged-in staff with staffId: {}", loggedInStaffId);
-
-			loggedInStaff = staffService.findByStaffId(loggedInStaffId).orElseThrow(() -> {
-
-				logger.error("Logged-in staff not found with staffId: {}", loggedInStaffId);
-
-				return new RuntimeException("Logged-in staff not found");
-			});
-		}
-
-		StaffResponse response = staffService.registerStaff(request, loggedInStaff);
-
-		logger.info("Staff registered successfully with email: {}", request.getEmailId());
-
-		return ResponseEntity.ok(response);
-	}
+//	@PostMapping("/register")
+//	public ResponseEntity<StaffResponse> registerStaff(@RequestBody StaffRegistrationRequest request,
+//			@RequestParam(required = false) String loggedInStaffId) {
+//
+//		logger.info("Received request to register staff with email: {}", request.getEmailId());
+//
+//		Staff loggedInStaff = null;
+//
+//		if (loggedInStaffId != null) {
+//
+//			logger.info("Fetching logged-in staff with staffId: {}", loggedInStaffId);
+//
+//			loggedInStaff = staffService.findByStaffId(loggedInStaffId).orElseThrow(() -> {
+//
+//				logger.error("Logged-in staff not found with staffId: {}", loggedInStaffId);
+//
+//				return new RuntimeException("Logged-in staff not found");
+//			});
+//		}
+//
+//		StaffResponse response = staffService.registerStaff(request, loggedInStaff);
+//
+//		logger.info("Staff registered successfully with email: {}", request.getEmailId());
+//
+//		return ResponseEntity.ok(response);
+//	}
 
 	@PostMapping("/verify-otp")
 	public ResponseEntity<StaffLoginResponse> verifyOtp(@RequestBody StaffOtpVerifyRequest request) {
@@ -129,6 +131,25 @@ public class StaffController {
 
 		return ResponseEntity.ok(response);
 	}
-	
+
+	@PostMapping("/create")
+	public ResponseEntity<StaffResponse> createStaff(
+			@Valid @RequestBody StaffCreateRequest request
+	) {
+
+		StaffResponse response = staffService.createStaff(request);
+
+		return ResponseEntity
+				.status(HttpStatus.CREATED)
+				.body(response);
+	}
+
+	@PostMapping("/set-password")
+	public ResponseEntity<?> setPassword(@Valid @RequestBody SetStaffPasswordRequest request) {
+
+		staffService.setPassword(request);
+
+		return ResponseEntity.ok("Password created successfully");
+	}
 
 }

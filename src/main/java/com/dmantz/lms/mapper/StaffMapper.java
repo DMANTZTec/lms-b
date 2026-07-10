@@ -1,4 +1,5 @@
 package com.dmantz.lms.mapper;
+import com.dmantz.lms.dto.request.StaffCreateRequest;
 import com.dmantz.lms.dto.request.StaffRegistrationRequest;
 import com.dmantz.lms.dto.response.StaffLoginResponse;
 import com.dmantz.lms.dto.response.StaffPasswordResponse;
@@ -51,5 +52,7 @@ public interface StaffMapper {
 
     List<StaffResponse> toResponseList(List<Staff> staffList);
 
+    @Mapping(target = "profileImg", ignore = true)
+    Staff toEntity(StaffCreateRequest request);
 
 }

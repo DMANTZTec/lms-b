@@ -13,7 +13,7 @@ import java.util.Optional;
 
 public interface StaffService {
 
-    StaffResponse registerStaff(StaffRegistrationRequest request, Staff loggedInStaff);
+//    StaffResponse registerStaff(StaffRegistrationRequest request, Staff loggedInStaff);
 
     Optional<Staff> findByStaffId(String staffId);
 
@@ -29,8 +29,9 @@ public interface StaffService {
 
     @Transactional
     StaffResponse registerInitialAdmin(StaffRegistrationRequest request);
-    
-    
 
+    StaffResponse createStaff(StaffCreateRequest request);
+
+    void setPassword(SetStaffPasswordRequest request);
 }
 

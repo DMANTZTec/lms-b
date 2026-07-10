@@ -12,6 +12,7 @@ import com.dmantz.lms.exceptions.*;
 import com.dmantz.lms.mapper.StaffMapper;
 import com.dmantz.lms.repository.RoleRepository;
 import com.dmantz.lms.repository.StaffOtpRepository;
+import com.dmantz.lms.repository.StaffPasswordTokenRepository;
 import com.dmantz.lms.repository.StaffRepository;
 import com.dmantz.lms.service.EmailService;
 import com.dmantz.lms.service.StaffService;
@@ -39,9 +40,10 @@ public class StaffServiceImpl implements StaffService {
 	private final StaffOtpRepository staffOtpRepository;
 	private final EmailService emailService;
 	private final JwtUtil jwtUtil;
+	private final StaffPasswordTokenRepository staffPasswordTokenRepository;
 
 	public StaffServiceImpl(StaffRepository staffRepository, RoleRepository roleRepository, StaffMapper staffMapper,
-			PasswordEncoder passwordEncoder, StaffOtpRepository staffOtpRepository, EmailService emailService) {
+                            PasswordEncoder passwordEncoder, StaffOtpRepository staffOtpRepository, EmailService emailService, StaffPasswordTokenRepository staffPasswordTokenRepository) {
 
 		this.staffRepository = staffRepository;
 		this.roleRepository = roleRepository;
@@ -49,106 +51,107 @@ public class StaffServiceImpl implements StaffService {
 		this.passwordEncoder = passwordEncoder;
 		this.staffOtpRepository = staffOtpRepository;
 		this.emailService = emailService;
-		this.jwtUtil = new JwtUtil();
+        this.staffPasswordTokenRepository = staffPasswordTokenRepository;
+        this.jwtUtil = new JwtUtil();
 	}
 
-	@Override
-	public StaffResponse registerStaff(StaffRegistrationRequest request, Staff loggedInStaff) {
-
-		logger.info("Staff registration started for email: {}", request.getEmailId());
-
-		staffRepository.findByEmailId(request.getEmailId()).ifPresent(s -> {
-
-			logger.error("Email already exists: {}", request.getEmailId());
-
-			throw new DuplicateValuesException("Staff already exists with this email");
-		});
-
-		boolean isFirstStaff = staffRepository.count() == 0;
-
-		if (!isFirstStaff) {
-
-			if (loggedInStaff == null) {
-
-				logger.error("Unauthorized staff registration attempt");
-
-				throw new UnauthorizedAccessException("Unauthorized access");
-			}
-
-			Staff dbStaff = staffRepository.findById(loggedInStaff.getId()).orElseThrow(() -> {
-
-				logger.error("Logged-in staff not found");
-
-				return new ResourceNotFoundException("Logged-in staff not found");
-			});
-
-			boolean isAdmin = dbStaff.getRoles().stream().anyMatch(role -> "ADMIN".equalsIgnoreCase(role.getRoleNm()));
-
-			if (!isAdmin) {
-
-				logger.warn("Non-admin tried to register staff");
-
-				throw new UnauthorizedAccessException("Only ADMIN can register staff");
-			}
-		}
-
-		if (request.getRoles() == null || request.getRoles().isEmpty()) {
-
-			logger.error("Roles are empty");
-
-			throw new InvalidCredentialsException("At least one role must be provided");
-		}
-
-		if (isFirstStaff && request.getRoles().stream().noneMatch(role -> "ADMIN".equalsIgnoreCase(role))) {
-
-			logger.error("First staff must have ADMIN role");
-
-			throw new UnauthorizedAccessException("First staff must have ADMIN role");
-		}
-
-		Staff staff = staffMapper.toEntity(request);
-
-		staff.setStaffId(generateStaffId());
-
-		staff.setPassword(passwordEncoder.encode(request.getPassword()));
-
-		staff.setStatus("ACTIVE");
-		staff.setEnabled("Y");
-		staff.setCreatedDt(LocalDateTime.now());
-
-		if (!isFirstStaff) {
-
-			staff.setCreatedBy(loggedInStaff.getId());
-		}
-
-		if (request.getProfileImgBase64() != null && !request.getProfileImgBase64().isBlank()) {
-
-			String base64 = request.getProfileImgBase64();
-
-			if (base64.contains(",")) {
-
-				base64 = base64.substring(base64.indexOf(",") + 1);
-			}
-
-			staff.setProfileImg(Base64.getDecoder().decode(base64));
-		}
-
-		Set<Role> assignedRoles = request.getRoles().stream().map(String::toUpperCase)
-				.map(roleNm -> roleRepository.findByRoleNm(roleNm).orElseThrow(() -> {
-
-					logger.error("Role not found: {}", roleNm);
-
-					return new ResourceNotFoundException(roleNm + " role not found");
-				})).collect(Collectors.toSet());
-
-		staff.setRoles(assignedRoles);
-
-		Staff savedStaff = staffRepository.save(staff);
-
-		logger.info("Staff registered successfully with staffId: {}", savedStaff.getStaffId());
-
-		return staffMapper.toResponse(savedStaff);
-	}
+//	@Override
+//	public StaffResponse registerStaff(StaffRegistrationRequest request, Staff loggedInStaff) {
+//
+//		logger.info("Staff registration started for email: {}", request.getEmailId());
+//
+//		staffRepository.findByEmailId(request.getEmailId()).ifPresent(s -> {
+//
+//			logger.error("Email already exists: {}", request.getEmailId());
+//
+//			throw new DuplicateValuesException("Staff already exists with this email");
+//		});
+//
+//		boolean isFirstStaff = staffRepository.count() == 0;
+//
+//		if (!isFirstStaff) {
+//
+//			if (loggedInStaff == null) {
+//
+//				logger.error("Unauthorized staff registration attempt");
+//
+//				throw new UnauthorizedAccessException("Unauthorized access");
+//			}
+//
+//			Staff dbStaff = staffRepository.findById(loggedInStaff.getId()).orElseThrow(() -> {
+//
+//				logger.error("Logged-in staff not found");
+//
+//				return new ResourceNotFoundException("Logged-in staff not found");
+//			});
+//
+//			boolean isAdmin = dbStaff.getRoles().stream().anyMatch(role -> "ADMIN".equalsIgnoreCase(role.getRoleNm()));
+//
+//			if (!isAdmin) {
+//
+//				logger.warn("Non-admin tried to register staff");
+//
+//				throw new UnauthorizedAccessException("Only ADMIN can register staff");
+//			}
+//		}
+//
+//		if (request.getRoles() == null || request.getRoles().isEmpty()) {
+//
+//			logger.error("Roles are empty");
+//
+//			throw new InvalidCredentialsException("At least one role must be provided");
+//		}
+//
+//		if (isFirstStaff && request.getRoles().stream().noneMatch(role -> "ADMIN".equalsIgnoreCase(role))) {
+//
+//			logger.error("First staff must have ADMIN role");
+//
+//			throw new UnauthorizedAccessException("First staff must have ADMIN role");
+//		}
+//
+//		Staff staff = staffMapper.toEntity(request);
+//
+//		staff.setStaffId(generateStaffId());
+//
+//		staff.setPassword(passwordEncoder.encode(request.getPassword()));
+//
+//		staff.setStatus("ACTIVE");
+//		staff.setEnabled("Y");
+//		staff.setCreatedDt(LocalDateTime.now());
+//
+//		if (!isFirstStaff) {
+//
+//			staff.setCreatedBy(loggedInStaff.getId());
+//		}
+//
+//		if (request.getProfileImgBase64() != null && !request.getProfileImgBase64().isBlank()) {
+//
+//			String base64 = request.getProfileImgBase64();
+//
+//			if (base64.contains(",")) {
+//
+//				base64 = base64.substring(base64.indexOf(",") + 1);
+//			}
+//
+//			staff.setProfileImg(Base64.getDecoder().decode(base64));
+//		}
+//
+//		Set<Role> assignedRoles = request.getRoles().stream().map(String::toUpperCase)
+//				.map(roleNm -> roleRepository.findByRoleNm(roleNm).orElseThrow(() -> {
+//
+//					logger.error("Role not found: {}", roleNm);
+//
+//					return new ResourceNotFoundException(roleNm + " role not found");
+//				})).collect(Collectors.toSet());
+//
+//		staff.setRoles(assignedRoles);
+//
+//		Staff savedStaff = staffRepository.save(staff);
+//
+//		logger.info("Staff registered successfully with staffId: {}", savedStaff.getStaffId());
+//
+//		return staffMapper.toResponse(savedStaff);
+//	}
 
 	private String generateStaffId() {
 
@@ -454,7 +457,7 @@ public class StaffServiceImpl implements StaffService {
 				base64 = base64.substring(base64.indexOf(",") + 1);
 			}
 
-			staff.setProfileImg(Base64.getDecoder().decode(base64));
+			staff.setProfileImg(Arrays.toString(Base64.getDecoder().decode(base64)));
 		}
 
 		Set<Role> roles = request.getRoles().stream().map(String::toUpperCase)
@@ -472,6 +475,119 @@ public class StaffServiceImpl implements StaffService {
 		logger.info("Initial admin registered successfully with staffId: {}", savedStaff.getStaffId());
 
 		return staffMapper.toResponse(savedStaff);
+	}
+
+	@Override
+	public StaffResponse createStaff(StaffCreateRequest request) {
+
+		if (staffRepository.existsByEmailId(request.getEmailId())) {
+			throw new DuplicateValuesException("Email already exists");
+		}
+
+		Staff staff = staffMapper.toEntity(request);
+
+		staff.setStaffId(generateStaffId());
+
+		// Staff creates password later
+		staff.setPassword(null);
+
+		staff.setEnabled("N");
+
+		staff.setStatus("PASSWORD_PENDING");
+
+		staff.setCreatedDt(LocalDateTime.now());
+
+
+		Set<Role> roles = request.getRoleIds().stream()
+				.map(roleRepository::findById)
+				.map(role -> role.orElseThrow(() ->
+						new ResourceNotFoundException("Role not found")))
+				.collect(Collectors.toSet());
+
+		staff.setRoles(roles);
+
+
+		Staff savedStaff = staffRepository.save(staff);
+
+
+		// Create password setup token
+		StaffPasswordToken passwordToken = new StaffPasswordToken();
+
+		passwordToken.setToken(
+				UUID.randomUUID().toString()
+		);
+
+		passwordToken.setStaff(savedStaff);
+
+		passwordToken.setExpiryTime(
+				LocalDateTime.now().plusHours(24)
+		);
+
+		passwordToken.setUsed(false);
+
+		staffPasswordTokenRepository.save(passwordToken);
+
+		// Send email
+		emailService.sendStaffPasswordSetupMail(
+				savedStaff.getEmailId(),
+				savedStaff.getFirstNm(),
+				passwordToken.getToken()
+		);
+
+		return staffMapper.toResponse(savedStaff);
+	}
+
+	@Override
+	public void setPassword(SetStaffPasswordRequest request) {
+
+		StaffPasswordToken passwordToken = staffPasswordTokenRepository
+						.findByToken(request.getToken())
+						.orElseThrow(() ->
+								new RuntimeException("Invalid password setup link")
+						);
+
+		if (passwordToken.getUsed()) {
+
+			throw new RuntimeException(
+					"Password link already used"
+			);
+		}
+
+
+		if (passwordToken.getExpiryTime()
+				.isBefore(LocalDateTime.now())) {
+
+			throw new RuntimeException(
+					"Password link expired"
+			);
+		}
+
+		if (!request.getPassword()
+				.equals(request.getConfirmPassword())) {
+
+			throw new RuntimeException(
+					"Password and confirm password not matching"
+			);
+		}
+
+		Staff staff = passwordToken.getStaff();
+
+		staff.setPassword(
+				passwordEncoder.encode(
+						request.getPassword()
+				)
+		);
+
+		staff.setEnabled("Y");
+
+		staff.setStatus("ACTIVE");
+
+		staffRepository.save(staff);
+
+		// invalidate token
+		passwordToken.setUsed(true);
+
+		staffPasswordTokenRepository.save(passwordToken);
 	}
 
 }

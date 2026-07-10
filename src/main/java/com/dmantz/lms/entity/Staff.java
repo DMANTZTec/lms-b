@@ -7,16 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.dmantz.lms.entity.base.AuditFields;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.Lob;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "staff")
@@ -76,9 +67,8 @@ public class Staff extends AuditFields {
 	@Column(name = "emergency_contact_num")
 	private String emergencyContactNum;
 
-	@Lob
-	@Column(name = "profile_img")
-	private byte[] profileImg;
+	@Column(name = "profile_img", length = 500)
+	private String profileImg;
 
 	@Column(name = "dob")
 	private LocalDate dob;
@@ -86,6 +76,13 @@ public class Staff extends AuditFields {
 	@ManyToMany
 	@JoinTable(name = "staff_role", joinColumns = @JoinColumn(name = "staff_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private Set<Role> roles = new HashSet<>();
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "gender")
+	private Gender gender;
+
+	@Column(name = "date_of_joining")
+	private LocalDate dateOfJoining;
 
 	public Long getId() {
 		return id;
@@ -231,11 +228,11 @@ public class Staff extends AuditFields {
 		this.emergencyContactNum = emergencyContactNum;
 	}
 
-	public byte[] getProfileImg() {
+	public String getProfileImg() {
 		return profileImg;
 	}
 
-	public void setProfileImg(byte[] profileImg) {
+	public void setProfileImg(String profileImg) {
 		this.profileImg = profileImg;
 	}
 
@@ -253,6 +250,22 @@ public class Staff extends AuditFields {
 
 	public void setRoles(Set<Role> roles) {
 		this.roles = roles;
+	}
+
+	public Gender getGender() {
+		return gender;
+	}
+
+	public void setGender(Gender gender) {
+		this.gender = gender;
+	}
+
+	public LocalDate getDateOfJoining() {
+		return dateOfJoining;
+	}
+
+	public void setDateOfJoining(LocalDate dateOfJoining) {
+		this.dateOfJoining = dateOfJoining;
 	}
 
 	@Override
@@ -276,10 +289,11 @@ public class Staff extends AuditFields {
 				", designation='" + designation + '\'' +
 				", emergencyContactNm='" + emergencyContactNm + '\'' +
 				", emergencyContactNum='" + emergencyContactNum + '\'' +
-				", profileImg=" + Arrays.toString(profileImg) +
+				", profileImg='" + profileImg + '\'' +
 				", dob=" + dob +
 				", roles=" + roles +
+				", gender=" + gender +
+				", dateOfJoining=" + dateOfJoining +
 				'}';
 	}
-
 }

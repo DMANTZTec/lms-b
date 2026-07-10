@@ -63,13 +63,15 @@ public class SecurityConfig {
                                 "/api/staff/verify-otp",
                                 "/api/staff/forgot-password",
                                 "/api/staff/reset-password",
+                                "/api/staff/create",
+                                "/api/staff/set-password",
                                 "/api/staff/resend-otp"
                         ).permitAll()
 
-                        // Only ADMIN can create staff/instructors
-                        .requestMatchers(
-                                "/api/staff/register"
-                        ).hasRole("ADMIN")
+//                        // Only ADMIN can create staff/instructors
+//                        .requestMatchers(
+//                                "/api/staff/register"
+//                        ).hasRole("ADMIN")
 
                         // SWAGGER APIs
                         .requestMatchers(
