@@ -30,7 +30,7 @@ public class StaffCreateRequest {
 
     private LocalDate dateOfJoining;
 
-    private String profileImg;
+    private MultipartFile profileImg;
 
     @NotEmpty
     private Set<Long> roleIds;
@@ -91,11 +91,11 @@ public class StaffCreateRequest {
         this.dateOfJoining = dateOfJoining;
     }
 
-    public String getProfileImg() {
+    public MultipartFile getProfileImg() {
         return profileImg;
     }
 
-    public void setProfileImg(String profileImg) {
+    public void setProfileImg(MultipartFile profileImg) {
         this.profileImg = profileImg;
     }
 

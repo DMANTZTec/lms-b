@@ -8,22 +8,16 @@ public class StaffResponse {
 
     private Long id;
     private String staffId;
-
     private String firstNm;
     private String lastNm;
-
     private String email;
     private String mobileNum;
-
+    private LocalDate dateOfJoining;
     private String designation;
-
     private String status;
     private String enabled;
-
     private LocalDate dob;
-
     private LocalDateTime createdDt;
-
     private Set<String> roles;
 
     public Long getId() {
@@ -122,6 +116,14 @@ public class StaffResponse {
         this.roles = roles;
     }
 
+    public LocalDate getDateOfJoining() {
+        return dateOfJoining;
+    }
+
+    public void setDateOfJoining(LocalDate dateOfJoining) {
+        this.dateOfJoining = dateOfJoining;
+    }
+
     @Override
     public String toString() {
         return "StaffResponse{" +
@@ -131,6 +133,7 @@ public class StaffResponse {
                 ", lastNm='" + lastNm + '\'' +
                 ", email='" + email + '\'' +
                 ", mobileNum='" + mobileNum + '\'' +
+                ", dateOfJoining=" + dateOfJoining +
                 ", designation='" + designation + '\'' +
                 ", status='" + status + '\'' +
                 ", enabled='" + enabled + '\'' +

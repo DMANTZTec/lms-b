@@ -16,12 +16,22 @@ import com.dmantz.lms.repository.StaffPasswordTokenRepository;
 import com.dmantz.lms.repository.StaffRepository;
 import com.dmantz.lms.service.EmailService;
 import com.dmantz.lms.service.StaffService;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -54,6 +64,14 @@ public class StaffServiceImpl implements StaffService {
         this.staffPasswordTokenRepository = staffPasswordTokenRepository;
         this.jwtUtil = new JwtUtil();
 	}
+
+	@Value("${strapi.url}")
+	private String strapiUrl;
+
+	@Value("${strapi.api.token}")
+	private String strapiApiToken;
+
+	private final RestTemplate restTemplate = new RestTemplate();
 
 //	@Override
 //	public StaffResponse registerStaff(StaffRegistrationRequest request, Staff loggedInStaff) {
@@ -485,18 +503,18 @@ public class StaffServiceImpl implements StaffService {
 		}
 
 		Staff staff = staffMapper.toEntity(request);
-
 		staff.setStaffId(generateStaffId());
 
-		// Staff creates password later
+		// Upload profile img to Strapi
+		if (request.getProfileImg() != null && !request.getProfileImg().isEmpty()) {
+			String imageUrl = uploadToStrapi(request.getProfileImg());
+			staff.setProfileImg(imageUrl);
+		}
+
 		staff.setPassword(null);
-
 		staff.setEnabled("N");
-
 		staff.setStatus("PASSWORD_PENDING");
-
 		staff.setCreatedDt(LocalDateTime.now());
-
 
 		Set<Role> roles = request.getRoleIds().stream()
 				.map(roleRepository::findById)
@@ -505,36 +523,56 @@ public class StaffServiceImpl implements StaffService {
 				.collect(Collectors.toSet());
 
 		staff.setRoles(roles);
-
-
 		Staff savedStaff = staffRepository.save(staff);
-
-
-		// Create password setup token
 		StaffPasswordToken passwordToken = new StaffPasswordToken();
 
-		passwordToken.setToken(
-				UUID.randomUUID().toString()
-		);
-
+		passwordToken.setToken(UUID.randomUUID().toString());
 		passwordToken.setStaff(savedStaff);
-
-		passwordToken.setExpiryTime(
-				LocalDateTime.now().plusHours(24)
-		);
-
+		passwordToken.setExpiryTime(LocalDateTime.now().plusHours(24));
 		passwordToken.setUsed(false);
 
 		staffPasswordTokenRepository.save(passwordToken);
 
-		// Send email
 		emailService.sendStaffPasswordSetupMail(
 				savedStaff.getEmailId(),
 				savedStaff.getFirstNm(),
-				passwordToken.getToken()
-		);
-
+				passwordToken.getToken());
 		return staffMapper.toResponse(savedStaff);
+	}
+
+	private String uploadToStrapi(MultipartFile file) {
+		try {
+			File tempFile = File.createTempFile("upload-", file.getOriginalFilename());
+			file.transferTo(tempFile);
+			try {
+				MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+				body.add("files", new FileSystemResource(tempFile));
+
+				HttpHeaders headers = new HttpHeaders();
+				headers.set("Authorization", "Bearer " + strapiApiToken);
+				headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+				ResponseEntity<String> response = restTemplate.exchange(strapiUrl + "/api/upload", HttpMethod.POST,
+						new HttpEntity<>(body, headers), String.class);
+
+				JsonNode root = new ObjectMapper().readTree(response.getBody());
+				JsonNode fileNode = root.get(0);
+
+				if (fileNode == null) {
+					throw new RuntimeException("Invalid Strapi upload response: " + response.getBody());
+				}
+
+				String fileUrl = strapiUrl + fileNode.get("url").asText();
+				logger.info("Profile image uploaded to Strapi: {}", fileUrl);
+				return fileUrl;
+
+			} finally {
+				tempFile.delete();
+			}
+		} catch (Exception e) {
+			logger.error("Failed to upload profile image to Strapi", e);
+			throw new RuntimeException("Failed to upload profile image to Strapi", e);
+		}
 	}
 
 	@Override

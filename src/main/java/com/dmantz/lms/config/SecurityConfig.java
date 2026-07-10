@@ -63,8 +63,10 @@ public class SecurityConfig {
                                 "/api/staff/verify-otp",
                                 "/api/staff/forgot-password",
                                 "/api/staff/reset-password",
-                                "/api/staff/create",
+                                "/api/staff/register",
                                 "/api/staff/set-password",
+                                "/api/staff/login",
+                                "/api/staff/*",
                                 "/api/staff/resend-otp"
                         ).permitAll()
 

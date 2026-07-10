@@ -6,6 +6,7 @@ import com.dmantz.lms.dto.response.StaffLoginResponse;
 import com.dmantz.lms.dto.response.StaffPasswordResponse;
 import com.dmantz.lms.dto.response.StaffResponse;
 import com.dmantz.lms.entity.Staff;
+import com.dmantz.lms.service.AuthService;
 import com.dmantz.lms.service.StaffService;
 
 import jakarta.validation.Valid;
@@ -27,10 +28,13 @@ public class StaffController {
 	private static final Logger logger = LogManager.getLogger(StaffController.class);
 
 	private final StaffService staffService;
+	private final AuthService authService;
 
-	public StaffController(StaffService staffService) {
+
+	public StaffController(StaffService staffService, AuthService authService) {
 		this.staffService = staffService;
-	}
+        this.authService = authService;
+    }
 
 //	@PostMapping("/register")
 //	public ResponseEntity<StaffResponse> registerStaff(@RequestBody StaffRegistrationRequest request,
@@ -58,6 +62,15 @@ public class StaffController {
 //
 //		return ResponseEntity.ok(response);
 //	}
+
+
+	@PostMapping("/login")
+	public ResponseEntity<StaffLoginResponse> staffLogin(@RequestBody StaffLoginRequest request) {
+
+		StaffLoginResponse response = authService.staffLogin(request);
+
+		return ResponseEntity.ok(response);
+	}
 
 	@PostMapping("/verify-otp")
 	public ResponseEntity<StaffLoginResponse> verifyOtp(@RequestBody StaffOtpVerifyRequest request) {
@@ -132,16 +145,13 @@ public class StaffController {
 		return ResponseEntity.ok(response);
 	}
 
-	@PostMapping("/create")
+	@PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<StaffResponse> createStaff(
-			@Valid @RequestBody StaffCreateRequest request
-	) {
+			@ModelAttribute StaffCreateRequest request) {
 
 		StaffResponse response = staffService.createStaff(request);
 
-		return ResponseEntity
-				.status(HttpStatus.CREATED)
-				.body(response);
+		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
 	@PostMapping("/set-password")
