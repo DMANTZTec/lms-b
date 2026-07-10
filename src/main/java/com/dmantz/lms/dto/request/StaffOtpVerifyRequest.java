@@ -2,15 +2,15 @@ package com.dmantz.lms.dto.request;
 
 public class StaffOtpVerifyRequest {
 
-    private String staffId;  // "SF00006"
+    private String emailId;
     private String otp;
 
-    public String getStaffId() {
-        return staffId;
+    public String getEmailId() {
+        return emailId;
     }
 
-    public void setStaffId(String staffId) {
-        this.staffId = staffId;
+    public void setEmailId(String emailId) {
+        this.emailId = emailId;
     }
 
     public String getOtp() {
@@ -21,11 +21,10 @@ public class StaffOtpVerifyRequest {
         this.otp = otp;
     }
 
-
     @Override
     public String toString() {
         return "StaffOtpVerifyRequest{" +
-                "staffId='" + staffId + '\'' +
+                "emailId='" + emailId + '\'' +
                 ", otp='" + otp + '\'' +
                 '}';
     }

@@ -36,12 +36,12 @@ public class AuthController {
 //		return ResponseEntity.ok(response);
 //	}
 
-	@PostMapping("/staff/login")
-	public ResponseEntity<StaffLoginResponse> staffLogin(@RequestBody StaffLoginRequest request) {
-
-		StaffLoginResponse response = authService.staffLogin(request);
-
-		return ResponseEntity.ok(response);
-	}
+//	@PostMapping("/staff/login")
+//	public ResponseEntity<StaffLoginResponse> staffLogin(@RequestBody StaffLoginRequest request) {
+//
+//		StaffLoginResponse response = authService.staffLogin(request);
+//
+//		return ResponseEntity.ok(response);
+//	}
 
 }

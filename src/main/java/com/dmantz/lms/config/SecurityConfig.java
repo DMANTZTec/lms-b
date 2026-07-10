@@ -60,12 +60,12 @@ public class SecurityConfig {
                         // STAFF PUBLIC APIs
                         .requestMatchers(
                                 "/api/staff/admin-register",
-                                "/api/staff/verify-otp",
                                 "/api/staff/forgot-password",
                                 "/api/staff/reset-password",
                                 "/api/staff/register",
                                 "/api/staff/set-password",
                                 "/api/staff/login",
+                                "/api/staff/login-verification-otp",
                                 "/api/staff/*",
                                 "/api/staff/resend-otp"
                         ).permitAll()
