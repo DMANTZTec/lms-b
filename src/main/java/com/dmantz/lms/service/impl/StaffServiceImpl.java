@@ -21,6 +21,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -88,7 +92,7 @@ public class StaffServiceImpl implements StaffService {
 
 		staff.setPassword(null);
 		staff.setEnabled("N");
-		staff.setStatus("PASSWORD_PENDING");
+		staff.setStatus("IN_ACTIVE");
 		staff.setCreatedDt(LocalDateTime.now());
 
 		Set<Role> roles = request.getRoleIds().stream()
@@ -355,6 +359,29 @@ public class StaffServiceImpl implements StaffService {
 		StaffPasswordResponse response = staffMapper.toPasswordResponse(staff);
 		response.setMessage("Password reset successful.");
 		return response;
+	}
+
+	@Override
+	public Page<StaffResponse> getActiveStaff(int page, int size) {
+
+		Pageable pageable = PageRequest.of(
+				page,
+				size,
+				Sort.by("createdDt").descending());
+
+		Page<Staff> staffPage = staffRepository.findByStatus("ACTIVE", pageable);
+
+		return staffPage.map(staffMapper::toResponse);
+	}
+
+	@Override
+	public Page<StaffResponse> getAllStaff(int page, int size) {
+
+		Pageable pageable = PageRequest.of(page, size, Sort.by("createdDt").descending());
+
+		Page<Staff> staffPage = staffRepository.findAll(pageable);
+
+		return staffPage.map(staffMapper::toResponse);
 	}
 
 	@Override

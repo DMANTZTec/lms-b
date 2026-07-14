@@ -5,6 +5,7 @@ import com.dmantz.lms.dto.response.StaffLoginResponse;
 import com.dmantz.lms.dto.response.StaffPasswordResponse;
 import com.dmantz.lms.dto.response.StaffResponse;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -24,6 +25,10 @@ public interface StaffService {
     StaffLoginResponse verifyStaffOtp(StaffOtpVerifyRequest request);
 
     StaffPasswordResponse resetPassword(StaffResetPasswordRequest request);
+
+    Page<StaffResponse> getActiveStaff(int page, int size);
+
+    Page<StaffResponse> getAllStaff(int page, int size);
 
 }
 

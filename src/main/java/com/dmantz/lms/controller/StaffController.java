@@ -12,9 +12,11 @@ import jakarta.validation.Valid;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,6 +35,7 @@ public class StaffController {
         this.authService = authService;
     }
 
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<StaffResponse> createStaff(
 			@ModelAttribute StaffCreateRequest request) {
@@ -75,6 +78,24 @@ public class StaffController {
 
 		StaffLoginResponse response = staffService.verifyStaffOtp(request);
 		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/active")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<Page<StaffResponse>> getActiveStaff(
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size) {
+
+		return ResponseEntity.ok(staffService.getActiveStaff(page, size));
+	}
+
+	@GetMapping("/pagination")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<Page<StaffResponse>> getAllStaff(
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size) {
+
+		return ResponseEntity.ok(staffService.getAllStaff(page, size));
 	}
 
 	@PostMapping("/admin-register")

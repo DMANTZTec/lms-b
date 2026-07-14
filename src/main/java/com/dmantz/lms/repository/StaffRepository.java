@@ -1,6 +1,8 @@
 package com.dmantz.lms.repository;
 
 import com.dmantz.lms.entity.Staff;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -30,6 +32,8 @@ public interface StaffRepository extends JpaRepository<Staff, Long> {
            OR s.staffId = :loginId
     """)
     Optional<Staff> findByLoginId(@Param("loginId") String loginId);
-    
+
+    Page<Staff> findByStatus(String status, Pageable pageable);
+
 }
 

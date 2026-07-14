@@ -2,6 +2,7 @@ package com.dmantz.lms.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -35,10 +36,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
 
                         // AUTH APIs
-                        .requestMatchers(
-                                "/api/auth/student/login",
-                                "/api/auth/staff/login"
-                        ).permitAll()
+//                        .requestMatchers(
+//                                "/api/auth/student/login",
+//                                "/api/auth/staff/login"
+//                        ).permitAll()
 
                         // CONTACT US PUBLIC APIs
                         .requestMatchers("/api/contact-us/**").permitAll()
@@ -57,18 +58,29 @@ public class SecurityConfig {
                                 "/api/student-programs/**"
                         ).permitAll()
 
+                        // Only ADMIN can create staff
+                        .requestMatchers(HttpMethod.POST, "/api/staff/register")
+                        .hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/api/staff/active")
+                        .hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/api/staff/pagination")
+                        .hasRole("ADMIN")
+
                         // STAFF PUBLIC APIs
                         .requestMatchers(
                                 "/api/staff/admin-register",
                                 "/api/staff/forgot-password",
                                 "/api/staff/reset-password",
-                                "/api/staff/register",
+
                                 "/api/staff/set-password",
                                 "/api/staff/login",
                                 "/api/staff/login-verification-otp",
                                 "/api/staff/*",
                                 "/api/staff/resend-otp"
                         ).permitAll()
+
 
 //                        // Only ADMIN can create staff/instructors
 //                        .requestMatchers(
