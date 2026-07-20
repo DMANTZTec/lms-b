@@ -30,5 +30,7 @@ public interface StaffService {
 
     Page<StaffResponse> getAllStaff(int page, int size);
 
+    StaffResponse updateStaff(String staffId, StaffUpdateRequest request);
+
 }
 

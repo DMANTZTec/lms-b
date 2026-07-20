@@ -120,4 +120,12 @@ public class StaffController {
 		return ResponseEntity.ok(response);
 	}
 
+	@PutMapping(value = "/{staffId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<StaffResponse> updateStaff(
+			@PathVariable String staffId,
+			@ModelAttribute StaffUpdateRequest request) {
+
+		return ResponseEntity.ok(staffService.updateStaff(staffId, request));
+	}
+
 }

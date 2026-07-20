@@ -385,6 +385,45 @@ public class StaffServiceImpl implements StaffService {
 	}
 
 	@Override
+	@Transactional
+	public StaffResponse updateStaff(String staffId, StaffUpdateRequest request) {
+
+		Staff staff = staffRepository.findByStaffId(staffId)
+				.orElseThrow(() -> new ResourceNotFoundException("Staff not found"));
+
+		// Update basic details
+		staff.setFirstNm(request.getFirstNm());
+		staff.setLastNm(request.getLastNm());
+		staff.setDob(request.getDob());
+		staff.setGender(request.getGender());
+		staff.setDateOfJoining(request.getDateOfJoining());
+
+		// Update profile image
+		if (request.getProfileImg() != null && !request.getProfileImg().isEmpty()) {
+
+			String profileUrl = uploadToStrapi(request.getProfileImg());
+
+			staff.setProfileImg(profileUrl);
+		}
+
+		// Update roles
+		if (request.getRoleIds() != null && !request.getRoleIds().isEmpty()) {
+
+			Set<Role> roles = new HashSet<>(roleRepository.findAllById(request.getRoleIds()));
+
+			if (roles.size() != request.getRoleIds().size()) {
+				throw new ResourceNotFoundException("One or more roles not found");
+			}
+
+			staff.setRoles(roles);
+		}
+
+		Staff updatedStaff = staffRepository.save(staff);
+
+		return staffMapper.toResponse(updatedStaff);
+	}
+
+	@Override
 	public StaffResponse registerInitialAdmin(StaffRegistrationRequest request) {
 
 		logger.info("Initial admin registration started");
