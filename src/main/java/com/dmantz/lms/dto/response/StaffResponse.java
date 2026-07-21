@@ -1,5 +1,7 @@
 package com.dmantz.lms.dto.response;
 
+import com.dmantz.lms.entity.Gender;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -14,6 +16,8 @@ public class StaffResponse {
     private String mobileNum;
     private LocalDate dateOfJoining;
     private String designation;
+    private String profileImg;
+    private Gender gender;
     private String status;
     private String enabled;
     private LocalDate dob;
@@ -124,6 +128,22 @@ public class StaffResponse {
         this.dateOfJoining = dateOfJoining;
     }
 
+    public String getProfileImg() {
+        return profileImg;
+    }
+
+    public void setProfileImg(String profileImg) {
+        this.profileImg = profileImg;
+    }
+
+    public Gender getGender() {
+        return gender;
+    }
+
+    public void setGender(Gender gender) {
+        this.gender = gender;
+    }
+
     @Override
     public String toString() {
         return "StaffResponse{" +
@@ -135,6 +155,8 @@ public class StaffResponse {
                 ", mobileNum='" + mobileNum + '\'' +
                 ", dateOfJoining=" + dateOfJoining +
                 ", designation='" + designation + '\'' +
+                ", profileImg='" + profileImg + '\'' +
+                ", gender=" + gender +
                 ", status='" + status + '\'' +
                 ", enabled='" + enabled + '\'' +
                 ", dob=" + dob +

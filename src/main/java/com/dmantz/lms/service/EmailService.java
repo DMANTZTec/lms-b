@@ -7,4 +7,7 @@ public interface EmailService {
     void sendOtpEmail(String toEmail, String otp, OtpPurpose purpose);
 
     void sendStaffPasswordSetupMail(String toEmail, String staffName, String token);
+
+    void sendResetPasswordEmail(String toEmail, String staffName, String resetLink);
+
 }

@@ -320,70 +320,6 @@ public class StaffServiceImpl implements StaffService {
 		return response;
 	}
 
-
-	@Override
-	public StaffPasswordResponse resetPassword(StaffResetPasswordRequest request) {
-
-		logger.info("Reset password started for staffId: {}", request.getStaffId());
-
-		StaffOtp otp = staffOtpRepository
-				.findTopByStaffIdAndStatusOrderByCreatedDtDesc(request.getStaffId(), OtpStatus.SENT).orElseThrow(() -> {
-					logger.error("OTP not found for staffId: {}", request.getStaffId());
-					return new OtpNotFoundException("OTP not found or expired");
-				});
-
-		if (!otp.getOtp().equals(request.getOtp())) {
-			logger.warn("Invalid OTP entered for staffId: {}", request.getStaffId());
-			throw new OtpInvalidException("Invalid OTP");
-		}
-
-		if (otp.getCreatedDt().isBefore(LocalDateTime.now().minusMinutes(5))) {
-			otp.setStatus(OtpStatus.EXPIRED);
-			staffOtpRepository.save(otp);
-			logger.warn("OTP expired for staffId: {}", request.getStaffId());
-			throw new OtpExpiredException("OTP expired");
-		}
-
-		Staff staff = staffRepository.findByStaffId(request.getStaffId()).orElseThrow(() -> {
-			logger.error("Staff not found for staffId: {}", request.getStaffId());
-			return new ResourceNotFoundException("Staff not found");
-		});
-
-		staff.setPassword(passwordEncoder.encode(request.getNewPassword()));
-		staffRepository.save(staff);
-		otp.setStatus(OtpStatus.VERIFIED);
-		otp.setUpdatedDt(LocalDateTime.now());
-		staffOtpRepository.save(otp);
-		emailService.sendOtpEmail(staff.getEmailId(), null, OtpPurpose.STAFF_PASSWORD_RESET_SUCCESS);
-		logger.info("Password reset successful for staffId: {}", request.getStaffId());
-		StaffPasswordResponse response = staffMapper.toPasswordResponse(staff);
-		response.setMessage("Password reset successful.");
-		return response;
-	}
-
-	@Override
-	public Page<StaffResponse> getActiveStaff(int page, int size) {
-
-		Pageable pageable = PageRequest.of(
-				page,
-				size,
-				Sort.by("createdDt").descending());
-
-		Page<Staff> staffPage = staffRepository.findByStatus("ACTIVE", pageable);
-
-		return staffPage.map(staffMapper::toResponse);
-	}
-
-	@Override
-	public Page<StaffResponse> getAllStaff(int page, int size) {
-
-		Pageable pageable = PageRequest.of(page, size, Sort.by("createdDt").descending());
-
-		Page<Staff> staffPage = staffRepository.findAll(pageable);
-
-		return staffPage.map(staffMapper::toResponse);
-	}
-
 	@Override
 	@Transactional
 	public StaffResponse updateStaff(String staffId, StaffUpdateRequest request) {
@@ -422,6 +358,123 @@ public class StaffServiceImpl implements StaffService {
 
 		return staffMapper.toResponse(updatedStaff);
 	}
+
+	@Override
+	public StaffResponse updateProfileImage(String staffId, MultipartFile file) {
+
+		Staff staff = staffRepository.findByStaffId(staffId)
+				.orElseThrow(() -> new ResourceNotFoundException("Staff not found"));
+
+		if (file == null || file.isEmpty()) {
+			throw new BadRequestException("Profile image is required.");
+		}
+
+		// Upload image to Strapi
+		String imageUrl = uploadToStrapi(file);
+
+		// Save image URL
+		staff.setProfileImg(imageUrl);
+
+		Staff savedStaff = staffRepository.save(staff);
+
+		return staffMapper.toResponse(savedStaff);
+	}
+
+	@Override
+	public void forgotPassword(ForgotPasswordRequest request) {
+
+		Staff staff = staffRepository.findByEmailId(request.getGetEmailIdOrMobileNo())
+				.orElseThrow(() -> new ResourceNotFoundException("Staff not found"));
+
+		String token = UUID.randomUUID().toString();
+
+		StaffPasswordToken passwordToken = new StaffPasswordToken();
+		passwordToken.setToken(token);
+		passwordToken.setStaff(staff);
+		passwordToken.setExpiryTime(LocalDateTime.now().plusMinutes(30));
+		passwordToken.setUsed(false);
+
+		staffPasswordTokenRepository.save(passwordToken);
+
+		String resetLink = "http://localhost:5173/reset-password?token=" + token;
+
+		emailService.sendResetPasswordEmail(
+				staff.getEmailId(),
+				staff.getFirstNm(),
+				resetLink
+		);
+	}
+
+	@Override
+	public void validateResetToken(String token) {
+
+		StaffPasswordToken passwordToken = staffPasswordTokenRepository
+				.findByToken(token)
+				.orElseThrow(() -> new ResourceNotFoundException("Invalid reset token"));
+
+		if (passwordToken.getUsed()) {
+			throw new BadRequestException("Reset token has already been used.");
+		}
+
+		if (passwordToken.getExpiryTime().isBefore(LocalDateTime.now())) {
+			throw new BadRequestException("Reset token has expired.");
+		}
+	}
+
+	@Override
+	public void resetPassword(SetStaffPasswordRequest request) {
+
+		if (!request.getPassword().equals(request.getConfirmPassword())) {
+			throw new BadRequestException("New Password and Confirm Password do not match.");
+		}
+
+		StaffPasswordToken passwordToken = staffPasswordTokenRepository
+				.findByToken(request.getToken())
+				.orElseThrow(() -> new ResourceNotFoundException("Invalid reset token"));
+
+		if (passwordToken.getUsed()) {
+			throw new BadRequestException("Reset token has already been used.");
+		}
+
+		if (passwordToken.getExpiryTime().isBefore(LocalDateTime.now())) {
+			throw new BadRequestException("Reset token has expired.");
+		}
+
+		Staff staff = passwordToken.getStaff();
+
+		staff.setPassword(passwordEncoder.encode(request.getPassword()));
+		staff.setStatus("ACTIVE");
+		staff.setEnabled("Y");
+
+		staffRepository.save(staff);
+
+		passwordToken.setUsed(true);
+		staffPasswordTokenRepository.save(passwordToken);
+	}
+
+	@Override
+	public Page<StaffResponse> getActiveStaff(int page, int size) {
+
+		Pageable pageable = PageRequest.of(
+				page,
+				size,
+				Sort.by("createdDt").descending());
+
+		Page<Staff> staffPage = staffRepository.findByStatus("ACTIVE", pageable);
+
+		return staffPage.map(staffMapper::toResponse);
+	}
+
+	@Override
+	public Page<StaffResponse> getAllStaff(int page, int size) {
+
+		Pageable pageable = PageRequest.of(page, size, Sort.by("createdDt").descending());
+
+		Page<Staff> staffPage = staffRepository.findAll(pageable);
+
+		return staffPage.map(staffMapper::toResponse);
+	}
+
 
 	@Override
 	public StaffResponse registerInitialAdmin(StaffRegistrationRequest request) {

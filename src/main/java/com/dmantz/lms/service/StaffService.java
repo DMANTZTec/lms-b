@@ -6,6 +6,7 @@ import com.dmantz.lms.dto.response.StaffPasswordResponse;
 import com.dmantz.lms.dto.response.StaffResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -15,22 +16,28 @@ public interface StaffService {
 
     void setPassword(SetStaffPasswordRequest request);
 
+    StaffLoginResponse verifyStaffOtp(StaffOtpVerifyRequest request);
+
     List<StaffResponse> getAllStaff();
 
     StaffResponse getStaffByStaffId(String staffId);
-
-    @Transactional
-    StaffResponse registerInitialAdmin(StaffRegistrationRequest request);
-
-    StaffLoginResponse verifyStaffOtp(StaffOtpVerifyRequest request);
-
-    StaffPasswordResponse resetPassword(StaffResetPasswordRequest request);
 
     Page<StaffResponse> getActiveStaff(int page, int size);
 
     Page<StaffResponse> getAllStaff(int page, int size);
 
     StaffResponse updateStaff(String staffId, StaffUpdateRequest request);
+
+    StaffResponse updateProfileImage(String staffId, MultipartFile file);
+
+    void forgotPassword(ForgotPasswordRequest request);
+
+    void validateResetToken(String token);
+
+    void resetPassword(SetStaffPasswordRequest request);
+
+    @Transactional
+    StaffResponse registerInitialAdmin(StaffRegistrationRequest request);
 
 }
 

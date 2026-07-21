@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -44,7 +45,7 @@ public class StaffController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
-	@PostMapping("/set-password")
+	@PostMapping("/set-Newpassword")
 	public ResponseEntity<?> setPassword(@Valid @RequestBody SetStaffPasswordRequest request) {
 		staffService.setPassword(request);
 		return ResponseEntity.ok("Password created successfully");
@@ -53,6 +54,14 @@ public class StaffController {
 	@PostMapping("/login")
 	public ResponseEntity<StaffLoginResponse> staffLogin(@RequestBody StaffLoginRequest request) {
 		StaffLoginResponse response = authService.staffLogin(request);
+		return ResponseEntity.ok(response);
+	}
+
+	@PostMapping("/login-verification-otp")
+	public ResponseEntity<StaffLoginResponse> verifyStaffOtp(
+			@RequestBody @Valid StaffOtpVerifyRequest request) {
+
+		StaffLoginResponse response = staffService.verifyStaffOtp(request);
 		return ResponseEntity.ok(response);
 	}
 
@@ -72,13 +81,6 @@ public class StaffController {
 		return ResponseEntity.ok(response);
 	}
 
-	@PostMapping("/login-verification-otp")
-	public ResponseEntity<StaffLoginResponse> verifyStaffOtp(
-			@RequestBody @Valid StaffOtpVerifyRequest request) {
-
-		StaffLoginResponse response = staffService.verifyStaffOtp(request);
-		return ResponseEntity.ok(response);
-	}
 
 	@GetMapping("/active")
 	@PreAuthorize("hasRole('ADMIN')")
@@ -108,24 +110,57 @@ public class StaffController {
 		return ResponseEntity.ok(response);
 	}
 
-	@PostMapping("/reset-password")
-	public ResponseEntity<StaffPasswordResponse> resetPassword(@RequestBody StaffResetPasswordRequest request) {
+	@PutMapping(value = "/{staffId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<StaffResponse> updateStaff(@PathVariable String staffId,
+			@ModelAttribute StaffUpdateRequest request) {
 
-		logger.info("Reset password request received for staffId: {}", request.getStaffId());
+		return ResponseEntity.ok(staffService.updateStaff(staffId, request));
+	}
 
-		StaffPasswordResponse response = staffService.resetPassword(request);
+	@PutMapping(value = "/{staffId}/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<StaffResponse> updateProfileImage(@PathVariable String staffId,
+			@RequestParam("file") MultipartFile file) {
 
-		logger.info("Password reset completed successfully for staffId: {}", request.getStaffId());
+		logger.info("Request received to update profile image for staffId: {}", staffId);
+
+		StaffResponse response = staffService.updateProfileImage(staffId, file);
+
+		logger.info("Profile image updated successfully for staffId: {}", staffId);
 
 		return ResponseEntity.ok(response);
 	}
 
-	@PutMapping(value = "/{staffId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<StaffResponse> updateStaff(
-			@PathVariable String staffId,
-			@ModelAttribute StaffUpdateRequest request) {
+	@PostMapping("/forgot-password")
+	public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
 
-		return ResponseEntity.ok(staffService.updateStaff(staffId, request));
+		logger.info("Received forgot password request for: {}", request.getGetEmailIdOrMobileNo());
+		staffService.forgotPassword(request);
+
+		logger.info("Password reset link sent successfully.");
+		return ResponseEntity.ok("Password reset link has been sent to your registered email.");
+	}
+
+
+	@GetMapping("/reset-password/validate")
+	public ResponseEntity<String> validateResetToken(
+			@RequestParam String token) {
+
+		logger.info("Validating password reset token.");
+		staffService.validateResetToken(token);
+
+		logger.info("Password reset token validated successfully.");
+		return ResponseEntity.ok("Reset token is valid.");
+	}
+
+
+	@PostMapping("/reset-password")
+	public ResponseEntity<String> resetPassword(@Valid @RequestBody SetStaffPasswordRequest request) {
+
+		logger.info("Received reset password request.");
+		staffService.resetPassword(request);
+
+		logger.info("Password reset successfully.");
+		return ResponseEntity.ok("Password has been reset successfully.");
 	}
 
 }

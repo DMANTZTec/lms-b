@@ -203,4 +203,50 @@ public class EmailServiceImpl implements EmailService {
 			);
 		}
 	}
+
+	@Override
+	public void sendResetPasswordEmail(String toEmail,
+									   String staffName,
+									   String resetLink) {
+
+		logger.info("Preparing reset password email for: {}", toEmail);
+
+		if (toEmail == null || toEmail.isBlank()) {
+			throw new IllegalArgumentException("Recipient email must not be null or blank");
+		}
+
+		if (resetLink == null || resetLink.isBlank()) {
+			throw new IllegalArgumentException("Reset link must not be null or blank");
+		}
+
+		String subject = "LMS - Reset Your Password";
+
+		String body =
+				"Hello " + staffName + ",\n\n"
+						+ "We received a request to reset your LMS password.\n\n"
+						+ "Please click the link below to reset your password:\n\n"
+						+ resetLink + "\n\n"
+						+ "This link is valid for 30 minutes.\n\n"
+						+ "If you did not request this password reset, you can safely ignore this email.\n\n"
+						+ "Regards,\n"
+						+ "LMS Team";
+
+		try {
+
+			SimpleMailMessage message = new SimpleMailMessage();
+			message.setTo(toEmail);
+			message.setSubject(subject);
+			message.setText(body);
+
+			mailSender.send(message);
+
+			logger.info("Reset password email sent successfully to: {}", toEmail);
+
+		} catch (MailException ex) {
+
+			logger.error("Failed to send reset password email to: {}", toEmail, ex);
+
+			throw new RuntimeException("Failed to send reset password email.", ex);
+		}
+	}
 }
