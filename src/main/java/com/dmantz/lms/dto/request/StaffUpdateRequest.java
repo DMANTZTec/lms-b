@@ -21,7 +21,7 @@ public class StaffUpdateRequest {
 
     private LocalDate dateOfJoining;
 
-    private MultipartFile profileImg;
+//    private MultipartFile profileImg;
 
     private Set<Long> roleIds;
 
@@ -65,13 +65,13 @@ public class StaffUpdateRequest {
         this.dateOfJoining = dateOfJoining;
     }
 
-    public MultipartFile getProfileImg() {
-        return profileImg;
-    }
-
-    public void setProfileImg(MultipartFile profileImg) {
-        this.profileImg = profileImg;
-    }
+//    public MultipartFile getProfileImg() {
+//        return profileImg;
+//    }
+//
+//    public void setProfileImg(MultipartFile profileImg) {
+//        this.profileImg = profileImg;
+//    }
 
     public Set<Long> getRoleIds() {
         return roleIds;

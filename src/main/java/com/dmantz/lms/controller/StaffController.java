@@ -110,11 +110,15 @@ public class StaffController {
 		return ResponseEntity.ok(response);
 	}
 
-	@PutMapping(value = "/{staffId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PutMapping("/{staffId}")
 	public ResponseEntity<StaffResponse> updateStaff(@PathVariable String staffId,
-			@ModelAttribute StaffUpdateRequest request) {
+			@Valid @RequestBody StaffUpdateRequest request) {
 
-		return ResponseEntity.ok(staffService.updateStaff(staffId, request));
+		logger.info("Request received to update staff with staffId: {}", staffId);
+		StaffResponse response = staffService.updateStaff(staffId, request);
+
+		logger.info("Staff updated successfully with staffId: {}", staffId);
+		return ResponseEntity.ok(response);
 	}
 
 	@PutMapping(value = "/{staffId}/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

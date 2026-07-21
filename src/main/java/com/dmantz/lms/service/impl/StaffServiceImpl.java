@@ -334,13 +334,13 @@ public class StaffServiceImpl implements StaffService {
 		staff.setGender(request.getGender());
 		staff.setDateOfJoining(request.getDateOfJoining());
 
-		// Update profile image
-		if (request.getProfileImg() != null && !request.getProfileImg().isEmpty()) {
-
-			String profileUrl = uploadToStrapi(request.getProfileImg());
-
-			staff.setProfileImg(profileUrl);
-		}
+//		// Update profile image
+//		if (request.getProfileImg() != null && !request.getProfileImg().isEmpty()) {
+//
+//			String profileUrl = uploadToStrapi(request.getProfileImg());
+//
+//			staff.setProfileImg(profileUrl);
+//		}
 
 		// Update roles
 		if (request.getRoleIds() != null && !request.getRoleIds().isEmpty()) {
