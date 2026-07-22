@@ -82,7 +82,7 @@ public class SecurityConfig {
                                 "/api/staff/login",
                                 "/api/staff/login-verification-otp",
                                 "/api/staff/*",
-                                "/api/staff/resend-otp"
+                                "/api/staff/resend-login-otp"
                         ).permitAll()
 
 

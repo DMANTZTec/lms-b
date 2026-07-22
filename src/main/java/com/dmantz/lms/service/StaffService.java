@@ -1,6 +1,7 @@
 package com.dmantz.lms.service;
 
 import com.dmantz.lms.dto.request.*;
+import com.dmantz.lms.dto.response.ResendOtpResponse;
 import com.dmantz.lms.dto.response.StaffLoginResponse;
 import com.dmantz.lms.dto.response.StaffPasswordResponse;
 import com.dmantz.lms.dto.response.StaffResponse;
@@ -35,6 +36,8 @@ public interface StaffService {
     void validateResetToken(String token);
 
     void resetPassword(SetStaffPasswordRequest request);
+
+    ResendOtpResponse resendLoginOtp(ResendStaffOtpRequest request);
 
     @Transactional
     StaffResponse registerInitialAdmin(StaffRegistrationRequest request);

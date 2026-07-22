@@ -1,6 +1,7 @@
 package com.dmantz.lms.controller;
 
 import com.dmantz.lms.dto.request.*;
+import com.dmantz.lms.dto.response.ResendOtpResponse;
 import com.dmantz.lms.dto.response.StaffLoginResponse;
 import com.dmantz.lms.dto.response.StaffPasswordResponse;
 import com.dmantz.lms.dto.response.StaffResponse;
@@ -165,6 +166,17 @@ public class StaffController {
 
 		logger.info("Password reset successfully.");
 		return ResponseEntity.ok("Password has been reset successfully.");
+	}
+
+	@PostMapping("/resend-login-otp")
+	public ResponseEntity<ResendOtpResponse> resendLoginOtp(
+			@Valid @RequestBody ResendStaffOtpRequest request) {
+
+		logger.info("Received request to resend login OTP for email: {}", request.getEmailId());
+		ResendOtpResponse response = staffService.resendLoginOtp(request);
+
+		logger.info("Login OTP resent successfully for email: {}", request.getEmailId());
+		return ResponseEntity.ok(response);
 	}
 
 }

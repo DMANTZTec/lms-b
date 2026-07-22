@@ -2,6 +2,7 @@ package com.dmantz.lms.service.impl;
 
 import com.dmantz.lms.config.JwtUtil;
 import com.dmantz.lms.dto.request.*;
+import com.dmantz.lms.dto.response.ResendOtpResponse;
 import com.dmantz.lms.dto.response.StaffLoginResponse;
 import com.dmantz.lms.dto.response.StaffPasswordResponse;
 import com.dmantz.lms.dto.response.StaffResponse;
@@ -451,6 +452,64 @@ public class StaffServiceImpl implements StaffService {
 		passwordToken.setUsed(true);
 		staffPasswordTokenRepository.save(passwordToken);
 	}
+
+	@Override
+	public ResendOtpResponse resendLoginOtp(ResendStaffOtpRequest request) {
+
+		logger.info("Resend OTP requested for email: {}", request.getEmailId());
+
+		Staff staff = staffRepository.findByEmailId(request.getEmailId())
+				.orElseThrow(() -> {
+					logger.warn("Staff not found with email: {}", request.getEmailId());
+					return new RuntimeException("Staff not found");
+				});
+
+		if (!"Y".equals(staff.getEnabled())) {
+			logger.warn("Disabled account for staffId: {}", staff.getStaffId());
+			throw new RuntimeException("Account disabled");
+		}
+
+		// Expire previous login OTP
+		staffOtpRepository.findTopByStaffIdOrderByCreatedDtDesc(staff.getStaffId())
+				.ifPresent(oldOtp -> {
+					oldOtp.setStatus(OtpStatus.EXPIRED);
+					oldOtp.setUpdatedDt(LocalDateTime.now());
+					staffOtpRepository.save(oldOtp);
+				});
+
+		// Generate new OTP
+		StaffOtp newOtp = generateStaffOtp(staff.getStaffId());
+
+		try {
+			emailService.sendOtpEmail(
+					staff.getEmailId(),
+					newOtp.getOtp(),
+					OtpPurpose.LOGIN);
+
+			newOtp.setStatus(OtpStatus.SENT);
+			newOtp.setUpdatedDt(LocalDateTime.now());
+			staffOtpRepository.save(newOtp);
+
+			logger.info("New login OTP sent successfully for staffId: {}", staff.getStaffId());
+
+		} catch (Exception e) {
+			logger.error("Failed to send OTP for staffId: {}", staff.getStaffId(), e);
+
+			newOtp.setStatus(OtpStatus.FAILED);
+			newOtp.setUpdatedDt(LocalDateTime.now());
+			staffOtpRepository.save(newOtp);
+
+			throw new RuntimeException("Failed to send OTP");
+		}
+
+		ResendOtpResponse response = new ResendOtpResponse();
+		response.setStaffId(staff.getStaffId());
+		response.setEmail(staff.getEmailId());
+		response.setMessage("OTP resent successfully");
+
+		return response;
+	}
+
 
 	@Override
 	public Page<StaffResponse> getActiveStaff(int page, int size) {

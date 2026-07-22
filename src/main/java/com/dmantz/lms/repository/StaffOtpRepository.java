@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.dmantz.lms.entity.OtpPurpose;
 import com.dmantz.lms.entity.OtpStatus;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -34,6 +35,7 @@ public interface StaffOtpRepository extends JpaRepository<StaffOtp, UUID> {
     Optional<StaffOtp> findTopByStaffIdAndStatusOrderByCreatedDtDesc(String staffId, OtpStatus status);
 
     Optional<StaffOtp> findTopByStaffIdOrderByCreatedDtDesc(String staffId);
+
 
 }
 
