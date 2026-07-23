@@ -53,6 +53,9 @@ public class Course extends AuditFields{
 
 	@Column(name = "intro_video")
 	private String introVideo;
+	
+	@Column(name = "is_deleted", nullable = false)
+	private boolean isDeleted = false;
 
 
 	public Long getId() {return id;}
@@ -141,6 +144,14 @@ public class Course extends AuditFields{
 
 	public void setIntroVideo(String introVideo) {
 		this.introVideo = introVideo;
+	}
+	
+	public boolean isDeleted() {
+	    return isDeleted;
+	}
+
+	public void setDeleted(boolean deleted) {
+	    isDeleted = deleted;
 	}
 
 	@Override

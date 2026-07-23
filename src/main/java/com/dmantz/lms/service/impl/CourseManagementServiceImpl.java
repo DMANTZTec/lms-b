@@ -467,38 +467,63 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 	}
 
 //--------------------------DELETE COURSE-----------------------------
+//	@Override
+//	public void deleteCourse(Long courseId, String staffId) throws BadRequestException {
+//
+//		logger.info("Deleting course id: {} by staffId: {}", courseId, staffId);
+//
+//		if (!staffRepository.existsByStaffId(staffId)) {
+//			throw new ResourceNotFoundException("Staff not found: " + staffId);
+//		}
+//
+//		Course course = courseRepository.findById(courseId)
+//				.orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+//		
+//		 // Check Batch Mapping
+//	    if (classBatchRepository.existsByCourse(course)) {
+//	        throw new BadRequestException(
+//	                "Course has active batches and cannot be deleted.");
+//	    }
+//
+//		// ===== DELETE COURSE IMAGE FROM STRAPI =====
+//		if (course.getCourseImage() != null && !course.getCourseImage().isBlank()) {
+//			deleteCourseFileFromStrapi(course.getCourseImage()); // full URL passed directly
+//		}
+//
+//		// ===== DELETE INTRO VIDEO FROM STRAPI =====
+//		if (course.getIntroVideo() != null && !course.getIntroVideo().isBlank()) {
+//			deleteCourseFileFromStrapi(course.getIntroVideo()); // full URL passed directly
+//		}
+//
+//		// ===== DELETE FROM DB =====
+//		courseRepository.delete(course);
+//
+//		logger.info("Course deleted from DB and Strapi files cleaned up successfully");
+//	}
+	
 	@Override
 	public void deleteCourse(Long courseId, String staffId) throws BadRequestException {
 
-		logger.info("Deleting course id: {} by staffId: {}", courseId, staffId);
+	    logger.info("Soft-deleting course id: {} by staffId: {}", courseId, staffId);
 
-		if (!staffRepository.existsByStaffId(staffId)) {
-			throw new ResourceNotFoundException("Staff not found: " + staffId);
-		}
-
-		Course course = courseRepository.findById(courseId)
-				.orElseThrow(() -> new ResourceNotFoundException("Course not found"));
-		
-		 // Check Batch Mapping
-	    if (classBatchRepository.existsByCourse(course)) {
-	        throw new BadRequestException(
-	                "Course has active batches and cannot be deleted.");
+	    if (!staffRepository.existsByStaffId(staffId)) {
+	        throw new ResourceNotFoundException("Staff not found: " + staffId);
 	    }
 
-		// ===== DELETE COURSE IMAGE FROM STRAPI =====
-		if (course.getCourseImage() != null && !course.getCourseImage().isBlank()) {
-			deleteCourseFileFromStrapi(course.getCourseImage()); // full URL passed directly
-		}
+	    Course course = courseRepository.findById(courseId)
+	            .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
 
-		// ===== DELETE INTRO VIDEO FROM STRAPI =====
-		if (course.getIntroVideo() != null && !course.getIntroVideo().isBlank()) {
-			deleteCourseFileFromStrapi(course.getIntroVideo()); // full URL passed directly
-		}
+	    if (course.isDeleted()) {
+	        logger.warn("Course id: {} is already deleted", courseId);
+	        throw new BadRequestException("Course  already soft deleted.");
+	    }
 
-		// ===== DELETE FROM DB =====
-		courseRepository.delete(course);
 
-		logger.info("Course deleted from DB and Strapi files cleaned up successfully");
+	    course.setDeleted(true);
+	    courseRepository.save(course);
+
+	    logger.info("Course id: {} soft-deleted successfully. Chapters, topics, references, "
+	            + "and batch mappings remain untouched in the database.", courseId);
 	}
 
 //--------------------------VIEW COURSES BY SUBJECT-----------------------------

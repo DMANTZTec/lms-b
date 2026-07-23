@@ -156,7 +156,7 @@ public class CourseManagementController {
 		courseManagementService.deleteCourse(courseId, staffId);
 
 		logger.info("Course deleted successfully with id: {}", courseId);
-		return ResponseEntity.ok("Course deleted successfully");
+		return ResponseEntity.ok("Course soft deleted successfully");
 	}
 
 //	get all courses by subject
