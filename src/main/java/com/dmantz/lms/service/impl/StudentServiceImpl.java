@@ -6,6 +6,7 @@ import com.dmantz.lms.dto.response.RegistrationResponse;
 import com.dmantz.lms.dto.response.StudentLoginResponse;
 import com.dmantz.lms.dto.response.StudentResponse;
 import com.dmantz.lms.entity.*;
+import com.dmantz.lms.exceptions.BadRequestException;
 import com.dmantz.lms.exceptions.DuplicateValuesException;
 import com.dmantz.lms.exceptions.InvalidOtpChannelException;
 import com.dmantz.lms.exceptions.InvalidPasswordException;
@@ -274,132 +275,129 @@ public class StudentServiceImpl implements StudentService {
 		return savedOtp;
 	}
 
-	 	@Override
-	    @Transactional
-	    public StudentLoginResponse login(StudentLoginRequest request) {
+	@Override
+	@Transactional
+	public StudentLoginResponse login(StudentLoginRequest request) {
 
-	        logger.info("Login attempt for username: {}", request.getUsername());
+		logger.info("Login attempt for username: {}", request.getUsername());
 
-	        // ── 1. Validate channel ──────────────────────────────────
-	        OtpChannel channel = request.getOtpChannel();
-	        if (channel == null) {
-	            throw new InvalidOtpChannelException("OTP channel must be specified: EMAIL or MOBILE");
-	        }
+		// ── 1. Validate channel ──────────────────────────────────
+		OtpChannel channel = request.getOtpChannel();
+		if (channel == null) {
+			throw new InvalidOtpChannelException("OTP channel must be specified: EMAIL or MOBILE");
+		}
 
-	        // ── 2. Look up student ───────────────────────────────────
-	        String username = request.getUsername();
-	        Student student = studentRepository.findByEmailIdOrMobileNumOrLoginId(username, username, username);
+		// ── 2. Look up student ───────────────────────────────────
+		String username = request.getUsername();
+		Student student = studentRepository.findByEmailIdOrMobileNumOrLoginId(username, username, username);
 
-	        if (student == null) {
-	            throw new RuntimeException("Invalid credentials");
-	        }
+		if (student == null) {
+			throw new RuntimeException("Invalid credentials");
+		}
 
-	        if (!"Y".equalsIgnoreCase(student.getEnabled())) {
-	            throw new RuntimeException("Account is disabled");
-	        }
+		if (!"Y".equalsIgnoreCase(student.getEnabled())) {
+			throw new RuntimeException("Account is disabled");
+		}
 
-	        // ── 3. Verify password ───────────────────────────────────
-	        if (!passwordEncoder.matches(request.getPassword(), student.getPassword())) {
-	            throw new RuntimeException("Invalid credentials");
-	        }
+		// ── 3. Verify password ───────────────────────────────────
+		if (!passwordEncoder.matches(request.getPassword(), student.getPassword())) {
+			throw new RuntimeException("Invalid credentials");
+		}
 
-	        // ── 4. Generate OTP ──────────────────────────────────────
-	        StudentOtp otp = generateOtp(student.getEmailId(), student.getMobileNum(), OtpPurpose.LOGIN);
+		// ── 4. Generate OTP ──────────────────────────────────────
+		StudentOtp otp = generateOtp(student.getEmailId(), student.getMobileNum(), OtpPurpose.LOGIN);
 
-	        // ── 5. Send OTP via requested channel ────────────────────
-	        try {
-	            switch (channel) {
-	                case EMAIL:
-	                    if (student.getEmailId() == null || student.getEmailId().isBlank()) {
-	                        throw new InvalidOtpChannelException(
-	                                "Email not available for this account. Cannot send OTP via EMAIL.");
-	                    }
-	                    emailService.sendOtpEmail(student.getEmailId(), otp.getOtp(), OtpPurpose.LOGIN);
-	                    logger.info("Login OTP sent via EMAIL to: {}", student.getEmailId());
-	                    break;
+		// ── 5. Send OTP via requested channel ────────────────────
+		try {
+			switch (channel) {
+			case EMAIL:
+				if (student.getEmailId() == null || student.getEmailId().isBlank()) {
+					throw new InvalidOtpChannelException(
+							"Email not available for this account. Cannot send OTP via EMAIL.");
+				}
+				emailService.sendOtpEmail(student.getEmailId(), otp.getOtp(), OtpPurpose.LOGIN);
+				logger.info("Login OTP sent via EMAIL to: {}", student.getEmailId());
+				break;
 
-	                case MOBILE:
-	                    if (student.getMobileNum() == null || student.getMobileNum().isBlank()) {
-	                        throw new InvalidOtpChannelException(
-	                                "Mobile number not available for this account. Cannot send OTP via MOBILE.");
-	                    }
-	                    smsService.sendOtpSms(student.getMobileNum(), otp.getOtp(), OtpPurpose.LOGIN);
-	                    logger.info("Login OTP sent via MOBILE to: {}", student.getMobileNum());
-	                    break;
+			case MOBILE:
+				if (student.getMobileNum() == null || student.getMobileNum().isBlank()) {
+					throw new InvalidOtpChannelException(
+							"Mobile number not available for this account. Cannot send OTP via MOBILE.");
+				}
+				smsService.sendOtpSms(student.getMobileNum(), otp.getOtp(), OtpPurpose.LOGIN);
+				logger.info("Login OTP sent via MOBILE to: {}", student.getMobileNum());
+				break;
 
-	                default:
-	                    throw new InvalidOtpChannelException("Invalid OTP channel: " + channel);
-	            }
+			default:
+				throw new InvalidOtpChannelException("Invalid OTP channel: " + channel);
+			}
 
-	            otp.setStatus(OtpStatus.SENT);
-	            otp.setUpdatedDt(LocalDateTime.now());
-	            otpRepository.save(otp);
+			otp.setStatus(OtpStatus.SENT);
+			otp.setUpdatedDt(LocalDateTime.now());
+			otpRepository.save(otp);
 
-	        } catch (InvalidOtpChannelException ex) {
-	            otp.setStatus(OtpStatus.FAILED);
-	            otp.setUpdatedDt(LocalDateTime.now());
-	            otpRepository.save(otp);
-	            logger.error("Invalid channel during login OTP send: {}", ex.getMessage());
-	            throw ex;
+		} catch (InvalidOtpChannelException ex) {
+			otp.setStatus(OtpStatus.FAILED);
+			otp.setUpdatedDt(LocalDateTime.now());
+			otpRepository.save(otp);
+			logger.error("Invalid channel during login OTP send: {}", ex.getMessage());
+			throw ex;
 
-	        } catch (Exception ex) {
-	            otp.setStatus(OtpStatus.FAILED);
-	            otp.setUpdatedDt(LocalDateTime.now());
-	            otpRepository.save(otp);
-	            logger.error("Failed to send login OTP via {}: {}", channel, ex.getMessage(), ex);
-	            throw new OtpSendingException("Failed to send OTP via " + channel + ": " + ex.getMessage(), ex);
-	        }
+		} catch (Exception ex) {
+			otp.setStatus(OtpStatus.FAILED);
+			otp.setUpdatedDt(LocalDateTime.now());
+			otpRepository.save(otp);
+			logger.error("Failed to send login OTP via {}: {}", channel, ex.getMessage(), ex);
+			throw new OtpSendingException("Failed to send OTP via " + channel + ": " + ex.getMessage(), ex);
+		}
 
-	        // ── 6. Build response ────────────────────────────────────
-	        StudentLoginResponse response = studentMapper.toLoginResponse(student);
-	        response.setMessage("OTP sent successfully via " + channel);
-	        return response;
-	    }
+		// ── 6. Build response ────────────────────────────────────
+		StudentLoginResponse response = studentMapper.toLoginResponse(student);
+		response.setMessage("OTP sent successfully via " + channel);
+		return response;
+	}
 
-	 @Override
-	    @Transactional
-	    public StudentLoginResponse verifyLoginOtp(OtpVerifyRequest request) {
+	@Override
+	@Transactional
+	public StudentLoginResponse verifyLoginOtp(OtpVerifyRequest request) {
 
-	        String identifier = request.getEmailIdOrMobileNo();
-	        logger.info("Verifying login OTP for identifier: {}", identifier);
+		String identifier = request.getEmailIdOrMobileNo();
+		logger.info("Verifying login OTP for identifier: {}", identifier);
 
-	        // ── 1. Find student ──────────────────────────────────────
-	        Student student = studentRepository.findByEmailIdOrMobileNumOrLoginId(identifier, identifier, identifier);
-	        if (student == null) {
-	            throw new StudentNotFoundException("Student not found");
-	        }
+		// ── 1. Find student ──────────────────────────────────────
+		Student student = studentRepository.findByEmailIdOrMobileNumOrLoginId(identifier, identifier, identifier);
+		if (student == null) {
+			throw new StudentNotFoundException("Student not found");
+		}
 
-	        // ── 2. Find latest OTP ───────────────────────────────────
-	        StudentOtp otp = otpRepository
-	                .findLatestByIdentifier(identifier)
-	                .orElseThrow(() -> new RuntimeException("OTP not found"));
+		// ── 2. Find latest OTP ───────────────────────────────────
+		StudentOtp otp = otpRepository.findLatestByIdentifier(identifier)
+				.orElseThrow(() -> new RuntimeException("OTP not found"));
 
-	        // ── 3. Check already used ────────────────────────────────
-	        if (OtpStatus.VERIFIED.equals(otp.getStatus())) {
-	            throw new RuntimeException("OTP already used");
-	        }
+		// ── 3. Check already used ────────────────────────────────
+		if (OtpStatus.VERIFIED.equals(otp.getStatus())) {
+			throw new RuntimeException("OTP already used");
+		}
 
-	        // ── 4. Validate OTP value ────────────────────────────────
-	        if (!otp.getOtp().equals(request.getOtp())) {
-	            otp.setAttemptsNum(otp.getAttemptsNum() == null ? 1 : otp.getAttemptsNum() + 1);
-	            otpRepository.save(otp);
-	            throw new RuntimeException("Invalid OTP");
-	        }
+		// ── 4. Validate OTP value ────────────────────────────────
+		if (!otp.getOtp().equals(request.getOtp())) {
+			otp.setAttemptsNum(otp.getAttemptsNum() == null ? 1 : otp.getAttemptsNum() + 1);
+			otpRepository.save(otp);
+			throw new RuntimeException("Invalid OTP");
+		}
 
-	        // ── 5. Mark verified and generate JWT ────────────────────
-	        otp.setStatus(OtpStatus.VERIFIED);
-	        otp.setUpdatedDt(LocalDateTime.now());
-	        otpRepository.save(otp);
+		// ── 5. Mark verified and generate JWT ────────────────────
+		otp.setStatus(OtpStatus.VERIFIED);
+		otp.setUpdatedDt(LocalDateTime.now());
+		otpRepository.save(otp);
 
-	        String token = jwtUtil.generateToken(
-	                student.getEmailId(), "STUDENT", String.valueOf(student.getStudentId()));
+		String token = jwtUtil.generateToken(student.getEmailId(), "STUDENT", String.valueOf(student.getStudentId()));
 
-	        StudentLoginResponse response = studentMapper.toLoginResponse(student);
-	        response.setToken(token);
-	        response.setMessage("Login successful");
-	        return response;
-	    }
-
+		StudentLoginResponse response = studentMapper.toLoginResponse(student);
+		response.setToken(token);
+		response.setMessage("Login successful");
+		return response;
+	}
 
 	private String uploadToStrapi(MultipartFile file) {
 		try {
@@ -468,7 +466,7 @@ public class StudentServiceImpl implements StudentService {
 	}
 
 	@Override
-	public StudentResponse updateStudentProfile(String studentId, StudentUpdateRequest request) {
+	public StudentResponse updateStudent(String studentId, StudentUpdateRequest request) {
 
 		logger.info("Updating student profile for studentId: {}", studentId);
 
@@ -477,23 +475,43 @@ public class StudentServiceImpl implements StudentService {
 			return new RuntimeException("Student not found");
 		});
 
-		// Read profileImg directly from request
-		MultipartFile profileImg = request.getProfileImg();
-		if (profileImg != null && !profileImg.isEmpty()) {
-			String oldImgUrl = student.getProfileImg();
-			if (oldImgUrl != null && !oldImgUrl.isBlank()) {
-				deleteFromStrapiByUrl(oldImgUrl);
-			}
-			String newImgUrl = uploadToStrapi(profileImg);
-			student.setProfileImg(newImgUrl); // set directly on entity, not via request
-		}
-
 		studentMapper.updateStudentFromDto(request, student);
 		studentRepository.save(student);
 
 		logger.info("Student profile updated successfully for studentId: {}", studentId);
 
 		return studentMapper.toResponse(student);
+	}
+
+	@Override
+	public StudentResponse updateProfileImage(String studentId, MultipartFile file) {
+
+		logger.info("Updating profile image for studentId: {}", studentId);
+
+		Student student = studentRepository.findByStudentId(studentId).orElseThrow(() -> {
+			logger.error("Student not found for studentId: {}", studentId);
+			return new StudentNotFoundException("Student not found for studentId: " + studentId);
+		});
+
+		if (file == null || file.isEmpty()) {
+			throw new BadRequestException("Profile image is required.");
+		}
+
+		// Delete old image from Strapi, if present
+		String oldImgUrl = student.getProfileImg();
+		if (oldImgUrl != null && !oldImgUrl.isBlank()) {
+			deleteFromStrapiByUrl(oldImgUrl);
+		}
+
+		// Upload new image to Strapi
+		String newImgUrl = uploadToStrapi(file);
+		student.setProfileImg(newImgUrl);
+
+		Student savedStudent = studentRepository.save(student);
+
+		logger.info("Profile image updated successfully for studentId: {}", studentId);
+
+		return studentMapper.toResponse(savedStudent);
 	}
 
 	@Override
@@ -584,86 +602,85 @@ public class StudentServiceImpl implements StudentService {
 	@Transactional
 	public void resetPassword(ResetPasswordRequest request) {
 
-	    logger.info("Reset password started for emailIdOrMobileNo: {}", request.getEmailIdOrMobileNo());
+		logger.info("Reset password started for emailIdOrMobileNo: {}", request.getEmailIdOrMobileNo());
 
-	    String emailIdOrMobileNo = request.getEmailIdOrMobileNo();
+		String emailIdOrMobileNo = request.getEmailIdOrMobileNo();
 
-	    Student student = studentRepository
-	            .findByEmailIdOrMobileNum(emailIdOrMobileNo, emailIdOrMobileNo)
-	            .orElseThrow(() -> {
-	                logger.error("Student not found for emailIdOrMobileNo: {}", emailIdOrMobileNo);
-	                return new RuntimeException("Student not found");
-	            });
+		Student student = studentRepository.findByEmailIdOrMobileNum(emailIdOrMobileNo, emailIdOrMobileNo)
+				.orElseThrow(() -> {
+					logger.error("Student not found for emailIdOrMobileNo: {}", emailIdOrMobileNo);
+					return new RuntimeException("Student not found");
+				});
 
-	    StudentOtp studentOtp = otpRepository
-	            .findTopByEmailIdOrMobileNumOrderByCreatedDtDesc(student.getEmailId(), student.getMobileNum())
-	            .orElseThrow(() -> {
-	                logger.error("OTP not found for emailIdOrMobileNo: {}", emailIdOrMobileNo);
-	                return new RuntimeException("OTP not found");
-	            });
+		StudentOtp studentOtp = otpRepository
+				.findTopByEmailIdOrMobileNumOrderByCreatedDtDesc(student.getEmailId(), student.getMobileNum())
+				.orElseThrow(() -> {
+					logger.error("OTP not found for emailIdOrMobileNo: {}", emailIdOrMobileNo);
+					return new RuntimeException("OTP not found");
+				});
 
-	    if (studentOtp.getStatus() == OtpStatus.VERIFIED) {
-	        logger.warn("OTP already used for emailIdOrMobileNo: {}", emailIdOrMobileNo);
-	        throw new RuntimeException("OTP already used");
-	    }
+		if (studentOtp.getStatus() == OtpStatus.VERIFIED) {
+			logger.warn("OTP already used for emailIdOrMobileNo: {}", emailIdOrMobileNo);
+			throw new RuntimeException("OTP already used");
+		}
 
-	    if (studentOtp.getCreatedDt().isBefore(LocalDateTime.now().minusMinutes(10))) {
-	        studentOtp.setStatus(OtpStatus.EXPIRED);
-	        studentOtp.setUpdatedDt(LocalDateTime.now());
-	        otpRepository.save(studentOtp);
+		if (studentOtp.getCreatedDt().isBefore(LocalDateTime.now().minusMinutes(10))) {
+			studentOtp.setStatus(OtpStatus.EXPIRED);
+			studentOtp.setUpdatedDt(LocalDateTime.now());
+			otpRepository.save(studentOtp);
 
-	        logger.warn("OTP expired for emailIdOrMobileNo: {}", emailIdOrMobileNo);
-	        throw new RuntimeException("OTP expired");
-	    }
+			logger.warn("OTP expired for emailIdOrMobileNo: {}", emailIdOrMobileNo);
+			throw new RuntimeException("OTP expired");
+		}
 
-	    if (!studentOtp.getOtp().equals(request.getOtp())) {
-	        logger.warn("Invalid OTP entered for password reset, emailIdOrMobileNo: {}", emailIdOrMobileNo);
-	        throw new RuntimeException("Invalid OTP");
-	    }
+		if (!studentOtp.getOtp().equals(request.getOtp())) {
+			logger.warn("Invalid OTP entered for password reset, emailIdOrMobileNo: {}", emailIdOrMobileNo);
+			throw new RuntimeException("Invalid OTP");
+		}
 
-	    student.setPassword(passwordEncoder.encode(request.getNewPassword()));
-	    studentRepository.save(student);
+		student.setPassword(passwordEncoder.encode(request.getNewPassword()));
+		studentRepository.save(student);
 
-	    studentOtp.setStatus(OtpStatus.VERIFIED);
-	    studentOtp.setUpdatedDt(LocalDateTime.now());
-	    otpRepository.save(studentOtp);
+		studentOtp.setStatus(OtpStatus.VERIFIED);
+		studentOtp.setUpdatedDt(LocalDateTime.now());
+		otpRepository.save(studentOtp);
 
-	    // Notify via EMAIL if available
-	    if (student.getEmailId() != null && !student.getEmailId().isBlank()) {
-	        try {
-	            emailService.sendOtpEmail(student.getEmailId(), null, OtpPurpose.PASSWORD_RESET_SUCCESS);
-	            logger.info("Password reset success email sent to: {}", student.getEmailId());
-	        } catch (Exception ex) {
-	            logger.error("Failed to send password reset success email to: {}", student.getEmailId(), ex);
-	        }
-	    }
+		// Notify via EMAIL if available
+		if (student.getEmailId() != null && !student.getEmailId().isBlank()) {
+			try {
+				emailService.sendOtpEmail(student.getEmailId(), null, OtpPurpose.PASSWORD_RESET_SUCCESS);
+				logger.info("Password reset success email sent to: {}", student.getEmailId());
+			} catch (Exception ex) {
+				logger.error("Failed to send password reset success email to: {}", student.getEmailId(), ex);
+			}
+		}
 
-	    // Notify via SMS if available
-	    if (student.getMobileNum() != null && !student.getMobileNum().isBlank()) {
-	        try {
-	            smsService.sendOtpSms(student.getMobileNum(), null, OtpPurpose.PASSWORD_RESET_SUCCESS);
-	            logger.info("Password reset success SMS sent to: {}", student.getMobileNum());
-	        } catch (Exception ex) {
-	            logger.error("Failed to send password reset success SMS to: {}", student.getMobileNum(), ex);
-	        }
-	    }
+		// Notify via SMS if available
+		if (student.getMobileNum() != null && !student.getMobileNum().isBlank()) {
+			try {
+				smsService.sendOtpSms(student.getMobileNum(), null, OtpPurpose.PASSWORD_RESET_SUCCESS);
+				logger.info("Password reset success SMS sent to: {}", student.getMobileNum());
+			} catch (Exception ex) {
+				logger.error("Failed to send password reset success SMS to: {}", student.getMobileNum(), ex);
+			}
+		}
 
-	    logger.info("Password reset successful for emailIdOrMobileNo: {}", emailIdOrMobileNo);
+		logger.info("Password reset successful for emailIdOrMobileNo: {}", emailIdOrMobileNo);
 	}
+
 	@Override
 	public StudentResponse getStudentById(String studentId) {
 
-	    logger.info("Fetching student with studentId: {}", studentId);
+		logger.info("Fetching student with studentId: {}", studentId);
 
-	    Student student = studentRepository.findByStudentId(studentId)
-	            .orElseThrow(() -> {
-	                logger.error("Student not found for studentId: {}", studentId);
-	                return new StudentNotFoundException("Student not found for studentId: " + studentId);
-	            });
+		Student student = studentRepository.findByStudentId(studentId).orElseThrow(() -> {
+			logger.error("Student not found for studentId: {}", studentId);
+			return new StudentNotFoundException("Student not found for studentId: " + studentId);
+		});
 
-	    logger.info("Student fetched successfully for studentId: {}", studentId);
+		logger.info("Student fetched successfully for studentId: {}", studentId);
 
-	    return studentMapper.toResponse(student);
+		return studentMapper.toResponse(student);
 	}
 
 	@Override
@@ -675,8 +692,7 @@ public class StudentServiceImpl implements StudentService {
 		String emailId = request.getEmailId();
 		String mobileNum = request.getMobileNum();
 
-		if ((emailId == null || emailId.isBlank())
-				&& (mobileNum == null || mobileNum.isBlank())) {
+		if ((emailId == null || emailId.isBlank()) && (mobileNum == null || mobileNum.isBlank())) {
 			throw new IllegalArgumentException("Either emailId or mobileNum must be provided");
 		}
 
@@ -690,28 +706,26 @@ public class StudentServiceImpl implements StudentService {
 
 		try {
 			switch (channel) {
-				case EMAIL:
-					if (emailId == null || emailId.isBlank()) {
-						throw new InvalidOtpChannelException(
-								"Email not provided");
-					}
+			case EMAIL:
+				if (emailId == null || emailId.isBlank()) {
+					throw new InvalidOtpChannelException("Email not provided");
+				}
 
-					emailService.sendOtpEmail(emailId, otp.getOtp(), request.getPurpose());
-					logger.info("OTP resent via EMAIL to {}", emailId);
-					break;
+				emailService.sendOtpEmail(emailId, otp.getOtp(), request.getPurpose());
+				logger.info("OTP resent via EMAIL to {}", emailId);
+				break;
 
-				case MOBILE:
-					if (mobileNum == null || mobileNum.isBlank()) {
-						throw new InvalidOtpChannelException(
-								"Mobile number not provided");
-					}
+			case MOBILE:
+				if (mobileNum == null || mobileNum.isBlank()) {
+					throw new InvalidOtpChannelException("Mobile number not provided");
+				}
 
-					smsService.sendOtpSms(mobileNum, otp.getOtp(), request.getPurpose());
-					logger.info("OTP resent via MOBILE to {}", mobileNum);
-					break;
+				smsService.sendOtpSms(mobileNum, otp.getOtp(), request.getPurpose());
+				logger.info("OTP resent via MOBILE to {}", mobileNum);
+				break;
 
-				default:
-					throw new InvalidOtpChannelException("Invalid OTP channel");
+			default:
+				throw new InvalidOtpChannelException("Invalid OTP channel");
 			}
 
 			otp.setStatus(OtpStatus.SENT);
@@ -736,7 +750,7 @@ public class StudentServiceImpl implements StudentService {
 		response.setMessage("OTP resent successfully via " + channel);
 		return response;
 	}
-	
+
 	@Override
 	@Transactional
 	public void changePassword(ChangePasswordRequest request) {
@@ -760,7 +774,8 @@ public class StudentServiceImpl implements StudentService {
 		}
 
 		if (!request.getNewPassword().equals(request.getConfirmPassword())) {
-			logger.warn("Change password failed - new password and confirm password do not match for studentId: {}", studentId);
+			logger.warn("Change password failed - new password and confirm password do not match for studentId: {}",
+					studentId);
 			throw new InvalidPasswordException("New password and confirm password do not match");
 		}
 

@@ -24,7 +24,6 @@ public class StudentUpdateRequest {
 	@NotNull(message = "Date of birth is required")
 	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
 	private LocalDate dob;
-	private MultipartFile profileImg;
 
 	public String getFirstNm() {
 		return firstNm;
@@ -122,14 +121,6 @@ public class StudentUpdateRequest {
 		this.emergencyContactNum = emergencyContactNum;
 	}
 
-	public MultipartFile getProfileImg() {
-		return profileImg;
-	}
-
-	public void setProfileImg(MultipartFile profileImg) {
-		this.profileImg = profileImg;
-	}
-
 	public LocalDate getDob() {
 		return dob;
 	}
@@ -143,7 +134,7 @@ public class StudentUpdateRequest {
 		return "StudentUpdateRequest [firstNm=" + firstNm + ", lastNm=" + lastNm + ", gender=" + gender + ", addr1="
 				+ addr1 + ", addr2=" + addr2 + ", city=" + city + ", state=" + state + ", country=" + country + ", pin="
 				+ pin + ", mobileNum=" + mobileNum + ", emergencyContactNm=" + emergencyContactNm
-				+ ", emergencyContactNum=" + emergencyContactNum + ", profileImg=" + profileImg + "]";
+				+ ", emergencyContactNum=" + emergencyContactNum + ", dob=" + dob + "]";
 	}
 
 }
