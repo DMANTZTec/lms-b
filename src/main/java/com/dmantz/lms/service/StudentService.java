@@ -26,11 +26,13 @@ public interface StudentService {
 
 	void resetPassword(ResetPasswordRequest request);
 
-	StudentResponse updateStudentProfile(String studentId, StudentUpdateRequest request);
+	StudentResponse updateStudent(String studentId, StudentUpdateRequest request);
 	
 	StudentResponse getStudentById(String studentId);
 
 	RegistrationResponse resendOtp(ResendOtpRequest request);
 	
 	void changePassword(ChangePasswordRequest request);
+	
+	StudentResponse updateProfileImage(String studentId, MultipartFile file);
 }
