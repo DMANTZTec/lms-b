@@ -6,6 +6,8 @@ import java.util.Arrays;
 import com.dmantz.lms.entity.base.AuditFields;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -46,11 +48,13 @@ public class Student extends AuditFields {
 	@Column(name = "city")
 	private String city;
 
+    @Enumerated(EnumType.STRING)
 	@Column(name = "state")
-	private String state;
+	private State state;
 
+    @Enumerated(EnumType.STRING)
 	@Column(name = "country")
-	private String country;
+	private Country country;
 
 	@Column(name = "pin")
 	private String pin;
@@ -158,20 +162,21 @@ public class Student extends AuditFields {
 	public void setCity(String city) {
 		this.city = city;
 	}
+	
 
-	public String getState() {
+	public State getState() {
 		return state;
 	}
 
-	public void setState(String state) {
+	public void setState(State state) {
 		this.state = state;
 	}
 
-	public String getCountry() {
+	public Country getCountry() {
 		return country;
 	}
 
-	public void setCountry(String country) {
+	public void setCountry(Country country) {
 		this.country = country;
 	}
 

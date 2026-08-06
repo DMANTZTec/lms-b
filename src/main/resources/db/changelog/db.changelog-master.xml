@@ -95,5 +95,8 @@
 
     <!-- staff_password_token table -->
     <include file="db/changelog/changelogs/202607101029-create-staff_password_token-table.xml"/>
+    
+    <!-- studen table -->
+    <include file="db/changelog/changelogs/202608061241-create-success_stories-table.xml"/>
 
 </databaseChangeLog>

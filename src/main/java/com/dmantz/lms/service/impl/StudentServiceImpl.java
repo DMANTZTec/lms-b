@@ -215,8 +215,8 @@ public class StudentServiceImpl implements StudentService {
 		student.setDob(LocalDate.of(2000, 1, 1));
 		student.setAddr1("NOT_SET");
 		student.setCity("NOT_SET");
-		student.setState("NOT_SET");
-		student.setCountry("NOT_SET");
+		student.setState(null);
+		student.setCountry(null);
 
 		Student savedStudent = studentRepository.save(student);
 		otpEntity.setStatus(OtpStatus.VERIFIED);

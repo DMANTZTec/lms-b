@@ -4,6 +4,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
+import com.dmantz.lms.entity.Country;
+import com.dmantz.lms.entity.State;
+
 public class StudentResponse {
 	private Long id;
 
@@ -19,8 +22,8 @@ public class StudentResponse {
 	private String addr1;
 	private String addr2;
 	private String city;
-	private String state;
-	private String country;
+	private State state;
+	private Country country;
 	private String pin;
 
 	private String emailId;
@@ -112,19 +115,20 @@ public class StudentResponse {
 		this.city = city;
 	}
 
-	public String getState() {
+
+	public State getState() {
 		return state;
 	}
 
-	public void setState(String state) {
+	public void setState(State state) {
 		this.state = state;
 	}
 
-	public String getCountry() {
+	public Country getCountry() {
 		return country;
 	}
 
-	public void setCountry(String country) {
+	public void setCountry(Country country) {
 		this.country = country;
 	}
 

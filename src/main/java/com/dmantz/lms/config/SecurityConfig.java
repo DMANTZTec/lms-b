@@ -44,6 +44,10 @@ public class SecurityConfig {
                         // CONTACT US PUBLIC APIs
                         .requestMatchers("/api/contact-us/**").permitAll()
                         .requestMatchers("/api/course/view-courses**").permitAll()
+                        
+                        .requestMatchers("/api/success-stories",
+                        		"/api/success-stories/**").permitAll()
+                        
 
 
                         // STUDENT PUBLIC APIs
