@@ -17,7 +17,7 @@ public class StudentTaskMentor extends AuditFields {
 
     // Mentor (also a student)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "mentor_student_id", referencedColumnName = "studentId", nullable = false)
+    @JoinColumn(name = "mentor_student_id", referencedColumnName = "student_id", nullable = false)
     private Student mentorStudent;
 
     @Column(name = "mins_spent")

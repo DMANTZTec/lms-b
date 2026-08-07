@@ -14,7 +14,7 @@ public class StudentTask extends AuditFields {
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "student_id", referencedColumnName = "studentId", nullable = false)
+	@JoinColumn(name = "student_id", referencedColumnName = "student_id", nullable = false)
 	private Student student;
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)

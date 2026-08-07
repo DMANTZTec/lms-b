@@ -3,7 +3,7 @@ package com.dmantz.lms.dto.response;
 public class SuccessStoryResponse {
 	
 	    private Long id;
-	    private Long studentId;
+	    private String studentId;
 	    private String studentName;    // firstNm + lastNm
 	    private String profileImg;      // straight from student.profileImg
 	    private String placedCompany;
@@ -15,10 +15,10 @@ public class SuccessStoryResponse {
 		public void setId(Long id) {
 			this.id = id;
 		}
-		public Long getStudentId() {
+		public String getStudentId() {
 			return studentId;
 		}
-		public void setStudentId(Long studentId) {
+		public void setStudentId(String studentId) {
 			this.studentId = studentId;
 		}
 		public String getStudentName() {

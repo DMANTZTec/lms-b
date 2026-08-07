@@ -30,7 +30,7 @@ public class SuccessStoryServiceImpl implements SuccessStoryService {
     @Override
     public SuccessStoryResponse create(SuccessStoryRequest request) {
 
-        Student student = studentRepository.findById(request.getStudentId())
+        Student student = studentRepository.findByStudentId(request.getStudentId())
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found: " + request.getStudentId()));
 
         SuccessStory entity = successStoryMapper.toEntity(request);
@@ -60,12 +60,13 @@ public class SuccessStoryServiceImpl implements SuccessStoryService {
         SuccessStory entity = successStoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Success story not found: " + id));
 
-        if (!entity.getStudent().getId().equals(request.getStudentId())) {
-            Student student = studentRepository.findById(request.getStudentId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Student not found: " + request.getStudentId()));
+        if (!entity.getStudent().getStudentId().equals(request.getStudentId())) {
+            Student student = studentRepository.findByStudentId(request.getStudentId())
+                    .orElseThrow(() ->
+                        new ResourceNotFoundException("Student not found"));
+
             entity.setStudent(student);
         }
-
         entity.setPlacedCompany(request.getPlacedCompany());
         entity.setPlacedDesignation(request.getPlacedDesignation());
         entity.setReviewMsg(request.getReviewMsg());

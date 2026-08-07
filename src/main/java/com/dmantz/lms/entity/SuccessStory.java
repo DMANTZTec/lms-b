@@ -1,4 +1,5 @@
 package com.dmantz.lms.entity;
+
 import com.dmantz.lms.entity.base.AuditFields;
 
 import jakarta.persistence.Column;
@@ -20,7 +21,7 @@ public class SuccessStory extends AuditFields {
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "student_id", nullable = false)
+	@JoinColumn(name = "student_id", referencedColumnName = "student_id", nullable = false)
 	private Student student;
 
 	@Column(name = "placed_company", nullable = false)
@@ -93,6 +94,5 @@ public class SuccessStory extends AuditFields {
 	public void setIsActive(Boolean isActive) {
 		this.isActive = isActive;
 	}
-	
-	
+
 }

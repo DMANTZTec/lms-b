@@ -12,8 +12,11 @@ import com.dmantz.lms.entity.SuccessStory;
 @Mapper(componentModel = "spring")
 public interface SuccessStoryMapper {
 
-    @Mapping(target = "studentId", source = "student.id")
-    @Mapping(target = "studentName", expression = "java(entity.getStudent().getFirstNm() + \" \" + entity.getStudent().getLastNm())")
+    @Mapping(target = "studentId", source = "student.studentId")
+    @Mapping(
+        target = "studentName",
+        expression = "java(entity.getStudent().getFirstNm() + \" \" + entity.getStudent().getLastNm())"
+    )
     @Mapping(target = "profileImg", source = "student.profileImg")
     SuccessStoryResponse toResponse(SuccessStory entity);
 
@@ -23,5 +26,4 @@ public interface SuccessStoryMapper {
     @Mapping(target = "student", ignore = true)
     @Mapping(target = "isActive", ignore = true)
     SuccessStory toEntity(SuccessStoryRequest request);
-
 }

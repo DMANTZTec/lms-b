@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 public class SuccessStoryRequest{
 	
 	 @NotNull 
-	 private Long studentId;
+	 private String studentId;
 	    @NotBlank 
 	    private String placedCompany;
 	    @NotBlank 
@@ -14,10 +14,10 @@ public class SuccessStoryRequest{
 	    @NotBlank 
 	    private String reviewMsg;
 	    Integer displayOrder;
-		public Long getStudentId() {
+		public String getStudentId() {
 			return studentId;
 		}
-		public void setStudentId(Long studentId) {
+		public void setStudentId(String studentId) {
 			this.studentId = studentId;
 		}
 		public String getPlacedCompany() {
