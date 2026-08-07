@@ -98,5 +98,8 @@
     
     <!-- studen table -->
     <include file="db/changelog/changelogs/202608061241-create-success_stories-table.xml"/>
+    
+    <!--  social media table  -->
+	<include file="db/changelog/changelogs/202608071117-create-social-media-table.xml"/>
 
 </databaseChangeLog>
