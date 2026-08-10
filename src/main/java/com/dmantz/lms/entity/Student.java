@@ -22,7 +22,7 @@ public class Student extends AuditFields {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(name = "student_id", nullable = false, unique = true)
+	@Column(name = "student_id", nullable = false, unique = true, length = 7, columnDefinition = "CHAR(7)")
 	private String studentId;
 
 	@Column(name = "login_id")
@@ -49,11 +49,11 @@ public class Student extends AuditFields {
 	@Column(name = "city")
 	private String city;
 
-    @Enumerated(EnumType.STRING)
+	@Enumerated(EnumType.STRING)
 	@Column(name = "state")
 	private State state;
 
-    @Enumerated(EnumType.STRING)
+	@Enumerated(EnumType.STRING)
 	@Column(name = "country")
 	private Country country;
 
@@ -163,7 +163,6 @@ public class Student extends AuditFields {
 	public void setCity(String city) {
 		this.city = city;
 	}
-	
 
 	public State getState() {
 		return state;
@@ -263,5 +262,4 @@ public class Student extends AuditFields {
 				+ emergencyContactNum + ", profileImg=" + profileImg + "]";
 	}
 
-	
 }

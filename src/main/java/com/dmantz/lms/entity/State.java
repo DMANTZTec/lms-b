@@ -6,6 +6,6 @@ public enum State {
 	Karnataka,
 	TamilNadu,
 	Kerala,
-	Maharashtra,
+	Maharashtra
 
 }
