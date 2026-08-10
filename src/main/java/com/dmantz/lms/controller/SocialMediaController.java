@@ -16,70 +16,70 @@ import java.util.List;
 @RequestMapping("/api/social-media")
 public class SocialMediaController {
 
-    private static final Logger logger = LoggerFactory.getLogger(SocialMediaController.class);
+	private static final Logger logger = LoggerFactory.getLogger(SocialMediaController.class);
 
-    private final SocialMediaService socialMediaService;
+	private final SocialMediaService socialMediaService;
 
-    public SocialMediaController(SocialMediaService socialMediaService) {
-        this.socialMediaService = socialMediaService;
-    }
+	public SocialMediaController(SocialMediaService socialMediaService) {
+		this.socialMediaService = socialMediaService;
+	}
 
-    @GetMapping("/active")
-    public ResponseEntity<List<SocialMediaResponse>> getActiveLinks() {
-        logger.info("Received request to fetch active social media links.");
+	@GetMapping("/active")
+	public ResponseEntity<List<SocialMediaResponse>> getActiveLinks() {
+		logger.info("Received request to fetch active social media links.");
 
-        List<SocialMediaResponse> response = socialMediaService.getActiveLinks();
+		List<SocialMediaResponse> response = socialMediaService.getActiveLinks();
 
-        logger.info("Successfully fetched {} active social media links.", response.size());
-        return ResponseEntity.ok(response);
-    }
+		logger.info("Successfully fetched {} active social media links.", response.size());
+		return ResponseEntity.ok(response);
+	}
 
-    @GetMapping
-    public ResponseEntity<List<SocialMediaResponse>> getAllLinks() {
-        logger.info("Received request to fetch all social media links.");
+	@GetMapping
+	public ResponseEntity<List<SocialMediaResponse>> getAllLinks() {
+		logger.info("Received request to fetch all social media links.");
 
-        List<SocialMediaResponse> response = socialMediaService.getAllLinks();
+		List<SocialMediaResponse> response = socialMediaService.getAllLinks();
 
-        logger.info("Successfully fetched {} social media links.", response.size());
-        return ResponseEntity.ok(response);
-    }
+		logger.info("Successfully fetched {} social media links.", response.size());
+		return ResponseEntity.ok(response);
+	}
 
-    @PostMapping
-    public ResponseEntity<SocialMediaResponse> createLink(
-            @Valid @RequestBody SocialMediaRequest request) {
+	@PostMapping("/staff/{staffId}")
+	public ResponseEntity<SocialMediaResponse> createLink(@PathVariable String staffId,
+			@Valid @RequestBody SocialMediaRequest request) {
 
-        logger.info("Received request to create social media link for platform: {}", request.getPlatform());
+		logger.info("Received request to create social media link. Staff ID: {}, Platform: {}", staffId,
+				request.getPlatform());
 
-        SocialMediaResponse response = socialMediaService.createLink(request);
+		SocialMediaResponse response = socialMediaService.createLink(staffId, request);
 
-        logger.info("Successfully created social media link for platform: {}", response.getPlatform());
+		logger.info("Successfully created social media link for platform: {}", response.getPlatform());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
+		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+	}
 
-    @PutMapping("/{id}")
-    public ResponseEntity<SocialMediaResponse> updateLink(
-            @PathVariable Long id,
-            @Valid @RequestBody SocialMediaRequest request) {
+	@PutMapping("/{id}/staff/{staffId}")
+	public ResponseEntity<SocialMediaResponse> updateLink(@PathVariable Long id, @PathVariable String staffId,
+			@Valid @RequestBody SocialMediaRequest request) {
 
-        logger.info("Received request to update social media link with id: {}", id);
+		logger.info("Received request to update social media link. ID: {}, Staff ID: {}", id, staffId);
 
-        SocialMediaResponse response = socialMediaService.updateLink(id, request);
+		SocialMediaResponse response = socialMediaService.updateLink(id, staffId, request);
 
-        logger.info("Successfully updated social media link with id: {}", id);
+		logger.info("Successfully updated social media link with id: {}", id);
 
-        return ResponseEntity.ok(response);
-    }
+		return ResponseEntity.ok(response);
+	}
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteLink(@PathVariable Long id) {
+	@DeleteMapping("/{id}/staff/{staffId}")
+	public ResponseEntity<String> deleteLink(@PathVariable Long id, @PathVariable String staffId) {
 
-        logger.info("Received request to delete social media link with id: {}", id);
+		logger.info("Received request to delete social media link. ID: {}, Staff ID: {}", id, staffId);
 
-        socialMediaService.deleteLink(id);
+		socialMediaService.deleteLink(id, staffId);
 
-        logger.info("Successfully deleted social media link with id: {}", id);
+		logger.info("Successfully deleted social media link with id: {} by staffId: {}", id, staffId);
 
-        return ResponseEntity.ok("Social media link deleted successfully.");
-    }
+		return ResponseEntity.ok("Social media link deleted successfully.");
+	}
 }

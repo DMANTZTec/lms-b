@@ -3,8 +3,11 @@ package com.dmantz.lms.service.impl;
 import com.dmantz.lms.dto.request.SocialMediaRequest;
 import com.dmantz.lms.dto.response.SocialMediaResponse;
 import com.dmantz.lms.entity.SocialMedia;
+import com.dmantz.lms.exceptions.DuplicateValuesException;
+import com.dmantz.lms.exceptions.ResourceNotFoundException;
 import com.dmantz.lms.mapper.SocialMediaMapper;
 import com.dmantz.lms.repository.SocialMediaRepository;
+import com.dmantz.lms.repository.StaffRepository;
 import com.dmantz.lms.service.SocialMediaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,103 +19,174 @@ import java.util.List;
 @Service
 public class SocialMediaServiceImpl implements SocialMediaService {
 
-    private static final Logger logger = LoggerFactory.getLogger(SocialMediaServiceImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(SocialMediaServiceImpl.class);
 
-    private final SocialMediaRepository socialMediaRepository;
-    private final SocialMediaMapper socialMediaMapper;
+	private final SocialMediaRepository socialMediaRepository;
+	private final SocialMediaMapper socialMediaMapper;
+	private final StaffRepository staffRepository;
 
-    public SocialMediaServiceImpl(SocialMediaRepository socialMediaRepository,
-                                  SocialMediaMapper socialMediaMapper) {
-        this.socialMediaRepository = socialMediaRepository;
-        this.socialMediaMapper = socialMediaMapper;
-    }
+	
+	public SocialMediaServiceImpl(SocialMediaRepository socialMediaRepository, SocialMediaMapper socialMediaMapper,
+			StaffRepository staffRepository) {
+		super();
+		this.socialMediaRepository = socialMediaRepository;
+		this.socialMediaMapper = socialMediaMapper;
+		this.staffRepository = staffRepository;
+	}
 
-    @Override
-    public List<SocialMediaResponse> getActiveLinks() {
+	@Override
+	public List<SocialMediaResponse> getActiveLinks() {
 
-        logger.info("Fetching active social media links.");
+		logger.info("Fetching active social media links.");
 
-        List<SocialMediaResponse> response = socialMediaRepository.findByIsActiveTrue()
-                .stream()
-                .sorted(Comparator.comparing(sm -> sm.getPlatform().name()))
-                .map(socialMediaMapper::toResponse)
-                .toList();
+		List<SocialMediaResponse> response = socialMediaRepository.findByIsActiveTrue().stream()
+				.sorted(Comparator.comparing(sm -> sm.getPlatform().name())).map(socialMediaMapper::toResponse)
+				.toList();
 
-        logger.info("Successfully fetched {} active social media links.", response.size());
+		logger.info("Successfully fetched {} active social media links.", response.size());
 
-        return response;
-    }
+		return response;
+	}
 
-    @Override
-    public List<SocialMediaResponse> getAllLinks() {
+	@Override
+	public List<SocialMediaResponse> getAllLinks() {
 
-        logger.info("Fetching all social media links.");
+		logger.info("Fetching all social media links.");
 
-        List<SocialMediaResponse> response = socialMediaRepository.findAll()
-                .stream()
-                .map(socialMediaMapper::toResponse)
-                .toList();
+		List<SocialMediaResponse> response = socialMediaRepository.findAll().stream().map(socialMediaMapper::toResponse)
+				.toList();
 
-        logger.info("Successfully fetched {} social media links.", response.size());
+		logger.info("Successfully fetched {} social media links.", response.size());
 
-        return response;
-    }
+		return response;
+	}
 
-    @Override
-    public SocialMediaResponse createLink(SocialMediaRequest request) {
+	@Override
+	public SocialMediaResponse createLink(String staffId, SocialMediaRequest request) {
 
-        logger.info("Creating social media link for platform: {}", request.getPlatform());
+		logger.info("Creating social media link. Staff ID: {}, Platform: {}", staffId, request.getPlatform());
 
-        socialMediaRepository.findByPlatform(request.getPlatform()).ifPresent(link -> {
-            logger.error("Social media link already exists for platform: {}", request.getPlatform());
-            throw new RuntimeException("Social media link already exists for platform: " + request.getPlatform());
-        });
+		if (staffId == null || staffId.trim().isEmpty()) {
 
-        SocialMedia socialMedia = socialMediaMapper.toEntity(request);
+			logger.error("Staff ID is null or empty.");
 
-        if (socialMedia.getIsActive() == null) {
-            socialMedia.setIsActive(true);
-        }
+			throw new ResourceNotFoundException("Staff ID is required.");
+		}
 
-        SocialMedia saved = socialMediaRepository.save(socialMedia);
+		boolean staffExists = staffRepository.existsByStaffId(staffId);
 
-        logger.info("Successfully created social media link with id: {}", saved.getId());
+		if (!staffExists) {
 
-        return socialMediaMapper.toResponse(saved);
-    }
+			logger.error("Staff not found with staffId: {}", staffId);
 
-    @Override
-    public SocialMediaResponse updateLink(Long id, SocialMediaRequest request) {
+			throw new ResourceNotFoundException("Staff not found with staffId: " + staffId);
+		}
 
-        logger.info("Updating social media link with id: {}", id);
+		logger.info("Staff validated successfully with staffId: {}", staffId);
 
-        SocialMedia socialMedia = socialMediaRepository.findById(id)
-                .orElseThrow(() -> {
-                    logger.error("Social media link not found with id: {}", id);
-                    return new RuntimeException("Social media link not found with id: " + id);
-                });
+		socialMediaRepository.findByPlatform(request.getPlatform()).ifPresent(link -> {
 
-        socialMediaMapper.updateEntity(request, socialMedia);
+			logger.error("Social media link already exists for platform: {}", request.getPlatform());
 
-        SocialMedia updated = socialMediaRepository.save(socialMedia);
+			throw new DuplicateValuesException(
+					"Social media link already exists for platform: " + request.getPlatform());
+		});
 
-        logger.info("Successfully updated social media link with id: {}", id);
+		SocialMedia socialMedia = socialMediaMapper.toEntity(request);
 
-        return socialMediaMapper.toResponse(updated);
-    }
+		if (socialMedia.getIsActive() == null) {
+			socialMedia.setIsActive(true);
+		}
 
-    @Override
-    public void deleteLink(Long id) {
+		SocialMedia saved = socialMediaRepository.save(socialMedia);
 
-        logger.info("Deleting social media link with id: {}", id);
+		logger.info("Successfully created social media link with id: {} by staffId: {}", saved.getId(), staffId);
 
-        if (!socialMediaRepository.existsById(id)) {
-            logger.error("Social media link not found with id: {}", id);
-            throw new RuntimeException("Social media link not found with id: " + id);
-        }
+		return socialMediaMapper.toResponse(saved);
+	}
 
-        socialMediaRepository.deleteById(id);
+	@Override
+	public SocialMediaResponse updateLink(Long id, String staffId, SocialMediaRequest request) {
 
-        logger.info("Successfully deleted social media link with id: {}", id);
-    }
+		logger.info("Updating social media link. ID: {}, Staff ID: {}, Platform: {}", id, staffId,
+				request.getPlatform());
+
+		if (staffId == null || staffId.trim().isEmpty()) {
+
+			logger.error("Staff ID is null or empty.");
+
+			throw new ResourceNotFoundException("Staff ID is required.");
+		}
+
+		boolean staffExists = staffRepository.existsByStaffId(staffId);
+
+		if (!staffExists) {
+
+			logger.error("Staff not found with staffId: {}", staffId);
+
+			throw new ResourceNotFoundException("Staff not found with staffId: " + staffId);
+		}
+
+		logger.info("Staff validated successfully with staffId: {}", staffId);
+
+		SocialMedia socialMedia = socialMediaRepository.findById(id).orElseThrow(() -> {
+
+			logger.error("Social media link not found with id: {}", id);
+
+			return new ResourceNotFoundException("Social media link not found with id: " + id);
+		});
+		socialMediaRepository.findByPlatform(request.getPlatform()).ifPresent(existingLink -> {
+
+			if (!existingLink.getId().equals(id)) {
+
+				logger.error("Social media link already exists for platform: {}", request.getPlatform());
+
+				throw new DuplicateValuesException(
+						"Social media link already exists for platform: " + request.getPlatform());
+			}
+		});
+
+		socialMediaMapper.updateEntity(request, socialMedia);
+
+		SocialMedia updated = socialMediaRepository.save(socialMedia);
+
+		logger.info("Successfully updated social media link with id: {} by staffId: {}", id, staffId);
+
+		return socialMediaMapper.toResponse(updated);
+	}
+
+	@Override
+	public void deleteLink(Long id, String staffId) {
+
+		logger.info("Deleting social media link. ID: {}, Staff ID: {}", id, staffId);
+
+		if (staffId == null || staffId.trim().isEmpty()) {
+
+			logger.error("Staff ID is null or empty.");
+
+			throw new ResourceNotFoundException("Staff ID is required.");
+		}
+
+		boolean staffExists = staffRepository.existsByStaffId(staffId);
+
+		if (!staffExists) {
+
+			logger.error("Staff not found with staffId: {}", staffId);
+
+			throw new ResourceNotFoundException("Staff not found with staffId: " + staffId);
+		}
+
+		logger.info("Staff validated successfully with staffId: {}", staffId);
+
+		SocialMedia socialMedia = socialMediaRepository.findById(id).orElseThrow(() -> {
+
+			logger.error("Social media link not found with id: {}", id);
+
+			return new ResourceNotFoundException("Social media link not found with id: " + id);
+		});
+
+		socialMediaRepository.delete(socialMedia);
+
+		logger.info("Successfully deleted social media link with id: {} by staffId: {}", id, staffId);
+	}
 }

@@ -11,9 +11,9 @@ public interface SocialMediaService {
 
     List<SocialMediaResponse> getAllLinks();
 
-    SocialMediaResponse createLink(SocialMediaRequest request);
+    SocialMediaResponse createLink( String staffId, SocialMediaRequest request);
 
-    SocialMediaResponse updateLink(Long id, SocialMediaRequest request);
+    SocialMediaResponse updateLink(Long id,  String staffId, SocialMediaRequest request);
 
-    void deleteLink(Long id);
+    void deleteLink(Long id,String staffId);
 }
