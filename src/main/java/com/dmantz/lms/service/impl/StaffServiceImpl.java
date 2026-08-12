@@ -583,5 +583,103 @@ public class StaffServiceImpl implements StaffService {
 		logger.info("Initial admin registered successfully with staffId: {}", savedStaff.getStaffId());
 		return staffMapper.toResponse(savedStaff);
 	}
+	
+	private void deleteFromStrapiByUrl(String fileUrl) {
+	    try {
+	        String urlPath = fileUrl.replace(strapiUrl, "");
 
+	        String searchUrl = strapiUrl
+	                + "/api/upload/files?filters[url][$eq]="
+	                + urlPath;
+
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.set("Authorization", "Bearer " + strapiApiToken);
+
+	        ResponseEntity<String> searchResponse =
+	                restTemplate.exchange(
+	                        searchUrl,
+	                        HttpMethod.GET,
+	                        new HttpEntity<>(headers),
+	                        String.class
+	                );
+
+	        JsonNode root =
+	                new ObjectMapper().readTree(searchResponse.getBody());
+
+	        if (root == null || !root.isArray() || root.size() == 0) {
+	            logger.warn(
+	                    "Profile image not found in Strapi by URL: {}",
+	                    urlPath
+	            );
+	            return;
+	        }
+
+	        Long strapiFileId =
+	                root.get(0).get("id").asLong();
+
+	        String deleteUrl =
+	                strapiUrl + "/api/upload/files/" + strapiFileId;
+
+	        restTemplate.exchange(
+	                deleteUrl,
+	                HttpMethod.DELETE,
+	                new HttpEntity<>(headers),
+	                String.class
+	        );
+
+	        logger.info(
+	                "Staff profile image deleted from Strapi: {}",
+	                urlPath
+	        );
+
+	    } catch (Exception e) {
+	        logger.error(
+	                "Failed to delete staff profile image from Strapi. URL: {}",
+	                fileUrl,
+	                e
+	        );
+
+	        throw new RuntimeException(
+	                "Failed to delete profile image from Strapi",
+	                e
+	        );
+	    }
+	}
+	@Override
+	@Transactional
+	public void deleteProfileImage(String staffId) {
+
+	    logger.info(
+	            "Deleting profile image for staffId: {}",
+	            staffId
+	    );
+
+	    Staff staff = staffRepository.findByStaffId(staffId)
+	            .orElseThrow(() ->
+	                    new ResourceNotFoundException(
+	                            "Staff not found for staffId: " + staffId
+	                    )
+	            );
+
+	    String profileImg = staff.getProfileImg();
+
+	    if (profileImg == null || profileImg.isBlank()) {
+	        throw new BadRequestException(
+	                "Staff profile image not found."
+	        );
+	    }
+
+	    // Delete actual image from Strapi
+	    deleteFromStrapiByUrl(profileImg);
+
+	    // Remove URL from database
+	    staff.setProfileImg(null);
+
+	    staffRepository.save(staff);
+
+	    logger.info(
+	            "Staff profile image deleted successfully for staffId: {}",
+	            staffId
+	    );
+	}
 }

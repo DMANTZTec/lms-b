@@ -41,6 +41,8 @@ public interface StaffService {
 
     @Transactional
     StaffResponse registerInitialAdmin(StaffRegistrationRequest request);
+    
+    void deleteProfileImage(String staffId);
 
 }
 

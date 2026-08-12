@@ -5,6 +5,9 @@ import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.dmantz.lms.entity.Country;
+import com.dmantz.lms.entity.State;
+
 import jakarta.validation.constraints.NotNull;
 
 public class StudentUpdateRequest {
@@ -14,8 +17,9 @@ public class StudentUpdateRequest {
 	private String addr1;
 	private String addr2;
 	private String city;
-	private String state;
-	private String country;
+	private State state;
+	private String status;
+	private Country country;
 	private String pin;
 	private String mobileNum;
 	private String emergencyContactNm;
@@ -72,20 +76,20 @@ public class StudentUpdateRequest {
 	public void setCity(String city) {
 		this.city = city;
 	}
-
-	public String getState() {
+	
+	public State getState() {
 		return state;
 	}
 
-	public void setState(String state) {
+	public void setState(State state) {
 		this.state = state;
 	}
 
-	public String getCountry() {
+	public Country getCountry() {
 		return country;
 	}
 
-	public void setCountry(String country) {
+	public void setCountry(Country country) {
 		this.country = country;
 	}
 
@@ -127,6 +131,14 @@ public class StudentUpdateRequest {
 
 	public void setDob(LocalDate dob) {
 		this.dob = dob;
+	}
+	
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 	@Override

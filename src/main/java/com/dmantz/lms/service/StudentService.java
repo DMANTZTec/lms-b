@@ -35,4 +35,6 @@ public interface StudentService {
 	void changePassword(ChangePasswordRequest request);
 	
 	StudentResponse updateProfileImage(String studentId, MultipartFile file);
+	
+	void deleteProfileImage(String studentId);
 }

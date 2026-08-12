@@ -26,6 +26,7 @@ public interface StudentMapper {
 	@Mapping(target = "gender", source = "gender")
 	@Mapping(target = "addr1", source = "addr1")
 	@Mapping(target = "addr2", source = "addr2")
+	@Mapping(target = "status", source = "status")
 	@Mapping(target = "city", source = "city")
 	@Mapping(target = "state", source = "state")
 	@Mapping(target = "country", source = "country")

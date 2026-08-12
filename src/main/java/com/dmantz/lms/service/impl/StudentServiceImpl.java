@@ -809,4 +809,33 @@ public class StudentServiceImpl implements StudentService {
 			}
 		}
 	}
+	@Override
+	@Transactional
+	public void deleteProfileImage(String studentId) {
+
+	    logger.info("Deleting profile image for studentId: {}", studentId);
+
+	    Student student = studentRepository.findByStudentId(studentId)
+	            .orElseThrow(() ->
+	                    new StudentNotFoundException(
+	                            "Student not found for studentId: " + studentId
+	                    )
+	            );
+
+	    String profileImg = student.getProfileImg();
+
+	    if (profileImg == null || profileImg.isBlank()) {
+	        throw new BadRequestException("Student profile image not found.");
+	    }
+
+	    // Delete image from Strapi
+	    deleteFromStrapiByUrl(profileImg);
+
+	    // Remove image URL from student table
+	    student.setProfileImg(null);
+
+	    studentRepository.save(student);
+
+	    logger.info("Profile image deleted successfully for studentId: {}", studentId);
+	}
 }

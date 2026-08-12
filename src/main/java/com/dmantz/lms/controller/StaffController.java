@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/staff")
@@ -178,5 +179,20 @@ public class StaffController {
 		logger.info("Login OTP resent successfully for email: {}", request.getEmailId());
 		return ResponseEntity.ok(response);
 	}
+	
+	@DeleteMapping("/profile-image/{staffId}")
+	public ResponseEntity<?> deleteProfileImage(
+	        @PathVariable String staffId) {
+
+	    staffService.deleteProfileImage(staffId);
+
+	    return ResponseEntity.ok(
+	            Map.of(
+	                    "status", "SUCCESS",
+	                    "message", "Profile image deleted successfully"
+	            )
+	    );
+	}
+	
 
 }

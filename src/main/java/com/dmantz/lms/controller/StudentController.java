@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/student")
@@ -159,6 +160,20 @@ public class StudentController {
 		logger.info("Password changed successfully for studentId: {}", request.getStudentId());
 
 		return ResponseEntity.ok("Password changed successfully");
+	}
+	
+	@DeleteMapping("/profile-image/{studentId}")
+	public ResponseEntity<?> deleteProfileImage(
+	        @PathVariable String studentId) {
+
+	    studentService.deleteProfileImage(studentId);
+
+	    return ResponseEntity.ok(
+	            Map.of(
+	                    "status", "SUCCESS",
+	                    "message", "Profile image deleted successfully"
+	            )
+	    );
 	}
 
 }
