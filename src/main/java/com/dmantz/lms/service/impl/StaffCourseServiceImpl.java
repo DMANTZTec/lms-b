@@ -49,7 +49,7 @@ public class StaffCourseServiceImpl implements StaffCourseService {
 		logger.info("Assigning {} instructor(s) to courseId: {}", request.getStaffIds().size(), courseId);
 
 		// 1. Verify course exists
-		Course course = courseRepository.findByCourseId(courseId).orElseThrow(() -> {
+		Course course = courseRepository.findByCourseIdAndIsDeletedFalse(courseId).orElseThrow(() -> {
 			logger.warn("Course not found: {}", courseId);
 			return new CourseNotFoundException("Course not found: " + courseId);
 		});
@@ -96,7 +96,7 @@ public class StaffCourseServiceImpl implements StaffCourseService {
 		logger.info("Fetching instructors for courseId: {}", courseId);
 
 		// 1. Verify course exists
-		courseRepository.findByCourseId(courseId).orElseThrow(() -> {
+		courseRepository.findByCourseIdAndIsDeletedFalse(courseId).orElseThrow(() -> {
 			logger.warn("Course not found: {}", courseId);
 			return new CourseNotFoundException("Course not found: " + courseId);
 		});

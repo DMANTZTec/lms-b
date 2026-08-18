@@ -60,7 +60,7 @@ public class StudentCourseServiceImpl implements StudentCourseService {
 			return new ResourceNotFoundException("Student not found with studentId: " + request.getStudentId());
 		});
 
-		Course course = courseRepository.findByCourseId(request.getCourseId()).orElseThrow(() -> {
+		Course course = courseRepository.findByCourseIdAndIsDeletedFalse(request.getCourseId()).orElseThrow(() -> {
 
 			logger.error("Course not found with courseId: {}", request.getCourseId());
 

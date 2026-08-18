@@ -161,7 +161,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 
 		logger.info("Fetching topic progress for courseId: {} and studentId: {}", courseId, studentId);
 
-		Course course = courseRepository.findByCourseId(courseId).orElseThrow(() -> {
+		Course course = courseRepository.findByCourseIdAndIsDeletedFalse(courseId).orElseThrow(() -> {
 			logger.error("Course not found with courseId: {}", courseId);
 			return new ResourceNotFoundException("Course not found: " + courseId);
 		});
@@ -230,7 +230,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 
 		logger.info("Fetching chapter progress for courseId: {} and studentId: {}", courseId, studentId);
 
-		Course course = courseRepository.findByCourseId(courseId).orElseThrow(() -> {
+		Course course = courseRepository.findByCourseIdAndIsDeletedFalse(courseId).orElseThrow(() -> {
 			logger.error("Course not found with courseId: {}", courseId);
 			return new ResourceNotFoundException("Course not found: " + courseId);
 		});
@@ -292,7 +292,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 
 		logger.info("Fetching course progress summary for courseId: {} and studentId: {}", courseId, studentId);
 
-		Course course = courseRepository.findByCourseId(courseId).orElseThrow(() -> {
+		Course course = courseRepository.findByCourseIdAndIsDeletedFalse(courseId).orElseThrow(() -> {
 			logger.error("Course not found with courseId: {}", courseId);
 			return new ResourceNotFoundException("Course not found: " + courseId);
 		});

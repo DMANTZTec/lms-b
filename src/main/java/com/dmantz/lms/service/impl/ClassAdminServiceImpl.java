@@ -74,7 +74,7 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 		logger.info("Creating class for courseId: {}", courseId);
 
 		// 1. Fetch course
-		Course course = courseRepository.findByCourseId(courseId).orElseThrow(() -> {
+		Course course = courseRepository.findByCourseIdAndIsDeletedFalse(courseId).orElseThrow(() -> {
 			logger.warn("Course not found: {}", courseId);
 			return new CourseNotFoundException("Course not found with ID: " + courseId);
 		});
@@ -487,7 +487,7 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 
 		logger.info("Fetching batches for courseId: {}", courseId);
 
-		courseRepository.findByCourseId(courseId)
+		courseRepository.findByCourseIdAndIsDeletedFalse(courseId)
 				.orElseThrow(() -> new CourseNotFoundException("Course not found: " + courseId));
 
 		List<ClassBatch> batches = classBatchRepository.findByCourse_CourseId(courseId);

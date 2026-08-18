@@ -286,7 +286,7 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 			throw new IllegalStateException("Subject short code is required");
 		}
 
-		Optional<Course> lastCourse = courseRepository.findTopBySubject_SubjectShortCdOrderByIdDesc(subjectShortCd);
+		Optional<Course> lastCourse = courseRepository.findTopBySubject_SubjectShortCdAndIsDeletedFalseOrderByIdDesc(subjectShortCd);
 
 		int nextNumber = 1;
 
@@ -304,21 +304,25 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 
 		do {
 			generatedId = String.format("%s%03d", subjectShortCd.toUpperCase(), nextNumber++);
-		} while (courseRepository.existsByCourseId(generatedId));
+		} while (courseRepository.existsByCourseIdAndIsDeletedFalse(generatedId));
 		logger.debug("Final generated courseId: {}", generatedId);
 		return generatedId;
 	}
 
 	// ------------------ VIEW ALL COURSES ------------------
-	@Override
-	public List<CourseResponse> viewAllCourses() {
-		logger.info("Fetching all courses");
-		List<CourseResponse> courses = courseRepository.findAll().stream().map(courseMapper::toDto)
-				.collect(Collectors.toList());
-		logger.debug("Total courses found: {}", courses.size());
-		return courses;
-	}
+		@Override
+		public List<CourseResponse> viewAllCourses() {
+		    logger.info("Fetching all active courses");
 
+		    List<CourseResponse> courses = courseRepository.findByIsDeletedFalse()
+		            .stream()
+		            .map(courseMapper::toDto)
+		            .collect(Collectors.toList());
+
+		    logger.debug("Total active courses found: {}", courses.size());
+
+		    return courses;
+		}
 //--------------------------UPDATE COURSE-----------------------------
 	@Override
 	public CourseResponse updateCourse(Long courseId, UpdateCourseRequest request, String staffId) {
@@ -536,7 +540,7 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 			throw new ResourceNotFoundException("Subject not found with id: " + subjectId);
 		}
 
-		List<CourseResponse> courses = courseRepository.findBySubject_Id(subjectId).stream().map(courseMapper::toDto)
+		List<CourseResponse> courses = courseRepository.findBySubject_IdAndIsDeletedFalse(subjectId).stream().map(courseMapper::toDto)
 				.collect(Collectors.toList());
 
 		logger.debug("Found {} courses for subjectId: {}", courses.size(), subjectId);
@@ -554,7 +558,7 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 			return new ResourceNotFoundException("Staff not found with id: " + staffId);
 		});
 
-		Course course = courseRepository.findByCourseId(request.getCourseId()).orElseThrow(() -> {
+		Course course = courseRepository.findByCourseIdAndIsDeletedFalse(request.getCourseId()).orElseThrow(() -> {
 			logger.warn("Course not found with id: {}", request.getCourseId());
 			return new ResourceNotFoundException("Course not found with id: " + request.getCourseId());
 		});
@@ -609,7 +613,7 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 		logger.info("Fetching chapters for courseId: {}", courseId);
 
 		// Validate course
-		Course course = courseRepository.findByCourseId(courseId).orElseThrow(() -> {
+		Course course = courseRepository.findByCourseIdAndIsDeletedFalse(courseId).orElseThrow(() -> {
 			logger.warn("Course not found with courseId: {}", courseId);
 			return new ResourceNotFoundException("Course not found with id: " + courseId);
 		});
@@ -1368,7 +1372,7 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 		for (String courseId : courseIds) {
 			logger.debug("Mapping courseId: {} to programId: {}", courseId, programId);
 
-			Course course = courseRepository.findByCourseId(courseId).orElseThrow(() -> {
+			Course course = courseRepository.findByCourseIdAndIsDeletedFalse(courseId).orElseThrow(() -> {
 				logger.warn("Course not found with courseId: {}", courseId);
 
 				return new ResourceNotFoundException("Course not found with ID: " + courseId);
@@ -1428,7 +1432,7 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 
 		// ================= COURSE =================
 
-		Course course = courseRepository.findByCourseId(courseId).orElseThrow(() -> {
+		Course course = courseRepository.findByCourseIdAndIsDeletedFalse(courseId).orElseThrow(() -> {
 			logger.warn("Course not found with courseId: {}", courseId);
 
 			return new ResourceNotFoundException("Course not found with id: " + courseId);

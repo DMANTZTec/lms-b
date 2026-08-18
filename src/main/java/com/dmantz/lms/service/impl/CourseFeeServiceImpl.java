@@ -48,7 +48,7 @@ public class CourseFeeServiceImpl implements CourseFeeService {
 	public CourseFeeSettingResponse getCourseFeeSetting(String courseId) {
 		logger.info("Fetching course fee setting for courseId: {}", courseId);
 
-		Course course = courseRepository.findByCourseId(courseId).orElseThrow(() -> {
+		Course course = courseRepository.findByCourseIdAndIsDeletedFalse(courseId).orElseThrow(() -> {
 			logger.error("Course not found with courseId: {}", courseId);
 			return new ResourceNotFoundException("Course not found with courseId: " + courseId);
 		});
@@ -73,7 +73,7 @@ public class CourseFeeServiceImpl implements CourseFeeService {
 		}
 
 		// Validate Course
-		Course course = courseRepository.findByCourseId(courseId).orElseThrow(() -> {
+		Course course = courseRepository.findByCourseIdAndIsDeletedFalse(courseId).orElseThrow(() -> {
 			logger.error("Course not found with courseId: {}", courseId);
 			return new ResourceNotFoundException("Course not found with courseId: " + courseId);
 		});
@@ -125,7 +125,7 @@ public class CourseFeeServiceImpl implements CourseFeeService {
 	    }
 
 	    // Validate Course
-	    Course course = courseRepository.findByCourseId(courseId).orElseThrow(() -> {
+	    Course course = courseRepository.findByCourseIdAndIsDeletedFalse(courseId).orElseThrow(() -> {
 	        logger.error("Course not found with courseId: {}", courseId);
 	        return new ResourceNotFoundException("Course not found with courseId: " + courseId);
 	    });
@@ -171,7 +171,7 @@ public class CourseFeeServiceImpl implements CourseFeeService {
 	    logger.info("Fetching fee history for courseId: {}", courseId);
 
 	    // Validate Course
-	    Course course = courseRepository.findByCourseId(courseId)
+	    Course course = courseRepository.findByCourseIdAndIsDeletedFalse(courseId)
 	            .orElseThrow(() -> {
 	                logger.error("Course not found with courseId: {}", courseId);
 	                return new ResourceNotFoundException("Course not found with courseId: " + courseId);
