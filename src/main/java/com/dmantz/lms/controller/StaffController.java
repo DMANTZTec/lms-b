@@ -35,13 +35,12 @@ public class StaffController {
 
 	public StaffController(StaffService staffService, AuthService authService) {
 		this.staffService = staffService;
-        this.authService = authService;
-    }
+		this.authService = authService;
+	}
 
 	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<StaffResponse> createStaff(
-			@ModelAttribute StaffCreateRequest request) {
+	public ResponseEntity<StaffResponse> createStaff(@ModelAttribute StaffCreateRequest request) {
 
 		StaffResponse response = staffService.createStaff(request);
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -60,8 +59,7 @@ public class StaffController {
 	}
 
 	@PostMapping("/login-verification-otp")
-	public ResponseEntity<StaffLoginResponse> verifyStaffOtp(
-			@RequestBody @Valid StaffOtpVerifyRequest request) {
+	public ResponseEntity<StaffLoginResponse> verifyStaffOtp(@RequestBody @Valid OtpVerifyRequest request) {
 
 		StaffLoginResponse response = staffService.verifyStaffOtp(request);
 		return ResponseEntity.ok(response);
@@ -83,11 +81,9 @@ public class StaffController {
 		return ResponseEntity.ok(response);
 	}
 
-
 	@GetMapping("/active")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<Page<StaffResponse>> getActiveStaff(
-			@RequestParam(defaultValue = "0") int page,
+	public ResponseEntity<Page<StaffResponse>> getActiveStaff(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size) {
 
 		return ResponseEntity.ok(staffService.getActiveStaff(page, size));
@@ -95,8 +91,7 @@ public class StaffController {
 
 	@GetMapping("/pagination")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<Page<StaffResponse>> getAllStaff(
-			@RequestParam(defaultValue = "0") int page,
+	public ResponseEntity<Page<StaffResponse>> getAllStaff(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size) {
 
 		return ResponseEntity.ok(staffService.getAllStaff(page, size));
@@ -139,17 +134,23 @@ public class StaffController {
 	@PostMapping("/forgot-password")
 	public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
 
-		logger.info("Received forgot password request for: {}", request.getGetEmailIdOrMobileNo());
+		logger.info("Received forgot password request for: {}", request.getEmailIdOrMobileNo());
+
 		staffService.forgotPassword(request);
 
-		logger.info("Password reset link sent successfully.");
-		return ResponseEntity.ok("Password reset link has been sent to your registered email.");
+		String identifier = request.getEmailIdOrMobileNo();
+
+		if (identifier.contains("@")) {
+			logger.info("Password reset link sent successfully through email.");
+			return ResponseEntity.ok("Password reset link has been sent to your registered email.");
+		} else {
+			logger.info("Password reset link sent successfully through SMS.");
+			return ResponseEntity.ok("Password reset link has been sent to your registered mobile number.");
+		}
 	}
 
-
 	@GetMapping("/reset-password/validate")
-	public ResponseEntity<String> validateResetToken(
-			@RequestParam String token) {
+	public ResponseEntity<String> validateResetToken(@RequestParam String token) {
 
 		logger.info("Validating password reset token.");
 		staffService.validateResetToken(token);
@@ -157,7 +158,6 @@ public class StaffController {
 		logger.info("Password reset token validated successfully.");
 		return ResponseEntity.ok("Reset token is valid.");
 	}
-
 
 	@PostMapping("/reset-password")
 	public ResponseEntity<String> resetPassword(@Valid @RequestBody SetStaffPasswordRequest request) {
@@ -170,29 +170,23 @@ public class StaffController {
 	}
 
 	@PostMapping("/resend-login-otp")
-	public ResponseEntity<ResendOtpResponse> resendLoginOtp(
-			@Valid @RequestBody ResendStaffOtpRequest request) {
+	public ResponseEntity<ResendOtpResponse> resendLoginOtp(@Valid @RequestBody ResendStaffOtpRequest request) {
 
-		logger.info("Received request to resend login OTP for email: {}", request.getEmailId());
+		logger.info("Received request to resend login OTP for: {}", request.getEmailIdOrMobileNo());
+
 		ResendOtpResponse response = staffService.resendLoginOtp(request);
 
-		logger.info("Login OTP resent successfully for email: {}", request.getEmailId());
+		logger.info("Login OTP resent successfully for: {}", request.getEmailIdOrMobileNo());
+
 		return ResponseEntity.ok(response);
 	}
-	
+
 	@DeleteMapping("/profile-image/{staffId}")
-	public ResponseEntity<?> deleteProfileImage(
-	        @PathVariable String staffId) {
+	public ResponseEntity<?> deleteProfileImage(@PathVariable String staffId) {
 
-	    staffService.deleteProfileImage(staffId);
+		staffService.deleteProfileImage(staffId);
 
-	    return ResponseEntity.ok(
-	            Map.of(
-	                    "status", "SUCCESS",
-	                    "message", "Profile image deleted successfully"
-	            )
-	    );
+		return ResponseEntity.ok(Map.of("status", "SUCCESS", "message", "Profile image deleted successfully"));
 	}
-	
 
 }

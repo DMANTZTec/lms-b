@@ -108,4 +108,132 @@ public class SmsServiceImpl implements SmsService {
 		}
 		return "+" + mobile;
 	}
+	
+	
+	@Override
+	public void sendStaffPasswordSetupSms(String mobileNumber, String staffName, String token) {
+
+	    logger.info("Preparing staff password setup SMS for: {}", mobileNumber);
+
+	    if (mobileNumber == null || mobileNumber.isBlank()) {
+	        throw new SmsSendingException("Mobile number must not be null or blank");
+	    }
+
+	    if (token == null || token.isBlank()) {
+	        throw new SmsSendingException("Password setup token must not be null or blank");
+	    }
+
+	    if (staffName == null || staffName.isBlank()) {
+	        staffName = "Staff";
+	    }
+
+	    String setupLink =
+	            "http://localhost:5173/staff/set-password?token=" + token;
+
+	    String messageBody =
+	            "Hello " + staffName + ", "
+	            + "Welcome to the LMS team. "
+	            + "Your staff account has been created successfully. "
+	            + "Set your password using this link: "
+	            + setupLink
+	            + " This link is valid for 24 hours. "
+	            + "Regards, LMS Team";
+
+	    try {
+
+	        String formattedNumber = formatToE164(mobileNumber);
+
+	        Message message = Message
+	                .creator(
+	                        new PhoneNumber(formattedNumber),
+	                        new PhoneNumber(twilioFromNumber),
+	                        messageBody
+	                )
+	                .create();
+
+	        logger.info(
+	                "Staff password setup SMS sent successfully to {} | SID: {}",
+	                formattedNumber,
+	                message.getSid()
+	        );
+
+	    } catch (Exception ex) {
+
+	        logger.error(
+	                "Failed to send staff password setup SMS to {}",
+	                mobileNumber,
+	                ex
+	        );
+
+	        throw new SmsSendingException(
+	                "Failed to send staff password setup SMS: " + ex.getMessage(),
+	                ex
+	        );
+	    }
+	}
+	
+	@Override
+	public void sendResetPasswordSms(
+	        String mobileNumber,
+	        String staffName,
+	        String resetLink) {
+
+	    logger.info("Preparing reset password SMS for: {}", mobileNumber);
+
+	    if (mobileNumber == null || mobileNumber.isBlank()) {
+	        throw new SmsSendingException(
+	                "Mobile number must not be null or blank");
+	    }
+
+	    if (resetLink == null || resetLink.isBlank()) {
+	        throw new SmsSendingException(
+	                "Reset password link must not be null or blank");
+	    }
+
+	    if (staffName == null || staffName.isBlank()) {
+	        staffName = "Staff";
+	    }
+
+	    String messageBody =
+	            "Hello " + staffName + ", "
+	            + "We received a request to reset your LMS password. "
+	            + "Reset your password using this link: "
+	            + resetLink
+	            + " This link is valid for 30 minutes. "
+	            + "If you did not request this password reset, please ignore this message. "
+	            + "LMS Team";
+
+	    try {
+
+	        String formattedNumber = formatToE164(mobileNumber);
+
+	        Message message = Message
+	                .creator(
+	                        new PhoneNumber(formattedNumber),
+	                        new PhoneNumber(twilioFromNumber),
+	                        messageBody
+	                )
+	                .create();
+
+	        logger.info(
+	                "Reset password SMS sent successfully to {} | SID: {}",
+	                formattedNumber,
+	                message.getSid()
+	        );
+
+	    } catch (Exception ex) {
+
+	        logger.error(
+	                "Failed to send reset password SMS to {}",
+	                mobileNumber,
+	                ex
+	        );
+
+	        throw new SmsSendingException(
+	                "Failed to send reset password SMS: "
+	                        + ex.getMessage(),
+	                ex
+	        );
+	    }
+	}
 }

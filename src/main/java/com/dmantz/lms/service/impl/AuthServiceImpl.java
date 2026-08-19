@@ -5,12 +5,14 @@ import com.dmantz.lms.dto.request.StaffLoginRequest;
 import com.dmantz.lms.dto.request.StudentLoginRequest;
 import com.dmantz.lms.dto.response.StaffLoginResponse;
 import com.dmantz.lms.dto.response.StudentLoginResponse;
+import com.dmantz.lms.entity.OtpChannel;
 import com.dmantz.lms.entity.OtpPurpose;
 import com.dmantz.lms.entity.OtpStatus;
 import com.dmantz.lms.entity.Staff;
 import com.dmantz.lms.entity.StaffOtp;
 import com.dmantz.lms.entity.Student;
 import com.dmantz.lms.entity.StudentOtp;
+import com.dmantz.lms.exceptions.InvalidOtpChannelException;
 import com.dmantz.lms.repository.StaffOtpRepository;
 import com.dmantz.lms.repository.StaffRepository;
 import com.dmantz.lms.repository.StudentOtpRepository;
@@ -39,10 +41,11 @@ public class AuthServiceImpl implements AuthService {
 	private final StudentOtpRepository otpRepository;
 	private final StaffOtpRepository staffOtpRepository;
 	private final EmailService emailService;
+	private final SmsServiceImpl smsService;
 
 	public AuthServiceImpl(StudentRepository studentRepository, StaffRepository staffRepository,
 			PasswordEncoder passwordEncoder, JwtUtil jwtUtil, StudentOtpRepository otpRepository,
-			StaffOtpRepository staffOtpRepository, EmailService emailService) {
+			StaffOtpRepository staffOtpRepository, EmailService emailService, SmsServiceImpl smsService) {
 
 		this.studentRepository = studentRepository;
 		this.staffRepository = staffRepository;
@@ -51,6 +54,7 @@ public class AuthServiceImpl implements AuthService {
 		this.otpRepository = otpRepository;
 		this.staffOtpRepository = staffOtpRepository;
 		this.emailService = emailService;
+		this.smsService = smsService;
 	}
 
 //	@Override
@@ -137,7 +141,7 @@ public class AuthServiceImpl implements AuthService {
 
 		StaffOtp otp = new StaffOtp();
 
-	    otp.setStaffId(staff.getStaffId());
+		otp.setStaffId(staff.getStaffId());
 
 		otp.setOtp(String.valueOf(new Random().nextInt(900000) + 100000));
 
@@ -162,84 +166,106 @@ public class AuthServiceImpl implements AuthService {
 	@Override
 	public StaffLoginResponse staffLogin(StaffLoginRequest request) {
 
-	    logger.info("Staff login attempt for username: {}", request.getUsername());
+		logger.info("Staff login attempt for username: {}", request.getUsername());
 
-	    String username = request.getUsername();
+		String username = request.getUsername();
 
-	    Staff staff = staffRepository.findByLoginId(username)
-	            .orElseThrow(() -> {
+		Staff staff = staffRepository.findByLoginId(username).orElseThrow(() -> {
 
-	                logger.warn("Invalid credentials for username: {}", username);
+			logger.warn("Invalid credentials for username: {}", username);
 
-	                return new RuntimeException("Invalid Credentials");
-	            });
+			return new RuntimeException("Invalid Credentials");
+		});
 
-	    // ACCOUNT DISABLED
-	    if (!"Y".equals(staff.getEnabled())) {
+		// ACCOUNT DISABLED
+		if (!"Y".equals(staff.getEnabled())) {
 
-	        logger.warn("Disabled account for staffId: {}", staff.getStaffId());
+			logger.warn("Disabled account for staffId: {}", staff.getStaffId());
 
-	        throw new RuntimeException("Account disabled");
-	    }
+			throw new RuntimeException("Account disabled");
+		}
 
-	    // PASSWORD CHECK
-	    if (!passwordEncoder.matches(request.getPassword(), staff.getPassword())) {
+		// PASSWORD CHECK
+		if (!passwordEncoder.matches(request.getPassword(), staff.getPassword())) {
 
-	        logger.warn("Wrong password for staffId: {}", staff.getStaffId());
+			logger.warn("Wrong password for staffId: {}", staff.getStaffId());
 
-	        throw new RuntimeException("Invalid Credentials");
-	    }
+			throw new RuntimeException("Invalid Credentials");
+		}
 
-	    // ROLE
-	    String role = staff.getRoles().stream()
-	            .findFirst()
-	            .map(r -> r.getRoleNm())
-	            .orElse("STAFF");
+		// ROLE
+		String role = staff.getRoles().stream().findFirst().map(r -> r.getRoleNm()).orElse("STAFF");
 
-	    // GENERATE OTP
-	    StaffOtp otp = generateStaffOtp(staff);
+		// GENERATE OTP
+		StaffOtp otp = generateStaffOtp(staff);
 
-	    try {
+		try {
 
-	        // SEND OTP EMAIL
-	        emailService.sendOtpEmail(
-	                staff.getEmailId(),
-	                otp.getOtp(),
-	                OtpPurpose.LOGIN);
+			// CHECK OTP CHANNEL
+			OtpChannel channel = request.getOtpChannel();
 
-	        otp.setStatus(OtpStatus.SENT);
+			if (channel == null) {
+				throw new InvalidOtpChannelException("OTP channel must be specified: EMAIL or MOBILE");
+			}
 
-	        otp.setUpdatedDt(LocalDateTime.now());
+			switch (channel) {
 
-	        staffOtpRepository.save(otp);
+			case EMAIL:
 
-	        logger.info("Login OTP sent successfully to email: {}", staff.getEmailId());
+				// SEND OTP EMAIL
+				emailService.sendOtpEmail(staff.getEmailId(), otp.getOtp(), OtpPurpose.LOGIN);
 
-	    } catch (Exception e) {
+				logger.info("Login OTP sent successfully to email: {}", staff.getEmailId());
 
-	        logger.error("Failed to send login OTP to email: {}", staff.getEmailId(), e);
+				break;
 
-	        otp.setStatus(OtpStatus.FAILED);
+			case MOBILE:
 
-	        staffOtpRepository.save(otp);
+				// SEND OTP SMS USING TWILIO
+				smsService.sendOtpSms(staff.getMobileNum(), otp.getOtp(), OtpPurpose.STAFF_LOGIN);
 
-	        throw new RuntimeException("Failed to send OTP");
-	    }
+				logger.info("Login OTP sent successfully to mobile: {}", staff.getMobileNum());
 
-	    // RESPONSE
-	    StaffLoginResponse response = new StaffLoginResponse();
+				break;
 
-	    response.setRole(role);
-	    response.setStaffId(staff.getStaffId());
-	    response.setEmail(staff.getEmailId());
+			default:
 
-	    // TOKEN SHOULD BE NULL BEFORE OTP VERIFICATION
-	    response.setToken(null);
+				throw new InvalidOtpChannelException("Invalid OTP channel: " + channel);
+			}
 
-	    response.setMessage("OTP sent successfully to registered email");
+			otp.setStatus(OtpStatus.SENT);
 
-	    logger.info("OTP sent successfully for staffId: {}", staff.getStaffId());
+			otp.setUpdatedDt(LocalDateTime.now());
 
-	    return response;
+			staffOtpRepository.save(otp);
+
+		} catch (Exception e) {
+
+			logger.error("Failed to send login OTP for staffId: {}", staff.getStaffId(), e);
+
+			otp.setStatus(OtpStatus.FAILED);
+
+			otp.setUpdatedDt(LocalDateTime.now());
+
+			staffOtpRepository.save(otp);
+
+			throw new RuntimeException("Failed to send OTP");
+		}
+
+		// RESPONSE
+		StaffLoginResponse response = new StaffLoginResponse();
+
+		response.setRole(role);
+		response.setStaffId(staff.getStaffId());
+		response.setEmail(staff.getEmailId());
+
+		// TOKEN SHOULD BE NULL BEFORE OTP VERIFICATION
+		response.setToken(null);
+
+		response.setMessage("OTP sent successfully via " + request.getOtpChannel());
+
+		logger.info("OTP sent successfully for staffId: {}", staff.getStaffId());
+
+		return response;
 	}
-	}
+}

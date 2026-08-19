@@ -1,9 +1,13 @@
 package com.dmantz.lms.dto.request;
 
 import com.dmantz.lms.entity.Gender;
+import com.dmantz.lms.entity.OtpChannel;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
@@ -31,6 +35,9 @@ public class StaffCreateRequest {
     private LocalDate dateOfJoining;
 
     private MultipartFile profileImg;
+    
+    @NotNull(message = "OTP channel is required (EMAIL or MOBILE)")
+ 	private OtpChannel otpChannel;
 
     @NotEmpty
     private Set<Long> roleIds;
@@ -106,4 +113,14 @@ public class StaffCreateRequest {
     public void setRoleIds(Set<Long> roleIds) {
         this.roleIds = roleIds;
     }
+
+	public OtpChannel getOtpChannel() {
+		return otpChannel;
+	}
+
+	public void setOtpChannel(OtpChannel otpChannel) {
+		this.otpChannel = otpChannel;
+	}
+    
+    
 }

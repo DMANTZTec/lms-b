@@ -14,26 +14,25 @@ import java.util.Optional;
 @Repository
 public interface StaffRepository extends JpaRepository<Staff, Long> {
 
+	Optional<Staff> findByEmailId(String emailId);
 
-    Optional<Staff> findByEmailId(String emailId);
+	Optional<Staff> findByStaffId(String staffId);
 
-    Optional<Staff> findByStaffId(String staffId);
+	boolean existsByEmailId(String emailId);
 
-    boolean existsByEmailId(String emailId);
-    
-    boolean existsByStaffId(String staffId);
+	boolean existsByStaffId(String staffId);
 
-    long count();
+	long count();
 
-    @Query("""
-        SELECT s FROM Staff s
-        WHERE s.emailId = :loginId
-           OR s.mobileNum = :loginId
-           OR s.staffId = :loginId
-    """)
-    Optional<Staff> findByLoginId(@Param("loginId") String loginId);
+	@Query("""
+			    SELECT s FROM Staff s
+			    WHERE s.emailId = :loginId
+			       OR s.mobileNum = :loginId
+			       OR s.staffId = :loginId
+			""")
+	Optional<Staff> findByLoginId(@Param("loginId") String loginId);
 
-    Page<Staff> findByStatus(String status, Pageable pageable);
+	Page<Staff> findByStatus(String status, Pageable pageable);
 
+	Optional<Object> findByMobileNum(String mobileNum);
 }
-

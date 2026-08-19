@@ -4,14 +4,14 @@ import jakarta.validation.constraints.NotBlank;
 
 public class ResendStaffOtpRequest {
 
-    @NotBlank(message = "Email is required")
-    private String emailId;
+    @NotBlank(message = "Email or mobile number is required")
+    private String emailIdOrMobileNo;
 
-    public String getEmailId() {
-        return emailId;
+    public String getEmailIdOrMobileNo() {
+        return emailIdOrMobileNo;
     }
 
-    public void setEmailId(String emailId) {
-        this.emailId = emailId;
+    public void setEmailIdOrMobileNo(String emailIdOrMobileNo) {
+        this.emailIdOrMobileNo = emailIdOrMobileNo;
     }
 }

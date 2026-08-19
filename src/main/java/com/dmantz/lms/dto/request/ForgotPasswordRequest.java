@@ -8,19 +8,17 @@ import jakarta.validation.constraints.NotNull;
 public class ForgotPasswordRequest {
 
 	@NotBlank(message = "Email or Mobile number is required")
-	private String getEmailIdOrMobileNo;
+	private String EmailIdOrMobileNo;
 
 	@NotNull(message = "OTP channel is required (EMAIL or MOBILE)")
 	private OtpChannel OtpChannel;
 
-	
-
-	public String getGetEmailIdOrMobileNo() {
-		return getEmailIdOrMobileNo;
+	public String getEmailIdOrMobileNo() {
+		return EmailIdOrMobileNo;
 	}
 
-	public void setGetEmailIdOrMobileNo(String getEmailIdOrMobileNo) {
-		this.getEmailIdOrMobileNo = getEmailIdOrMobileNo;
+	public void setEmailIdOrMobileNo(String emailIdOrMobileNo) {
+		EmailIdOrMobileNo = emailIdOrMobileNo;
 	}
 
 	public OtpChannel getOtpChannel() {
@@ -30,7 +28,5 @@ public class ForgotPasswordRequest {
 	public void setOtpChannel(OtpChannel otpChannel) {
 		OtpChannel = otpChannel;
 	}
-
-	
 
 }

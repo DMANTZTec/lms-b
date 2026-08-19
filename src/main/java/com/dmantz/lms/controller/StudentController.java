@@ -89,11 +89,11 @@ public class StudentController {
 	public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
 
 		logger.info("Forgot password request received for iudentifier: {} via channel: {}",
-				request.getGetEmailIdOrMobileNo(), request.getOtpChannel());
+				request.getEmailIdOrMobileNo(), request.getOtpChannel());
 
 		studentService.forgotPassword(request);
 
-		logger.info("Forgot password OTP sent successfully for identifier: {}", request.getGetEmailIdOrMobileNo());
+		logger.info("Forgot password OTP sent successfully for identifier: {}", request.getEmailIdOrMobileNo());
 
 		return ResponseEntity.ok("OTP sent successfully via " + request.getOtpChannel());
 	}

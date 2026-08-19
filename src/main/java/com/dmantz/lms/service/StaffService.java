@@ -17,7 +17,7 @@ public interface StaffService {
 
     void setPassword(SetStaffPasswordRequest request);
 
-    StaffLoginResponse verifyStaffOtp(StaffOtpVerifyRequest request);
+    StaffLoginResponse verifyStaffOtp(OtpVerifyRequest request);
 
     List<StaffResponse> getAllStaff();
 

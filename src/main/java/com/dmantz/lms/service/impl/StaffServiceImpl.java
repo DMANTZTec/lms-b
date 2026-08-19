@@ -54,9 +54,11 @@ public class StaffServiceImpl implements StaffService {
 	private final EmailService emailService;
 	private final JwtUtil jwtUtil;
 	private final StaffPasswordTokenRepository staffPasswordTokenRepository;
+	private final SmsServiceImpl smsService;
 
 	public StaffServiceImpl(StaffRepository staffRepository, RoleRepository roleRepository, StaffMapper staffMapper,
-                            PasswordEncoder passwordEncoder, StaffOtpRepository staffOtpRepository, EmailService emailService, StaffPasswordTokenRepository staffPasswordTokenRepository) {
+			PasswordEncoder passwordEncoder, StaffOtpRepository staffOtpRepository, EmailService emailService,
+			StaffPasswordTokenRepository staffPasswordTokenRepository, SmsServiceImpl smsService) {
 
 		this.staffRepository = staffRepository;
 		this.roleRepository = roleRepository;
@@ -64,8 +66,9 @@ public class StaffServiceImpl implements StaffService {
 		this.passwordEncoder = passwordEncoder;
 		this.staffOtpRepository = staffOtpRepository;
 		this.emailService = emailService;
-        this.staffPasswordTokenRepository = staffPasswordTokenRepository;
-        this.jwtUtil = new JwtUtil();
+		this.staffPasswordTokenRepository = staffPasswordTokenRepository;
+		this.jwtUtil = new JwtUtil();
+		this.smsService = smsService;
 	}
 
 	@Value("${strapi.url}")
@@ -77,16 +80,33 @@ public class StaffServiceImpl implements StaffService {
 	private final RestTemplate restTemplate = new RestTemplate();
 
 	@Override
+	@Transactional
 	public StaffResponse createStaff(StaffCreateRequest request) {
 
+		logger.info("Staff creation started for email: {}", request.getEmailId());
+
+		// Check email already exists
 		if (staffRepository.existsByEmailId(request.getEmailId())) {
+			logger.warn("Staff creation failed - email already exists: {}", request.getEmailId());
 			throw new DuplicateValuesException("Email already exists");
 		}
+
+		// Validate OTP channel
+		OtpChannel channel = request.getOtpChannel();
+		if (channel == null) {
+			logger.warn("OTP channel not specified for staff email: {}", request.getEmailId());
+			throw new InvalidOtpChannelException("OTP channel must be specified: EMAIL or MOBILE");
+		}
+
+		// Create Staff
 		Staff staff = staffMapper.toEntity(request);
 		staff.setStaffId(generateStaffId());
 
-		// Upload profile img to Strapi
+		// Upload profile image to Strapi
 		if (request.getProfileImg() != null && !request.getProfileImg().isEmpty()) {
+
+			logger.info("Uploading staff profile image to Strapi for email: {}", request.getEmailId());
+
 			String imageUrl = uploadToStrapi(request.getProfileImg());
 			staff.setProfileImg(imageUrl);
 		}
@@ -96,14 +116,19 @@ public class StaffServiceImpl implements StaffService {
 		staff.setStatus("IN_ACTIVE");
 		staff.setCreatedDt(LocalDateTime.now());
 
-		Set<Role> roles = request.getRoleIds().stream()
-				.map(roleRepository::findById)
-				.map(role -> role.orElseThrow(() ->
-						new ResourceNotFoundException("Role not found")))
+		// Set roles
+		Set<Role> roles = request.getRoleIds().stream().map(roleRepository::findById)
+				.map(role -> role.orElseThrow(() -> new ResourceNotFoundException("Role not found")))
 				.collect(Collectors.toSet());
 
 		staff.setRoles(roles);
+
+		// Save staff
 		Staff savedStaff = staffRepository.save(staff);
+
+		logger.info("Staff created successfully with staffId: {}", savedStaff.getStaffId());
+
+		// Create password setup token
 		StaffPasswordToken passwordToken = new StaffPasswordToken();
 
 		passwordToken.setToken(UUID.randomUUID().toString());
@@ -113,10 +138,80 @@ public class StaffServiceImpl implements StaffService {
 
 		staffPasswordTokenRepository.save(passwordToken);
 
-		emailService.sendStaffPasswordSetupMail(
-				savedStaff.getEmailId(),
-				savedStaff.getFirstNm(),
+		logger.info("Staff password setup token created for staffId: {}", savedStaff.getStaffId());
+
+		// Generate OTP
+		StaffOtp otp = generateStaffOtp(savedStaff.getStaffId());
+
+		try {
+
+			switch (channel) {
+
+			case EMAIL:
+
+				emailService.sendStaffPasswordSetupMail(savedStaff.getEmailId(), savedStaff.getFirstNm(),
+						passwordToken.getToken());
+
+				logger.info("Staff password setup email sent to: {}", savedStaff.getEmailId());
+
+				break;
+
+			case MOBILE:
+
+				smsService.sendStaffPasswordSetupSms(savedStaff.getMobileNum(), savedStaff.getFirstNm(),
+						passwordToken.getToken());
+
+				logger.info("Staff password setup SMS sent to: {}", savedStaff.getMobileNum());
+
+				break;
+
+			default:
+				throw new InvalidOtpChannelException("Invalid OTP channel: " + channel);
+			}
+
+			// Mark OTP as sent
+			otp.setStatus(OtpStatus.SENT);
+			otp.setUpdatedDt(LocalDateTime.now());
+			staffOtpRepository.save(otp);
+
+			logger.info("Staff OTP status updated to SENT for staffId: {}", savedStaff.getStaffId());
+
+		} catch (InvalidOtpChannelException ex) {
+
+			otp.setStatus(OtpStatus.FAILED);
+			otp.setUpdatedDt(LocalDateTime.now());
+			staffOtpRepository.save(otp);
+
+			logger.error("Invalid OTP channel during staff creation: {}", ex.getMessage());
+
+			throw ex;
+
+		} catch (Exception ex) {
+
+			otp.setStatus(OtpStatus.FAILED);
+			otp.setUpdatedDt(LocalDateTime.now());
+			staffOtpRepository.save(otp);
+
+			logger.error("Failed to send staff OTP via {} for staffId: {}", channel, savedStaff.getStaffId(), ex);
+
+			throw new OtpSendingException("Failed to send OTP via " + channel + ": " + ex.getMessage(), ex);
+		}
+
+		// Existing password setup email
+		// Send password setup email
+		emailService.sendStaffPasswordSetupMail(savedStaff.getEmailId(), savedStaff.getFirstNm(),
 				passwordToken.getToken());
+
+		logger.info("Staff password setup email sent to: {}", savedStaff.getEmailId());
+
+		// Send password setup SMS
+		smsService.sendStaffPasswordSetupSms(savedStaff.getMobileNum(), savedStaff.getFirstNm(),
+				passwordToken.getToken());
+
+		logger.info("Staff password setup SMS sent to: {}", savedStaff.getMobileNum());
+
+		logger.info("Staff creation completed successfully for staffId: {}", savedStaff.getStaffId());
+
 		return staffMapper.toResponse(savedStaff);
 	}
 
@@ -163,13 +258,11 @@ public class StaffServiceImpl implements StaffService {
 	@Override
 	public void setPassword(SetStaffPasswordRequest request) {
 
-		StaffPasswordToken passwordToken = staffPasswordTokenRepository
-				.findByToken(request.getToken())
+		StaffPasswordToken passwordToken = staffPasswordTokenRepository.findByToken(request.getToken())
 				.orElseThrow(() -> new RuntimeException("Invalid password setup link"));
 
 		if (passwordToken.getUsed()) {
-			throw new RuntimeException(
-					"Password link already used");
+			throw new RuntimeException("Password link already used");
 		}
 
 		if (passwordToken.getExpiryTime().isBefore(LocalDateTime.now())) {
@@ -213,7 +306,8 @@ public class StaffServiceImpl implements StaffService {
 		Staff staff = staffRepository.findByStaffId(staffId).orElseThrow(() -> {
 
 			logger.error("Staff not found for staffId: {}", staffId);
-			return new ResourceNotFoundException("Staff not found");});
+			return new ResourceNotFoundException("Staff not found");
+		});
 
 		logger.info("Staff fetched successfully for staffId: {}", staffId);
 		return staffMapper.toResponse(staff);
@@ -245,73 +339,97 @@ public class StaffServiceImpl implements StaffService {
 	}
 
 	@Override
-	public StaffLoginResponse verifyStaffOtp(StaffOtpVerifyRequest request) {
+	public StaffLoginResponse verifyStaffOtp(OtpVerifyRequest request) {
 
-		logger.info("OTP verification started for email: {}", request.getEmailId());
+		logger.info("OTP verification started for identifier: {}", request.getEmailIdOrMobileNo());
 
-		// Fetch staff using email
-		Staff staff = staffRepository.findByEmailId(request.getEmailId())
-				.orElseThrow(() -> {
-					logger.error("Staff not found for email: {}", request.getEmailId());
-					return new ResourceNotFoundException("Staff not found");
-				});
+		String identifier = request.getEmailIdOrMobileNo();
+
+		// Validate OTP channel
+		if (request.getChannel() == null) {
+			throw new InvalidOtpChannelException("OTP channel must be specified: EMAIL or MOBILE");
+		}
+
+		// Fetch staff using email or mobile
+		Staff staff;
+
+		if (request.getChannel() == OtpChannel.EMAIL) {
+
+			staff = staffRepository.findByEmailId(identifier).orElseThrow(() -> {
+				logger.error("Staff not found for email: {}", identifier);
+				return new ResourceNotFoundException("Staff not found");
+			});
+
+		} else if (request.getChannel() == OtpChannel.MOBILE) {
+
+			staff = (Staff) staffRepository.findByMobileNum(identifier).orElseThrow(() -> {
+				logger.error("Staff not found for mobile: {}", identifier);
+				return new ResourceNotFoundException("Staff not found");
+			});
+
+		} else {
+
+			throw new InvalidOtpChannelException("Invalid OTP channel: " + request.getChannel());
+		}
 
 		// Fetch latest OTP using staffId
-		StaffOtp otp = staffOtpRepository
-				.findTopByStaffIdOrderByCreatedDtDesc(staff.getStaffId())
-				.orElseThrow(() -> {
-					logger.error("OTP not found for email: {}", request.getEmailId());
-					return new OtpNotFoundException("OTP not found");
-				});
+		StaffOtp otp = staffOtpRepository.findTopByStaffIdOrderByCreatedDtDesc(staff.getStaffId()).orElseThrow(() -> {
+			logger.error("OTP not found for staff: {}", staff.getStaffId());
+
+			return new OtpNotFoundException("OTP not found");
+		});
 
 		// CHECK OTP STATUS
 		if (otp.getStatus() != OtpStatus.SENT) {
-			logger.warn("Invalid OTP status for email: {}", request.getEmailId());
+
+			logger.warn("Invalid OTP status for staffId: {}", staff.getStaffId());
+
 			throw new OtpInvalidException("OTP is not valid");
 		}
 
 		// CHECK OTP EXPIRY
 		if (otp.getCreatedDt().isBefore(LocalDateTime.now().minusMinutes(5))) {
+
 			otp.setStatus(OtpStatus.EXPIRED);
 			otp.setUpdatedDt(LocalDateTime.now());
+
 			staffOtpRepository.save(otp);
 
-			logger.warn("OTP expired for email: {}", request.getEmailId());
+			logger.warn("OTP expired for staffId: {}", staff.getStaffId());
+
 			throw new OtpExpiredException("OTP expired");
 		}
 
 		// INVALID OTP
 		if (!otp.getOtp().equals(request.getOtp())) {
+
 			otp.setAttemptsNum(otp.getAttemptsNum() + 1);
 			otp.setUpdatedDt(LocalDateTime.now());
+
 			staffOtpRepository.save(otp);
 
-			logger.warn("Invalid OTP entered for email: {}", request.getEmailId());
+			logger.warn("Invalid OTP entered for staffId: {}", staff.getStaffId());
+
 			throw new OtpInvalidException("Invalid OTP");
 		}
 
 		// GET ROLE
-		String role = staff.getRoles().stream()
-				.findFirst()
-				.map(Role::getRoleNm)
-				.orElse("STAFF");
+		String role = staff.getRoles().stream().findFirst().map(Role::getRoleNm).orElse("STAFF");
 
 		// GENERATE JWT TOKEN
-		String token = jwtUtil.generateToken(
-				staff.getEmailId(),
-				role,
-				staff.getStaffId()
-		);
+		String token = jwtUtil.generateToken(staff.getEmailId(), role, staff.getStaffId());
 
 		// UPDATE OTP STATUS
 		otp.setStatus(OtpStatus.VERIFIED);
 		otp.setUpdatedDt(LocalDateTime.now());
+
 		staffOtpRepository.save(otp);
 
-		logger.info("OTP verified successfully for email: {}", request.getEmailId());
+		logger.info("OTP verified successfully for staffId: {}", staff.getStaffId());
 
 		// RESPONSE
 		StaffLoginResponse response = new StaffLoginResponse();
+
 		response.setStaffId(staff.getStaffId());
 		response.setEmail(staff.getEmailId());
 		response.setRole(role);
@@ -384,12 +502,27 @@ public class StaffServiceImpl implements StaffService {
 	@Override
 	public void forgotPassword(ForgotPasswordRequest request) {
 
-		Staff staff = staffRepository.findByEmailId(request.getGetEmailIdOrMobileNo())
-				.orElseThrow(() -> new ResourceNotFoundException("Staff not found"));
+		String identifier = request.getEmailIdOrMobileNo();
+
+		Staff staff;
+
+		if (identifier.contains("@")) {
+
+			// Search by email
+			staff = staffRepository.findByEmailId(identifier)
+					.orElseThrow(() -> new ResourceNotFoundException("Staff not found"));
+
+		} else {
+
+			// Search by mobile number
+			staff = (Staff) staffRepository.findByMobileNum(identifier)
+					.orElseThrow(() -> new ResourceNotFoundException("Staff not found"));
+		}
 
 		String token = UUID.randomUUID().toString();
 
 		StaffPasswordToken passwordToken = new StaffPasswordToken();
+
 		passwordToken.setToken(token);
 		passwordToken.setStaff(staff);
 		passwordToken.setExpiryTime(LocalDateTime.now().plusMinutes(30));
@@ -399,18 +532,26 @@ public class StaffServiceImpl implements StaffService {
 
 		String resetLink = "http://localhost:5173/reset-password?token=" + token;
 
-		emailService.sendResetPasswordEmail(
-				staff.getEmailId(),
-				staff.getFirstNm(),
-				resetLink
-		);
+		if (identifier.contains("@")) {
+
+			// Send reset link through email
+			emailService.sendResetPasswordEmail(staff.getEmailId(), staff.getFirstNm(), resetLink);
+
+			logger.info("Password reset link sent through email to: {}", staff.getEmailId());
+
+		} else {
+
+			// Send reset link through SMS
+			smsService.sendResetPasswordSms(staff.getMobileNum(), staff.getFirstNm(), resetLink);
+
+			logger.info("Password reset link sent through SMS to: {}", staff.getMobileNum());
+		}
 	}
 
 	@Override
 	public void validateResetToken(String token) {
 
-		StaffPasswordToken passwordToken = staffPasswordTokenRepository
-				.findByToken(token)
+		StaffPasswordToken passwordToken = staffPasswordTokenRepository.findByToken(token)
 				.orElseThrow(() -> new ResourceNotFoundException("Invalid reset token"));
 
 		if (passwordToken.getUsed()) {
@@ -429,8 +570,7 @@ public class StaffServiceImpl implements StaffService {
 			throw new BadRequestException("New Password and Confirm Password do not match.");
 		}
 
-		StaffPasswordToken passwordToken = staffPasswordTokenRepository
-				.findByToken(request.getToken())
+		StaffPasswordToken passwordToken = staffPasswordTokenRepository.findByToken(request.getToken())
 				.orElseThrow(() -> new ResourceNotFoundException("Invalid reset token"));
 
 		if (passwordToken.getUsed()) {
@@ -456,68 +596,120 @@ public class StaffServiceImpl implements StaffService {
 	@Override
 	public ResendOtpResponse resendLoginOtp(ResendStaffOtpRequest request) {
 
-		logger.info("Resend OTP requested for email: {}", request.getEmailId());
+	    String identifier = request.getEmailIdOrMobileNo();
 
-		Staff staff = staffRepository.findByEmailId(request.getEmailId())
-				.orElseThrow(() -> {
-					logger.warn("Staff not found with email: {}", request.getEmailId());
-					return new RuntimeException("Staff not found");
-				});
+	    logger.info("Resend OTP requested for: {}", identifier);
 
-		if (!"Y".equals(staff.getEnabled())) {
-			logger.warn("Disabled account for staffId: {}", staff.getStaffId());
-			throw new RuntimeException("Account disabled");
-		}
+	    Staff staff;
 
-		// Expire previous login OTP
-		staffOtpRepository.findTopByStaffIdOrderByCreatedDtDesc(staff.getStaffId())
-				.ifPresent(oldOtp -> {
-					oldOtp.setStatus(OtpStatus.EXPIRED);
-					oldOtp.setUpdatedDt(LocalDateTime.now());
-					staffOtpRepository.save(oldOtp);
-				});
+	    // Find staff using email or mobile
+	    if (identifier.contains("@")) {
 
-		// Generate new OTP
-		StaffOtp newOtp = generateStaffOtp(staff.getStaffId());
+	        staff = staffRepository.findByEmailId(identifier)
+	                .orElseThrow(() -> {
+	                    logger.warn("Staff not found with email: {}", identifier);
+	                    return new RuntimeException("Staff not found");
+	                });
 
-		try {
-			emailService.sendOtpEmail(
-					staff.getEmailId(),
-					newOtp.getOtp(),
-					OtpPurpose.LOGIN);
+	    } else {
 
-			newOtp.setStatus(OtpStatus.SENT);
-			newOtp.setUpdatedDt(LocalDateTime.now());
-			staffOtpRepository.save(newOtp);
+	        staff = (Staff) staffRepository.findByMobileNum(identifier)
+	                .orElseThrow(() -> {
+	                    logger.warn("Staff not found with mobile: {}", identifier);
+	                    return new RuntimeException("Staff not found");
+	                });
+	    }
 
-			logger.info("New login OTP sent successfully for staffId: {}", staff.getStaffId());
+	    if (!"Y".equals(staff.getEnabled())) {
 
-		} catch (Exception e) {
-			logger.error("Failed to send OTP for staffId: {}", staff.getStaffId(), e);
+	        logger.warn("Disabled account for staffId: {}", staff.getStaffId());
 
-			newOtp.setStatus(OtpStatus.FAILED);
-			newOtp.setUpdatedDt(LocalDateTime.now());
-			staffOtpRepository.save(newOtp);
+	        throw new RuntimeException("Account disabled");
+	    }
 
-			throw new RuntimeException("Failed to send OTP");
-		}
+	    // Expire previous login OTP
+	    staffOtpRepository
+	            .findTopByStaffIdOrderByCreatedDtDesc(staff.getStaffId())
+	            .ifPresent(oldOtp -> {
 
-		ResendOtpResponse response = new ResendOtpResponse();
-		response.setStaffId(staff.getStaffId());
-		response.setEmail(staff.getEmailId());
-		response.setMessage("OTP resent successfully");
+	                oldOtp.setStatus(OtpStatus.EXPIRED);
+	                oldOtp.setUpdatedDt(LocalDateTime.now());
 
-		return response;
+	                staffOtpRepository.save(oldOtp);
+	            });
+
+	    // Generate new OTP
+	    StaffOtp newOtp = generateStaffOtp(staff.getStaffId());
+
+	    try {
+
+	        if (identifier.contains("@")) {
+
+	            // Send OTP through email
+	            emailService.sendOtpEmail(
+	                    staff.getEmailId(),
+	                    newOtp.getOtp(),
+	                    OtpPurpose.LOGIN
+	            );
+
+	            logger.info(
+	                    "Login OTP sent successfully through email to staffId: {}",
+	                    staff.getStaffId()
+	            );
+
+	        } else {
+
+	            // Send OTP through SMS
+	            smsService.sendOtpSms(
+	                    staff.getMobileNum(),
+	                    newOtp.getOtp(),
+	                    OtpPurpose.STAFF_LOGIN
+	            );
+
+	            logger.info(
+	                    "Staff login OTP sent successfully through SMS to staffId: {}",
+	                    staff.getStaffId()
+	            );
+	        }
+
+	        newOtp.setStatus(OtpStatus.SENT);
+	        newOtp.setUpdatedDt(LocalDateTime.now());
+
+	        staffOtpRepository.save(newOtp);
+
+	    } catch (Exception e) {
+
+	        logger.error(
+	                "Failed to send OTP for staffId: {}",
+	                staff.getStaffId(),
+	                e
+	        );
+
+	        newOtp.setStatus(OtpStatus.FAILED);
+	        newOtp.setUpdatedDt(LocalDateTime.now());
+
+	        staffOtpRepository.save(newOtp);
+
+	        throw new RuntimeException("Failed to send OTP");
+	    }
+	    ResendOtpResponse response = new ResendOtpResponse();
+
+	    response.setStaffId(staff.getStaffId());
+
+	    if (identifier.contains("@")) {
+	        response.setEmail(staff.getEmailId());
+	    } else {
+	        response.setEmail(staff.getMobileNum());
+	    }
+
+	    response.setMessage("OTP resent successfully");
+
+	    return response;
 	}
-
-
 	@Override
 	public Page<StaffResponse> getActiveStaff(int page, int size) {
 
-		Pageable pageable = PageRequest.of(
-				page,
-				size,
-				Sort.by("createdDt").descending());
+		Pageable pageable = PageRequest.of(page, size, Sort.by("createdDt").descending());
 
 		Page<Staff> staffPage = staffRepository.findByStatus("ACTIVE", pageable);
 
@@ -533,7 +725,6 @@ public class StaffServiceImpl implements StaffService {
 
 		return staffPage.map(staffMapper::toResponse);
 	}
-
 
 	@Override
 	public StaffResponse registerInitialAdmin(StaffRegistrationRequest request) {
@@ -583,103 +774,64 @@ public class StaffServiceImpl implements StaffService {
 		logger.info("Initial admin registered successfully with staffId: {}", savedStaff.getStaffId());
 		return staffMapper.toResponse(savedStaff);
 	}
-	
+
 	private void deleteFromStrapiByUrl(String fileUrl) {
-	    try {
-	        String urlPath = fileUrl.replace(strapiUrl, "");
+		try {
+			String urlPath = fileUrl.replace(strapiUrl, "");
 
-	        String searchUrl = strapiUrl
-	                + "/api/upload/files?filters[url][$eq]="
-	                + urlPath;
+			String searchUrl = strapiUrl + "/api/upload/files?filters[url][$eq]=" + urlPath;
 
-	        HttpHeaders headers = new HttpHeaders();
-	        headers.set("Authorization", "Bearer " + strapiApiToken);
+			HttpHeaders headers = new HttpHeaders();
+			headers.set("Authorization", "Bearer " + strapiApiToken);
 
-	        ResponseEntity<String> searchResponse =
-	                restTemplate.exchange(
-	                        searchUrl,
-	                        HttpMethod.GET,
-	                        new HttpEntity<>(headers),
-	                        String.class
-	                );
+			ResponseEntity<String> searchResponse = restTemplate.exchange(searchUrl, HttpMethod.GET,
+					new HttpEntity<>(headers), String.class);
 
-	        JsonNode root =
-	                new ObjectMapper().readTree(searchResponse.getBody());
+			JsonNode root = new ObjectMapper().readTree(searchResponse.getBody());
 
-	        if (root == null || !root.isArray() || root.size() == 0) {
-	            logger.warn(
-	                    "Profile image not found in Strapi by URL: {}",
-	                    urlPath
-	            );
-	            return;
-	        }
+			if (root == null || !root.isArray() || root.size() == 0) {
+				logger.warn("Profile image not found in Strapi by URL: {}", urlPath);
+				return;
+			}
 
-	        Long strapiFileId =
-	                root.get(0).get("id").asLong();
+			Long strapiFileId = root.get(0).get("id").asLong();
 
-	        String deleteUrl =
-	                strapiUrl + "/api/upload/files/" + strapiFileId;
+			String deleteUrl = strapiUrl + "/api/upload/files/" + strapiFileId;
 
-	        restTemplate.exchange(
-	                deleteUrl,
-	                HttpMethod.DELETE,
-	                new HttpEntity<>(headers),
-	                String.class
-	        );
+			restTemplate.exchange(deleteUrl, HttpMethod.DELETE, new HttpEntity<>(headers), String.class);
 
-	        logger.info(
-	                "Staff profile image deleted from Strapi: {}",
-	                urlPath
-	        );
+			logger.info("Staff profile image deleted from Strapi: {}", urlPath);
 
-	    } catch (Exception e) {
-	        logger.error(
-	                "Failed to delete staff profile image from Strapi. URL: {}",
-	                fileUrl,
-	                e
-	        );
+		} catch (Exception e) {
+			logger.error("Failed to delete staff profile image from Strapi. URL: {}", fileUrl, e);
 
-	        throw new RuntimeException(
-	                "Failed to delete profile image from Strapi",
-	                e
-	        );
-	    }
+			throw new RuntimeException("Failed to delete profile image from Strapi", e);
+		}
 	}
+
 	@Override
 	@Transactional
 	public void deleteProfileImage(String staffId) {
 
-	    logger.info(
-	            "Deleting profile image for staffId: {}",
-	            staffId
-	    );
+		logger.info("Deleting profile image for staffId: {}", staffId);
 
-	    Staff staff = staffRepository.findByStaffId(staffId)
-	            .orElseThrow(() ->
-	                    new ResourceNotFoundException(
-	                            "Staff not found for staffId: " + staffId
-	                    )
-	            );
+		Staff staff = staffRepository.findByStaffId(staffId)
+				.orElseThrow(() -> new ResourceNotFoundException("Staff not found for staffId: " + staffId));
 
-	    String profileImg = staff.getProfileImg();
+		String profileImg = staff.getProfileImg();
 
-	    if (profileImg == null || profileImg.isBlank()) {
-	        throw new BadRequestException(
-	                "Staff profile image not found."
-	        );
-	    }
+		if (profileImg == null || profileImg.isBlank()) {
+			throw new BadRequestException("Staff profile image not found.");
+		}
 
-	    // Delete actual image from Strapi
-	    deleteFromStrapiByUrl(profileImg);
+		// Delete actual image from Strapi
+		deleteFromStrapiByUrl(profileImg);
 
-	    // Remove URL from database
-	    staff.setProfileImg(null);
+		// Remove URL from database
+		staff.setProfileImg(null);
 
-	    staffRepository.save(staff);
+		staffRepository.save(staff);
 
-	    logger.info(
-	            "Staff profile image deleted successfully for staffId: {}",
-	            staffId
-	    );
+		logger.info("Staff profile image deleted successfully for staffId: {}", staffId);
 	}
 }

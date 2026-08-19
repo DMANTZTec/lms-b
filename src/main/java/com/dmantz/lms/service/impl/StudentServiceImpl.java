@@ -530,7 +530,7 @@ public class StudentServiceImpl implements StudentService {
 	@Override
 	public void forgotPassword(ForgotPasswordRequest request) {
 
-		String identifier = request.getGetEmailIdOrMobileNo();
+		String identifier = request.getEmailIdOrMobileNo();
 		OtpChannel channel = request.getOtpChannel();
 
 		logger.info("Forgot password requested for identifier: {} via channel: {}", identifier, channel);
