@@ -545,4 +545,43 @@ public class CourseManagementController {
 
 		return ResponseEntity.ok(response);
 	}
+	
+//	======================== UPLOAD SUBJECT IMAGE ============================
+	@PostMapping(value = "/subject/{subjectId}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<SubjectResponse> uploadSubjectImage(@PathVariable Long subjectId,
+			@RequestParam MultipartFile subjectImage, @RequestParam String staffId) throws Exception {
+
+		logger.info("POST /subject/{}/image - Uploading subject image by staffId: {}", subjectId, staffId);
+
+		SubjectResponse response = courseManagementService.uploadSubjectImage(subjectId, subjectImage, staffId);
+
+		logger.info("Subject image uploaded successfully for subjectId: {}", subjectId);
+		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+	}
+
+//	======================== UPDATE SUBJECT IMAGE ============================
+	@PutMapping(value = "/subject/{subjectId}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<SubjectResponse> updateSubjectImage(@PathVariable Long subjectId,
+			@RequestParam MultipartFile subjectImage, @RequestParam String staffId) throws Exception {
+
+		logger.info("PUT /subject/{}/image - Updating subject image by staffId: {}", subjectId, staffId);
+
+		SubjectResponse response = courseManagementService.updateSubjectImage(subjectId, subjectImage, staffId);
+
+		logger.info("Subject image updated successfully for subjectId: {}", subjectId);
+		return ResponseEntity.ok(response);
+	}
+
+//	======================== DELETE SUBJECT IMAGE ============================
+	@DeleteMapping("/subject/{subjectId}/image")
+	public ResponseEntity<String> deleteSubjectImage(@PathVariable Long subjectId, @RequestParam String staffId) {
+
+		logger.info("DELETE /subject/{}/image - Deleting subject image by staffId: {}", subjectId, staffId);
+
+		courseManagementService.deleteSubjectImage(subjectId, staffId);
+
+		logger.info("Subject image deleted successfully for subjectId: {}", subjectId);
+		return ResponseEntity.ok("Subject image deleted successfully");
+	}
+	
 }

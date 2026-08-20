@@ -286,7 +286,8 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 			throw new IllegalStateException("Subject short code is required");
 		}
 
-		Optional<Course> lastCourse = courseRepository.findTopBySubject_SubjectShortCdAndIsDeletedFalseOrderByIdDesc(subjectShortCd);
+		Optional<Course> lastCourse = courseRepository
+				.findTopBySubject_SubjectShortCdAndIsDeletedFalseOrderByIdDesc(subjectShortCd);
 
 		int nextNumber = 1;
 
@@ -310,119 +311,122 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 	}
 
 	// ------------------ VIEW ALL COURSES ------------------
-		@Override
-		public List<CourseResponse> viewAllCourses() {
-		    logger.info("Fetching all active courses");
+	@Override
+	public List<CourseResponse> viewAllCourses() {
+		logger.info("Fetching all active courses");
 
-		    List<CourseResponse> courses = courseRepository.findByIsDeletedFalse()
-		            .stream()
-		            .map(courseMapper::toDto)
-		            .collect(Collectors.toList());
+		List<CourseResponse> courses = courseRepository.findByIsDeletedFalse().stream().map(courseMapper::toDto)
+				.collect(Collectors.toList());
 
-		    logger.debug("Total active courses found: {}", courses.size());
+		logger.debug("Total active courses found: {}", courses.size());
 
-		    return courses;
-		}
+		return courses;
+	}
+
 //--------------------------UPDATE COURSE-----------------------------
 	@Override
 	public CourseResponse updateCourse(Long courseId, UpdateCourseRequest request, String staffId) {
 
-	    logger.info("Updating course with id: {} by staffId: {}", courseId, staffId);
+		logger.info("Updating course with id: {} by staffId: {}", courseId, staffId);
 
-	    if (!staffRepository.existsByStaffId(staffId)) {
-	        throw new ResourceNotFoundException("Staff with ID " + staffId + " does not exist");
-	    }
+		if (!staffRepository.existsByStaffId(staffId)) {
+			throw new ResourceNotFoundException("Staff with ID " + staffId + " does not exist");
+		}
 
-	    Course course = courseRepository.findById(courseId)
-	            .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
+		Course course = courseRepository.findById(courseId)
+				.orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
 
-	    Subject subject = subjectRepository.findById(request.getSubjectId())
-	            .orElseThrow(() -> new ResourceNotFoundException("Subject not found with id: " + request.getSubjectId()));
+		Subject subject = subjectRepository.findById(request.getSubjectId()).orElseThrow(
+				() -> new ResourceNotFoundException("Subject not found with id: " + request.getSubjectId()));
 
-	    Provider provider = providerRepository.findById(request.getProviderId())
-	            .orElseThrow(() -> new ResourceNotFoundException("Provider not found with id: " + request.getProviderId()));
+		Provider provider = providerRepository.findById(request.getProviderId()).orElseThrow(
+				() -> new ResourceNotFoundException("Provider not found with id: " + request.getProviderId()));
 
-	    boolean exists = courseRepository.existsByCourseTitleAndSubject_IdAndProvider_IdAndLanguage(
-	            request.getCourseTitle(), subject.getId(), provider.getId(), request.getLanguage());
+		boolean exists = courseRepository.existsByCourseTitleAndSubject_IdAndProvider_IdAndLanguage(
+				request.getCourseTitle(), subject.getId(), provider.getId(), request.getLanguage());
 
-	    if (exists && !(course.getCourseTitle().equals(request.getCourseTitle())
-	            && course.getSubject().getId().equals(subject.getId())
-	            && course.getProvider().getId().equals(provider.getId())
-	            && course.getLanguage().equals(request.getLanguage()))) {
-	        throw new DuplicateValuesException("Another course already exists with same title, subject, provider and language");
-	    }
+		if (exists && !(course.getCourseTitle().equals(request.getCourseTitle())
+				&& course.getSubject().getId().equals(subject.getId())
+				&& course.getProvider().getId().equals(provider.getId())
+				&& course.getLanguage().equals(request.getLanguage()))) {
+			throw new DuplicateValuesException(
+					"Another course already exists with same title, subject, provider and language");
+		}
 
-	    courseMapper.updateCourseFromUpdateRequest(request, course);
-	    course.setSubject(subject);
-	    course.setProvider(provider);
+		courseMapper.updateCourseFromUpdateRequest(request, course);
+		course.setSubject(subject);
+		course.setProvider(provider);
 
-	    Course updatedCourse = courseRepository.save(course);
+		Course updatedCourse = courseRepository.save(course);
 
-	    logger.info("Course updated successfully: {}", updatedCourse.getCourseId());
+		logger.info("Course updated successfully: {}", updatedCourse.getCourseId());
 
-	    return courseMapper.toDto(updatedCourse);
+		return courseMapper.toDto(updatedCourse);
 	}
+
 //	======================== UPDATE COURSE IMAGE ============================
 	@Override
 	public CourseResponse updateCourseImage(Long courseId, MultipartFile courseImage, String staffId) throws Exception {
 
-	    logger.info("Updating course image for courseId: {} by staffId: {}", courseId, staffId);
+		logger.info("Updating course image for courseId: {} by staffId: {}", courseId, staffId);
 
-	    if (!staffRepository.existsByStaffId(staffId)) {
-	        throw new ResourceNotFoundException("Staff with ID " + staffId + " does not exist");
-	    }
+		if (!staffRepository.existsByStaffId(staffId)) {
+			throw new ResourceNotFoundException("Staff with ID " + staffId + " does not exist");
+		}
 
-	    Course course = courseRepository.findById(courseId)
-	            .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
+		Course course = courseRepository.findById(courseId)
+				.orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
 
-	    if (courseImage == null || courseImage.isEmpty()) {
-	        throw new IllegalArgumentException("Course image file is required");
-	    }
+		if (courseImage == null || courseImage.isEmpty()) {
+			throw new IllegalArgumentException("Course image file is required");
+		}
 
-	    if (course.getCourseImage() != null && !course.getCourseImage().isBlank()) {
-	        deleteCourseFileFromStrapi(course.getCourseImage());
-	    }
+		if (course.getCourseImage() != null && !course.getCourseImage().isBlank()) {
+			deleteCourseFileFromStrapi(course.getCourseImage());
+		}
 
-	    JsonNode imageNode = uploadToStrapi(courseImage);
-	    course.setCourseImage(strapiUrl + imageNode.get("url").asText());
+		JsonNode imageNode = uploadToStrapi(courseImage);
+		course.setCourseImage(strapiUrl + imageNode.get("url").asText());
 
-	    logger.info("Course image updated: {}", course.getCourseImage());
+		logger.info("Course image updated: {}", course.getCourseImage());
 
-	    return courseMapper.toDto(courseRepository.save(course));
+		return courseMapper.toDto(courseRepository.save(course));
 	}
+
 //===================== UPDATE COURSE INTRO VIDEO ============================
 	@Override
-	public CourseResponse updateCourseIntroVideo(Long courseId, MultipartFile introVideo, String staffId) throws Exception {
+	public CourseResponse updateCourseIntroVideo(Long courseId, MultipartFile introVideo, String staffId)
+			throws Exception {
 
-	    logger.info("Updating intro video for courseId: {} by staffId: {}", courseId, staffId);
+		logger.info("Updating intro video for courseId: {} by staffId: {}", courseId, staffId);
 
-	    if (!staffRepository.existsByStaffId(staffId)) {
-	        throw new ResourceNotFoundException("Staff with ID " + staffId + " does not exist");
-	    }
+		if (!staffRepository.existsByStaffId(staffId)) {
+			throw new ResourceNotFoundException("Staff with ID " + staffId + " does not exist");
+		}
 
-	    Course course = courseRepository.findById(courseId)
-	            .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
+		Course course = courseRepository.findById(courseId)
+				.orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
 
-	    if (introVideo == null || introVideo.isEmpty()) {
-	        throw new IllegalArgumentException("Intro video file is required");
-	    }
+		if (introVideo == null || introVideo.isEmpty()) {
+			throw new IllegalArgumentException("Intro video file is required");
+		}
 
-	    if (!"video/mp4".equalsIgnoreCase(introVideo.getContentType())) {
-	        throw new IllegalArgumentException("Intro video must be MP4 format");
-	    }
+		if (!"video/mp4".equalsIgnoreCase(introVideo.getContentType())) {
+			throw new IllegalArgumentException("Intro video must be MP4 format");
+		}
 
-	    if (course.getIntroVideo() != null && !course.getIntroVideo().isBlank()) {
-	        deleteCourseFileFromStrapi(course.getIntroVideo());
-	    }
+		if (course.getIntroVideo() != null && !course.getIntroVideo().isBlank()) {
+			deleteCourseFileFromStrapi(course.getIntroVideo());
+		}
 
-	    JsonNode videoNode = uploadToStrapi(introVideo);
-	    course.setIntroVideo(strapiUrl + videoNode.get("url").asText());
+		JsonNode videoNode = uploadToStrapi(introVideo);
+		course.setIntroVideo(strapiUrl + videoNode.get("url").asText());
 
-	    logger.info("Intro video updated: {}", course.getIntroVideo());
+		logger.info("Intro video updated: {}", course.getIntroVideo());
 
-	    return courseMapper.toDto(courseRepository.save(course));
+		return courseMapper.toDto(courseRepository.save(course));
 	}
-	
+
 	private void deleteCourseFileFromStrapi(String fileUrl) {
 
 		if (fileUrl == null || fileUrl.isBlank()) {
@@ -504,30 +508,29 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 //
 //		logger.info("Course deleted from DB and Strapi files cleaned up successfully");
 //	}
-	
+
 	@Override
 	public void deleteCourse(Long courseId, String staffId) throws BadRequestException {
 
-	    logger.info("Soft-deleting course id: {} by staffId: {}", courseId, staffId);
+		logger.info("Soft-deleting course id: {} by staffId: {}", courseId, staffId);
 
-	    if (!staffRepository.existsByStaffId(staffId)) {
-	        throw new ResourceNotFoundException("Staff not found: " + staffId);
-	    }
+		if (!staffRepository.existsByStaffId(staffId)) {
+			throw new ResourceNotFoundException("Staff not found: " + staffId);
+		}
 
-	    Course course = courseRepository.findById(courseId)
-	            .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+		Course course = courseRepository.findById(courseId)
+				.orElseThrow(() -> new ResourceNotFoundException("Course not found"));
 
-	    if (course.isDeleted()) {
-	        logger.warn("Course id: {} is already deleted", courseId);
-	        throw new BadRequestException("Course  already soft deleted.");
-	    }
+		if (course.isDeleted()) {
+			logger.warn("Course id: {} is already deleted", courseId);
+			throw new BadRequestException("Course  already soft deleted.");
+		}
 
+		course.setDeleted(true);
+		courseRepository.save(course);
 
-	    course.setDeleted(true);
-	    courseRepository.save(course);
-
-	    logger.info("Course id: {} soft-deleted successfully. Chapters, topics, references, "
-	            + "and batch mappings remain untouched in the database.", courseId);
+		logger.info("Course id: {} soft-deleted successfully. Chapters, topics, references, "
+				+ "and batch mappings remain untouched in the database.", courseId);
 	}
 
 //--------------------------VIEW COURSES BY SUBJECT-----------------------------
@@ -540,8 +543,8 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 			throw new ResourceNotFoundException("Subject not found with id: " + subjectId);
 		}
 
-		List<CourseResponse> courses = courseRepository.findBySubject_IdAndIsDeletedFalse(subjectId).stream().map(courseMapper::toDto)
-				.collect(Collectors.toList());
+		List<CourseResponse> courses = courseRepository.findBySubject_IdAndIsDeletedFalse(subjectId).stream()
+				.map(courseMapper::toDto).collect(Collectors.toList());
 
 		logger.debug("Found {} courses for subjectId: {}", courses.size(), subjectId);
 		return courses;
@@ -1397,33 +1400,24 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 	}
 
 	// ========================= delete course from program
-		@Override
-		public void deleteProgramCourse(DeleteProgramCourseRequest request) {
-			logger.info("Removing course {} from program {}",
-		            request.getCourseId(),
-		            request.getProgramId());
+	@Override
+	public void deleteProgramCourse(DeleteProgramCourseRequest request) {
+		logger.info("Removing course {} from program {}", request.getCourseId(), request.getProgramId());
 
-		    ProgramCourse programCourse = programCourseRepository
-		            .findByProgram_ProgramIdAndCourse_CourseId(
-		                    request.getProgramId(),
-		                    request.getCourseId())
-		            .orElseThrow(() -> {
-		                logger.warn("Course {} does not belong to program {}",
-		                        request.getCourseId(),
-		                        request.getProgramId());
+		ProgramCourse programCourse = programCourseRepository
+				.findByProgram_ProgramIdAndCourse_CourseId(request.getProgramId(), request.getCourseId())
+				.orElseThrow(() -> {
+					logger.warn("Course {} does not belong to program {}", request.getCourseId(),
+							request.getProgramId());
 
-		                return new ResourceNotFoundException(
-		                        "Course " + request.getCourseId()
-		                                + " is not associated with Program "
-		                                + request.getProgramId());
-		            });
+					return new ResourceNotFoundException("Course " + request.getCourseId()
+							+ " is not associated with Program " + request.getProgramId());
+				});
 
-		    programCourseRepository.delete(programCourse);
+		programCourseRepository.delete(programCourse);
 
-		    logger.info("Course {} removed successfully from program {}",
-		            request.getCourseId(),
-		            request.getProgramId());
-		}
+		logger.info("Course {} removed successfully from program {}", request.getCourseId(), request.getProgramId());
+	}
 
 	@Override
 	public CourseDetailsResponse getCourseDetails(String courseId) {
@@ -1519,6 +1513,101 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 		logger.info("Successfully fetched course details for courseId: {}", courseId);
 
 		return response;
+	}
+
+//	======================== UPLOAD SUBJECT IMAGE (CREATE) ============================
+	@Override
+	public SubjectResponse uploadSubjectImage(Long subjectId, MultipartFile subjectImage, String staffId)
+			throws Exception {
+
+		logger.info("Uploading subject image for subjectId: {} by staffId: {}", subjectId, staffId);
+
+		if (!staffRepository.existsByStaffId(staffId)) {
+			logger.warn("Staff not found with id: {} during uploadSubjectImage", staffId);
+			throw new ResourceNotFoundException("Staff with ID " + staffId + " does not exist");
+		}
+
+		Subject subject = subjectRepository.findById(subjectId).orElseThrow(() -> {
+			logger.warn("Subject not found with id: {}", subjectId);
+			return new ResourceNotFoundException("Subject not found with id: " + subjectId);
+		});
+
+		if (subjectImage == null || subjectImage.isEmpty()) {
+			throw new IllegalArgumentException("Subject image file is required");
+		}
+
+		if (subject.getSubjectImage() != null && !subject.getSubjectImage().isBlank()) {
+			logger.warn("Subject id: {} already has an image, use update instead", subjectId);
+			throw new DuplicateValuesException("Subject already has an image. Use update instead.");
+		}
+
+		JsonNode imageNode = uploadToStrapi(subjectImage);
+		subject.setSubjectImage(strapiUrl + imageNode.get("url").asText());
+
+		logger.info("Subject image uploaded: {}", subject.getSubjectImage());
+
+		return subjectMapper.toDto(subjectRepository.save(subject));
+	}
+
+//	======================== UPDATE SUBJECT IMAGE ============================
+	@Override
+	public SubjectResponse updateSubjectImage(Long subjectId, MultipartFile subjectImage, String staffId)
+			throws Exception {
+
+		logger.info("Updating subject image for subjectId: {} by staffId: {}", subjectId, staffId);
+
+		if (!staffRepository.existsByStaffId(staffId)) {
+			logger.warn("Staff not found with id: {} during updateSubjectImage", staffId);
+			throw new ResourceNotFoundException("Staff with ID " + staffId + " does not exist");
+		}
+
+		Subject subject = subjectRepository.findById(subjectId).orElseThrow(() -> {
+			logger.warn("Subject not found with id: {}", subjectId);
+			return new ResourceNotFoundException("Subject not found with id: " + subjectId);
+		});
+
+		if (subjectImage == null || subjectImage.isEmpty()) {
+			throw new IllegalArgumentException("Subject image file is required");
+		}
+
+		if (subject.getSubjectImage() != null && !subject.getSubjectImage().isBlank()) {
+			deleteCourseFileFromStrapi(subject.getSubjectImage());
+		}
+
+		JsonNode imageNode = uploadToStrapi(subjectImage);
+		subject.setSubjectImage(strapiUrl + imageNode.get("url").asText());
+
+		logger.info("Subject image updated: {}", subject.getSubjectImage());
+
+		return subjectMapper.toDto(subjectRepository.save(subject));
+	}
+
+//	======================== DELETE SUBJECT IMAGE ============================
+	@Override
+	public void deleteSubjectImage(Long subjectId, String staffId) {
+
+		logger.info("Deleting subject image for subjectId: {} by staffId: {}", subjectId, staffId);
+
+		if (!staffRepository.existsByStaffId(staffId)) {
+			logger.warn("Staff not found with id: {} during deleteSubjectImage", staffId);
+			throw new ResourceNotFoundException("Staff with ID " + staffId + " does not exist");
+		}
+
+		Subject subject = subjectRepository.findById(subjectId).orElseThrow(() -> {
+			logger.warn("Subject not found with id: {}", subjectId);
+			return new ResourceNotFoundException("Subject not found with id: " + subjectId);
+		});
+
+		if (subject.getSubjectImage() == null || subject.getSubjectImage().isBlank()) {
+			logger.warn("No image to delete for subjectId: {}", subjectId);
+			throw new ResourceNotFoundException("No image found for subject with id: " + subjectId);
+		}
+
+		deleteCourseFileFromStrapi(subject.getSubjectImage());
+		subject.setSubjectImage(null);
+		subjectRepository.save(subject);
+
+		logger.info("Subject image deleted successfully for subjectId: {}", subjectId);
 	}
 
 }

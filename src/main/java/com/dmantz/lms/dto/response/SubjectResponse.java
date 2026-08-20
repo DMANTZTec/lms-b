@@ -9,6 +9,7 @@ public class SubjectResponse {
 	private String subjectShortCd;
 	private String subjectCategory;
 	private String description;
+	private String subjectImage; 
 
 	private Long createdBy;
 	private LocalDateTime createdDt;
@@ -86,5 +87,15 @@ public class SubjectResponse {
 	public void setId(Long id) {
 		this.id = id;
 	}
+
+	public String getSubjectImage() {
+		return subjectImage;
+	}
+
+	public void setSubjectImage(String subjectImage) {
+		this.subjectImage = subjectImage;
+	}
+	
+	
 	
 }

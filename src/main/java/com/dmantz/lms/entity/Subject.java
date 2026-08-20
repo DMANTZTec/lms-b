@@ -17,7 +17,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "subject")
-public class Subject extends AuditFields{
+public class Subject extends AuditFields {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -33,6 +33,9 @@ public class Subject extends AuditFields{
 
 	@Column(name = "description")
 	private String description;
+
+	@Column(name = "subject_image")
+	private String subjectImage;
 
 	@OneToMany(mappedBy = "subject", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Course> courses = new ArrayList<>();
@@ -85,11 +88,19 @@ public class Subject extends AuditFields{
 		this.courses = courses;
 	}
 
+	public String getSubjectImage() {
+		return subjectImage;
+	}
+
+	public void setSubjectImage(String subjectImage) {
+		this.subjectImage = subjectImage;
+	}
+
 	@Override
 	public String toString() {
 		return "Subject [id=" + id + ", subjectNm=" + subjectNm + ", subjectShortCd=" + subjectShortCd
-				+ ", subjectCategory=" + subjectCategory + ", description=" + description + ", courses=" + courses
-				+ "]";
+				+ ", subjectCategory=" + subjectCategory + ", description=" + description + ", subjectImage="
+				+ subjectImage + ", courses=" + courses + "]";
 	}
 
 }

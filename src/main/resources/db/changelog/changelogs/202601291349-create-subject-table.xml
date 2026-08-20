@@ -42,5 +42,14 @@
         </createTable>
 
     </changeSet>
+    
+    
+    <changeSet id="202608201211" author="Tejaswini">
+        <addColumn tableName="subject">
+            <column name="subject_image" type="VARCHAR(500)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
 
 </databaseChangeLog>

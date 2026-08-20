@@ -114,5 +114,14 @@ public interface CourseManagementService {
 	List<ChapterResponse> getChaptersByCourseStringId(String courseId);
 
 	CourseDetailsResponse getCourseDetails(String courseId);
+	
+//	upload subject image 
+SubjectResponse uploadSubjectImage(Long subjectId, MultipartFile subjectImage, String staffId) throws Exception;
+
+//	update/replace subject image
+SubjectResponse updateSubjectImage(Long subjectId, MultipartFile subjectImage, String staffId) throws Exception;
+
+//	delete subject image
+void deleteSubjectImage(Long subjectId, String staffId);
 
 }
