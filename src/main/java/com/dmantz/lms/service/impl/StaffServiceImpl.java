@@ -441,43 +441,36 @@ public class StaffServiceImpl implements StaffService {
 
 	@Override
 	@Transactional
-	public StaffResponse updateStaff(String staffId, StaffUpdateRequest request) {
+	public StaffResponse updateStaff(
+	        String staffId,
+	        StaffUpdateRequest request) {
 
-		Staff staff = staffRepository.findByStaffId(staffId)
-				.orElseThrow(() -> new ResourceNotFoundException("Staff not found"));
+	    Staff staff = staffRepository.findByStaffId(staffId)
+	            .orElseThrow(() ->
+	                    new ResourceNotFoundException("Staff not found"));
 
-		// Update basic details
-		staff.setFirstNm(request.getFirstNm());
-		staff.setLastNm(request.getLastNm());
-		staff.setDob(request.getDob());
-		staff.setGender(request.getGender());
-		staff.setDateOfJoining(request.getDateOfJoining());
+	    // DTO → Entity
+	    staffMapper.updateEntity(request, staff);
 
-//		// Update profile image
-//		if (request.getProfileImg() != null && !request.getProfileImg().isEmpty()) {
-//
-//			String profileUrl = uploadToStrapi(request.getProfileImg());
-//
-//			staff.setProfileImg(profileUrl);
-//		}
+	    // Update roles
+	    if (request.getRoles() != null && !request.getRoles().isEmpty()) {
 
-		// Update roles
-		if (request.getRoleIds() != null && !request.getRoleIds().isEmpty()) {
+	        Set<Role> roles = request.getRoles()
+	                .stream()
+	                .map(roleName -> roleRepository.findByRoleNm(roleName)
+	                        .orElseThrow(() ->
+	                                new ResourceNotFoundException(
+	                                        "Role not found: " + roleName)))
+	                .collect(Collectors.toSet());
 
-			Set<Role> roles = new HashSet<>(roleRepository.findAllById(request.getRoleIds()));
+	        staff.setRoles(roles);
+	    }
 
-			if (roles.size() != request.getRoleIds().size()) {
-				throw new ResourceNotFoundException("One or more roles not found");
-			}
+	    Staff updatedStaff = staffRepository.save(staff);
 
-			staff.setRoles(roles);
-		}
-
-		Staff updatedStaff = staffRepository.save(staff);
-
-		return staffMapper.toResponse(updatedStaff);
+	    // Entity → Response
+	    return staffMapper.toResponse(updatedStaff);
 	}
-
 	@Override
 	public StaffResponse updateProfileImage(String staffId, MultipartFile file) {
 

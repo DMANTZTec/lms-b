@@ -2,7 +2,6 @@ package com.dmantz.lms.dto.request;
 
 import com.dmantz.lms.entity.Gender;
 import jakarta.validation.constraints.NotBlank;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -10,43 +9,65 @@ import java.util.Set;
 public class StaffUpdateRequest {
 
     @NotBlank
-    private String firstNm;
+    private String firstName;
 
     @NotBlank
-    private String lastNm;
+    private String lastName;
 
-    private LocalDate dob;
+    private String emailId;
+    private String mobileNumber;
 
     private Gender gender;
 
+    private LocalDate dateOfBirth;
+
+    private String designation;
+
     private LocalDate dateOfJoining;
 
-//    private MultipartFile profileImg;
+    private Set<String> roles;
 
-    private Set<Long> roleIds;
+    private String addressOne;
+    private String addressTwo;
+    private String city;
+    private String state;
+    private String country;
+    private String pincode;
 
-    public String getFirstNm() {
-        return firstNm;
+    private String emergencyContactName;
+    private String emergencyContactNumber;
+
+
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setFirstNm(String firstNm) {
-        this.firstNm = firstNm;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
-    public String getLastNm() {
-        return lastNm;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setLastNm(String lastNm) {
-        this.lastNm = lastNm;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
-    public LocalDate getDob() {
-        return dob;
+    public String getEmailId() {
+        return emailId;
     }
 
-    public void setDob(LocalDate dob) {
-        this.dob = dob;
+    public void setEmailId(String emailId) {
+        this.emailId = emailId;
+    }
+
+    public String getMobileNumber() {
+        return mobileNumber;
+    }
+
+    public void setMobileNumber(String mobileNumber) {
+        this.mobileNumber = mobileNumber;
     }
 
     public Gender getGender() {
@@ -57,6 +78,22 @@ public class StaffUpdateRequest {
         this.gender = gender;
     }
 
+    public LocalDate getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public void setDateOfBirth(LocalDate dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
+    public String getDesignation() {
+        return designation;
+    }
+
+    public void setDesignation(String designation) {
+        this.designation = designation;
+    }
+
     public LocalDate getDateOfJoining() {
         return dateOfJoining;
     }
@@ -65,19 +102,75 @@ public class StaffUpdateRequest {
         this.dateOfJoining = dateOfJoining;
     }
 
-//    public MultipartFile getProfileImg() {
-//        return profileImg;
-//    }
-//
-//    public void setProfileImg(MultipartFile profileImg) {
-//        this.profileImg = profileImg;
-//    }
-
-    public Set<Long> getRoleIds() {
-        return roleIds;
+    public Set<String> getRoles() {
+        return roles;
     }
 
-    public void setRoleIds(Set<Long> roleIds) {
-        this.roleIds = roleIds;
+    public void setRoles(Set<String> roles) {
+        this.roles = roles;
+    }
+
+    public String getAddressOne() {
+        return addressOne;
+    }
+
+    public void setAddressOne(String addressOne) {
+        this.addressOne = addressOne;
+    }
+
+    public String getAddressTwo() {
+        return addressTwo;
+    }
+
+    public void setAddressTwo(String addressTwo) {
+        this.addressTwo = addressTwo;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getPincode() {
+        return pincode;
+    }
+
+    public void setPincode(String pincode) {
+        this.pincode = pincode;
+    }
+
+    public String getEmergencyContactName() {
+        return emergencyContactName;
+    }
+
+    public void setEmergencyContactName(String emergencyContactName) {
+        this.emergencyContactName = emergencyContactName;
+    }
+
+    public String getEmergencyContactNumber() {
+        return emergencyContactNumber;
+    }
+
+    public void setEmergencyContactNumber(String emergencyContactNumber) {
+        this.emergencyContactNumber = emergencyContactNumber;
     }
 }
