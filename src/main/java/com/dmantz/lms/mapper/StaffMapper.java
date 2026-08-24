@@ -69,18 +69,18 @@ public interface StaffMapper {
 
 
     // Entity → Response
-    @Mapping(source = "firstNm", target = "firstName")
-    @Mapping(source = "lastNm", target = "lastName")
-    @Mapping(source = "mobileNum", target = "mobileNumber")
-    @Mapping(source = "dob", target = "dateOfBirth")
-    @Mapping(source = "addr1", target = "addressOne")
-    @Mapping(source = "addr2", target = "addressTwo")
-    @Mapping(source = "pin", target = "pincode")
-    @Mapping(source = "emergencyContactNm", target = "emergencyContactName")
-    @Mapping(source = "emergencyContactNum", target = "emergencyContactNumber")
-    @Mapping(source = "createdDt", target = "createdDate")
-    @Mapping(source = "updatedDt", target = "updatedDate")
-    @Mapping(source = "profileImg", target = "profileImage")
+    @Mapping(source = "firstNm", target = "firstNm")
+    @Mapping(source = "lastNm", target = "lastNm")
+    @Mapping(source = "mobileNum", target = "mobileNum")
+    @Mapping(source = "dob", target = "dob")
+    @Mapping(source = "addr1", target = "addr1")
+    @Mapping(source = "addr2", target = "addr2")
+    @Mapping(source = "pin", target = "pin")
+    @Mapping(source = "emergencyContactNm", target = "emergencyContactNm")
+    @Mapping(source = "emergencyContactNum", target = "emergencyContactNum")
+    @Mapping(source = "createdDt", target = "createdDt")
+    @Mapping(source = "updatedDt", target = "updatedDt")
+    @Mapping(source = "profileImg", target = "profileImg")
     StaffResponse toResponse(Staff staff);
 
 

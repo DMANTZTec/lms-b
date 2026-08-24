@@ -9,35 +9,52 @@ import java.util.Set;
 public class StaffResponse {
 
     private Long id;
-    private String firstName;
-    private String lastName;
-    private String emailId;
-    private String mobileNumber;
-    private Gender gender;
-    private LocalDate dateOfBirth;
+
     private String staffId;
-    private String designation;
-    private LocalDate dateOfJoining;
-    private Set<String> roles;
 
-    private String addressOne;
-    private String addressTwo;
+    private String firstNm;
+
+    private String lastNm;
+
+    private String addr1;
+
+    private String addr2;
+
     private String city;
+
     private String state;
+
     private String country;
-    private String pincode;
 
-    private String emergencyContactName;
-    private String emergencyContactNumber;
+    private String pin;
 
-    private String createdBy;
-    private LocalDateTime createdDate;
+    private String email;
 
-    private String updatedBy;
-    private LocalDateTime updatedDate;
+    private String mobileNum;
 
-    private String profileImage;
+    private LocalDate dateOfJoining;
+
+    private String designation;
+
+    private String emergencyContactNm;
+
+    private String emergencyContactNum;
+
+    private String profileImg;
+
+    private Gender gender;
+
     private String status;
+
+    private String enabled;
+
+    private LocalDate dob;
+
+    private LocalDateTime createdDt;
+    
+    private LocalDateTime updatedDt;
+
+    private Set<String> roles;
 
 
     public Long getId() {
@@ -48,54 +65,6 @@ public class StaffResponse {
         this.id = id;
     }
 
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getEmailId() {
-        return emailId;
-    }
-
-    public void setEmailId(String emailId) {
-        this.emailId = emailId;
-    }
-
-    public String getMobileNumber() {
-        return mobileNumber;
-    }
-
-    public void setMobileNumber(String mobileNumber) {
-        this.mobileNumber = mobileNumber;
-    }
-
-    public Gender getGender() {
-        return gender;
-    }
-
-    public void setGender(Gender gender) {
-        this.gender = gender;
-    }
-
-    public LocalDate getDateOfBirth() {
-        return dateOfBirth;
-    }
-
-    public void setDateOfBirth(LocalDate dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
-    }
-
     public String getStaffId() {
         return staffId;
     }
@@ -104,44 +73,36 @@ public class StaffResponse {
         this.staffId = staffId;
     }
 
-    public String getDesignation() {
-        return designation;
+    public String getFirstNm() {
+        return firstNm;
     }
 
-    public void setDesignation(String designation) {
-        this.designation = designation;
+    public void setFirstNm(String firstNm) {
+        this.firstNm = firstNm;
     }
 
-    public LocalDate getDateOfJoining() {
-        return dateOfJoining;
+    public String getLastNm() {
+        return lastNm;
     }
 
-    public void setDateOfJoining(LocalDate dateOfJoining) {
-        this.dateOfJoining = dateOfJoining;
+    public void setLastNm(String lastNm) {
+        this.lastNm = lastNm;
     }
 
-    public Set<String> getRoles() {
-        return roles;
+    public String getAddr1() {
+        return addr1;
     }
 
-    public void setRoles(Set<String> roles) {
-        this.roles = roles;
+    public void setAddr1(String addr1) {
+        this.addr1 = addr1;
     }
 
-    public String getAddressOne() {
-        return addressOne;
+    public String getAddr2() {
+        return addr2;
     }
 
-    public void setAddressOne(String addressOne) {
-        this.addressOne = addressOne;
-    }
-
-    public String getAddressTwo() {
-        return addressTwo;
-    }
-
-    public void setAddressTwo(String addressTwo) {
-        this.addressTwo = addressTwo;
+    public void setAddr2(String addr2) {
+        this.addr2 = addr2;
     }
 
     public String getCity() {
@@ -168,68 +129,76 @@ public class StaffResponse {
         this.country = country;
     }
 
-    public String getPincode() {
-        return pincode;
+    public String getPin() {
+        return pin;
     }
 
-    public void setPincode(String pincode) {
-        this.pincode = pincode;
+    public void setPin(String pin) {
+        this.pin = pin;
     }
 
-    public String getEmergencyContactName() {
-        return emergencyContactName;
+    public String getEmail() {
+        return email;
     }
 
-    public void setEmergencyContactName(String emergencyContactName) {
-        this.emergencyContactName = emergencyContactName;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public String getEmergencyContactNumber() {
-        return emergencyContactNumber;
+    public String getMobileNum() {
+        return mobileNum;
     }
 
-    public void setEmergencyContactNumber(String emergencyContactNumber) {
-        this.emergencyContactNumber = emergencyContactNumber;
+    public void setMobileNum(String mobileNum) {
+        this.mobileNum = mobileNum;
     }
 
-    public String getCreatedBy() {
-        return createdBy;
+    public LocalDate getDateOfJoining() {
+        return dateOfJoining;
     }
 
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
+    public void setDateOfJoining(LocalDate dateOfJoining) {
+        this.dateOfJoining = dateOfJoining;
     }
 
-    public LocalDateTime getCreatedDate() {
-        return createdDate;
+    public String getDesignation() {
+        return designation;
     }
 
-    public void setCreatedDate(LocalDateTime createdDate) {
-        this.createdDate = createdDate;
+    public void setDesignation(String designation) {
+        this.designation = designation;
     }
 
-    public String getUpdatedBy() {
-        return updatedBy;
+    public String getEmergencyContactNm() {
+        return emergencyContactNm;
     }
 
-    public void setUpdatedBy(String updatedBy) {
-        this.updatedBy = updatedBy;
+    public void setEmergencyContactNm(String emergencyContactNm) {
+        this.emergencyContactNm = emergencyContactNm;
     }
 
-    public LocalDateTime getUpdatedDate() {
-        return updatedDate;
+    public String getEmergencyContactNum() {
+        return emergencyContactNum;
     }
 
-    public void setUpdatedDate(LocalDateTime updatedDate) {
-        this.updatedDate = updatedDate;
+    public void setEmergencyContactNum(String emergencyContactNum) {
+        this.emergencyContactNum = emergencyContactNum;
     }
 
-    public String getProfileImage() {
-        return profileImage;
+    public String getProfileImg() {
+        return profileImg;
     }
 
-    public void setProfileImage(String profileImage) {
-        this.profileImage = profileImage;
+    public void setProfileImg(String profileImg) {
+        this.profileImg = profileImg;
+    }
+
+    public Gender getGender() {
+        return gender;
+    }
+
+    public void setGender(Gender gender) {
+        this.gender = gender;
     }
 
     public String getStatus() {
@@ -238,5 +207,76 @@ public class StaffResponse {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(String enabled) {
+        this.enabled = enabled;
+    }
+
+    public LocalDate getDob() {
+        return dob;
+    }
+
+    public void setDob(LocalDate dob) {
+        this.dob = dob;
+    }
+
+    public LocalDateTime getCreatedDt() {
+        return createdDt;
+    }
+
+    public void setCreatedDt(LocalDateTime createdDt) {
+        this.createdDt = createdDt;
+    }
+
+    public Set<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<String> roles) {
+        this.roles = roles;
+    }
+    
+    
+
+    public LocalDateTime getUpdatedDt() {
+		return updatedDt;
+	}
+
+	public void setUpdatedDt(LocalDateTime updatedDt) {
+		this.updatedDt = updatedDt;
+	}
+
+	@Override
+    public String toString() {
+        return "StaffResponse{" +
+                "id=" + id +
+                ", staffId='" + staffId + '\'' +
+                ", firstNm='" + firstNm + '\'' +
+                ", lastNm='" + lastNm + '\'' +
+                ", addr1='" + addr1 + '\'' +
+                ", addr2='" + addr2 + '\'' +
+                ", city='" + city + '\'' +
+                ", state='" + state + '\'' +
+                ", country='" + country + '\'' +
+                ", pin='" + pin + '\'' +
+                ", email='" + email + '\'' +
+                ", mobileNum='" + mobileNum + '\'' +
+                ", dateOfJoining=" + dateOfJoining +
+                ", designation='" + designation + '\'' +
+                ", emergencyContactNm='" + emergencyContactNm + '\'' +
+                ", emergencyContactNum='" + emergencyContactNum + '\'' +
+                ", profileImg='" + profileImg + '\'' +
+                ", gender=" + gender +
+                ", status='" + status + '\'' +
+                ", enabled='" + enabled + '\'' +
+                ", dob=" + dob +
+                ", createdDt=" + createdDt +
+                ", roles=" + roles +
+                '}';
     }
 }
