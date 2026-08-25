@@ -76,6 +76,8 @@ public interface StaffMapper {
     @Mapping(source = "addr1", target = "addr1")
     @Mapping(source = "addr2", target = "addr2")
     @Mapping(source = "pin", target = "pin")
+    @Mapping(source = "emailId", target = "email")
+    @Mapping(source = "gender", target = "gender")
     @Mapping(source = "emergencyContactNm", target = "emergencyContactNm")
     @Mapping(source = "emergencyContactNum", target = "emergencyContactNum")
     @Mapping(source = "createdDt", target = "createdDt")
