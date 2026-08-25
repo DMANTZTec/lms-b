@@ -197,18 +197,7 @@ public class StaffServiceImpl implements StaffService {
 			throw new OtpSendingException("Failed to send OTP via " + channel + ": " + ex.getMessage(), ex);
 		}
 
-		// Existing password setup email
-		// Send password setup email
-		emailService.sendStaffPasswordSetupMail(savedStaff.getEmailId(), savedStaff.getFirstNm(),
-				passwordToken.getToken());
-
-		logger.info("Staff password setup email sent to: {}", savedStaff.getEmailId());
-
-		// Send password setup SMS
-		smsService.sendStaffPasswordSetupSms(savedStaff.getMobileNum(), savedStaff.getFirstNm(),
-				passwordToken.getToken());
-
-		logger.info("Staff password setup SMS sent to: {}", savedStaff.getMobileNum());
+		
 
 		logger.info("Staff creation completed successfully for staffId: {}", savedStaff.getStaffId());
 

@@ -75,7 +75,7 @@ public class SecurityConfig {
                         .hasRole("ADMIN")
 
                         .requestMatchers(HttpMethod.PUT,
-                                "/api/staff/profile-image")
+                                "/api/staff/*/profile-image")
                         .hasRole("ADMIN")
 
                         // STAFF PUBLIC APIs
