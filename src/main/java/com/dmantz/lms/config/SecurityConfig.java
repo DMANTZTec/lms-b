@@ -47,7 +47,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/subject/view-subjects").permitAll()
                         .requestMatchers("/api/success-stories",
                         		"/api/success-stories/**").permitAll()
-                        
+                        .requestMatchers("/api/learner-paths",
+                                "/api/learner-paths/**").permitAll()
 
 
                         // STUDENT PUBLIC APIs
