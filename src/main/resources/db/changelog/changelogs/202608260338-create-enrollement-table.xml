@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+           http://www.liquibase.org/xml/ns/dbchangelog
+           http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.15.xsd">
+
+    <changeSet id="202608260338" author="afsheen">
+
+        <createTable tableName="enrollment">
+
+            <!-- Primary Key -->
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <!-- Student -->
+            <column name="student_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- Single Course Enrollment -->
+            <column name="course_id" type="BIGINT"/>
+
+            <!-- Program Enrollment -->
+            <column name="program_id" type="BIGINT"/>
+
+            <!-- COURSE / PROGRAM -->
+            <column name="enrollment_type" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- Enrollment Date -->
+            <column name="enrollment_date"
+                    type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- PENDING / ACTIVE / CANCELLED -->
+            <column name="status" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- PENDING / PAID / FAILED -->
+            <column name="payment_status" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- Audit Fields -->
+            <column name="created_dt"
+                    type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP"/>
+
+            <column name="created_by" type="BIGINT"/>
+
+            <column name="updated_dt"
+                    type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP"/>
+
+            <column name="updated_by" type="BIGINT"/>
+
+        </createTable>
+
+
+        <!-- Student Foreign Key -->
+
+        <addForeignKeyConstraint
+                baseTableName="enrollment"
+                baseColumnNames="student_id"
+                referencedTableName="student"
+                referencedColumnNames="id"
+                constraintName="fk_enrollment_student"/>
+
+
+        <!-- Course Foreign Key -->
+
+        <addForeignKeyConstraint
+                baseTableName="enrollment"
+                baseColumnNames="course_id"
+                referencedTableName="course"
+                referencedColumnNames="id"
+                constraintName="fk_enrollment_course"/>
+
+
+        <!-- Program Foreign Key -->
+
+        <addForeignKeyConstraint
+                baseTableName="enrollment"
+                baseColumnNames="program_id"
+                referencedTableName="program"
+                referencedColumnNames="id"
+                constraintName="fk_enrollment_program"/>
+
+    </changeSet>
+    
+       <changeSet id="202608261500" author="afsheen">
+
+        <!-- Drop existing foreign keys -->
+
+        <dropForeignKeyConstraint
+                baseTableName="enrollment"
+                constraintName="fk_enrollment_student"/>
+
+        <dropForeignKeyConstraint
+                baseTableName="enrollment"
+                constraintName="fk_enrollment_course"/>
+
+        <dropForeignKeyConstraint
+                baseTableName="enrollment"
+                constraintName="fk_enrollment_program"/>
+
+
+        <!-- Change student_id from BIGINT to CHAR(7) -->
+
+        <modifyDataType
+                tableName="enrollment"
+                columnName="student_id"
+                newDataType="CHAR(7)"/>
+
+
+        <!-- Change course_id from BIGINT to VARCHAR -->
+
+        <modifyDataType
+                tableName="enrollment"
+                columnName="course_id"
+                newDataType="VARCHAR(50)"/>
+
+
+        <!-- Change program_id from BIGINT to VARCHAR -->
+
+        <modifyDataType
+                tableName="enrollment"
+                columnName="program_id"
+                newDataType="VARCHAR(50)"/>
+
+
+        <!-- Add Student Foreign Key -->
+
+        <addForeignKeyConstraint
+                baseTableName="enrollment"
+                baseColumnNames="student_id"
+                referencedTableName="student"
+                referencedColumnNames="student_id"
+                constraintName="fk_enrollment_student"/>
+
+
+        <!-- Add Course Foreign Key -->
+
+        <addForeignKeyConstraint
+                baseTableName="enrollment"
+                baseColumnNames="course_id"
+                referencedTableName="course"
+                referencedColumnNames="course_id"
+                constraintName="fk_enrollment_course"/>
+
+
+        <!-- Add Program Foreign Key -->
+
+        <addForeignKeyConstraint
+                baseTableName="enrollment"
+                baseColumnNames="program_id"
+                referencedTableName="program"
+                referencedColumnNames="program_id"
+                constraintName="fk_enrollment_program"/>
+
+    </changeSet>
+
+</databaseChangeLog>

@@ -103,5 +103,7 @@
 	<include file="db/changelog/changelogs/202608071117-create-social-media-table.xml"/>
 	
 	<include file = "db/changelog/changelogs/202608261219-create-learner_path-table.xml"/>
+	
+	<include file = "db/changelog/changelogs/202608260338-create-enrollement-table.xml"/>
 
 </databaseChangeLog>
