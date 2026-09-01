@@ -50,5 +50,12 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
     
  // ClassScheduleRepository
  	List<ClassSchedule> findByClassBatch_Id(Long batchId);
+ 	
+ 	  List<ClassSchedule>
+ 	    findByClassBatchIdInAndClassDateBetweenOrderByClassDateAscStartTimeAsc(
+ 	            List<Long> batchIds,
+ 	            LocalDate startDate,
+ 	            LocalDate endDate
+ 	    );
 
 }

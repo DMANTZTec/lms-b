@@ -1,5 +1,6 @@
 package com.dmantz.lms.repository;
 
+import com.dmantz.lms.entity.Enrollment;
 import com.dmantz.lms.entity.Staff;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,4 +36,5 @@ public interface StaffRepository extends JpaRepository<Staff, Long> {
 	Page<Staff> findByStatus(String status, Pageable pageable);
 
 	Optional<Object> findByMobileNum(String mobileNum);
+
 }
