@@ -1,57 +1,42 @@
 package com.dmantz.lms.dto.request;
 
-import com.dmantz.lms.entity.Gender;
-import jakarta.validation.constraints.NotBlank;
-
 import java.time.LocalDate;
 import java.util.Set;
 
+import com.dmantz.lms.entity.Gender;
+
 public class StaffUpdateRequest {
 
-    @NotBlank
-    private String firstName;
+    private String firstNm;
 
-    @NotBlank
-    private String lastName;
+    private String lastNm;
 
     private String emailId;
-    private String mobileNumber;
+
+    private String mobileNum;
+
+    private LocalDate dob;
 
     private Gender gender;
 
-    private LocalDate dateOfBirth;
-
-    private String designation;
-
     private LocalDate dateOfJoining;
 
-    private Set<String> roles;
+    private Set<Long> roleIds;
 
-    private String addressOne;
-    private String addressTwo;
-    private String city;
-    private String state;
-    private String country;
-    private String pincode;
-
-    private String emergencyContactName;
-    private String emergencyContactNumber;
-
-
-    public String getFirstName() {
-        return firstName;
+    public String getFirstNm() {
+        return firstNm;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public void setFirstNm(String firstNm) {
+        this.firstNm = firstNm;
     }
 
-    public String getLastName() {
-        return lastName;
+    public String getLastNm() {
+        return lastNm;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public void setLastNm(String lastNm) {
+        this.lastNm = lastNm;
     }
 
     public String getEmailId() {
@@ -62,12 +47,20 @@ public class StaffUpdateRequest {
         this.emailId = emailId;
     }
 
-    public String getMobileNumber() {
-        return mobileNumber;
+    public String getMobileNum() {
+        return mobileNum;
     }
 
-    public void setMobileNumber(String mobileNumber) {
-        this.mobileNumber = mobileNumber;
+    public void setMobileNum(String mobileNum) {
+        this.mobileNum = mobileNum;
+    }
+
+    public LocalDate getDob() {
+        return dob;
+    }
+
+    public void setDob(LocalDate dob) {
+        this.dob = dob;
     }
 
     public Gender getGender() {
@@ -78,22 +71,6 @@ public class StaffUpdateRequest {
         this.gender = gender;
     }
 
-    public LocalDate getDateOfBirth() {
-        return dateOfBirth;
-    }
-
-    public void setDateOfBirth(LocalDate dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
-    }
-
-    public String getDesignation() {
-        return designation;
-    }
-
-    public void setDesignation(String designation) {
-        this.designation = designation;
-    }
-
     public LocalDate getDateOfJoining() {
         return dateOfJoining;
     }
@@ -102,75 +79,11 @@ public class StaffUpdateRequest {
         this.dateOfJoining = dateOfJoining;
     }
 
-    public Set<String> getRoles() {
-        return roles;
+    public Set<Long> getRoleIds() {
+        return roleIds;
     }
 
-    public void setRoles(Set<String> roles) {
-        this.roles = roles;
-    }
-
-    public String getAddressOne() {
-        return addressOne;
-    }
-
-    public void setAddressOne(String addressOne) {
-        this.addressOne = addressOne;
-    }
-
-    public String getAddressTwo() {
-        return addressTwo;
-    }
-
-    public void setAddressTwo(String addressTwo) {
-        this.addressTwo = addressTwo;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public String getState() {
-        return state;
-    }
-
-    public void setState(String state) {
-        this.state = state;
-    }
-
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
-    public String getPincode() {
-        return pincode;
-    }
-
-    public void setPincode(String pincode) {
-        this.pincode = pincode;
-    }
-
-    public String getEmergencyContactName() {
-        return emergencyContactName;
-    }
-
-    public void setEmergencyContactName(String emergencyContactName) {
-        this.emergencyContactName = emergencyContactName;
-    }
-
-    public String getEmergencyContactNumber() {
-        return emergencyContactNumber;
-    }
-
-    public void setEmergencyContactNumber(String emergencyContactNumber) {
-        this.emergencyContactNumber = emergencyContactNumber;
+    public void setRoleIds(Set<Long> roleIds) {
+        this.roleIds = roleIds;
     }
 }

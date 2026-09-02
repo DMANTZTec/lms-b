@@ -27,7 +27,7 @@ public interface StaffService {
 
     Page<StaffResponse> getAllStaff(int page, int size);
 
-    StaffResponse updateStaff(String staffId, StaffUpdateRequest request);
+    StaffResponse updateStaff1(String staffId, StaffUpdateReq1 request);
 
     StaffResponse updateProfileImage(String staffId, MultipartFile file);
 
@@ -43,6 +43,11 @@ public interface StaffService {
     StaffResponse registerInitialAdmin(StaffRegistrationRequest request);
     
     void deleteProfileImage(String staffId);
+    
+    StaffResponse updateStaff(
+            String staffId,
+            StaffUpdateRequest request
+    );
 
 }
 

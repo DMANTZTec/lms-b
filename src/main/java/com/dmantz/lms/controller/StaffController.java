@@ -107,7 +107,7 @@ public class StaffController {
 		return ResponseEntity.ok(response);
 	}
 
-	@PutMapping("/{staffId}")
+	@PutMapping("/{staffId}/update")
 	public ResponseEntity<StaffResponse> updateStaff(@PathVariable String staffId,
 			@Valid @RequestBody StaffUpdateRequest request) {
 
@@ -189,4 +189,15 @@ public class StaffController {
 		return ResponseEntity.ok(Map.of("status", "SUCCESS", "message", "Profile image deleted successfully"));
 	}
 
+	
+	@PutMapping("/{staffId}/update1")
+	public ResponseEntity<StaffResponse> updateStaff(@PathVariable String staffId,
+			@Valid @RequestBody StaffUpdateReq1 request) {
+
+		logger.info("Request received to update staff with staffId: {}", staffId);
+		StaffResponse response = staffService.updateStaff1(staffId, request);
+
+		logger.info("Staff updated successfully with staffId: {}", staffId);
+		return ResponseEntity.ok(response);
+	}
 }

@@ -428,7 +428,7 @@ public class StaffServiceImpl implements StaffService {
 		return response;
 	}
 
-	@Override
+@Override
 	@Transactional
 	public StaffResponse updateStaff(
 	        String staffId,
@@ -436,28 +436,28 @@ public class StaffServiceImpl implements StaffService {
 
 	    Staff staff = staffRepository.findByStaffId(staffId)
 	            .orElseThrow(() ->
-	                    new ResourceNotFoundException("Staff not found"));
+	                    new RuntimeException(
+	                            "Staff not found with ID: " + staffId
+	                    ));
 
-	    // DTO → Entity
+	    // Update all normal fields using MapStruct
 	    staffMapper.updateEntity(request, staff);
 
-	    // Update roles
-	    if (request.getRoles() != null && !request.getRoles().isEmpty()) {
+	    // Update roles separately
+	    Set<Role> roles = new HashSet<>(
+	            roleRepository.findAllById(request.getRoleIds())
+	    );
 
-	        Set<Role> roles = request.getRoles()
-	                .stream()
-	                .map(roleName -> roleRepository.findByRoleNm(roleName)
-	                        .orElseThrow(() ->
-	                                new ResourceNotFoundException(
-	                                        "Role not found: " + roleName)))
-	                .collect(Collectors.toSet());
-
-	        staff.setRoles(roles);
+	    if (roles.size() != request.getRoleIds().size()) {
+	        throw new RuntimeException(
+	                "One or more selected roles are invalid"
+	        );
 	    }
+
+	    staff.setRoles(roles);
 
 	    Staff updatedStaff = staffRepository.save(staff);
 
-	    // Entity → Response
 	    return staffMapper.toResponse(updatedStaff);
 	}
 	@Override
@@ -789,6 +789,39 @@ public class StaffServiceImpl implements StaffService {
 
 			throw new RuntimeException("Failed to delete profile image from Strapi", e);
 		}
+	}
+	
+	@Override
+	@Transactional
+	public StaffResponse updateStaff1(
+	        String staffId,
+	        StaffUpdateReq1 request) {
+
+	    Staff staff = staffRepository.findByStaffId(staffId)
+	            .orElseThrow(() ->
+	                    new ResourceNotFoundException("Staff not found"));
+
+	    // DTO → Entity
+	    staffMapper.updateEntity(request, staff);
+
+	    // Update roles
+	    if (request.getRoles() != null && !request.getRoles().isEmpty()) {
+
+	        Set<Role> roles = request.getRoles()
+	                .stream()
+	                .map(roleName -> roleRepository.findByRoleNm(roleName)
+	                        .orElseThrow(() ->
+	                                new ResourceNotFoundException(
+	                                        "Role not found: " + roleName)))
+	                .collect(Collectors.toSet());
+
+	        staff.setRoles(roles);
+	    }
+
+	    Staff updatedStaff = staffRepository.save(staff);
+
+	    // Entity → Response
+	    return staffMapper.toResponse(updatedStaff);
 	}
 
 	@Override
