@@ -1,0 +1,129 @@
+# Copyright (c) 2026 DMANTZ Technologies Pvt Ltd. All rights reserved.
+# Common properties shared across all environments.
+#
+# Activate an environment profile with:
+# --spring.profiles.active=<profile>
+#
+# Examples:
+# --spring.profiles.active=local
+# --spring.profiles.active=dev
+# --spring.profiles.active=uat
+# --spring.profiles.active=prod
+
+server:
+  port: 9090
+  servlet:
+    context-path: /lms
+
+spring:
+  application:
+    name: lms-b
+
+  # ------------------------------------------
+  # Database
+  # ------------------------------------------
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 20
+      idle-timeout: 60000
+      connection-timeout: 30000
+
+  # ------------------------------------------
+  # JPA / Hibernate
+  # ------------------------------------------
+  jpa:
+    generate-ddl: false
+    show-sql: false
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  # ------------------------------------------
+  # Liquibase
+  # ------------------------------------------
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    default-schema: lms_db
+    drop-first: false
+
+  # ------------------------------------------
+  # Mail
+  # ------------------------------------------
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    default-encoding: UTF-8
+    test-connection: false
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+  # ------------------------------------------
+  # File Upload
+  # ------------------------------------------
+  servlet:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB
+
+# ------------------------------------------
+# Swagger / OpenAPI
+# ------------------------------------------
+springdoc:
+  swagger-ui:
+    persistAuthorization: true
+
+# ------------------------------------------
+# Twilio
+# Credentials should be supplied through
+# environment-specific configuration.
+# ------------------------------------------
+twilio:
+  account:
+    sid: ${TWILIO_ACCOUNT_SID}
+  auth:
+    token: ${TWILIO_AUTH_TOKEN}
+  from:
+    number: ${TWILIO_FROM_NUMBER}
+
+# ------------------------------------------
+# Strapi
+# ------------------------------------------
+strapi:
+  url: ${STRAPI_URL:http://localhost:1337}
+  api:
+    token: ${STRAPI_API_TOKEN}
+
+# ------------------------------------------
+# Application Registration
+# ------------------------------------------
+registrationverfiy:
+  method: emailOTP
+
+# ------------------------------------------
+# Razorpay
+# Credentials should be supplied through
+# environment variables.
+# ------------------------------------------
+razorpay:
+  key-id: ${RAZORPAY_KEY_ID}
+  key-secret: ${RAZORPAY_KEY_SECRET}
+
+# ------------------------------------------
+# Logging
+# ------------------------------------------
+logging:
+  level:
+    com.dmantz.lms: INFO
+    org.springframework.security: INFO
