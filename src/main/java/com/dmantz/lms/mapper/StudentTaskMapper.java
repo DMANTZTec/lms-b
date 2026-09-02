@@ -1,51 +1,45 @@
 package com.dmantz.lms.mapper;
 
-import com.dmantz.lms.dto.request.StudentTaskUpdateRequest;
+import com.dmantz.lms.dto.request.StudentTaskRequest;
 import com.dmantz.lms.dto.response.StudentTaskResponse;
 import com.dmantz.lms.entity.StudentTask;
-import com.dmantz.lms.entity.TopicReference;
 
-import org.mapstruct.BeanMapping;
+import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.ArrayList;
 
 @Mapper(componentModel = "spring")
 public interface StudentTaskMapper {
 
-    @Mapping(source = "student.studentId", target = "studentId")
-    @Mapping(source = "topic.id", target = "topicId")
-    @Mapping(source = "topic.topicNm", target = "topicName")
-    @Mapping(source = "topic.references", target = "topicReferences")
+    // ================= REQUEST -> ENTITY =================
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "course", ignore = true)
+    @Mapping(target = "chapter", ignore = true)
+    @Mapping(target = "topic", ignore = true)
+    @Mapping(target = "student", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "startDt", ignore = true)
+    @Mapping(target = "endDt", ignore = true)
+    @Mapping(target = "needHelp", ignore = true)
+    StudentTask toEntity(StudentTaskRequest request);
+
+    // ================= ENTITY -> RESPONSE =================
+    @Mapping(target = "id", expression = "java(String.valueOf(task.getId()))")
+    @Mapping(target = "tags", ignore = true)
     StudentTaskResponse toResponse(StudentTask task);
 
-    default List<Map<String, Object>> mapTopicReferences(List<TopicReference> references) {
-
-        return references == null
-                ? List.of()
-                : references.stream()
-                .map(TopicReference::getRefValue)
-                .filter(Objects::nonNull)
-                .toList();
+    @AfterMapping
+    default void buildTags(StudentTask task, @MappingTarget StudentTaskResponse response) {
+        var tags = new ArrayList<String>();
+        if (task.getCourse() != null) {
+            tags.add(task.getCourse().getCourseTitle());
+        }
+        if (task.getTopic() != null) {
+            tags.add(task.getTopic().getTopicNm());
+        }
+        response.setTags(tags);
     }
-    
-    @BeanMapping(
-            ignoreByDefault = true,
-            nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
-    )
-    @Mapping(source = "commitUrl", target = "commitUrl")
-    @Mapping(source = "status", target = "status")
-    @Mapping(source = "needHelp", target = "needHelp")
-    @Mapping(source = "studentCommentTxt", target = "studentCommentTxt")
-    @Mapping(source = "reviewerCommentTxt", target = "reviewerCommentTxt")
-    void updateTaskFromRequest(
-    		StudentTaskUpdateRequest request,
-            @MappingTarget StudentTask task);
-
-    
 }

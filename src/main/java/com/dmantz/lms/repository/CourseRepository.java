@@ -29,4 +29,6 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     boolean existsByCourseIdAndIsDeletedFalse(String courseId);
     
     List<Course> findByIsDeletedFalse();
+    
+    Optional<Course> findByCourseId(String courseId);
 }

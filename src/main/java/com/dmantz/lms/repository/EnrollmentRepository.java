@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.dmantz.lms.entity.Enrollment;
+import com.dmantz.lms.entity.EnrollmentStatus;
 
 @Repository
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
@@ -21,4 +22,6 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
             String studentId,
             String programId
     );
+    
+
 }

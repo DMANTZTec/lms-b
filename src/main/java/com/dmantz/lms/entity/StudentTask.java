@@ -9,39 +9,51 @@ import java.time.LocalDateTime;
 @Table(name = "student_task")
 public class StudentTask extends AuditFields {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "student_id", referencedColumnName = "student_id", nullable = false, columnDefinition = "CHAR(7)")
-	private Student student;
+    @Column(name = "title", nullable = false)
+    private String title;
 
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "topic_id", nullable = false)
-	private Topic topic;
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
 
-	@Column(name = "start_dt")
-	private LocalDateTime startDt;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "course_id", referencedColumnName = "course_id", nullable = false)
+    private Course course;
 
-	@Column(name = "end_dt")
-	private LocalDateTime endDt;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "chapter_id")
+    private Chapter chapter;
 
-	@Column(name = "commit_url", length = 500)
-	private String commitUrl;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "topic_id")
+    private Topic topic;
 
-	@Enumerated(EnumType.STRING)
-	@Column(name = "status", nullable = false, length = 50)
-	private StudentTaskStatus status;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "student_id", referencedColumnName = "student_id", nullable = false, columnDefinition = "CHAR(7)")
+    private Student student;
 
-	@Column(name = "need_help")
+    @Column(name = "assigned_by", nullable = false)
+    private Long assignedBy;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "assigned_by_type", nullable = false)
+    private AssignedByType assignedByType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private StudentTaskStatus status;
+
+    @Column(name = "start_dt")
+    private LocalDateTime startDt;
+
+    @Column(name = "end_dt")
+    private LocalDateTime endDt;
+    
+    @Column(name = "need_help")
 	private Boolean needHelp = false;
-
-	@Column(name = "student_comment_txt", length = 1000)
-	private String studentCommentTxt;
-
-	@Column(name = "reviewer_comment_txt", length = 1000)
-	private String reviewerCommentTxt;
 
 	public Long getId() {
 		return id;
@@ -49,6 +61,46 @@ public class StudentTask extends AuditFields {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public Course getCourse() {
+		return course;
+	}
+
+	public void setCourse(Course course) {
+		this.course = course;
+	}
+
+	public Chapter getChapter() {
+		return chapter;
+	}
+
+	public void setChapter(Chapter chapter) {
+		this.chapter = chapter;
+	}
+
+	public Topic getTopic() {
+		return topic;
+	}
+
+	public void setTopic(Topic topic) {
+		this.topic = topic;
 	}
 
 	public Student getStudent() {
@@ -59,12 +111,28 @@ public class StudentTask extends AuditFields {
 		this.student = student;
 	}
 
-	public Topic getTopic() {
-		return topic;
+	public Long getAssignedBy() {
+		return assignedBy;
 	}
 
-	public void setTopic(Topic topic) {
-		this.topic = topic;
+	public void setAssignedBy(Long assignedBy) {
+		this.assignedBy = assignedBy;
+	}
+
+	public AssignedByType getAssignedByType() {
+		return assignedByType;
+	}
+
+	public void setAssignedByType(AssignedByType assignedByType) {
+		this.assignedByType = assignedByType;
+	}
+
+	public StudentTaskStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(StudentTaskStatus status) {
+		this.status = status;
 	}
 
 	public LocalDateTime getStartDt() {
@@ -83,51 +151,13 @@ public class StudentTask extends AuditFields {
 		this.endDt = endDt;
 	}
 
-	public String getCommitUrl() {
-		return commitUrl;
-	}
-
-	public void setCommitUrl(String commitUrl) {
-		this.commitUrl = commitUrl;
-	}
-
-	public StudentTaskStatus getStatus() {
-		return status;
-	}
-
-	public void setStatus(StudentTaskStatus status) {
-		this.status = status;
-	}
-
 	public Boolean getNeedHelp() {
 		return needHelp;
 	}
 
 	public void setNeedHelp(Boolean needHelp) {
 		this.needHelp = needHelp;
-	}
-
-	public String getStudentCommentTxt() {
-		return studentCommentTxt;
-	}
-
-	public void setStudentCommentTxt(String studentCommentTxt) {
-		this.studentCommentTxt = studentCommentTxt;
-	}
-
-	public String getReviewerCommentTxt() {
-		return reviewerCommentTxt;
-	}
-
-	public void setReviewerCommentTxt(String reviewerCommentTxt) {
-		this.reviewerCommentTxt = reviewerCommentTxt;
-	}
-
-	@Override
-	public String toString() {
-		return "StudentTask{" + "id=" + id + ", student=" + student + ", topic=" + topic + ", startDt=" + startDt
-				+ ", endDt=" + endDt + ", commitUrl='" + commitUrl + '\'' + ", status=" + status + ", needHelp="
-				+ needHelp + ", studentCommentTxt='" + studentCommentTxt + '\'' + ", reviewerCommentTxt='"
-				+ reviewerCommentTxt + '\'' + '}';
-	}
+	} 
+    
+    
 }

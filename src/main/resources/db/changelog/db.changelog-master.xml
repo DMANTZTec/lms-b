@@ -108,6 +108,4 @@
 	
 	<include file = "db/changelog/changelogs/202609011103-create-enrollment-batch-table.xml"/>
 	
-	
-
 </databaseChangeLog>

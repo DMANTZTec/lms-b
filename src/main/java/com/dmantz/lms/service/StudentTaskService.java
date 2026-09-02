@@ -1,26 +1,26 @@
 package com.dmantz.lms.service;
 
+import java.util.List;
+
 import com.dmantz.lms.dto.request.StudentTaskRequest;
 import com.dmantz.lms.dto.request.StudentTaskUpdateRequest;
+import com.dmantz.lms.dto.response.ChapterDropdownResponse;
+import com.dmantz.lms.dto.response.CourseDropdownResponse;
 import com.dmantz.lms.dto.response.HoursSpentResponse;
 import com.dmantz.lms.dto.response.StudentTaskListResponse;
 import com.dmantz.lms.dto.response.StudentTaskResponse;
+import com.dmantz.lms.dto.response.TopicDropdownResponse;
 import com.dmantz.lms.entity.StudentNeedHelpRequest;
 
 public interface StudentTaskService {
 
 	StudentTaskResponse addTask(StudentTaskRequest request);
 
-	StudentTaskResponse updateNeedHelp(StudentNeedHelpRequest request);
+	List<CourseDropdownResponse> getEnrolledCourses(String studentId);
 
-	HoursSpentResponse getHoursSpent(String studentId);
+	List<ChapterDropdownResponse> getChaptersByCourse(String courseId);
 
-	StudentTaskResponse updateTask(StudentTaskUpdateRequest request);
+	List<TopicDropdownResponse> getTopicsByChapter(Long chapterId);
 
-	String deleteTask(String studentId, Long topicId);
-
-	StudentTaskListResponse getStudentTasks(String studentId, String status);
-
-	StudentTaskResponse markTaskCompleted(Long taskId, String studentId);
-
+	StudentTaskListResponse getTasksByStatus(String studentId, String statusFilter);
 }

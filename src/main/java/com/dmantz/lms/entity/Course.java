@@ -17,7 +17,7 @@ public class Course extends AuditFields{
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(name = "course_id")
+	@Column(name = "course_id", unique = true)
 	private String courseId;
 
 	@Column(name = "course_title")
