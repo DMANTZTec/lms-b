@@ -30,4 +30,5 @@ public interface EnrollmentBatchRepository
     findByEnrollmentStudentStudentId(String studentId);
 
     long countByClassBatchId(Long batchId);
+
 }

@@ -20,10 +20,12 @@ public interface EnrollmentMapper {
         target = "studentName"
     )
 
-    @Mapping(source = "course.id", target = "courseId")
-    @Mapping(source = "course.courseTitle", target = "courseTitle")
+    @Mapping(
+            source = "course.courseId",
+            target = "courseId"
+    )    @Mapping(source = "course.courseTitle", target = "courseTitle")
 
-    @Mapping(source = "program.id", target = "programId")
+    @Mapping(source = "program.programId", target = "programId")
 
     // Change programName if your Program entity has a different field
     @Mapping(source = "program.programTitle", target = "programName")

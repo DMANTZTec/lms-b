@@ -1,8 +1,8 @@
 package com.dmantz.lms.controller;
 
 import com.dmantz.lms.dto.request.AssignStudentToBatchRequest;
+import com.dmantz.lms.dto.response.DailyScheduleResponse;
 import com.dmantz.lms.dto.response.EnrollmentBatchResponse;
-import com.dmantz.lms.dto.response.StudentWeeklyScheduleResponse;
 import com.dmantz.lms.service.EnrollmentBatchService;
 
 import jakarta.validation.Valid;
@@ -110,23 +110,23 @@ public class EnrollmentBatchController {
     // 5. STUDENT WEEKLY SCHEDULE
     // ==========================================================
 
-    @GetMapping(
-            "/students/{studentId}/weekly-schedule"
-    )
-    public ResponseEntity<
-            List<StudentWeeklyScheduleResponse>>
-    getStudentWeeklySchedule(
-            @PathVariable String studentId,
+    @GetMapping("/students/{studentId}/weekly-schedule")
+    public List<DailyScheduleResponse> getStudentWeeklySchedule(
+            @PathVariable String studentId
+           ) {
 
-            @RequestParam
-            LocalDate startDate
-    ) {
-
-        return ResponseEntity.ok(
-                service.getStudentWeeklySchedule(
-                        studentId,
-                        startDate
-                )
+        return service.getStudentWeeklySchedule(
+                studentId
         );
     }
+    @GetMapping("/students/{studentId}/batches")
+    public ResponseEntity<List<EnrollmentBatchResponse>>
+    getEnrolledBatchesByStudentId(
+            @PathVariable String studentId) {
+
+        return ResponseEntity.ok(
+                service
+                        .getEnrolledBatchesByStudentId(studentId)
+        );
+    }   
 }
