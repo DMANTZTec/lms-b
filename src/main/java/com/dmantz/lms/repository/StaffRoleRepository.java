@@ -29,5 +29,11 @@ public interface StaffRoleRepository extends JpaRepository<StaffRole, Long> {
 	    Optional<StaffRole> findByStaff_IdAndRole_Id(Long staffPkId, Long roleId);
 
 	    boolean existsByStaff_IdAndRole_Id(Long staffPkId, Long roleId);
+	    
+	    // Add this
+	    boolean existsByStaff_IdAndRole_RoleNmIgnoreCase(
+	            Long staffPkId,
+	            String roleNm
+	    );
 
 }

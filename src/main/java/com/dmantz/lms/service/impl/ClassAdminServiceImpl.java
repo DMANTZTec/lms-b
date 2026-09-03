@@ -14,7 +14,9 @@ import com.dmantz.lms.repository.*;
 import com.dmantz.lms.service.ClassAdminService;
 import jakarta.transaction.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -46,13 +48,14 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 	private final TopicRepository topicRepository;
 	private final ClassTopicMapper classTopicMapper;
 	private final StaffCourseRepository staffCourseRepository;
+	private final StaffRoleRepository staffRoleRepository;
 
 	public ClassAdminServiceImpl(CourseRepository courseRepository, ClassBatchRepository classBatchRepository,
 			ClassBatchMapper classBatchMapper, ClassScheduleMapper classScheduleMapper, StaffRepository staffRepository,
 			ClassScheduleRepository classScheduleRepository, StudentRepository studentRepository,
 			StudentCourseRepository studentCourseRepository, StudentCourseMapper studentCourseMapper,
 			ClassTopicRepository classTopicRepository, TopicRepository topicRepository,
-			ClassTopicMapper classTopicMapper, StaffCourseRepository staffCourseRepository) {
+			ClassTopicMapper classTopicMapper, StaffCourseRepository staffCourseRepository, StaffRoleRepository staffRoleRepository) {
 		this.courseRepository = courseRepository;
 		this.classBatchRepository = classBatchRepository;
 		this.classBatchMapper = classBatchMapper;
@@ -66,6 +69,7 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 		this.topicRepository = topicRepository;
 		this.classTopicMapper = classTopicMapper;
 		this.staffCourseRepository = staffCourseRepository;
+		this.staffRoleRepository = staffRoleRepository;
 	}
 
 	@Override
@@ -398,16 +402,122 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 	}
 
 	@Override
-	public List<ClassScheduleResponse> getSchedulesByStaffId(String staffId) {
+	public List<InstructorScheduleResponse> getSchedulesByStaffId(
+	        String staffId,
+	        ScheduleFilter filter) {
 
-		logger.info("Fetching schedules for staffId: {}", staffId);
+	    logger.info(
+	            "Fetching schedules for instructorId: {} with filter: {}",
+	            staffId,
+	            filter
+	    );
 
-		List<ClassSchedule> schedules = classScheduleRepository.findByStaff_StaffId(staffId);
+	    Staff staff = staffRepository.findByStaffId(staffId)
+	            .orElseThrow(() ->
+	                    new ResourceNotFoundException(
+	                            "Staff not found with ID: " + staffId
+	                    )
+	            );
 
-		logger.debug("Found {} schedule(s) for staffId: {}", schedules.size(), staffId);
-		return classScheduleMapper.toDtoList(schedules);
+	    boolean isInstructor = staffRoleRepository
+	            .existsByStaff_IdAndRole_RoleNmIgnoreCase(
+	                    staff.getId(),
+	                    "INSTRUCTOR"
+	            );
+
+	    if (!isInstructor) {
+	        throw new ResourceNotFoundException(
+	                "Instructor not found with staff ID: " + staffId
+	        );
+	    }
+
+	    LocalDate today = LocalDate.now();
+
+	    List<ClassSchedule> schedules = switch (
+	            filter != null ? filter : ScheduleFilter.ALL
+	    ) {
+
+	        case WEEK -> {
+
+	            LocalDate startOfWeek =
+	                    today.with(DayOfWeek.MONDAY);
+
+	            LocalDate endOfWeek =
+	                    today.with(DayOfWeek.SUNDAY);
+
+	            yield classScheduleRepository
+	                    .findByStaff_StaffIdAndClassDateBetween(
+	                            staffId,
+	                            startOfWeek,
+	                            endOfWeek
+	                    );
+	        }
+
+	        case MONTH -> {
+
+	            LocalDate startOfMonth =
+	                    today.withDayOfMonth(1);
+
+	            LocalDate endOfMonth =
+	                    today.withDayOfMonth(today.lengthOfMonth());
+
+	            yield classScheduleRepository
+	                    .findByStaff_StaffIdAndClassDateBetween(
+	                            staffId,
+	                            startOfMonth,
+	                            endOfMonth
+	                    );
+	        }
+
+	        case ALL -> classScheduleRepository
+	                .findByStaff_StaffId(staffId);
+	    };
+
+	    return schedules.stream()
+	            .map(schedule -> {
+
+	                InstructorScheduleResponse response =
+	                        new InstructorScheduleResponse();
+
+	                response.setId(schedule.getId());
+
+	                response.setTime(
+	                        schedule.getStartTime()
+	                                .format(
+	                                        DateTimeFormatter.ofPattern(
+	                                                "hh:mm a"
+	                                        )
+	                                )
+	                );
+
+	                response.setDate(
+	                        schedule.getClassDate()
+	                                .format(
+	                                        DateTimeFormatter.ofPattern(
+	                                                "EEE, dd MMM yyyy",
+	                                                Locale.ENGLISH
+	                                        )
+	                                )
+	                );
+
+	                // Batch name from ClassBatch
+	                response.setBatchName(
+	                        schedule.getClassBatch().getClassName()
+	                );
+
+	                // Actual class/session name from ClassSchedule
+	                response.setClassName(
+	                        schedule.getClassName()
+	                );
+	                response.setCourse(
+	                        schedule.getClassBatch()
+	                                .getCourse()
+	                                .getCourseTitle()
+	                );
+	                return response;
+	            })
+	            .toList();
 	}
-
 	@Override
 	public List<ClassScheduleResponse> getStaffDailySchedule(String staffId, LocalDate date) {
 

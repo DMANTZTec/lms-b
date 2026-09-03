@@ -7,6 +7,8 @@ import org.apache.coyote.BadRequestException;
 
 import com.dmantz.lms.dto.request.*;
 import com.dmantz.lms.dto.response.*;
+import com.dmantz.lms.entity.ScheduleFilter;
+
 import jakarta.transaction.Transactional;
 
 public interface ClassAdminService {
@@ -25,8 +27,10 @@ public interface ClassAdminService {
 
 	List<ClassAdminStudentDetailsResponse> viewStudents();
 
-	List<ClassScheduleResponse> getSchedulesByStaffId(String staffId);
-
+	List<InstructorScheduleResponse> getSchedulesByStaffId(
+	        String staffId,
+	        ScheduleFilter filter
+	);
 	List<ClassScheduleResponse> getStaffDailySchedule(String staffId, LocalDate date);
 
 	void addTopicsToClass(Long batchId, AddClassTopicRequest request);

@@ -57,5 +57,11 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
  	            LocalDate startDate,
  	            LocalDate endDate
  	    );
+ 	  
+ 	    List<ClassSchedule> findByStaff_StaffIdAndClassDateBetween(
+ 	            String staffId,
+ 	            LocalDate startDate,
+ 	            LocalDate endDate
+ 	    );
 
 }

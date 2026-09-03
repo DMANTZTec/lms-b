@@ -2,6 +2,7 @@ package com.dmantz.lms.controller;
 
 import com.dmantz.lms.dto.request.*;
 import com.dmantz.lms.dto.response.*;
+import com.dmantz.lms.entity.ScheduleFilter;
 import com.dmantz.lms.service.ClassAdminService;
 import com.dmantz.lms.service.StudentDashboardService;
 import jakarta.validation.Valid;
@@ -125,15 +126,21 @@ public class ClassAdminController {
 		return ResponseEntity.ok(response);
 	}
 
-	@GetMapping("/schedules/staff/{staffId}")
-	public ResponseEntity<List<ClassScheduleResponse>> getSchedulesByStaff(@PathVariable String staffId) {
+	@GetMapping("/instructor/{staffId}")
+	public ResponseEntity<List<InstructorScheduleResponse>> getSchedulesByInstructor(
+	        @PathVariable String staffId,
+	        @RequestParam(
+	                required = false,
+	                defaultValue = "ALL"
+	        ) ScheduleFilter filter) {
 
-		logger.info("GET /schedules/staff/{} - Fetching schedules for staffId: {}", staffId, staffId);
+	    List<InstructorScheduleResponse> schedules =
+	    		classAdminService.getSchedulesByStaffId(
+	                    staffId,
+	                    filter
+	            );
 
-		List<ClassScheduleResponse> schedules = classAdminService.getSchedulesByStaffId(staffId);
-
-		logger.debug("Returning {} schedule(s) for staffId: {}", schedules.size(), staffId);
-		return ResponseEntity.ok(schedules);
+	    return ResponseEntity.ok(schedules);
 	}
 
 	@GetMapping("/staff/{staffId}/dailySchedules")
