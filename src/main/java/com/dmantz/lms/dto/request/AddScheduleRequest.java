@@ -11,7 +11,8 @@ public class AddScheduleRequest {
 	@NotNull
 	private Long BatchId;
 
-	@NotNull
+	// Instructor assignment is no longer accepted here — schedules automatically
+	// inherit every instructor already assigned to the batch (ClassBatch.instructors).
 	private String staffId;
 	private LocalDate classDate;
 	private LocalTime startTime;

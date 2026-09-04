@@ -142,6 +142,8 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 
 					schedule.setClassBatch(savedBatch);
 					schedule.setStaff(null);
+					// Every schedule inherits all of the batch's instructors.
+					schedule.setInstructors(new HashSet<>(instructors));
 					schedule.setClassDate(current);
 					schedule.setStartTime(slot.getStart());
 					schedule.setEndTime(slot.getEnd());
@@ -158,8 +160,8 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 
 					generatedSchedules.add(saved);
 
-					logger.debug("Schedule created: date={} batchId={} (no staff assigned)", current,
-							savedBatch.getId());
+					logger.debug("Schedule created: date={} batchId={} with {} instructor(s)", current,
+							savedBatch.getId(), instructors.size());
 
 					sessionNo++;
 				}
@@ -186,9 +188,7 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 			sr.setStartTime(s.getStartTime());
 			sr.setEndTime(s.getEndTime());
 
-			sr.setStaffId(s.getStaff() != null ? s.getStaff().getStaffId() : null);
-
-			sr.setStaffName(s.getStaff() != null ? s.getStaff().getFirstNm() + " " + s.getStaff().getLastNm() : null);
+			sr.setInstructors(resolveInstructors(s));
 
 			sr.setMode(s.getMode() != null ? s.getMode().name() : null);
 
@@ -249,7 +249,7 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 	@Override
 	public ClassScheduleResponse addScheduleToClass(AddScheduleRequest request) {
 
-		logger.info("Adding schedule to classId: {} with staffId: {}", request.getBatchId(), request.getStaffId());
+		logger.info("Adding schedule to classId: {}", request.getBatchId());
 
 		ClassSchedule schedule = classScheduleMapper.toEntity(request);
 
@@ -262,19 +262,17 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 			return new ResourceNotFoundException("Class not found with id: " + request.getBatchId());
 		});
 
-		Staff staff = staffRepository.findByStaffId(request.getStaffId()).orElseThrow(() -> {
-			logger.warn("Staff not found with id: {}", request.getStaffId());
-			return new ResourceNotFoundException("Staff not found with id: " + request.getStaffId());
-		});
-
 		schedule.setClassBatch(batch);
-		schedule.setStaff(staff);
+
+		// Not assigned manually here — every schedule inherits all of the
+		// batch's currently assigned instructors (ClassBatch.instructors).
+		schedule.setStaff(null);
+		schedule.setInstructors(new HashSet<>(batch.getInstructors()));
 
 		// Hardcoded values because DB columns are NOT NULL
 		schedule.setMode(ClassMode.ONLINE);
 		schedule.setMeetingLink("N/A");
 		schedule.setLocation("N/A");
-		schedule.setStaff(null);
 
 		ClassSchedule saved = classScheduleRepository.save(schedule);
 
@@ -309,14 +307,8 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 			schedule.setEndTime(request.getEndTime());
 		}
 
-		if (request.getStaffId() != null) {
-			logger.debug("Updating staff to id: {} for scheduleId: {}", request.getStaffId(), scheduleId);
-			Staff staff = staffRepository.findByStaffId(request.getStaffId()).orElseThrow(() -> {
-				logger.warn("Staff not found with id: {} during modifySchedule", request.getStaffId());
-				return new ResourceNotFoundException("Staff not found with id: " + request.getStaffId());
-			});
-			schedule.setStaff(staff);
-		}
+		// Instructors are not assigned per schedule — they are always derived from
+		// the schedule's batch (ClassBatch.instructors), so no staff update here.
 
 		ClassSchedule updated = classScheduleRepository.save(schedule);
 
@@ -446,7 +438,7 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 	                    today.with(DayOfWeek.SUNDAY);
 
 	            yield classScheduleRepository
-	                    .findByStaff_StaffIdAndClassDateBetween(
+	                    .findForInstructorAndClassDateBetween(
 	                            staffId,
 	                            startOfWeek,
 	                            endOfWeek
@@ -462,7 +454,7 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 	                    today.withDayOfMonth(today.lengthOfMonth());
 
 	            yield classScheduleRepository
-	                    .findByStaff_StaffIdAndClassDateBetween(
+	                    .findForInstructorAndClassDateBetween(
 	                            staffId,
 	                            startOfMonth,
 	                            endOfMonth
@@ -470,7 +462,7 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 	        }
 
 	        case ALL -> classScheduleRepository
-	                .findByStaff_StaffId(staffId);
+	                .findAllForInstructor(staffId);
 	    };
 
 	    return schedules.stream()
@@ -521,7 +513,7 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 	@Override
 	public List<ClassScheduleResponse> getStaffDailySchedule(String staffId, LocalDate date) {
 
-		List<ClassSchedule> schedules = classScheduleRepository.findByStaffStaffIdAndClassDate(staffId, date);
+		List<ClassSchedule> schedules = classScheduleRepository.findForInstructorAndClassDate(staffId, date);
 
 		return schedules.stream().map(classScheduleMapper::toResponse).toList();
 	}
@@ -612,11 +604,13 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 			cr.setBatchId(batch.getId());
 			cr.setCourseId(courseId);
 			cr.setCourseName(batch.getCourse().getCourseTitle());
+			cr.setBatchName(batch.getClassName());
 			cr.setStartDate(batch.getStartDate());
 			cr.setEndDate(batch.getEndDate());
 			cr.setStatus(batch.getStatus());
 			List<ClassSchedule> schedules = classScheduleRepository.findByClassBatch_Id(batch.getId());
 			cr.setTotalSchedulesGenerated(schedules.size());
+			cr.setSchedules(classScheduleMapper.toDtoList(schedules));
 			return cr;
 		}).toList();
 	}
@@ -640,14 +634,16 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 			ClassScheduleResponse sr = new ClassScheduleResponse();
 			sr.setBatchId(batchId);
 			sr.setScheduleId(s.getId()); // ✅ add this
-			sr.setClassName(s.getClassBatch().getClassName());
+			sr.setBatchName(s.getClassBatch().getClassName());
+			sr.setClassName(s.getClassName());
 			sr.setClassDate(s.getClassDate());
 			sr.setDayOfWeek(s.getClassDate().getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.ENGLISH));
 			sr.setStartTime(s.getStartTime());
 			sr.setEndTime(s.getEndTime());
-			sr.setStaffId(s.getStaff() != null ? s.getStaff().getStaffId() : null);
-
-			sr.setStaffName(s.getStaff() != null ? s.getStaff().getFirstNm() + " " + s.getStaff().getLastNm() : null);
+			sr.setInstructors(resolveInstructors(s));
+			sr.setMode(s.getMode() != null ? s.getMode().name() : null);
+			sr.setMeetingLink(s.getMeetingLink());
+			sr.setLocation(s.getLocation());
 			sr.setStatus(s.getStatus().name());
 			return sr;
 		}).toList();
@@ -689,8 +685,10 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 		Staff staff = staffRepository.findByStaffId(request.getStaffId())
 				.orElseThrow(() -> new ResourceNotFoundException("Instructor not found"));
 
-		// 6. Assign instructor
-		schedule.setStaff(staff);
+		// 6. Assign instructor — added to this schedule only (on top of whatever
+		// instructors it already inherited from the batch), does not affect the
+		// batch's own instructor set or any other schedule.
+		schedule.getInstructors().add(staff);
 
 		classScheduleRepository.save(schedule);
 
@@ -783,6 +781,14 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 
 		classBatchRepository.save(batch);
 
+		// Keep every already-created schedule of this batch in sync — newly added
+		// instructors apply to every existing schedule too.
+		List<ClassSchedule> existingSchedules = classScheduleRepository.findByClassBatch_Id(batchId);
+		for (ClassSchedule schedule : existingSchedules) {
+			schedule.getInstructors().addAll(batch.getInstructors());
+		}
+		classScheduleRepository.saveAll(existingSchedules);
+
 		logger.info("Instructors added successfully to batchId: {}", batchId);
 
 		return batch.getInstructors().stream().map(this::toBatchInstructorResponse).toList();
@@ -822,9 +828,35 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 		batch.setInstructors(newInstructors); // ✅ replaces, not appends
 		classBatchRepository.save(batch);
 
+		// Keep every already-created schedule of this batch in sync — replaces each
+		// schedule's instructor set to match the batch's new instructor set exactly.
+		List<ClassSchedule> existingSchedules = classScheduleRepository.findByClassBatch_Id(batchId);
+		for (ClassSchedule schedule : existingSchedules) {
+			schedule.setInstructors(new HashSet<>(newInstructors));
+		}
+		classScheduleRepository.saveAll(existingSchedules);
+
 		logger.info("Instructors updated successfully for batchId: {}", batchId);
 
 		return batch.getInstructors().stream().map(this::toBatchInstructorResponse).toList();
+	}
+
+	private List<BatchInstructorResponse> resolveInstructors(ClassSchedule schedule) {
+
+		Set<Staff> instructors = schedule.getInstructors();
+
+		// Legacy schedules created before per-schedule instructor storage existed
+		// have no rows of their own yet — fall back to the batch's current
+		// instructors so they don't show up empty.
+		if ((instructors == null || instructors.isEmpty()) && schedule.getClassBatch() != null) {
+			instructors = schedule.getClassBatch().getInstructors();
+		}
+
+		if (instructors == null) {
+			return List.of();
+		}
+
+		return instructors.stream().map(this::toBatchInstructorResponse).toList();
 	}
 
 	private BatchInstructorResponse toBatchInstructorResponse(Staff staff) {

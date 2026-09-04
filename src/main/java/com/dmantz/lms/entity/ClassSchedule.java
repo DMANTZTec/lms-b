@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "class_schedule")
@@ -18,10 +20,23 @@ public class ClassSchedule extends AuditFields {
     @JoinColumn(name = "class_id", nullable = false)
     private ClassBatch classBatch;
 
+    // Legacy single-instructor column — superseded by `instructors` below.
+    // Kept only for backward compatibility; no longer written to.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "staff_id", nullable = true)
     private Staff staff;
-    
+
+    @ManyToMany
+    @JoinTable(
+            name = "class_schedule_instructor",
+            joinColumns = @JoinColumn(name = "schedule_id"),
+            inverseJoinColumns = @JoinColumn(
+                    name = "staff_id",
+                    referencedColumnName = "staff_id"
+            )
+    )
+    private Set<Staff> instructors = new HashSet<>();
+
     @Column(nullable = false)
     private String className;
 
@@ -70,6 +85,14 @@ public class ClassSchedule extends AuditFields {
 
     public void setStaff(Staff staff) {
         this.staff = staff;
+    }
+
+    public Set<Staff> getInstructors() {
+        return instructors;
+    }
+
+    public void setInstructors(Set<Staff> instructors) {
+        this.instructors = instructors;
     }
 
     public LocalDate getClassDate() {

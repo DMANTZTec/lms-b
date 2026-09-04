@@ -107,5 +107,8 @@
 	<include file = "db/changelog/changelogs/202608260338-create-enrollement-table.xml"/>
 	
 	<include file = "db/changelog/changelogs/202609011103-create-enrollment-batch-table.xml"/>
-	
+
+	<!-- Class Schedule Instructor table -->
+	<include file="db/changelog/changelogs/202609041200-create-class_schedule_instructor-table.xml"/>
+
 </databaseChangeLog>

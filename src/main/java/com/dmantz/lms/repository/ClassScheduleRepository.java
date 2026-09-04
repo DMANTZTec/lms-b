@@ -64,4 +64,54 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
  	            LocalDate endDate
  	    );
 
+    // Matches a schedule for a given instructor via: the legacy single staff
+    // column (old data), the schedule's own instructors join table (current
+    // design), or — when a schedule has no instructors of its own yet — the
+    // instructor being on the schedule's batch (legacy-data fallback).
+    @Query("""
+        SELECT DISTINCT cs
+        FROM ClassSchedule cs
+        LEFT JOIN cs.staff st
+        LEFT JOIN cs.instructors si
+        LEFT JOIN cs.classBatch cb
+        LEFT JOIN cb.instructors bi
+        WHERE st.staffId = :staffId
+           OR si.staffId = :staffId
+           OR (si IS NULL AND bi.staffId = :staffId)
+        """)
+    List<ClassSchedule> findAllForInstructor(@Param("staffId") String staffId);
+
+    @Query("""
+        SELECT DISTINCT cs
+        FROM ClassSchedule cs
+        LEFT JOIN cs.staff st
+        LEFT JOIN cs.instructors si
+        LEFT JOIN cs.classBatch cb
+        LEFT JOIN cb.instructors bi
+        WHERE (st.staffId = :staffId
+           OR si.staffId = :staffId
+           OR (si IS NULL AND bi.staffId = :staffId))
+          AND cs.classDate = :classDate
+        """)
+    List<ClassSchedule> findForInstructorAndClassDate(
+            @Param("staffId") String staffId,
+            @Param("classDate") LocalDate classDate);
+
+    @Query("""
+        SELECT DISTINCT cs
+        FROM ClassSchedule cs
+        LEFT JOIN cs.staff st
+        LEFT JOIN cs.instructors si
+        LEFT JOIN cs.classBatch cb
+        LEFT JOIN cb.instructors bi
+        WHERE (st.staffId = :staffId
+           OR si.staffId = :staffId
+           OR (si IS NULL AND bi.staffId = :staffId))
+          AND cs.classDate BETWEEN :startDate AND :endDate
+        """)
+    List<ClassSchedule> findForInstructorAndClassDateBetween(
+            @Param("staffId") String staffId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
+
 }

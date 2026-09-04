@@ -72,8 +72,7 @@ public class ClassAdminController {
 	@PostMapping("/addschedule-to-class")
 	public ResponseEntity<ClassScheduleResponse> addScheduleToClass(@Valid @RequestBody AddScheduleRequest request) {
 
-		logger.info("POST /addschedule-to-class - Adding schedule to classId: {} with staffId: {}",
-				request.getBatchId(), request.getStaffId());
+		logger.info("POST /addschedule-to-class - Adding schedule to classId: {}", request.getBatchId());
 
 		ClassScheduleResponse response = classAdminService.addScheduleToClass(request);
 

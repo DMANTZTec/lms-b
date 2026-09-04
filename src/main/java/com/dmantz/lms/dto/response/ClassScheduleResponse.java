@@ -2,6 +2,7 @@ package com.dmantz.lms.dto.response;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 public class ClassScheduleResponse {
     private Long scheduleId;
@@ -12,8 +13,9 @@ public class ClassScheduleResponse {
 	private String dayOfWeek;
 	private LocalTime startTime;
 	private LocalTime endTime;
-	private String staffId;
-	private String staffName;
+	// Instructors assigned to this schedule (inherited from its batch, plus any
+	// added directly via assign-instructor).
+	private List<BatchInstructorResponse> instructors;
 	private String mode;
 	private String meetingLink;
 	private String location;
@@ -58,22 +60,6 @@ public class ClassScheduleResponse {
 
 	public void setEndTime(LocalTime endTime) {
 		this.endTime = endTime;
-	}
-
-	public String getStaffId() {
-		return staffId;
-	}
-
-	public void setStaffId(String staffId) {
-		this.staffId = staffId;
-	}
-
-	public String getStaffName() {
-		return staffName;
-	}
-
-	public void setStaffName(String staffName) {
-		this.staffName = staffName;
 	}
 
 	public String getMode() {
@@ -127,9 +113,17 @@ public class ClassScheduleResponse {
 	public Long getScheduleId() {
 		return scheduleId;
 	}
-	
+
 	public void setScheduleId(Long scheduleId) {
 		this.scheduleId = scheduleId;
 	}
-	
+
+	public List<BatchInstructorResponse> getInstructors() {
+		return instructors;
+	}
+
+	public void setInstructors(List<BatchInstructorResponse> instructors) {
+		this.instructors = instructors;
+	}
+
 }
