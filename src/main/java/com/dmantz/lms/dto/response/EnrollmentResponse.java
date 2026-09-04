@@ -1,6 +1,7 @@
 package com.dmantz.lms.dto.response;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.dmantz.lms.entity.EnrollmentStatus;
 import com.dmantz.lms.entity.EnrollmentType;
@@ -17,6 +18,9 @@ public class EnrollmentResponse {
 
     private String programId;
     private String programName;
+
+    // Populated only for PROGRAM enrollments — the courses that make up the program.
+    private List<CourseDropdownResponse> courses;
 
     private EnrollmentType enrollmentType;
 
@@ -112,5 +116,13 @@ public class EnrollmentResponse {
 
     public void setPaymentStatus(String paymentStatus) {
         this.paymentStatus = paymentStatus;
+    }
+
+    public List<CourseDropdownResponse> getCourses() {
+        return courses;
+    }
+
+    public void setCourses(List<CourseDropdownResponse> courses) {
+        this.courses = courses;
     }
 }
