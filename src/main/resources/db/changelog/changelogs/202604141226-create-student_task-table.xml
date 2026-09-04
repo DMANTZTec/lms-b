@@ -126,6 +126,31 @@
 		<dropColumn tableName="student_task"
 			columnName="reviewer_comment_txt" />
 			
-	</changeSet>
+</changeSet>
+
+	
+	
+	<changeSet
+	id="202609041300-student-task-instructor-assignment" author="Tejaswini">
+	
+	<dropNotNullConstraint tableName="student_task"
+		columnName="topic_id" columnDataType="BIGINT" />
+		
+	<addColumn tableName="student_task">
+		<column name="batch_id" type="BIGINT" afterColumn="course_id" />
+	</addColumn>
+	
+	<addForeignKeyConstraint
+		baseTableName="student_task" baseColumnNames="batch_id"
+		constraintName="fk_student_task_batch"
+		referencedTableName="class_batch" referencedColumnNames="id" />
+		
+	<createIndex indexName="idx_student_task_batch"
+		tableName="student_task">
+		<column name="batch_id" />
+		
+	</createIndex>
+	
+</changeSet>
 
 </databaseChangeLog>

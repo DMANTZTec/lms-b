@@ -34,53 +34,47 @@ public class StudentTaskController {
 		this.studentTaskService = studentTaskService;
 	}
 
-	// ================= ADD STUDENT TASK =================
-		@PostMapping("/addtask")
-		public ResponseEntity<StudentTaskResponse> addStudentTask(@Valid @RequestBody StudentTaskRequest request) {
+	@PostMapping("/addtask")
+	public ResponseEntity<StudentTaskResponse> addStudentTask(@Valid @RequestBody StudentTaskRequest request) {
 
-			logger.info("Received add task request for studentId: {} and topicId: {}", request.getStudentId(),
-					request.getTopicId());
+		logger.info("Received add task request for authenticated student, topicId: {}", request.getTopicId());
 
-			StudentTaskResponse response = studentTaskService.addTask(request);
+		StudentTaskResponse response = studentTaskService.addTask(request);
 
-			logger.info("Task added successfully for studentId: {} and topicId: {}", request.getStudentId(),
-					request.getTopicId());
+		logger.info("Task added successfully with id: {}", response.getId());
 
-			return ResponseEntity.ok(response);
-		}
-		
-		// ================= DROPDOWN: ENROLLED COURSES =================
-		@GetMapping("/dropdown/courses")
-		public ResponseEntity<List<CourseDropdownResponse>> getEnrolledCourses(@RequestParam String studentId) {
-		    return ResponseEntity.ok(studentTaskService.getEnrolledCourses(studentId));
-		}
+		return ResponseEntity.ok(response);
+	}
 
-		// ================= DROPDOWN: CHAPTERS BY COURSE =================
-		@GetMapping("/dropdown/chapters")
-		public ResponseEntity<List<ChapterDropdownResponse>> getChaptersByCourse(@RequestParam String courseId) {
-		    return ResponseEntity.ok(studentTaskService.getChaptersByCourse(courseId));
-		}
+	// ================= DROPDOWN: ENROLLED COURSES =================
+	@GetMapping("/dropdown/courses")
+	public ResponseEntity<List<CourseDropdownResponse>> getEnrolledCourses(@RequestParam String studentId) {
+		return ResponseEntity.ok(studentTaskService.getEnrolledCourses(studentId));
+	}
 
-		// ================= DROPDOWN: TOPICS BY CHAPTER =================
-		@GetMapping("/dropdown/topics")
-		public ResponseEntity<List<TopicDropdownResponse>> getTopicsByChapter(@RequestParam Long chapterId) {
-		    return ResponseEntity.ok(studentTaskService.getTopicsByChapter(chapterId));
-		}
-		
-		// ================= GET TASKS BY STATUS (ACTIVE / COMPLETED) =================
-		@GetMapping("/status")
-		public ResponseEntity<StudentTaskListResponse> getTasksByStatus(
-		        @RequestParam String studentId,
-		        @Parameter(schema = @Schema(allowableValues = { "ACTIVE", "COMPLETED" }))
-		        @RequestParam String status) {
+	// ================= DROPDOWN: CHAPTERS BY COURSE =================
+	@GetMapping("/dropdown/chapters")
+	public ResponseEntity<List<ChapterDropdownResponse>> getChaptersByCourse(@RequestParam String courseId) {
+		return ResponseEntity.ok(studentTaskService.getChaptersByCourse(courseId));
+	}
 
-		    logger.info("Received get tasks by status request for studentId: {} status: {}", studentId, status);
+	// ================= DROPDOWN: TOPICS BY CHAPTER =================
+	@GetMapping("/dropdown/topics")
+	public ResponseEntity<List<TopicDropdownResponse>> getTopicsByChapter(@RequestParam Long chapterId) {
+		return ResponseEntity.ok(studentTaskService.getTopicsByChapter(chapterId));
+	}
 
-		    StudentTaskListResponse response = studentTaskService.getTasksByStatus(studentId, status);
+	// ================= GET TASKS BY STATUS (ACTIVE / COMPLETED) =================
+	@GetMapping("/status")
+	public ResponseEntity<StudentTaskListResponse> getTasksByStatus(@RequestParam String studentId,
+			@Parameter(schema = @Schema(allowableValues = { "ACTIVE", "COMPLETED" })) @RequestParam String status) {
 
-		    return ResponseEntity.ok(response);
-		}
+		logger.info("Received get tasks by status request for studentId: {} status: {}", studentId, status);
 
+		StudentTaskListResponse response = studentTaskService.getTasksByStatus(studentId, status);
+
+		return ResponseEntity.ok(response);
+	}
 
 //	// ================= UPDATE NEED HELP =================
 //	@PatchMapping("/need-help")

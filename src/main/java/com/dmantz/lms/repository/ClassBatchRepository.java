@@ -6,6 +6,7 @@ import com.dmantz.lms.entity.Course;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -29,5 +30,14 @@ public interface ClassBatchRepository extends JpaRepository<ClassBatch, Long> {
 	Optional<ClassBatch> findTopByCourse_CourseIdAndStatusOrderByStartDateDesc(String courseId, String status);
 
 	Optional<ClassBatch> findTopByCourse_CourseIdOrderByStartDateDesc(String courseId);
+
+	@Query("""
+			SELECT CASE WHEN COUNT(b) > 0 THEN true ELSE false END
+			FROM ClassBatch b
+			JOIN b.instructors instructor
+			WHERE b.id = :batchId
+			AND instructor.staffId = :staffId
+			""")
+	boolean existsByIdAndInstructorsStaffId(@Param("batchId") Long batchId, @Param("staffId") String staffId);
 
 }

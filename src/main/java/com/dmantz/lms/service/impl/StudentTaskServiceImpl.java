@@ -8,7 +8,9 @@ import com.dmantz.lms.dto.response.HoursSpentResponse;
 import com.dmantz.lms.dto.response.StudentTaskListResponse;
 import com.dmantz.lms.dto.response.StudentTaskResponse;
 import com.dmantz.lms.dto.response.TopicDropdownResponse;
+import com.dmantz.lms.entity.AssignedByType;
 import com.dmantz.lms.entity.Chapter;
+import com.dmantz.lms.entity.ClassBatch;
 import com.dmantz.lms.entity.Course;
 import com.dmantz.lms.entity.Student;
 import com.dmantz.lms.entity.StudentNeedHelpRequest;
@@ -18,7 +20,9 @@ import com.dmantz.lms.entity.Topic;
 import com.dmantz.lms.exceptions.ResourceNotFoundException;
 import com.dmantz.lms.mapper.StudentTaskMapper;
 import com.dmantz.lms.repository.ChapterRepository;
+import com.dmantz.lms.repository.ClassBatchRepository;
 import com.dmantz.lms.repository.CourseRepository;
+import com.dmantz.lms.repository.EnrollmentBatchRepository;
 import com.dmantz.lms.repository.EnrollmentRepository;
 import com.dmantz.lms.repository.StudentCourseRepository;
 import com.dmantz.lms.repository.StudentRepository;
@@ -30,6 +34,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -48,13 +53,14 @@ public class StudentTaskServiceImpl implements StudentTaskService {
 	private final CourseRepository courseRepository;
 	private final ChapterRepository chapterRepository;
 	private final EnrollmentRepository enrollmentRepository;
-
-	
+	private final ClassBatchRepository classBatchRepository;
+	private final EnrollmentBatchRepository enrollmentBatchRepository;
 
 	public StudentTaskServiceImpl(StudentTaskRepository studentTaskRepository, StudentRepository studentRepository,
 			TopicRepository topicRepository, StudentTaskMapper studentTaskMapper,
 			StudentCourseRepository studentCourseRepository, CourseRepository courseRepository,
-			ChapterRepository chapterRepository, EnrollmentRepository enrollmentRepository) {
+			ChapterRepository chapterRepository, EnrollmentRepository enrollmentRepository,
+			ClassBatchRepository classBatchRepository, EnrollmentBatchRepository enrollmentBatchRepository) {
 		super();
 		this.studentTaskRepository = studentTaskRepository;
 		this.studentRepository = studentRepository;
@@ -64,134 +70,147 @@ public class StudentTaskServiceImpl implements StudentTaskService {
 		this.courseRepository = courseRepository;
 		this.chapterRepository = chapterRepository;
 		this.enrollmentRepository = enrollmentRepository;
+		this.classBatchRepository = classBatchRepository;
+		this.enrollmentBatchRepository = enrollmentBatchRepository;
 	}
 
 	@Override
+	@Transactional
 	public StudentTaskResponse addTask(StudentTaskRequest request) {
 
-	    logger.info("Creating task for studentId: {} courseId: {}", request.getStudentId(), request.getCourseId());
+		Student student = studentRepository.findByStudentId(request.getStudentId())
+				.orElseThrow(() -> new ResourceNotFoundException("Student not found: " + request.getStudentId()));
 
-	    Student student = studentRepository.findByStudentId(request.getStudentId())
-	            .orElseThrow(() -> new ResourceNotFoundException("Student not found: " + request.getStudentId()));
+		logger.info("Creating task for studentId: {} courseId: {}", student.getStudentId(), request.getCourseId());
 
-	    boolean isEnrolled = enrollmentRepository
-	            .existsByStudentStudentIdAndCourseCourseId(
-	                    request.getStudentId(),
-	                    request.getCourseId()
-	            );
+		boolean isEnrolled = enrollmentRepository.existsByStudentStudentIdAndCourseCourseId(student.getStudentId(),
+				request.getCourseId());
 
-	    if (!isEnrolled) {
-	        throw new IllegalStateException(
-	                "Student is not actively enrolled in the selected course"
-	        );
-	    }
-	    if (!isEnrolled) {
-	        throw new IllegalStateException("Student is not enrolled in the selected course");
-	    }
+		if (!isEnrolled) {
+			throw new IllegalStateException("Student is not actively enrolled in the selected course");
+		}
 
-	    Course course = courseRepository.findByCourseId(request.getCourseId())
-	            .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + request.getCourseId()));
+		Course course = courseRepository.findByCourseId(request.getCourseId())
+				.orElseThrow(() -> new ResourceNotFoundException("Course not found: " + request.getCourseId()));
 
-	    Chapter chapter = null;
-	    if (request.getChapterId() != null) {
-	        chapter = chapterRepository.findById(request.getChapterId())
-	                .orElseThrow(() -> new ResourceNotFoundException("Chapter not found: " + request.getChapterId()));
+		ClassBatch batch = classBatchRepository.findById(request.getBatchId())
+				.orElseThrow(() -> new ResourceNotFoundException("Batch not found with id: " + request.getBatchId()));
+		if (batch.getCourse() == null || !batch.getCourse().getId().equals(course.getId())) {
+			throw new IllegalArgumentException("Selected batch does not belong to the selected course");
+		}
+		boolean enrolledInBatch = enrollmentBatchRepository
+				.existsByEnrollment_Student_StudentIdAndClassBatch_Id(student.getStudentId(), batch.getId());
+		if (!enrolledInBatch) {
+			throw new IllegalStateException("Student is not enrolled in the selected batch");
+		}
 
-	        if (!chapter.getCourse().getCourseId().equals(course.getCourseId())) {
-	            throw new IllegalArgumentException("Selected chapter does not belong to the selected course");
-	        }
-	    }
+		Chapter chapter = null;
+		if (request.getChapterId() != null) {
+			chapter = chapterRepository.findById(request.getChapterId())
+					.orElseThrow(() -> new ResourceNotFoundException("Chapter not found: " + request.getChapterId()));
 
-	    Topic topic = null;
-	    if (request.getTopicId() != null) {
-	        topic = topicRepository.findById(request.getTopicId())
-	                .orElseThrow(() -> new ResourceNotFoundException("Topic not found: " + request.getTopicId()));
+			if (!chapter.getCourse().getCourseId().equals(course.getCourseId())) {
+				throw new IllegalArgumentException("Selected chapter does not belong to the selected course");
+			}
+		}
 
-	        if (chapter == null || !topic.getChapter().getId().equals(chapter.getId())) {
-	            throw new IllegalArgumentException("Selected topic does not belong to the selected chapter");
-	        }
-	    }
+		Topic topic = null;
+		if (request.getTopicId() != null) {
+			topic = topicRepository.findById(request.getTopicId())
+					.orElseThrow(() -> new ResourceNotFoundException("Topic not found: " + request.getTopicId()));
 
-	    StudentTask task = studentTaskMapper.toEntity(request);
+			if (chapter == null || !topic.getChapter().getId().equals(chapter.getId())) {
+				throw new IllegalArgumentException("Selected topic does not belong to the selected chapter");
+			}
+		}
 
-	    task.setCourse(course);
-	    task.setChapter(chapter);
-	    task.setTopic(topic);
-	    task.setStudent(student);
-	    task.setStatus(StudentTaskStatus.ACTIVE);
-	    task.setStartDt(LocalDateTime.now());
-	    task.setNeedHelp(false);
+		LocalDateTime now = LocalDateTime.now();
+		StudentTask task = studentTaskMapper.toEntity(request);
 
-	    StudentTask saved = studentTaskRepository.save(task);
+		task.setCourseId(course.getCourseId());
+		task.setChapter(chapter);
 
-	    logger.info("Task created successfully with id: {}", saved.getId());
+		task.setTopic(topic);
+		task.setStudent(student);
+		task.setBatchId(batch.getId());
+		task.setClassBatch(batch);
+		task.setAssignedBy(student.getStudentId());
+		task.setAssignedByType(AssignedByType.STUDENT);
+		task.setStatus(StudentTaskStatus.ACTIVE);
+		task.setStartDt(now);
+		task.setNeedHelp(false);
+		task.setCreatedBy(student.getId());
+		task.setCreatedDt(now);
+		task.setUpdatedBy(student.getId());
+		task.setUpdatedDt(now);
 
-	    return studentTaskMapper.toResponse(saved);
+		StudentTask saved = studentTaskRepository.save(task);
+
+		logger.info("Task created successfully with id: {}", saved.getId());
+
+		return studentTaskMapper.toResponse(saved);
 	}
 
 	@Override
 	public List<CourseDropdownResponse> getEnrolledCourses(String studentId) {
 
-	    logger.info("Fetching enrolled courses for studentId: {}", studentId);
+		logger.info("Fetching enrolled courses for studentId: {}", studentId);
 
-	    studentRepository.findByStudentId(studentId)
-	            .orElseThrow(() -> new ResourceNotFoundException("Student not found: " + studentId));
+		studentRepository.findByStudentId(studentId)
+				.orElseThrow(() -> new ResourceNotFoundException("Student not found: " + studentId));
 
-	    return studentCourseRepository.findByStudent_StudentId(studentId).stream()
-	            .map(sc -> new CourseDropdownResponse(sc.getCourse().getCourseId(), sc.getCourse().getCourseTitle()))
-	            .toList();
+		return studentCourseRepository.findByStudent_StudentId(studentId).stream()
+				.map(sc -> new CourseDropdownResponse(sc.getCourse().getCourseId(), sc.getCourse().getCourseTitle()))
+				.toList();
 	}
 
 	@Override
 	public List<ChapterDropdownResponse> getChaptersByCourse(String courseId) {
 
-	    logger.info("Fetching chapters for courseId: {}", courseId);
+		logger.info("Fetching chapters for courseId: {}", courseId);
 
-	    return chapterRepository.findByCourse_CourseId(courseId).stream()
-	            .map(c -> new ChapterDropdownResponse(c.getId(), c.getChapterNm()))
-	            .toList();
+		return chapterRepository.findByCourse_CourseId(courseId).stream()
+				.map(c -> new ChapterDropdownResponse(c.getId(), c.getChapterNm())).toList();
 	}
 
 	@Override
 	public List<TopicDropdownResponse> getTopicsByChapter(Long chapterId) {
 
-	    logger.info("Fetching topics for chapterId: {}", chapterId);
+		logger.info("Fetching topics for chapterId: {}", chapterId);
 
-	    return topicRepository.findByChapter_Id(chapterId).stream()
-	            .map(t -> new TopicDropdownResponse(t.getId(), t.getTopicNm()))
-	            .toList();
+		return topicRepository.findByChapter_Id(chapterId).stream()
+				.map(t -> new TopicDropdownResponse(t.getId(), t.getTopicNm())).toList();
 	}
-	
+
 	@Override
 	public StudentTaskListResponse getTasksByStatus(String studentId, String statusFilter) {
 
-	    logger.info("Fetching tasks for studentId: {} filtered by status: {}", studentId, statusFilter);
+		logger.info("Fetching tasks for studentId: {} filtered by status: {}", studentId, statusFilter);
 
-	    studentRepository.findByStudentId(studentId)
-	            .orElseThrow(() -> new ResourceNotFoundException("Student not found: " + studentId));
+		studentRepository.findByStudentId(studentId)
+				.orElseThrow(() -> new ResourceNotFoundException("Student not found: " + studentId));
 
-	    if (!"ACTIVE".equalsIgnoreCase(statusFilter) && !"COMPLETED".equalsIgnoreCase(statusFilter)) {
-	        throw new IllegalArgumentException("Invalid status filter. Allowed values: ACTIVE, COMPLETED");
-	    }
+		if (!"ACTIVE".equalsIgnoreCase(statusFilter) && !"COMPLETED".equalsIgnoreCase(statusFilter)) {
+			throw new IllegalArgumentException("Invalid status filter. Allowed values: ACTIVE, COMPLETED");
+		}
 
-	    List<StudentTask> tasks;
+		List<StudentTask> tasks;
 
-	    if ("COMPLETED".equalsIgnoreCase(statusFilter)) {
-	        tasks = studentTaskRepository.findByStudent_StudentIdAndStatus(studentId, StudentTaskStatus.COMPLETED);
-	    } else {
-	        // ACTIVE = everything not yet completed (NOT_STARTED, IN_PROGRESS, SUBMITTED, REVIEWED)
-	        tasks = studentTaskRepository.findByStudent_StudentId(studentId).stream()
-	                .filter(t -> t.getStatus() != StudentTaskStatus.COMPLETED)
-	                .toList();
-	    }
+		if ("COMPLETED".equalsIgnoreCase(statusFilter)) {
+			tasks = studentTaskRepository.findByStudent_StudentIdAndStatus(studentId, StudentTaskStatus.COMPLETED);
+		} else {
+			// ACTIVE = everything not yet completed (NOT_STARTED, IN_PROGRESS, SUBMITTED,
+			// REVIEWED)
+			tasks = studentTaskRepository.findByStudent_StudentId(studentId).stream()
+					.filter(t -> t.getStatus() != StudentTaskStatus.COMPLETED).toList();
+		}
 
-	    StudentTaskListResponse response = new StudentTaskListResponse();
-	    response.setCount(tasks.size());
-	    response.setTasks(tasks.stream().map(studentTaskMapper::toResponse).toList());
+		StudentTaskListResponse response = new StudentTaskListResponse();
+		response.setCount(tasks.size());
+		response.setTasks(tasks.stream().map(studentTaskMapper::toResponse).toList());
 
-	    return response;
+		return response;
 	}
-	
 
 //	@Override
 //	public StudentTaskResponse updateNeedHelp(StudentNeedHelpRequest request) {
@@ -378,6 +397,5 @@ public class StudentTaskServiceImpl implements StudentTaskService {
 //
 //		return studentTaskMapper.toResponse(updatedTask);
 //	}
-
 
 }

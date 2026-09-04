@@ -3,7 +3,7 @@ package com.dmantz.lms.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public class StudentTaskRequest {
+public class InstructorTaskRequest {
 
 	@NotBlank(message = "Title is required")
 	private String title;
@@ -13,15 +13,16 @@ public class StudentTaskRequest {
 	@NotBlank(message = "Course ID is required")
 	private String courseId;
 
-	private Long chapterId;
-
-	private Long topicId;
-
 	@NotNull(message = "Batch ID is required")
 	private Long batchId;
 
-	@NotBlank(message = "Student ID is required")
-	private String studentId;
+	@NotNull(message = "Chapter ID is required")
+	private Long chapterId;
+
+	@NotNull(message = "Topic ID is required")
+	private Long topicId;
+	@NotBlank(message = "Assigned by is required")
+	private String assignedBy;
 
 	public String getTitle() {
 		return title;
@@ -47,6 +48,14 @@ public class StudentTaskRequest {
 		this.courseId = courseId;
 	}
 
+	public Long getBatchId() {
+		return batchId;
+	}
+
+	public void setBatchId(Long batchId) {
+		this.batchId = batchId;
+	}
+
 	public Long getChapterId() {
 		return chapterId;
 	}
@@ -63,20 +72,11 @@ public class StudentTaskRequest {
 		this.topicId = topicId;
 	}
 
-	public String getStudentId() {
-		return studentId;
+	public String getAssignedBy() {
+		return assignedBy;
 	}
 
-	public void setStudentId(String studentId) {
-		this.studentId = studentId;
+	public void setAssignedBy(String assignedBy) {
+		this.assignedBy = assignedBy;
 	}
-
-	public Long getBatchId() {
-		return batchId;
-	}
-
-	public void setBatchId(Long batchId) {
-		this.batchId = batchId;
-	}
-
 }

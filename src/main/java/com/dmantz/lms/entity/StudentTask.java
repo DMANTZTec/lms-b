@@ -9,51 +9,61 @@ import java.time.LocalDateTime;
 @Table(name = "student_task")
 public class StudentTask extends AuditFields {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Column(name = "title", nullable = false)
-    private String title;
+	@Column(name = "title", nullable = false)
+	private String title;
 
-    @Column(name = "description", columnDefinition = "TEXT")
-    private String description;
+	@Column(name = "description", columnDefinition = "TEXT")
+	private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "course_id", referencedColumnName = "course_id", nullable = false)
-    private Course course;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "course_id", referencedColumnName = "course_id", insertable = false, updatable = false)
+	private Course course;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "chapter_id")
-    private Chapter chapter;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "chapter_id")
+	private Chapter chapter;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "topic_id")
-    private Topic topic;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "topic_id")
+	private Topic topic;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "student_id", referencedColumnName = "student_id", nullable = false, columnDefinition = "CHAR(7)")
-    private Student student;
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "student_id", referencedColumnName = "student_id", nullable = false, columnDefinition = "CHAR(7)")
+	private Student student;
 
-    @Column(name = "assigned_by", nullable = false)
-    private Long assignedBy;
+	@Column(name = "assigned_by", nullable = false, length = 20)
+	private String assignedBy;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "assigned_by_type", nullable = false)
-    private AssignedByType assignedByType;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "assigned_by_type", nullable = false)
+	private AssignedByType assignedByType;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private StudentTaskStatus status;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "status", nullable = false)
+	private StudentTaskStatus status;
 
-    @Column(name = "start_dt")
-    private LocalDateTime startDt;
+	@Column(name = "start_dt")
+	private LocalDateTime startDt;
 
-    @Column(name = "end_dt")
-    private LocalDateTime endDt;
-    
-    @Column(name = "need_help")
+	@Column(name = "end_dt")
+	private LocalDateTime endDt;
+
+	@Column(name = "need_help")
 	private Boolean needHelp = false;
+
+	@Column(name = "course_id", nullable = false, length = 20)
+	private String courseId;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "batch_id", insertable = false, updatable = false)
+	private ClassBatch classBatch;
+
+	@Column(name = "batch_id")
+	private Long batchId;
 
 	public Long getId() {
 		return id;
@@ -111,11 +121,11 @@ public class StudentTask extends AuditFields {
 		this.student = student;
 	}
 
-	public Long getAssignedBy() {
+	public String getAssignedBy() {
 		return assignedBy;
 	}
 
-	public void setAssignedBy(Long assignedBy) {
+	public void setAssignedBy(String assignedBy) {
 		this.assignedBy = assignedBy;
 	}
 
@@ -157,7 +167,30 @@ public class StudentTask extends AuditFields {
 
 	public void setNeedHelp(Boolean needHelp) {
 		this.needHelp = needHelp;
-	} 
-    
-    
+	}
+
+	public ClassBatch getClassBatch() {
+		return classBatch;
+	}
+
+	public void setClassBatch(ClassBatch classBatch) {
+		this.classBatch = classBatch;
+	}
+
+	public String getCourseId() {
+		return courseId;
+	}
+
+	public void setCourseId(String courseId) {
+		this.courseId = courseId;
+	}
+
+	public Long getBatchId() {
+		return batchId;
+	}
+
+	public void setBatchId(Long batchId) {
+		this.batchId = batchId;
+	}
+
 }
