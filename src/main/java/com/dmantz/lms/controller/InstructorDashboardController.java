@@ -1,5 +1,7 @@
 package com.dmantz.lms.controller;
 
+import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +17,7 @@ import com.dmantz.lms.dto.response.InstructorBatchSummaryResponse;
 import com.dmantz.lms.dto.response.InstructorClassStatsResponse;
 import com.dmantz.lms.dto.response.InstructorStudentStatsResponse;
 import com.dmantz.lms.dto.response.InstructorTaskResponse;
+import com.dmantz.lms.dto.response.StudentTaskSubmissionResponse;
 import com.dmantz.lms.service.InstructorDashboardService;
 
 import jakarta.validation.Valid;
@@ -84,5 +87,18 @@ public class InstructorDashboardController {
 
 		return ResponseEntity.ok(response);
 	}
+	
+	@GetMapping("/submissions")
+	public ResponseEntity<List<StudentTaskSubmissionResponse>> getTaskSubmissions(
+	        @RequestParam String staffId,
+	        @RequestParam(required = false) String courseId) {
+
+	    logger.info("Fetching task submissions for staffId: {} courseId: {}", staffId, courseId);
+
+	    List<StudentTaskSubmissionResponse> response = instructorDashboardService.getTaskSubmissions(staffId, courseId);
+
+	    return ResponseEntity.ok(response);
+	}
+
 
 }

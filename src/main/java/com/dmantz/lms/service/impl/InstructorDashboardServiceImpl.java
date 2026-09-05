@@ -20,6 +20,7 @@ import com.dmantz.lms.dto.response.InstructorBatchSummaryResponse;
 import com.dmantz.lms.dto.response.InstructorClassStatsResponse;
 import com.dmantz.lms.dto.response.InstructorStudentStatsResponse;
 import com.dmantz.lms.dto.response.InstructorTaskResponse;
+import com.dmantz.lms.dto.response.StudentTaskSubmissionResponse;
 import com.dmantz.lms.entity.AssignedByType;
 import com.dmantz.lms.entity.Chapter;
 import com.dmantz.lms.entity.ClassBatch;
@@ -30,21 +31,26 @@ import com.dmantz.lms.entity.Enrollment;
 import com.dmantz.lms.entity.EnrollmentBatch;
 import com.dmantz.lms.entity.EnrollmentStatus;
 import com.dmantz.lms.entity.Staff;
+import com.dmantz.lms.entity.StaffCourse;
 import com.dmantz.lms.entity.Student;
 import com.dmantz.lms.entity.StudentTask;
 import com.dmantz.lms.entity.StudentTaskStatus;
+import com.dmantz.lms.entity.StudentTaskSubmission;
 import com.dmantz.lms.entity.Topic;
 import com.dmantz.lms.exceptions.ResourceNotFoundException;
 import com.dmantz.lms.exceptions.UnauthorizedAccessException;
 import com.dmantz.lms.mapper.StudentTaskMapper;
+import com.dmantz.lms.mapper.StudentTaskSubmissionMapper;
 import com.dmantz.lms.repository.ChapterRepository;
 import com.dmantz.lms.repository.ClassBatchRepository;
 import com.dmantz.lms.repository.ClassScheduleRepository;
 import com.dmantz.lms.repository.CourseRepository;
 import com.dmantz.lms.repository.EnrollmentBatchRepository;
 import com.dmantz.lms.repository.EnrollmentRepository;
+import com.dmantz.lms.repository.StaffCourseRepository;
 import com.dmantz.lms.repository.StaffRepository;
 import com.dmantz.lms.repository.StudentTaskRepository;
+import com.dmantz.lms.repository.StudentTaskSubmissionRepository;
 import com.dmantz.lms.repository.TopicRepository;
 import com.dmantz.lms.service.InstructorDashboardService;
 
@@ -63,12 +69,20 @@ public class InstructorDashboardServiceImpl implements InstructorDashboardServic
 	private final StudentTaskRepository studentTaskRepository;
 	private final StudentTaskMapper studentTaskMapper;
 	private final ClassScheduleRepository classScheduleRepository;
+	private final StaffCourseRepository staffCourseRepository;
+	private final StudentTaskSubmissionRepository studentTaskSubmissionRepository;
+	private final StudentTaskSubmissionMapper studentTaskSubmissionMapper;
+
+	
 
 	public InstructorDashboardServiceImpl(StaffRepository staffRepository, ClassBatchRepository classBatchRepository,
 			CourseRepository courseRepository, ChapterRepository chapterRepository, TopicRepository topicRepository,
 			EnrollmentBatchRepository enrollmentBatchRepository, EnrollmentRepository enrollmentRepository,
 			StudentTaskRepository studentTaskRepository, StudentTaskMapper studentTaskMapper,
-			ClassScheduleRepository classScheduleRepository) {
+			ClassScheduleRepository classScheduleRepository, StaffCourseRepository staffCourseRepository,
+			StudentTaskSubmissionRepository studentTaskSubmissionRepository,
+			StudentTaskSubmissionMapper studentTaskSubmissionMapper) {
+		super();
 		this.staffRepository = staffRepository;
 		this.classBatchRepository = classBatchRepository;
 		this.courseRepository = courseRepository;
@@ -79,6 +93,9 @@ public class InstructorDashboardServiceImpl implements InstructorDashboardServic
 		this.studentTaskRepository = studentTaskRepository;
 		this.studentTaskMapper = studentTaskMapper;
 		this.classScheduleRepository = classScheduleRepository;
+		this.staffCourseRepository = staffCourseRepository;
+		this.studentTaskSubmissionRepository = studentTaskSubmissionRepository;
+		this.studentTaskSubmissionMapper = studentTaskSubmissionMapper;
 	}
 
 	@Override
@@ -277,5 +294,51 @@ public class InstructorDashboardServiceImpl implements InstructorDashboardServic
 				activeStudentIds.size(), totalStudentIds.size());
 
 		return new InstructorStudentStatsResponse(activeStudentIds.size(), totalStudentIds.size());
+	}
+	
+	
+	@Override
+	public List<StudentTaskSubmissionResponse> getTaskSubmissions(String staffId, String courseId) {
+
+		Staff instructor = staffRepository.findByStaffId(staffId)
+				.orElseThrow(() -> new ResourceNotFoundException("Instructor not found: " + staffId));
+
+		List<StudentTaskSubmission> submissions;
+
+		if (courseId != null && !courseId.isBlank()) {
+
+			boolean assignedToCourse = staffCourseRepository
+					.existsByStaff_StaffIdAndCourse_CourseId(instructor.getStaffId(), courseId);
+			if (!assignedToCourse) {
+				throw new UnauthorizedAccessException(
+						"Instructor " + instructor.getStaffId() + " is not assigned to course: " + courseId);
+			}
+
+			submissions = studentTaskSubmissionRepository.findByStudentTask_CourseId(courseId);
+
+			logger.info("Instructor {} retrieved {} submission(s) for course {}", instructor.getStaffId(),
+					submissions.size(), courseId);
+
+		} else {
+
+			List<String> courseIds = staffCourseRepository.findByStaff_StaffId(instructor.getStaffId()).stream()
+					.map(StaffCourse::getCourse)
+					.filter(c -> c != null)
+					.map(Course::getCourseId)
+					.distinct()
+					.toList();
+
+			if (courseIds.isEmpty()) {
+				throw new ResourceNotFoundException(
+						"Instructor " + instructor.getStaffId() + " is not assigned to any course");
+			}
+
+			submissions = studentTaskSubmissionRepository.findByStudentTask_CourseIdIn(courseIds);
+
+			logger.info("Instructor {} retrieved {} submission(s) across {} course(s)", instructor.getStaffId(),
+					submissions.size(), courseIds.size());
+		}
+
+		return submissions.stream().map(studentTaskSubmissionMapper::toResponse).toList();
 	}
 }

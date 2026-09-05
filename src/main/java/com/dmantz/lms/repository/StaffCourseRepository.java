@@ -17,4 +17,6 @@ public interface StaffCourseRepository extends JpaRepository<StaffCourse, Long> 
 	boolean existsByStaff_StaffIdAndCourse_CourseId(String staffId, String courseId);
 
 	Optional<StaffCourse> findByStaff_StaffIdAndCourse_CourseId(String staffId, String courseId);
+	
+	List<StaffCourse> findByCourse_Id(Long courseId);
 }
