@@ -33,4 +33,12 @@ public interface EnrollmentBatchRepository extends JpaRepository<EnrollmentBatch
 
 	boolean existsByEnrollment_Student_StudentIdAndClassBatch_Id(String studentId, Long batchId);
 
+	// Students who have been placed into one of the given batches.
+	@Query("""
+			SELECT DISTINCT eb.enrollment.student.studentId
+			FROM EnrollmentBatch eb
+			WHERE eb.classBatch.id IN :batchIds
+			""")
+	List<String> findDistinctStudentIdsByClassBatchIds(@Param("batchIds") List<Long> batchIds);
+
 }

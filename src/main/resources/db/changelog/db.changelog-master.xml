@@ -111,4 +111,7 @@
 	<!-- Class Schedule Instructor table -->
 	<include file="db/changelog/changelogs/202609041200-create-class_schedule_instructor-table.xml"/>
 
+	<!-- Normalize legacy class_batch.status values for ClassStatus enum mapping -->
+	<include file="db/changelog/changelogs/202609051430-normalize-class_batch-status.xml"/>
+
 </databaseChangeLog>

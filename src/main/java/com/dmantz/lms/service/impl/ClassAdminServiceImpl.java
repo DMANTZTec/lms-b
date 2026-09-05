@@ -86,7 +86,7 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 		// 2. Create ClassBatch
 		ClassBatch classBatch = classBatchMapper.toEntity(request);
 		classBatch.setCourse(course);
-		classBatch.setStatus(ClassStatus.SCHEDULED.name());
+		classBatch.setStatus(ClassStatus.SCHEDULED);
 
 		final ClassBatch savedBatch = classBatchRepository.save(classBatch);
 
@@ -238,7 +238,7 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 			return new ResourceNotFoundException("Class not found with id: " + batchId);
 		});
 
-		classBatch.setStatus("CANCELLED");
+		classBatch.setStatus(ClassStatus.CANCELLED);
 
 		classBatch = classBatchRepository.save(classBatch);
 
@@ -607,7 +607,7 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 			cr.setBatchName(batch.getClassName());
 			cr.setStartDate(batch.getStartDate());
 			cr.setEndDate(batch.getEndDate());
-			cr.setStatus(batch.getStatus());
+			cr.setStatus(batch.getStatus() != null ? batch.getStatus().name() : null);
 			List<ClassSchedule> schedules = classScheduleRepository.findByClassBatch_Id(batch.getId());
 			cr.setTotalSchedulesGenerated(schedules.size());
 			cr.setSchedules(classScheduleMapper.toDtoList(schedules));

@@ -3,11 +3,14 @@ package com.dmantz.lms.repository;
 import com.dmantz.lms.entity.ClassSchedule;
 import com.dmantz.lms.entity.ClassStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Repository
@@ -113,5 +116,17 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
             @Param("staffId") String staffId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
+
+    // Flips any still-SCHEDULED class whose date/time has fully passed to COMPLETED.
+    // Driven by a periodic job (ClassScheduleStatusScheduler) — never touches CANCELLED rows.
+    @Modifying
+    @Transactional
+    @Query("""
+        UPDATE ClassSchedule cs
+        SET cs.status = com.dmantz.lms.entity.ClassStatus.COMPLETED
+        WHERE cs.status = com.dmantz.lms.entity.ClassStatus.SCHEDULED
+        AND (cs.classDate < :today OR (cs.classDate = :today AND cs.endTime <= :now))
+        """)
+    int markPastSchedulesCompleted(@Param("today") LocalDate today, @Param("now") LocalTime now);
 
 }

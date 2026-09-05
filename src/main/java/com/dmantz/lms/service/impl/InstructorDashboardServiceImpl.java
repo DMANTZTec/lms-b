@@ -1,10 +1,13 @@
 package com.dmantz.lms.service.impl;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,10 +15,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.dmantz.lms.dto.request.InstructorTaskRequest;
+import com.dmantz.lms.dto.response.InstructorBatchResponse;
+import com.dmantz.lms.dto.response.InstructorBatchSummaryResponse;
+import com.dmantz.lms.dto.response.InstructorClassStatsResponse;
+import com.dmantz.lms.dto.response.InstructorStudentStatsResponse;
 import com.dmantz.lms.dto.response.InstructorTaskResponse;
 import com.dmantz.lms.entity.AssignedByType;
 import com.dmantz.lms.entity.Chapter;
 import com.dmantz.lms.entity.ClassBatch;
+import com.dmantz.lms.entity.ClassSchedule;
+import com.dmantz.lms.entity.ClassStatus;
 import com.dmantz.lms.entity.Course;
 import com.dmantz.lms.entity.Enrollment;
 import com.dmantz.lms.entity.EnrollmentBatch;
@@ -30,8 +39,10 @@ import com.dmantz.lms.exceptions.UnauthorizedAccessException;
 import com.dmantz.lms.mapper.StudentTaskMapper;
 import com.dmantz.lms.repository.ChapterRepository;
 import com.dmantz.lms.repository.ClassBatchRepository;
+import com.dmantz.lms.repository.ClassScheduleRepository;
 import com.dmantz.lms.repository.CourseRepository;
 import com.dmantz.lms.repository.EnrollmentBatchRepository;
+import com.dmantz.lms.repository.EnrollmentRepository;
 import com.dmantz.lms.repository.StaffRepository;
 import com.dmantz.lms.repository.StudentTaskRepository;
 import com.dmantz.lms.repository.TopicRepository;
@@ -48,21 +59,26 @@ public class InstructorDashboardServiceImpl implements InstructorDashboardServic
 	private final ChapterRepository chapterRepository;
 	private final TopicRepository topicRepository;
 	private final EnrollmentBatchRepository enrollmentBatchRepository;
+	private final EnrollmentRepository enrollmentRepository;
 	private final StudentTaskRepository studentTaskRepository;
 	private final StudentTaskMapper studentTaskMapper;
+	private final ClassScheduleRepository classScheduleRepository;
 
 	public InstructorDashboardServiceImpl(StaffRepository staffRepository, ClassBatchRepository classBatchRepository,
 			CourseRepository courseRepository, ChapterRepository chapterRepository, TopicRepository topicRepository,
-			EnrollmentBatchRepository enrollmentBatchRepository, StudentTaskRepository studentTaskRepository,
-			StudentTaskMapper studentTaskMapper) {
+			EnrollmentBatchRepository enrollmentBatchRepository, EnrollmentRepository enrollmentRepository,
+			StudentTaskRepository studentTaskRepository, StudentTaskMapper studentTaskMapper,
+			ClassScheduleRepository classScheduleRepository) {
 		this.staffRepository = staffRepository;
 		this.classBatchRepository = classBatchRepository;
 		this.courseRepository = courseRepository;
 		this.chapterRepository = chapterRepository;
 		this.topicRepository = topicRepository;
 		this.enrollmentBatchRepository = enrollmentBatchRepository;
+		this.enrollmentRepository = enrollmentRepository;
 		this.studentTaskRepository = studentTaskRepository;
 		this.studentTaskMapper = studentTaskMapper;
+		this.classScheduleRepository = classScheduleRepository;
 	}
 
 	@Override
@@ -154,5 +170,112 @@ public class InstructorDashboardServiceImpl implements InstructorDashboardServic
 
 		return new InstructorTaskResponse(request.getTitle(), request.getDescription(), course.getCourseId(),
 				batch.getId(), savedTasks.size(), savedTasks.stream().map(studentTaskMapper::toResponse).toList());
+	}
+
+	@Override
+	public InstructorBatchSummaryResponse getBatchSummary(String instructorId) {
+
+		Staff instructor = staffRepository.findByStaffId(instructorId)
+				.orElseThrow(() -> new ResourceNotFoundException("Instructor not found: " + instructorId));
+
+		logger.info("Fetching active/completed batch summary for instructor: {}", instructor.getStaffId());
+
+		List<ClassBatch> batches = classBatchRepository.findByInstructors_StaffId(instructor.getStaffId());
+
+		List<InstructorBatchResponse> activeBatches = new ArrayList<>();
+		List<InstructorBatchResponse> completedBatches = new ArrayList<>();
+
+		for (ClassBatch batch : batches) {
+			if (batch.getStatus() != ClassStatus.SCHEDULED && batch.getStatus() != ClassStatus.COMPLETED) {
+				// CANCELLED batches are neither active nor completed
+				continue;
+			}
+
+			boolean isCompleted = batch.getStatus() == ClassStatus.COMPLETED;
+
+			InstructorBatchResponse batchResponse = new InstructorBatchResponse(batch.getId(), batch.getClassName(),
+					batch.getCourse() != null ? batch.getCourse().getCourseId() : null,
+					batch.getCourse() != null ? batch.getCourse().getCourseTitle() : null, batch.getStartDate(),
+					batch.getEndDate(), isCompleted ? "COMPLETED" : "ACTIVE");
+
+			if (isCompleted) {
+				completedBatches.add(batchResponse);
+			} else {
+				activeBatches.add(batchResponse);
+			}
+		}
+
+		logger.info("Instructor {} has {} active and {} completed batches", instructor.getStaffId(),
+				activeBatches.size(), completedBatches.size());
+
+		return new InstructorBatchSummaryResponse(activeBatches.size(), completedBatches.size(), activeBatches,
+				completedBatches);
+	}
+
+	@Override
+	public InstructorClassStatsResponse getClassStats(String instructorId) {
+
+		Staff instructor = staffRepository.findByStaffId(instructorId)
+				.orElseThrow(() -> new ResourceNotFoundException("Instructor not found: " + instructorId));
+
+		logger.info("Fetching classes-taken/scheduled/hours-spent stats for instructor: {}", instructor.getStaffId());
+
+		List<ClassSchedule> schedules = classScheduleRepository.findAllForInstructor(instructor.getStaffId());
+
+		int classesTaken = 0;
+		int scheduled = 0;
+		long totalMinutes = 0;
+
+		for (ClassSchedule schedule : schedules) {
+			if (schedule.getStatus() == ClassStatus.COMPLETED) {
+				classesTaken++;
+				if (schedule.getStartTime() != null && schedule.getEndTime() != null) {
+					totalMinutes += Duration.between(schedule.getStartTime(), schedule.getEndTime()).toMinutes();
+				}
+			} else if (schedule.getStatus() == ClassStatus.SCHEDULED) {
+				scheduled++;
+			}
+		}
+
+		double hoursSpent = Math.round((totalMinutes / 60.0) * 10) / 10.0;
+
+		logger.info("Instructor {} has classesTaken: {}, scheduled: {}, hoursSpent: {}", instructor.getStaffId(),
+				classesTaken, scheduled, hoursSpent);
+
+		return new InstructorClassStatsResponse(classesTaken, scheduled, hoursSpent);
+	}
+
+	@Override
+	public InstructorStudentStatsResponse getStudentStats(String instructorId) {
+
+		Staff instructor = staffRepository.findByStaffId(instructorId)
+				.orElseThrow(() -> new ResourceNotFoundException("Instructor not found: " + instructorId));
+
+		logger.info("Fetching active/total student stats for instructor: {}", instructor.getStaffId());
+
+		List<ClassBatch> batches = classBatchRepository.findByInstructors_StaffId(instructor.getStaffId());
+
+		if (batches.isEmpty()) {
+			return new InstructorStudentStatsResponse(0, 0);
+		}
+
+		List<Long> batchIds = batches.stream().map(ClassBatch::getId).distinct().toList();
+		List<Long> courseIds = batches.stream().map(ClassBatch::getCourse).filter(course -> course != null)
+				.map(Course::getId).distinct().toList();
+
+		// Active = students placed into one of this instructor's batches.
+		Set<String> activeStudentIds = new LinkedHashSet<>(
+				enrollmentBatchRepository.findDistinctStudentIdsByClassBatchIds(batchIds));
+
+		// Total = students enrolled (directly or via a program) in one of this instructor's courses.
+		Set<String> totalStudentIds = new LinkedHashSet<>();
+		totalStudentIds.addAll(enrollmentRepository.findDistinctStudentIdsByCourseIds(courseIds));
+		totalStudentIds.addAll(enrollmentRepository.findDistinctStudentIdsByProgramCourseIds(courseIds));
+		totalStudentIds.addAll(activeStudentIds);
+
+		logger.info("Instructor {} has {} active and {} total students", instructor.getStaffId(),
+				activeStudentIds.size(), totalStudentIds.size());
+
+		return new InstructorStudentStatsResponse(activeStudentIds.size(), totalStudentIds.size());
 	}
 }

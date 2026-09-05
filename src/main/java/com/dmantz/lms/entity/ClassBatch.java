@@ -28,8 +28,9 @@ public class ClassBatch extends AuditFields {
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private String status;  // ACTIVE, CANCELLED
+    private ClassStatus status;  // SCHEDULED, COMPLETED, CANCELLED
 
     @Column(name = "capacity")
     private Integer capacity;   // Maximum students (nullable)
@@ -93,11 +94,11 @@ public class ClassBatch extends AuditFields {
         this.capacity = capacity;
     }
 
-    public String getStatus() {
+    public ClassStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(ClassStatus status) {
         this.status = status;
     }
     
