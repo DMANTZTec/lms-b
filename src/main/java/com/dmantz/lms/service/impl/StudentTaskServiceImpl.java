@@ -212,6 +212,21 @@ public class StudentTaskServiceImpl implements StudentTaskService {
 		return response;
 	}
 
+	@Override
+	public List<StudentTaskResponse> getAllTasks(String studentId) {
+
+		logger.info("Fetching all tasks for studentId: {}", studentId);
+
+		studentRepository.findByStudentId(studentId)
+				.orElseThrow(() -> new ResourceNotFoundException("Student not found: " + studentId));
+
+		List<StudentTask> tasks = studentTaskRepository.findByStudent_StudentId(studentId);
+
+		logger.info("Found {} tasks for studentId: {}", tasks.size(), studentId);
+
+		return tasks.stream().map(studentTaskMapper::toResponse).toList();
+	}
+
 //	@Override
 //	public StudentTaskResponse updateNeedHelp(StudentNeedHelpRequest request) {
 //

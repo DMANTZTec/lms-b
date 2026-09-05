@@ -23,4 +23,6 @@ public interface StudentTaskService {
 	List<TopicDropdownResponse> getTopicsByChapter(Long chapterId);
 
 	StudentTaskListResponse getTasksByStatus(String studentId, String statusFilter);
+	
+	List<StudentTaskResponse> getAllTasks(String studentId);
 }

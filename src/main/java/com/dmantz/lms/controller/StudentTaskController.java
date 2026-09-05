@@ -76,6 +76,16 @@ public class StudentTaskController {
 		return ResponseEntity.ok(response);
 	}
 
+	@GetMapping("/tasks/{studentId}")
+	public ResponseEntity<List<StudentTaskResponse>> getAllTasks(@PathVariable String studentId) {
+
+		logger.info("Fetching all tasks for studentId: {}", studentId);
+
+		List<StudentTaskResponse> tasks = studentTaskService.getAllTasks(studentId);
+
+		return ResponseEntity.ok(tasks);
+	}
+
 //	// ================= UPDATE NEED HELP =================
 //	@PatchMapping("/need-help")
 //	public ResponseEntity<StudentTaskResponse> markNeedHelp(@Valid @RequestBody StudentNeedHelpRequest request) {
