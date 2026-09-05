@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="202602191036" author="shiva">
+
+        <createTable tableName="class_schedule">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="class_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="staff_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="class_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="start_time" type="TIME">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="end_time" type="TIME">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="meeting_link" type="VARCHAR(500)"/>
+            <column name="location" type="VARCHAR(500)"/>
+
+            <column name="mode" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="status" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- Audit Fields -->
+            <column name="created_by" type="BIGINT" />
+            <column name="created_dt" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_by" type="BIGINT"/>
+            <column name="updated_dt" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+
+<!--        &lt;!&ndash; FK: schedule → class &ndash;&gt;-->
+<!--        <addForeignKeyConstraint-->
+<!--                baseTableName="class_schedule"-->
+<!--                baseColumnNames="class_id"-->
+<!--                referencedTableName="class_batch"-->
+<!--                referencedColumnNames="id"-->
+<!--                constraintName="fk_schedule_class"/>-->
+
+        <!-- FK: schedule → staff -->
+        <addForeignKeyConstraint
+                baseTableName="class_schedule"
+                baseColumnNames="staff_id"
+                referencedTableName="staff"
+                referencedColumnNames="id"
+                constraintName="fk_schedule_staff"/>
+
+    </changeSet>
+
+    <changeSet id="202602191039" author="shiva">
+
+        <addForeignKeyConstraint
+                baseTableName="class_schedule"
+                baseColumnNames="class_id"
+                referencedTableName="class_batch"
+                referencedColumnNames="id"
+                constraintName="fk_schedule_class"
+                onDelete="CASCADE"
+                onUpdate="CASCADE"/>
+
+    </changeSet>
+    
+    <changeSet id="2026061601-add-class-name-to-class-schedule" author="afsheen">
+
+    <addColumn tableName="class_schedule">
+
+        <column name="class_name" type="VARCHAR(255)" defaultValue="">
+            <constraints nullable="false"/>
+        </column>
+
+    </addColumn>
+
+</changeSet>
+
+<changeSet id="2026062201-make-staff-id-nullable-class-schedule" author="afsheen">
+
+        <dropNotNullConstraint
+                tableName="class_schedule"
+                columnName="staff_id"
+                columnDataType="BIGINT"/>
+
+    </changeSet>
+
+</databaseChangeLog>

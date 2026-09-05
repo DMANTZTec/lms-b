@@ -1,0 +1,40 @@
+package com.dmantz.lms.repository;
+
+import com.dmantz.lms.entity.Enrollment;
+import com.dmantz.lms.entity.Staff;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface StaffRepository extends JpaRepository<Staff, Long> {
+
+	Optional<Staff> findByEmailId(String emailId);
+
+	Optional<Staff> findByStaffId(String staffId);
+
+	boolean existsByEmailId(String emailId);
+
+	boolean existsByStaffId(String staffId);
+
+	long count();
+
+	@Query("""
+			    SELECT s FROM Staff s
+			    WHERE s.emailId = :loginId
+			       OR s.mobileNum = :loginId
+			       OR s.staffId = :loginId
+			""")
+	Optional<Staff> findByLoginId(@Param("loginId") String loginId);
+
+	Page<Staff> findByStatus(String status, Pageable pageable);
+
+	Optional<Object> findByMobileNum(String mobileNum);
+
+}

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+           http://www.liquibase.org/xml/ns/dbchangelog
+           http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.15.xsd">
+
+    <changeSet id="202609011103" author="Afsheen">
+
+        <createTable tableName="enrollment_batch">
+
+            <!-- Primary Key -->
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints
+                        primaryKey="true"
+                        nullable="false"/>
+            </column>
+
+            <!-- Enrollment -->
+            <column name="enrollment_id" type="BIGINT">
+                <constraints
+                        nullable="false"/>
+            </column>
+
+            <!-- Class Batch -->
+            <column name="batch_id" type="BIGINT">
+                <constraints
+                        nullable="false"/>
+            </column>
+
+            <!-- Staff who assigned the student -->
+            <column name="assigned_by" type="VARCHAR(50)">
+                <constraints
+                        nullable="false"/>
+            </column>
+
+            <!-- Assignment Date -->
+            <column name="assigned_date" type="TIMESTAMP">
+                <constraints
+                        nullable="false"/>
+            </column>
+
+            <!-- Audit Fields -->
+            <column name="created_dt"
+                    type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP"/>
+
+            <column name="created_by"
+                    type="BIGINT"/>
+
+            <column name="updated_dt"
+                    type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP"/>
+
+            <column name="updated_by"
+                    type="BIGINT"/>
+
+        </createTable>
+
+
+        <!-- Foreign Key: Enrollment -->
+        <addForeignKeyConstraint
+                baseTableName="enrollment_batch"
+                baseColumnNames="enrollment_id"
+                constraintName="fk_enrollment_batch_enrollment"
+                referencedTableName="enrollment"
+                referencedColumnNames="id"/>
+
+
+        <!-- Foreign Key: Class Batch -->
+        <addForeignKeyConstraint
+                baseTableName="enrollment_batch"
+                baseColumnNames="batch_id"
+                constraintName="fk_enrollment_batch_batch"
+                referencedTableName="class_batch"
+                referencedColumnNames="id"/>
+
+
+        <!-- Foreign Key: Staff -->
+        <addForeignKeyConstraint
+                baseTableName="enrollment_batch"
+                baseColumnNames="assigned_by"
+                constraintName="fk_enrollment_batch_staff"
+                referencedTableName="staff"
+                referencedColumnNames="staff_id"/>
+
+
+        <!-- Prevent duplicate assignment of same enrollment to same batch -->
+        <addUniqueConstraint
+                tableName="enrollment_batch"
+                columnNames="enrollment_id,batch_id"
+                constraintName="uk_enrollment_batch"/>
+
+    </changeSet>
+
+</databaseChangeLog>

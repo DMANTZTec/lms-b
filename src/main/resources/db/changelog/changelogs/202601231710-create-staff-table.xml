@@ -72,4 +72,38 @@
 
     </changeSet>
 
+    <changeSet id="202607101010" author="shivashankar">
+
+        <addColumn tableName="staff">
+
+            <column name="gender" type="VARCHAR(20)"/>
+
+            <column name="date_of_joining" type="DATE"/>
+
+        </addColumn>
+
+    </changeSet>
+
+    <changeSet id="202607101109" author="shiva">
+
+        <dropNotNullConstraint
+                tableName="staff"
+                columnName="password"
+                columnDataType="VARCHAR(255)"/>
+
+    </changeSet>
+
+    <changeSet id="202607101127" author="shiva">
+
+        <sql>
+            UPDATE staff SET profile_img = NULL;
+        </sql>
+
+        <modifyDataType
+                tableName="staff"
+                columnName="profile_img"
+                newDataType="VARCHAR(500)"/>
+
+    </changeSet>
+
 </databaseChangeLog>
