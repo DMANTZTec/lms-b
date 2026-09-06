@@ -37,16 +37,17 @@ public class InstructorDashboardController {
 	@PostMapping("/tasks")
 	public ResponseEntity<InstructorTaskResponse> createTask(@Valid @RequestBody InstructorTaskRequest request) {
 
-		logger.info("Received instructor create-task request for assignedBy: {} batchId: {} courseId: {}",
-				request.getAssignedBy(), request.getBatchId(), request.getCourseId());
+		logger.info("Received instructor create-task request for assignedBy: {} courseId: {} chapterId: {} topicId: {}",
+				request.getAssignedBy(), request.getCourseId(), request.getChapterId(), request.getTopicId());
 
 		InstructorTaskResponse response = instructorDashboardService.createTask(request);
 
-		logger.info("Instructor task assigned to {} students in batch {}", response.getAssignedStudentCount(),
-				response.getBatchId());
+		logger.info("Instructor task assigned to {} students in course {}", response.getAssignedStudentCount(),
+				response.getCourseId());
 
 		return ResponseEntity.ok(response);
 	}
+
 
 	@GetMapping("/batches")
 	public ResponseEntity<InstructorBatchSummaryResponse> getBatchSummary(@RequestParam String instructorId) {

@@ -43,5 +43,8 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
             AND pc.course.id IN :courseIds
             """)
     List<String> findDistinctStudentIdsByProgramCourseIds(@Param("courseIds") List<Long> courseIds);
+    
+    
+    List<Enrollment> findByCourse_CourseIdAndStatusNot(String courseId, EnrollmentStatus status);
 
 }

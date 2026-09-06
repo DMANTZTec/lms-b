@@ -93,17 +93,6 @@ public class StudentTaskServiceImpl implements StudentTaskService {
 		Course course = courseRepository.findByCourseId(request.getCourseId())
 				.orElseThrow(() -> new ResourceNotFoundException("Course not found: " + request.getCourseId()));
 
-		ClassBatch batch = classBatchRepository.findById(request.getBatchId())
-				.orElseThrow(() -> new ResourceNotFoundException("Batch not found with id: " + request.getBatchId()));
-		if (batch.getCourse() == null || !batch.getCourse().getId().equals(course.getId())) {
-			throw new IllegalArgumentException("Selected batch does not belong to the selected course");
-		}
-		boolean enrolledInBatch = enrollmentBatchRepository
-				.existsByEnrollment_Student_StudentIdAndClassBatch_Id(student.getStudentId(), batch.getId());
-		if (!enrolledInBatch) {
-			throw new IllegalStateException("Student is not enrolled in the selected batch");
-		}
-
 		Chapter chapter = null;
 		if (request.getChapterId() != null) {
 			chapter = chapterRepository.findById(request.getChapterId())
@@ -129,11 +118,8 @@ public class StudentTaskServiceImpl implements StudentTaskService {
 
 		task.setCourseId(course.getCourseId());
 		task.setChapter(chapter);
-
 		task.setTopic(topic);
 		task.setStudent(student);
-		task.setBatchId(batch.getId());
-		task.setClassBatch(batch);
 		task.setAssignedBy(student.getStudentId());
 		task.setAssignedByType(AssignedByType.STUDENT);
 		task.setStatus(StudentTaskStatus.ACTIVE);
@@ -150,7 +136,6 @@ public class StudentTaskServiceImpl implements StudentTaskService {
 
 		return studentTaskMapper.toResponse(saved);
 	}
-
 	@Override
 	public List<CourseDropdownResponse> getEnrolledCourses(String studentId) {
 

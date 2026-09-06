@@ -37,7 +37,8 @@ public class StudentTaskController {
 	@PostMapping("/addtask")
 	public ResponseEntity<StudentTaskResponse> addStudentTask(@Valid @RequestBody StudentTaskRequest request) {
 
-		logger.info("Received add task request for authenticated student, topicId: {}", request.getTopicId());
+		logger.info("Received add task request for studentId: {} courseId: {} topicId: {}",
+				request.getStudentId(), request.getCourseId(), request.getTopicId());
 
 		StudentTaskResponse response = studentTaskService.addTask(request);
 

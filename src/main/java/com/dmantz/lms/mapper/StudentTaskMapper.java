@@ -19,8 +19,6 @@ public interface StudentTaskMapper {
 	@Mapping(target = "chapter", ignore = true)
 	@Mapping(target = "topic", ignore = true)
 	@Mapping(target = "student", ignore = true)
-	@Mapping(target = "classBatch", ignore = true)
-	@Mapping(target = "batchId", source = "batchId")
 	@Mapping(target = "assignedBy", ignore = true)
 	@Mapping(target = "assignedByType", ignore = true)
 	@Mapping(target = "status", ignore = true)
@@ -35,7 +33,6 @@ public interface StudentTaskMapper {
 
 	@Mapping(target = "id", expression = "java(String.valueOf(task.getId()))")
 	@Mapping(target = "courseId", source = "courseId")
-	@Mapping(target = "batchId", source = "batchId")
 	@Mapping(target = "tags", ignore = true)
 	StudentTaskResponse toResponse(StudentTask task);
 

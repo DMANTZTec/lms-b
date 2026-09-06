@@ -7,20 +7,18 @@ public class InstructorTaskResponse {
 	private String title;
 	private String description;
 	private String courseId;
-	private Long batchId;
 	private int assignedStudentCount;
 	private List<StudentTaskResponse> assignedTasks;
 
 	public InstructorTaskResponse() {
 	}
 
-	public InstructorTaskResponse(String title, String description, String courseId, Long batchId,
+	public InstructorTaskResponse(String title, String description, String courseId, 
 			int assignedStudentCount, List<StudentTaskResponse> assignedTasks) {
 		super();
 		this.title = title;
 		this.description = description;
 		this.courseId = courseId;
-		this.batchId = batchId;
 		this.assignedStudentCount = assignedStudentCount;
 		this.assignedTasks = assignedTasks;
 	}
@@ -47,14 +45,6 @@ public class InstructorTaskResponse {
 
 	public void setCourseId(String courseId) {
 		this.courseId = courseId;
-	}
-
-	public Long getBatchId() {
-		return batchId;
-	}
-
-	public void setBatchId(Long batchId) {
-		this.batchId = batchId;
 	}
 
 	public int getAssignedStudentCount() {

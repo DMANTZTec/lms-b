@@ -84,73 +84,94 @@
 	</changeSet>
 
 	<changeSet id="202609011032" author="Tejaswini">
-	
+
 		<addColumn tableName="student_task">
-		
+
 			<column name="title" type="VARCHAR(255)" afterColumn="id" />
-			
-			<column name="description" type="VARCHAR(1000)" afterColumn="title" />
-			
-			<column name="course_id" type="VARCHAR(20)" afterColumn="description" />
-			
-			<column name="chapter_id" type="BIGINT" afterColumn="course_id" />
-			
+
+			<column name="description" type="VARCHAR(1000)"
+				afterColumn="title" />
+
+			<column name="course_id" type="VARCHAR(20)"
+				afterColumn="description" />
+
+			<column name="chapter_id" type="BIGINT"
+				afterColumn="course_id" />
+
 		</addColumn>
-		
+
 		<addColumn tableName="student_task">
-		
-			<column name="assigned_by" type="VARCHAR(20)" afterColumn="student_id" />
-			
-			<column name="assigned_by_type" type="VARCHAR(20)" afterColumn="assigned_by" />
-			
+
+			<column name="assigned_by" type="VARCHAR(20)"
+				afterColumn="student_id" />
+
+			<column name="assigned_by_type" type="VARCHAR(20)"
+				afterColumn="assigned_by" />
+
 		</addColumn>
-		
-		<dropUniqueConstraint tableName="student_task" constraintName="uk_student_task_student_topic" />
-		
+
+		<dropUniqueConstraint tableName="student_task"
+			constraintName="uk_student_task_student_topic" />
+
 		<addForeignKeyConstraint
 			baseTableName="student_task" baseColumnNames="course_id"
 			constraintName="fk_student_task_course" referencedTableName="course"
 			referencedColumnNames="course_id" />
-			
+
 		<addForeignKeyConstraint
 			baseTableName="student_task" baseColumnNames="chapter_id"
 			constraintName="fk_student_task_chapter"
 			referencedTableName="chapter" referencedColumnNames="id" />
-			
+
 		<dropColumn tableName="student_task"
 			columnName="commit_url" />
-			
+
 		<dropColumn tableName="student_task"
 			columnName="student_comment_txt" />
-			
+
 		<dropColumn tableName="student_task"
 			columnName="reviewer_comment_txt" />
-			
-</changeSet>
 
-	
-	
+	</changeSet>
+
+
+
 	<changeSet
-	id="202609041300-student-task-instructor-assignment" author="Tejaswini">
+		id="202609041300-student-task-instructor-assignment"
+		author="Tejaswini">
+
+		<dropNotNullConstraint tableName="student_task"
+			columnName="topic_id" columnDataType="BIGINT" />
+
+		<addColumn tableName="student_task">
+			<column name="batch_id" type="BIGINT" afterColumn="course_id" />
+		</addColumn>
+
+		<addForeignKeyConstraint
+			baseTableName="student_task" baseColumnNames="batch_id"
+			constraintName="fk_student_task_batch"
+			referencedTableName="class_batch" referencedColumnNames="id" />
+
+		<createIndex indexName="idx_student_task_batch"
+			tableName="student_task">
+			<column name="batch_id" />
+
+		</createIndex>
+
+	</changeSet>
+
+	<changeSet id="202609061500-drop-student-task-batch" author="Tejaswini">
 	
-	<dropNotNullConstraint tableName="student_task"
-		columnName="topic_id" columnDataType="BIGINT" />
 		
-	<addColumn tableName="student_task">
-		<column name="batch_id" type="BIGINT" afterColumn="course_id" />
-	</addColumn>
+		<dropForeignKeyConstraint
+			baseTableName="student_task" constraintName="fk_student_task_batch" />
+			
+		
+		<dropIndex tableName="student_task"
+			indexName="idx_student_task_batch" />
+			
 	
-	<addForeignKeyConstraint
-		baseTableName="student_task" baseColumnNames="batch_id"
-		constraintName="fk_student_task_batch"
-		referencedTableName="class_batch" referencedColumnNames="id" />
-		
-	<createIndex indexName="idx_student_task_batch"
-		tableName="student_task">
-		<column name="batch_id" />
-		
-	</createIndex>
-	
-</changeSet>
+		<dropColumn tableName="student_task" columnName="batch_id" />
+	</changeSet>
 
 </databaseChangeLog>

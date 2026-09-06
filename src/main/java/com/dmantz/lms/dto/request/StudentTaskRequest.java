@@ -17,9 +17,6 @@ public class StudentTaskRequest {
 
 	private Long topicId;
 
-	@NotNull(message = "Batch ID is required")
-	private Long batchId;
-
 	@NotBlank(message = "Student ID is required")
 	private String studentId;
 
@@ -69,14 +66,6 @@ public class StudentTaskRequest {
 
 	public void setStudentId(String studentId) {
 		this.studentId = studentId;
-	}
-
-	public Long getBatchId() {
-		return batchId;
-	}
-
-	public void setBatchId(Long batchId) {
-		this.batchId = batchId;
 	}
 
 }

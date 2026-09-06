@@ -58,13 +58,6 @@ public class StudentTask extends AuditFields {
 	@Column(name = "course_id", nullable = false, length = 20)
 	private String courseId;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "batch_id", insertable = false, updatable = false)
-	private ClassBatch classBatch;
-
-	@Column(name = "batch_id")
-	private Long batchId;
-
 	public Long getId() {
 		return id;
 	}
@@ -169,13 +162,6 @@ public class StudentTask extends AuditFields {
 		this.needHelp = needHelp;
 	}
 
-	public ClassBatch getClassBatch() {
-		return classBatch;
-	}
-
-	public void setClassBatch(ClassBatch classBatch) {
-		this.classBatch = classBatch;
-	}
 
 	public String getCourseId() {
 		return courseId;
@@ -185,12 +171,5 @@ public class StudentTask extends AuditFields {
 		this.courseId = courseId;
 	}
 
-	public Long getBatchId() {
-		return batchId;
-	}
-
-	public void setBatchId(Long batchId) {
-		this.batchId = batchId;
-	}
 
 }

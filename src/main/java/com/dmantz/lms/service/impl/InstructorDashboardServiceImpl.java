@@ -105,23 +105,16 @@ public class InstructorDashboardServiceImpl implements InstructorDashboardServic
 		Staff instructor = staffRepository.findByStaffId(request.getAssignedBy())
 				.orElseThrow(() -> new ResourceNotFoundException("Instructor not found: " + request.getAssignedBy()));
 
-		logger.info("Instructor {} creating task for batchId: {} courseId: {}", instructor.getStaffId(),
-				request.getBatchId(), request.getCourseId());
-
-		ClassBatch batch = classBatchRepository.findById(request.getBatchId())
-				.orElseThrow(() -> new ResourceNotFoundException("Batch not found with id: " + request.getBatchId()));
-
-		boolean assignedToBatch = classBatchRepository.existsByIdAndInstructorsStaffId(batch.getId(),
-				instructor.getStaffId());
-		if (!assignedToBatch) {
-			throw new UnauthorizedAccessException("Instructor is not assigned to batch: " + request.getBatchId());
-		}
+		logger.info("Instructor {} creating task for courseId: {}", instructor.getStaffId(), request.getCourseId());
 
 		Course course = courseRepository.findByCourseId(request.getCourseId())
 				.orElseThrow(() -> new ResourceNotFoundException("Course not found: " + request.getCourseId()));
 
-		if (batch.getCourse() == null || !batch.getCourse().getId().equals(course.getId())) {
-			throw new IllegalArgumentException("Selected batch does not belong to the selected course");
+		boolean assignedToCourse = staffCourseRepository
+				.existsByStaff_StaffIdAndCourse_CourseId(instructor.getStaffId(), course.getCourseId());
+		if (!assignedToCourse) {
+			throw new UnauthorizedAccessException(
+					"Instructor is not assigned to course: " + request.getCourseId());
 		}
 
 		Chapter chapter = chapterRepository.findById(request.getChapterId())
@@ -136,16 +129,12 @@ public class InstructorDashboardServiceImpl implements InstructorDashboardServic
 			throw new IllegalArgumentException("Selected topic does not belong to the selected chapter");
 		}
 
-		List<EnrollmentBatch> enrollmentBatches = enrollmentBatchRepository
-				.findWithStudentsByClassBatchId(batch.getId());
+		List<Enrollment> enrollments = enrollmentRepository
+				.findByCourse_CourseIdAndStatusNot(course.getCourseId(), EnrollmentStatus.CANCELLED);
 
 		Map<String, Student> uniqueStudents = new LinkedHashMap<>();
-		for (EnrollmentBatch enrollmentBatch : enrollmentBatches) {
-			Enrollment enrollment = enrollmentBatch.getEnrollment();
-			if (enrollment == null || enrollment.getStudent() == null) {
-				continue;
-			}
-			if (enrollment.getStatus() == EnrollmentStatus.CANCELLED) {
+		for (Enrollment enrollment : enrollments) {
+			if (enrollment.getStudent() == null) {
 				continue;
 			}
 			uniqueStudents.putIfAbsent(enrollment.getStudent().getStudentId(), enrollment.getStudent());
@@ -153,7 +142,7 @@ public class InstructorDashboardServiceImpl implements InstructorDashboardServic
 
 		List<Student> students = new ArrayList<>(uniqueStudents.values());
 		if (students.isEmpty()) {
-			throw new ResourceNotFoundException("No students are enrolled in batch: " + batch.getId());
+			throw new ResourceNotFoundException("No students are enrolled in course: " + course.getCourseId());
 		}
 
 		LocalDateTime now = LocalDateTime.now();
@@ -167,8 +156,6 @@ public class InstructorDashboardServiceImpl implements InstructorDashboardServic
 			task.setCourse(course);
 			task.setChapter(chapter);
 			task.setTopic(topic);
-			task.setBatchId(batch.getId());
-			task.setClassBatch(batch);
 			task.setStudent(student);
 			task.setAssignedBy(instructor.getStaffId());
 			task.setAssignedByType(AssignedByType.INSTRUCTOR);
@@ -182,13 +169,12 @@ public class InstructorDashboardServiceImpl implements InstructorDashboardServic
 			savedTasks.add(studentTaskRepository.save(task));
 		}
 
-		logger.info("Instructor {} assigned task '{}' to {} students in batch {}", instructor.getStaffId(),
-				request.getTitle(), savedTasks.size(), batch.getId());
+		logger.info("Instructor {} assigned task '{}' to {} students in course {}", instructor.getStaffId(),
+				request.getTitle(), savedTasks.size(), course.getCourseId());
 
 		return new InstructorTaskResponse(request.getTitle(), request.getDescription(), course.getCourseId(),
-				batch.getId(), savedTasks.size(), savedTasks.stream().map(studentTaskMapper::toResponse).toList());
+				savedTasks.size(), savedTasks.stream().map(studentTaskMapper::toResponse).toList());
 	}
-
 	@Override
 	public InstructorBatchSummaryResponse getBatchSummary(String instructorId) {
 

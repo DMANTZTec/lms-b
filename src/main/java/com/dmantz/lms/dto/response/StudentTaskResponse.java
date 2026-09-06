@@ -8,7 +8,6 @@ public class StudentTaskResponse {
 	private String title;
 	private String description;
 	private String courseId;
-	private Long batchId;
 	private List<String> tags;
 
 	public StudentTaskResponse() {
@@ -61,11 +60,5 @@ public class StudentTaskResponse {
 		this.courseId = courseId;
 	}
 
-	public Long getBatchId() {
-		return batchId;
-	}
 
-	public void setBatchId(Long batchId) {
-		this.batchId = batchId;
-	}
 }
