@@ -7,6 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -86,16 +87,15 @@ public class InstructorDashboardController {
 	}
 	
 	@GetMapping("/submissions")
-	public ResponseEntity<List<StudentTaskSubmissionResponse>> getTaskSubmissions(
-	        @RequestParam String staffId,
-	        @RequestParam(required = false) String courseId) {
+	 public ResponseEntity<List<StudentTaskSubmissionResponse>> getTaskSubmissions(
+			 @RequestParam String staffId) {
 
-	    logger.info("Fetching task submissions for staffId: {} courseId: {}", staffId, courseId);
+	        logger.info("Fetching task submissions for staffId: {}", staffId);
 
-	    List<StudentTaskSubmissionResponse> response = instructorDashboardService.getTaskSubmissions(staffId, courseId);
+	        List<StudentTaskSubmissionResponse> response = instructorDashboardService.getTaskSubmissions(staffId);
 
-	    return ResponseEntity.ok(response);
-	}
+	        return ResponseEntity.ok(response);
+	    }
 
 	@GetMapping("/courses")
 	public ResponseEntity<List<InstructorCourseResponse>> getMyCourses(@RequestParam String instructorId) {

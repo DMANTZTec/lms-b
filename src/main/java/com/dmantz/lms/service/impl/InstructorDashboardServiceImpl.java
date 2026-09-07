@@ -269,48 +269,29 @@ public class InstructorDashboardServiceImpl implements InstructorDashboardServic
 	
 	
 	@Override
-	public List<StudentTaskSubmissionResponse> getTaskSubmissions(String staffId, String courseId) {
+	public List<StudentTaskSubmissionResponse> getTaskSubmissions(String staffId) {
 
-		Staff instructor = staffRepository.findByStaffId(staffId)
-				.orElseThrow(() -> new ResourceNotFoundException("Instructor not found: " + staffId));
+	    Staff instructor = staffRepository.findByStaffId(staffId)
+	            .orElseThrow(() -> new ResourceNotFoundException("Instructor not found: " + staffId));
 
-		List<StudentTaskSubmission> submissions;
+	    List<String> courseIds = staffCourseRepository.findByStaff_StaffId(instructor.getStaffId()).stream()
+	            .map(StaffCourse::getCourse)
+	            .filter(c -> c != null)
+	            .map(Course::getCourseId)
+	            .distinct()
+	            .toList();
 
-		if (courseId != null && !courseId.isBlank()) {
+	    if (courseIds.isEmpty()) {
+	        throw new ResourceNotFoundException(
+	                "Instructor " + instructor.getStaffId() + " is not assigned to any course");
+	    }
 
-			boolean assignedToCourse = staffCourseRepository
-					.existsByStaff_StaffIdAndCourse_CourseId(instructor.getStaffId(), courseId);
-			if (!assignedToCourse) {
-				throw new UnauthorizedAccessException(
-						"Instructor " + instructor.getStaffId() + " is not assigned to course: " + courseId);
-			}
+	    List<StudentTaskSubmission> submissions = studentTaskSubmissionRepository.findByStudentTask_CourseIdIn(courseIds);
 
-			submissions = studentTaskSubmissionRepository.findByStudentTask_CourseId(courseId);
+	    logger.info("Instructor {} retrieved {} submission(s) across {} course(s)", instructor.getStaffId(),
+	            submissions.size(), courseIds.size());
 
-			logger.info("Instructor {} retrieved {} submission(s) for course {}", instructor.getStaffId(),
-					submissions.size(), courseId);
-
-		} else {
-
-			List<String> courseIds = staffCourseRepository.findByStaff_StaffId(instructor.getStaffId()).stream()
-					.map(StaffCourse::getCourse)
-					.filter(c -> c != null)
-					.map(Course::getCourseId)
-					.distinct()
-					.toList();
-
-			if (courseIds.isEmpty()) {
-				throw new ResourceNotFoundException(
-						"Instructor " + instructor.getStaffId() + " is not assigned to any course");
-			}
-
-			submissions = studentTaskSubmissionRepository.findByStudentTask_CourseIdIn(courseIds);
-
-			logger.info("Instructor {} retrieved {} submission(s) across {} course(s)", instructor.getStaffId(),
-					submissions.size(), courseIds.size());
-		}
-
-		return submissions.stream().map(studentTaskSubmissionMapper::toResponse).toList();
+	    return submissions.stream().map(studentTaskSubmissionMapper::toResponse).toList();
 	}
 
 	@Override

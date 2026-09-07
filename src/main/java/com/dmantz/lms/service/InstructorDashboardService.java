@@ -15,7 +15,7 @@ public interface InstructorDashboardService {
 
 	InstructorStudentStatsResponse getStudentStats(String instructorId);
 
-	List<StudentTaskSubmissionResponse> getTaskSubmissions(String staffId, String courseId);
+	List<StudentTaskSubmissionResponse> getTaskSubmissions(String staffId);
 
 	List<InstructorCourseResponse> getMyCourses(String instructorId);
 
