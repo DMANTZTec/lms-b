@@ -144,7 +144,7 @@ public class StudentTaskServiceImpl implements StudentTaskService {
 		studentRepository.findByStudentId(studentId)
 				.orElseThrow(() -> new ResourceNotFoundException("Student not found: " + studentId));
 
-		return studentCourseRepository.findByStudent_StudentId(studentId).stream()
+		return enrollmentRepository.findByStudentStudentId(studentId).stream()
 				.map(sc -> new CourseDropdownResponse(sc.getCourse().getCourseId(), sc.getCourse().getCourseTitle()))
 				.toList();
 	}
