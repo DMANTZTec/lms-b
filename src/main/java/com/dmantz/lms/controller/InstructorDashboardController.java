@@ -2,6 +2,7 @@ package com.dmantz.lms.controller;
 
 import java.util.List;
 
+import com.dmantz.lms.dto.response.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
@@ -13,11 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dmantz.lms.dto.request.InstructorTaskRequest;
-import com.dmantz.lms.dto.response.InstructorBatchSummaryResponse;
-import com.dmantz.lms.dto.response.InstructorClassStatsResponse;
-import com.dmantz.lms.dto.response.InstructorStudentStatsResponse;
-import com.dmantz.lms.dto.response.InstructorTaskResponse;
-import com.dmantz.lms.dto.response.StudentTaskSubmissionResponse;
 import com.dmantz.lms.service.InstructorDashboardService;
 
 import jakarta.validation.Valid;
@@ -99,6 +95,18 @@ public class InstructorDashboardController {
 	    List<StudentTaskSubmissionResponse> response = instructorDashboardService.getTaskSubmissions(staffId, courseId);
 
 	    return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/courses")
+	public ResponseEntity<List<InstructorCourseResponse>> getMyCourses(@RequestParam String instructorId) {
+
+		logger.info("Received request for my-courses payload for instructorId: {}", instructorId);
+
+		List<InstructorCourseResponse> response = instructorDashboardService.getMyCourses(instructorId);
+
+		logger.info("Returning {} course(s) for instructorId: {}", response.size(), instructorId);
+
+		return ResponseEntity.ok(response);
 	}
 
 
