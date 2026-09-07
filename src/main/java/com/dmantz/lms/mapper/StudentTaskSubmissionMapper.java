@@ -1,6 +1,5 @@
 package com.dmantz.lms.mapper;
 
-import com.dmantz.lms.dto.request.AttachmentRequest;
 import com.dmantz.lms.dto.request.StudentTaskSubmissionRequest;
 import com.dmantz.lms.dto.response.AttachmentResponse;
 import com.dmantz.lms.dto.response.StudentTaskSubmissionResponse;
@@ -17,6 +16,7 @@ public interface StudentTaskSubmissionMapper {
     @Mapping(target = "studentTask", source = "task")
     @Mapping(target = "student", source = "student")
     @Mapping(target = "instructor", source = "instructor")
+    @Mapping(target = "attachments", ignore = true)
     @Mapping(target = "status", constant = "PENDING_REVIEW")
     @Mapping(target = "submittedAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "reviewFeedback", ignore = true)
@@ -27,9 +27,6 @@ public interface StudentTaskSubmissionMapper {
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedBy", ignore = true)
     StudentTaskSubmission toEntity(StudentTaskSubmissionRequest request, StudentTask task, Student student, Staff instructor);
-   
-
-    FileAttachment mapAttachment(AttachmentRequest request);
 
     // ================= ENTITY -> RESPONSE =================
     @Mapping(source = "student.studentId", target = "studentId")
@@ -37,7 +34,6 @@ public interface StudentTaskSubmissionMapper {
     @Mapping(source = "studentTask.topic.topicNm", target = "topicName")
     @Mapping(source = "studentTask.title", target = "taskTitle")
     StudentTaskSubmissionResponse toResponse(StudentTaskSubmission submission);
-
 
     AttachmentResponse mapAttachmentResponse(FileAttachment dto);
 }

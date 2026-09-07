@@ -5,5 +5,6 @@ import com.dmantz.lms.dto.response.StudentTaskSubmissionResponse;
 
 public interface StudentTaskSubmissionService {
 	
-	StudentTaskSubmissionResponse submitTask(StudentTaskSubmissionRequest request);
+	StudentTaskSubmissionResponse submitTask(StudentTaskSubmissionRequest request) throws Exception;
+	
 }

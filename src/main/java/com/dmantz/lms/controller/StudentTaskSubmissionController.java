@@ -7,9 +7,10 @@ import jakarta.validation.Valid;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,9 +27,9 @@ public class StudentTaskSubmissionController {
     }
 
     // ================= SUBMIT TASK FOR REVIEW =================
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<StudentTaskSubmissionResponse> submitTask(
-            @Valid @RequestBody StudentTaskSubmissionRequest request) {
+            @Valid @ModelAttribute StudentTaskSubmissionRequest request) throws Exception {
 
         logger.info("Received submit task request for studentId: {} taskId: {}",
                 request.getStudentId(), request.getStudentTaskId());
