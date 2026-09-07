@@ -358,6 +358,7 @@ public class InstructorDashboardServiceImpl implements InstructorDashboardServic
 			InstructorCourseResponse resp = new InstructorCourseResponse();
 			resp.setCourseId(course.getCourseId());
 			resp.setTitle(course.getCourseTitle());
+			resp.setCourseImage(course.getCourseImage());
 			resp.setDescription(course.getDescription());
 			resp.setLanguage(course.getLanguage());
 			resp.setSubject(course.getSubject() != null ? course.getSubject().getSubjectNm() : null);
