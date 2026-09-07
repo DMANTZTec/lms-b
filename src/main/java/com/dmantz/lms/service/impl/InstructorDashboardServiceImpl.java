@@ -1,6 +1,7 @@
 package com.dmantz.lms.service.impl;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -9,34 +10,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.dmantz.lms.dto.response.*;
+import com.dmantz.lms.entity.*;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.dmantz.lms.dto.request.InstructorTaskRequest;
-import com.dmantz.lms.dto.response.InstructorBatchResponse;
-import com.dmantz.lms.dto.response.InstructorBatchSummaryResponse;
-import com.dmantz.lms.dto.response.InstructorClassStatsResponse;
-import com.dmantz.lms.dto.response.InstructorStudentStatsResponse;
-import com.dmantz.lms.dto.response.InstructorTaskResponse;
-import com.dmantz.lms.dto.response.StudentTaskSubmissionResponse;
-import com.dmantz.lms.entity.AssignedByType;
-import com.dmantz.lms.entity.Chapter;
-import com.dmantz.lms.entity.ClassBatch;
-import com.dmantz.lms.entity.ClassSchedule;
-import com.dmantz.lms.entity.ClassStatus;
-import com.dmantz.lms.entity.Course;
-import com.dmantz.lms.entity.Enrollment;
-import com.dmantz.lms.entity.EnrollmentBatch;
-import com.dmantz.lms.entity.EnrollmentStatus;
-import com.dmantz.lms.entity.Staff;
-import com.dmantz.lms.entity.StaffCourse;
-import com.dmantz.lms.entity.Student;
-import com.dmantz.lms.entity.StudentTask;
-import com.dmantz.lms.entity.StudentTaskStatus;
-import com.dmantz.lms.entity.StudentTaskSubmission;
-import com.dmantz.lms.entity.Topic;
 import com.dmantz.lms.exceptions.ResourceNotFoundException;
 import com.dmantz.lms.exceptions.UnauthorizedAccessException;
 import com.dmantz.lms.mapper.StudentTaskMapper;
@@ -58,6 +42,7 @@ import com.dmantz.lms.service.InstructorDashboardService;
 public class InstructorDashboardServiceImpl implements InstructorDashboardService {
 
 	private static final Logger logger = LogManager.getLogger(InstructorDashboardServiceImpl.class);
+	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
 	private final StaffRepository staffRepository;
 	private final ClassBatchRepository classBatchRepository;
@@ -326,5 +311,206 @@ public class InstructorDashboardServiceImpl implements InstructorDashboardServic
 		}
 
 		return submissions.stream().map(studentTaskSubmissionMapper::toResponse).toList();
+	}
+
+	@Override
+	public List<InstructorCourseResponse> getMyCourses(String instructorId) {
+
+		Staff instructor = staffRepository.findByStaffId(instructorId)
+				.orElseThrow(() -> new ResourceNotFoundException("Instructor not found: " + instructorId));
+
+		logger.info("Fetching my-courses payload for instructor: {}", instructor.getStaffId());
+
+		// All courses the instructor is assigned to (StaffCourse).
+		List<Course> assignedCourses = staffCourseRepository.findByStaff_StaffId(instructor.getStaffId()).stream()
+				.map(StaffCourse::getCourse)
+				.filter(c -> c != null && !c.isDeleted())
+				.distinct()
+				.toList();
+
+		if (assignedCourses.isEmpty()) {
+			logger.info("Instructor {} is not assigned to any course", instructor.getStaffId());
+			return List.of();
+		}
+
+		List<String> courseIds = assignedCourses.stream().map(Course::getCourseId).distinct().toList();
+		Set<Long> assignedCourseIds = new LinkedHashSet<>(
+				assignedCourses.stream().map(Course::getId).toList());
+
+		// All batches this instructor teaches.
+		List<ClassBatch> instructorBatches = classBatchRepository.findByInstructors_StaffId(instructor.getStaffId());
+
+		// Group schedule rows per course for upcoming-class / date computation.
+		List<Long> instructorBatchIds = instructorBatches.stream().map(ClassBatch::getId).distinct().toList();
+		List<ClassSchedule> instructorSchedules = instructorBatchIds.isEmpty() ? List.of()
+				: classScheduleRepository.findByClassBatchIdInAndClassDateBetweenOrderByClassDateAscStartTimeAsc(
+				instructorBatchIds, LocalDate.now().minusYears(5), LocalDate.now().plusYears(5));
+
+		LocalDate today = LocalDate.now();
+		List<InstructorCourseResponse> result = new ArrayList<>();
+
+		for (Course course : assignedCourses) {
+
+			if (course == null) {
+				continue;
+			}
+
+			InstructorCourseResponse resp = new InstructorCourseResponse();
+			resp.setCourseId(course.getCourseId());
+			resp.setTitle(course.getCourseTitle());
+			resp.setCourseImage(course.getCourseImage());
+			resp.setDescription(course.getDescription());
+			resp.setLanguage(course.getLanguage());
+			resp.setSubject(course.getSubject() != null ? course.getSubject().getSubjectNm() : null);
+			resp.setLevel(displayLevel(course.getLevel()));
+			resp.setSkills(parseSkills(course.getSkills()));
+
+			// Chapters
+			List<Chapter> chapters = chapterRepository.findByCourse_CourseId(course.getCourseId());
+			int totalChapters = chapters.size();
+			int chaptersCompleted = (int) chapters.stream().filter(ch -> ch.getTopics() != null && !ch.getTopics().isEmpty())
+					.count();
+			resp.setTotalChapters(totalChapters);
+			resp.setChaptersCompleted(chaptersCompleted);
+			resp.setProgress(totalChapters == 0 ? 0.0
+					: Math.round((chaptersCompleted * 100.0 / totalChapters) * 10.0) / 10.0);
+
+			// This course's batches (only those this instructor teaches).
+			List<ClassBatch> courseBatches = instructorBatches.stream()
+					.filter(b -> b.getCourse() != null && b.getCourse().getId().equals(course.getId()))
+					.toList();
+
+			boolean hasActiveBatch = false;
+			boolean hasCompletedBatch = false;
+			boolean hasBatch = false;
+			int totalStudents = 0;
+			Set<String> activeStudentIds = new LinkedHashSet<>();
+
+			for (ClassBatch batch : courseBatches) {
+				hasBatch = true;
+				if (batch.getStatus() == ClassStatus.SCHEDULED) {
+					hasActiveBatch = true;
+				} else if (batch.getStatus() == ClassStatus.COMPLETED) {
+					hasCompletedBatch = true;
+				}
+
+				int batchStudents = (int) enrollmentBatchRepository.countByClassBatchId(batch.getId());
+				totalStudents += batchStudents;
+
+				// Batch detail (name, students, schedule).
+				InstructorCourseResponse.BatchDetail detail = new InstructorCourseResponse.BatchDetail();
+				detail.setName(batch.getClassName());
+				detail.setStudents(batchStudents);
+				detail.setSchedule(buildBatchSchedule(batch, instructorSchedules, today));
+				resp.getBatches().add(detail);
+
+				// Active students (placed into one of this instructor's active batches).
+				if (batch.getStatus() == ClassStatus.SCHEDULED) {
+					activeStudentIds
+							.addAll(enrollmentBatchRepository.findDistinctStudentIdsByClassBatchIds(List.of(batch.getId())));
+				}
+			}
+
+			resp.setTotalStudents(totalStudents);
+			resp.setActiveStudents(activeStudentIds.size());
+
+			// Status: derive from batches.
+			String status;
+			if (!hasBatch) {
+				status = "PLANNED";
+			} else if (hasActiveBatch) {
+				status = "ACTIVE";
+			} else if (hasCompletedBatch) {
+				status = "COMPLETED";
+			} else {
+				status = "PLANNED";
+			}
+			resp.setStatus(status);
+
+			// Upcoming classes + next/last class date (from schedules belonging to batches of this course).
+			Set<Long> courseBatchIds = courseBatches.stream().map(ClassBatch::getId).collect(java.util.stream.Collectors.toSet());
+			int upcomingClasses = 0;
+			for (ClassSchedule schedule : instructorSchedules) {
+				if (!courseBatchIds.contains(schedule.getClassBatch() == null ? null : schedule.getClassBatch().getId())) {
+					continue;
+				}
+				if (schedule.getClassDate() != null && schedule.getStatus() == ClassStatus.SCHEDULED) {
+					if (schedule.getClassDate().compareTo(today) >= 0) {
+						upcomingClasses++;
+						if (resp.getNextClassDate() == null
+								|| schedule.getClassDate().isBefore(resp.getNextClassDate())) {
+							resp.setNextClassDate(schedule.getClassDate());
+						}
+					}
+					if (resp.getLastClassDate() == null
+							|| schedule.getClassDate().isAfter(resp.getLastClassDate())) {
+						resp.setLastClassDate(schedule.getClassDate());
+					}
+				}
+			}
+			resp.setUpcomingClasses(upcomingClasses);
+
+			// Avoid returning batches linked to courses not actually assigned to this instructor.
+			if (!assignedCourseIds.contains(course.getId())) {
+				continue;
+			}
+
+			result.add(resp);
+		}
+
+		logger.info("Instructor {} has {} my-course records", instructor.getStaffId(), result.size());
+		return result;
+	}
+
+	private String displayLevel(CourseLevel level) {
+		if (level == null) {
+			return null;
+		}
+		String name = level.name();
+		return name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
+	}
+
+	private List<String> parseSkills(String skills) {
+		if (skills == null || skills.isBlank()) {
+			return List.of();
+		}
+		try {
+			return OBJECT_MAPPER.readValue(skills, new TypeReference<List<String>>() {
+			});
+		} catch (Exception e) {
+			logger.warn("Failed to parse course skills JSON: {}", skills);
+			return List.of();
+		}
+	}
+
+	private String buildBatchSchedule(ClassBatch batch, List<ClassSchedule> schedules, LocalDate today) {
+		if (batch.getStatus() == ClassStatus.COMPLETED) {
+			return "Completed";
+		}
+		if (batch.getStatus() == ClassStatus.SCHEDULED && batch.getEndDate() != null && batch.getEndDate().isBefore(today)) {
+			return "Completed";
+		}
+		if (batch.getStartDate() != null && batch.getStartDate().isAfter(today)) {
+			return "Starts " + batch.getStartDate();
+		}
+		// Combine schedule day/times for upcoming active classes.
+		List<String> parts = new ArrayList<>();
+		for (ClassSchedule schedule : schedules) {
+			if (schedule.getClassBatch() == null || !schedule.getClassBatch().getId().equals(batch.getId())) {
+				continue;
+			}
+			if (schedule.getStatus() != ClassStatus.SCHEDULED) {
+				continue;
+			}
+			String day = schedule.getClassDate() != null
+					? schedule.getClassDate().getDayOfWeek().toString().substring(0, 3)
+					: "";
+			String time = "";
+			if (schedule.getStartTime() != null) {
+				time = schedule.getStartTime().toString().substring(0, 5);
+			}
+			parts.add((day + " " + time).trim());
+		}
+		return parts.isEmpty() ? "Scheduled" : String.join(", ", parts);
 	}
 }
