@@ -175,7 +175,7 @@ public class EnrollmentBatchServiceImpl implements EnrollmentBatchService {
 		if (enrollment.getProgram() != null) {
 
 			boolean courseExists = enrollment.getProgram().getProgramCourses().stream()
-					.anyMatch(course -> batchCourseId.equals(course.getCourse()));
+					.anyMatch(course -> batchCourseId.equals(course.getCourse().getCourseId()));
 
 			if (!courseExists) {
 
