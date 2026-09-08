@@ -266,13 +266,13 @@ public class InstructorDashboardServiceImpl implements InstructorDashboardServic
 
 		return new InstructorStudentStatsResponse(activeStudentIds.size(), totalStudentIds.size());
 	}
-	
+
 	
 	@Override
-	public List<StudentTaskSubmissionResponse> getTaskSubmissions(String staffId) {
+	public List<StudentTaskSubmissionResponse> getTaskSubmissions(String instructorId, SubmissionFilter filter) {
 
-	    Staff instructor = staffRepository.findByStaffId(staffId)
-	            .orElseThrow(() -> new ResourceNotFoundException("Instructor not found: " + staffId));
+	    Staff instructor = staffRepository.findByStaffId(instructorId)
+	            .orElseThrow(() -> new ResourceNotFoundException("Instructor not found: " + instructorId));
 
 	    List<String> courseIds = staffCourseRepository.findByStaff_StaffId(instructor.getStaffId()).stream()
 	            .map(StaffCourse::getCourse)
@@ -288,8 +288,16 @@ public class InstructorDashboardServiceImpl implements InstructorDashboardServic
 
 	    List<StudentTaskSubmission> submissions = studentTaskSubmissionRepository.findByStudentTask_CourseIdIn(courseIds);
 
-	    logger.info("Instructor {} retrieved {} submission(s) across {} course(s)", instructor.getStaffId(),
-	            submissions.size(), courseIds.size());
+	    SubmissionFilter effectiveFilter = filter != null ? filter : SubmissionFilter.ALL_SUBMISSIONS;
+
+	    if (effectiveFilter == SubmissionFilter.ASSIGNED_BY_ME) {
+	        submissions = submissions.stream()
+	                .filter(s -> s.getStudentTask() != null
+	                        && instructor.getStaffId().equals(s.getStudentTask().getAssignedBy()))
+	                .toList();
+	    }
+	    logger.info("Instructor {} retrieved {} submission(s) across {} course(s) with filter {}", instructor.getStaffId(),
+	            submissions.size(), courseIds.size(), effectiveFilter);
 
 	    return submissions.stream().map(studentTaskSubmissionMapper::toResponse).toList();
 	}
@@ -494,4 +502,28 @@ public class InstructorDashboardServiceImpl implements InstructorDashboardServic
 		}
 		return parts.isEmpty() ? "Scheduled" : String.join(", ", parts);
 	}
+	
+	@Override
+	public List<InstructorCourseSummaryResponse> getMyCourseSummaries(String instructorId) {
+
+	    Staff instructor = staffRepository.findByStaffId(instructorId)
+	            .orElseThrow(() -> new ResourceNotFoundException("Instructor not found: " + instructorId));
+
+	    logger.info("Fetching course summary list for instructor: {}", instructor.getStaffId());
+
+	    List<Course> assignedCourses = staffCourseRepository.findByStaff_StaffId(instructor.getStaffId()).stream()
+	            .map(StaffCourse::getCourse)
+	            .filter(c -> c != null && !c.isDeleted())
+	            .distinct()
+	            .toList();
+
+	    List<InstructorCourseSummaryResponse> result = assignedCourses.stream()
+	            .map(c -> new InstructorCourseSummaryResponse(c.getCourseId(), c.getCourseTitle()))
+	            .toList();
+
+	    logger.info("Instructor {} has {} course(s)", instructor.getStaffId(), result.size());
+
+	    return result;
+	}
+	
 }

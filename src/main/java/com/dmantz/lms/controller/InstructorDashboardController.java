@@ -3,6 +3,8 @@ package com.dmantz.lms.controller;
 import java.util.List;
 
 import com.dmantz.lms.dto.response.*;
+import com.dmantz.lms.entity.SubmissionFilter;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
@@ -87,15 +89,16 @@ public class InstructorDashboardController {
 	}
 	
 	@GetMapping("/submissions")
-	 public ResponseEntity<List<StudentTaskSubmissionResponse>> getTaskSubmissions(
-			 @RequestParam String staffId) {
+	public ResponseEntity<List<StudentTaskSubmissionResponse>> getTaskSubmissions(
+	        @RequestParam String InstructorId,
+	        @RequestParam(required = false, defaultValue = "ALL") SubmissionFilter filter) {
 
-	        logger.info("Fetching task submissions for staffId: {}", staffId);
+	    logger.info("Received submissions request for staffId: {}, filter: {}", InstructorId, filter);
 
-	        List<StudentTaskSubmissionResponse> response = instructorDashboardService.getTaskSubmissions(staffId);
+	    List<StudentTaskSubmissionResponse> response = instructorDashboardService.getTaskSubmissions(InstructorId, filter);
 
-	        return ResponseEntity.ok(response);
-	    }
+	    return ResponseEntity.ok(response);
+	}
 
 	@GetMapping("/courses")
 	public ResponseEntity<List<InstructorCourseResponse>> getMyCourses(@RequestParam String instructorId) {
@@ -109,5 +112,14 @@ public class InstructorDashboardController {
 		return ResponseEntity.ok(response);
 	}
 
+	@GetMapping("/coursesSummaries")
+	public ResponseEntity<List<InstructorCourseSummaryResponse>> getMyCourseSummaries(
+	        @RequestParam String instructorId) {
 
+	    logger.info("Received request for course summaries, instructorId: {}", instructorId);
+
+	    List<InstructorCourseSummaryResponse> response = instructorDashboardService.getMyCourseSummaries(instructorId);
+
+	    return ResponseEntity.ok(response);
+	}
 }
