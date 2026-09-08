@@ -17,7 +17,7 @@ public interface StudentTaskSubmissionMapper {
     @Mapping(target = "student", source = "student")
     @Mapping(target = "instructor", source = "instructor")
     @Mapping(target = "attachments", ignore = true)
-    @Mapping(target = "status", constant = "PENDING_REVIEW")
+    @Mapping(target = "status", constant = "ACTIVE")
     @Mapping(target = "submittedAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "reviewFeedback", ignore = true)
     @Mapping(target = "pointsAwarded", ignore = true)
@@ -33,6 +33,7 @@ public interface StudentTaskSubmissionMapper {
     @Mapping(source = "studentTask.course.courseTitle", target = "courseTitle")
     @Mapping(source = "studentTask.topic.topicNm", target = "topicName")
     @Mapping(source = "studentTask.title", target = "taskTitle")
+    @Mapping(target = "studentName", expression = "java(submission.getStudent().getFirstNm() + \" \" + submission.getStudent().getLastNm())")
     StudentTaskSubmissionResponse toResponse(StudentTaskSubmission submission);
 
     AttachmentResponse mapAttachmentResponse(FileAttachment dto);
