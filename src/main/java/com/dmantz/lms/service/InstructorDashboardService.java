@@ -15,8 +15,6 @@ public interface InstructorDashboardService {
 	InstructorClassStatsResponse getClassStats(String instructorId);
 
 	InstructorStudentStatsResponse getStudentStats(String instructorId);
-
-//	List<StudentTaskSubmissionResponse> getTaskSubmissions(String staffId);
 	
 	List<StudentTaskSubmissionResponse> getTaskSubmissions(String staffId, SubmissionFilter filter);
 
@@ -24,4 +22,5 @@ public interface InstructorDashboardService {
 	
 	List<InstructorCourseSummaryResponse> getMyCourseSummaries(String instructorId);
 
+	List<StudentTaskSubmissionResponse> getPendingReviews(String instructorId);
 }

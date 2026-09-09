@@ -122,4 +122,17 @@ public class InstructorDashboardController {
 
 	    return ResponseEntity.ok(response);
 	}
+	
+	@GetMapping("/pending-reviews")
+	public ResponseEntity<List<StudentTaskSubmissionResponse>> getPendingReviews(
+	        @RequestParam String instructorId) {
+
+	    logger.info("Received pending-reviews request for instructorId: {}", instructorId);
+
+	    List<StudentTaskSubmissionResponse> response = instructorDashboardService.getPendingReviews(instructorId);
+
+	    logger.info("Returning {} pending review(s) for instructorId: {}", response.size(), instructorId);
+
+	    return ResponseEntity.ok(response);
+	}
 }

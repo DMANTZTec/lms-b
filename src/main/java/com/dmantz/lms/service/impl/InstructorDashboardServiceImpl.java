@@ -526,4 +526,31 @@ public class InstructorDashboardServiceImpl implements InstructorDashboardServic
 	    return result;
 	}
 	
+	@Override
+	public List<StudentTaskSubmissionResponse> getPendingReviews(String instructorId) {
+
+	    Staff instructor = staffRepository.findByStaffId(instructorId)
+	            .orElseThrow(() -> new ResourceNotFoundException("Instructor not found: " + instructorId));
+
+	    List<String> courseIds = staffCourseRepository.findByStaff_StaffId(instructor.getStaffId()).stream()
+	            .map(StaffCourse::getCourse)
+	            .filter(c -> c != null)
+	            .map(Course::getCourseId)
+	            .distinct()
+	            .toList();
+
+	    if (courseIds.isEmpty()) {
+	        throw new ResourceNotFoundException(
+	                "Instructor " + instructor.getStaffId() + " is not assigned to any course");
+	    }
+
+	    List<StudentTaskSubmission> pendingSubmissions = studentTaskSubmissionRepository
+	            .findByStudentTask_CourseIdInAndReviewStatus(courseIds, ReviewStatus.PENDING_REVIEW);
+
+	    logger.info("Instructor {} has {} pending review(s) across {} course(s)", instructor.getStaffId(),
+	            pendingSubmissions.size(), courseIds.size());
+
+	    return pendingSubmissions.stream().map(studentTaskSubmissionMapper::toResponse).toList();
+	}
+	
 }
