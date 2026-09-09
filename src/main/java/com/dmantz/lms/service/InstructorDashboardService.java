@@ -3,6 +3,7 @@ package com.dmantz.lms.service;
 import java.util.List;
 
 import com.dmantz.lms.dto.request.InstructorTaskRequest;
+import com.dmantz.lms.dto.request.PlanClassTopicsRequest;
 import com.dmantz.lms.dto.response.*;
 
 public interface InstructorDashboardService {
@@ -18,5 +19,9 @@ public interface InstructorDashboardService {
 	List<StudentTaskSubmissionResponse> getTaskSubmissions(String staffId, String courseId);
 
 	List<InstructorCourseResponse> getMyCourses(String instructorId);
+
+	List<ClassTopicResponse> planClassTopics(Long scheduleId, PlanClassTopicsRequest request);
+
+	List<ClassTopicResponse> getPlannedTopics(Long scheduleId, String staffId);
 
 }

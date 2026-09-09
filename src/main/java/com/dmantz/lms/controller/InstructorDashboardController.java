@@ -7,13 +7,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dmantz.lms.dto.request.InstructorTaskRequest;
+import com.dmantz.lms.dto.request.PlanClassTopicsRequest;
 import com.dmantz.lms.service.InstructorDashboardService;
 
 import jakarta.validation.Valid;
@@ -109,5 +112,31 @@ public class InstructorDashboardController {
 		return ResponseEntity.ok(response);
 	}
 
+	// "Plan Class" popup on a Class Schedule row: pick which course topics this class occurrence covers.
+	@PutMapping("/schedule/{scheduleId}/topics")
+	public ResponseEntity<List<ClassTopicResponse>> planClassTopics(@PathVariable Long scheduleId,
+			@Valid @RequestBody PlanClassTopicsRequest request) {
+
+		logger.info("PUT /schedule/{}/topics - staffId: {} planning {} topic(s)", scheduleId, request.getStaffId(),
+				request.getTopicIds() == null ? 0 : request.getTopicIds().size());
+
+		List<ClassTopicResponse> response = instructorDashboardService.planClassTopics(scheduleId, request);
+
+		logger.info("Schedule {} now has {} planned topic(s)", scheduleId, response.size());
+
+		return ResponseEntity.ok(response);
+	}
+
+	// Pre-fills the "Plan Class" popup with whatever is already planned for this schedule's class.
+	@GetMapping("/schedule/{scheduleId}/topics")
+	public ResponseEntity<List<ClassTopicResponse>> getPlannedTopics(@PathVariable Long scheduleId,
+			@RequestParam String staffId) {
+
+		logger.info("GET /schedule/{}/topics - Fetching planned topics for staffId: {}", scheduleId, staffId);
+
+		List<ClassTopicResponse> response = instructorDashboardService.getPlannedTopics(scheduleId, staffId);
+
+		return ResponseEntity.ok(response);
+	}
 
 }

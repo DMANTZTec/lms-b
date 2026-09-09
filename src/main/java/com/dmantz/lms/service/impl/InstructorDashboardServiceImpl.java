@@ -9,6 +9,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.dmantz.lms.dto.response.*;
 import com.dmantz.lms.entity.*;
@@ -21,13 +22,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.dmantz.lms.dto.request.InstructorTaskRequest;
+import com.dmantz.lms.dto.request.PlanClassTopicsRequest;
 import com.dmantz.lms.exceptions.ResourceNotFoundException;
 import com.dmantz.lms.exceptions.UnauthorizedAccessException;
+import com.dmantz.lms.mapper.ClassTopicMapper;
 import com.dmantz.lms.mapper.StudentTaskMapper;
 import com.dmantz.lms.mapper.StudentTaskSubmissionMapper;
 import com.dmantz.lms.repository.ChapterRepository;
 import com.dmantz.lms.repository.ClassBatchRepository;
 import com.dmantz.lms.repository.ClassScheduleRepository;
+import com.dmantz.lms.repository.ClassTopicRepository;
 import com.dmantz.lms.repository.CourseRepository;
 import com.dmantz.lms.repository.EnrollmentBatchRepository;
 import com.dmantz.lms.repository.EnrollmentRepository;
@@ -57,8 +61,10 @@ public class InstructorDashboardServiceImpl implements InstructorDashboardServic
 	private final StaffCourseRepository staffCourseRepository;
 	private final StudentTaskSubmissionRepository studentTaskSubmissionRepository;
 	private final StudentTaskSubmissionMapper studentTaskSubmissionMapper;
+	private final ClassTopicRepository classTopicRepository;
+	private final ClassTopicMapper classTopicMapper;
 
-	
+
 
 	public InstructorDashboardServiceImpl(StaffRepository staffRepository, ClassBatchRepository classBatchRepository,
 			CourseRepository courseRepository, ChapterRepository chapterRepository, TopicRepository topicRepository,
@@ -66,7 +72,8 @@ public class InstructorDashboardServiceImpl implements InstructorDashboardServic
 			StudentTaskRepository studentTaskRepository, StudentTaskMapper studentTaskMapper,
 			ClassScheduleRepository classScheduleRepository, StaffCourseRepository staffCourseRepository,
 			StudentTaskSubmissionRepository studentTaskSubmissionRepository,
-			StudentTaskSubmissionMapper studentTaskSubmissionMapper) {
+			StudentTaskSubmissionMapper studentTaskSubmissionMapper, ClassTopicRepository classTopicRepository,
+			ClassTopicMapper classTopicMapper) {
 		super();
 		this.staffRepository = staffRepository;
 		this.classBatchRepository = classBatchRepository;
@@ -81,6 +88,8 @@ public class InstructorDashboardServiceImpl implements InstructorDashboardServic
 		this.staffCourseRepository = staffCourseRepository;
 		this.studentTaskSubmissionRepository = studentTaskSubmissionRepository;
 		this.studentTaskSubmissionMapper = studentTaskSubmissionMapper;
+		this.classTopicRepository = classTopicRepository;
+		this.classTopicMapper = classTopicMapper;
 	}
 
 	@Override
@@ -460,6 +469,101 @@ public class InstructorDashboardServiceImpl implements InstructorDashboardServic
 
 		logger.info("Instructor {} has {} my-course records", instructor.getStaffId(), result.size());
 		return result;
+	}
+
+	@Override
+	@Transactional
+	public List<ClassTopicResponse> planClassTopics(Long scheduleId, PlanClassTopicsRequest request) {
+
+		ClassSchedule schedule = classScheduleRepository.findById(scheduleId)
+				.orElseThrow(() -> new ResourceNotFoundException("Class schedule not found: " + scheduleId));
+
+		Staff instructor = staffRepository.findByStaffId(request.getStaffId())
+				.orElseThrow(() -> new ResourceNotFoundException("Instructor not found: " + request.getStaffId()));
+
+		if (!isScheduleInstructor(schedule, instructor.getStaffId())) {
+			throw new UnauthorizedAccessException(
+					"Instructor " + instructor.getStaffId() + " is not assigned to schedule: " + scheduleId);
+		}
+
+		ClassBatch batch = schedule.getClassBatch();
+		if (batch == null) {
+			throw new ResourceNotFoundException("Schedule " + scheduleId + " has no associated class batch");
+		}
+
+		String courseId = batch.getCourse() != null ? batch.getCourse().getCourseId() : null;
+		List<Long> requestedTopicIds = request.getTopicIds() == null ? List.of() : request.getTopicIds();
+
+		for (Long topicId : requestedTopicIds) {
+			Topic topic = topicRepository.findById(topicId)
+					.orElseThrow(() -> new ResourceNotFoundException("Topic not found: " + topicId));
+			if (topic.getChapter() == null || topic.getChapter().getCourse() == null
+					|| !topic.getChapter().getCourse().getCourseId().equals(courseId)) {
+				throw new IllegalArgumentException("Topic " + topicId + " does not belong to this class's course");
+			}
+		}
+
+		List<ClassTopic> existing = classTopicRepository.findByClassBatchId(batch.getId());
+		Set<Long> existingTopicIds = existing.stream().map(ct -> ct.getTopic().getId()).collect(Collectors.toSet());
+		Set<Long> requestedSet = new LinkedHashSet<>(requestedTopicIds);
+
+		// "Save Plan" replaces the full selection: drop anything unchecked, keep anything already checked.
+		List<Long> toRemove = existingTopicIds.stream().filter(id -> !requestedSet.contains(id)).toList();
+		if (!toRemove.isEmpty()) {
+			classTopicRepository.deleteByClassBatchIdAndTopicIdIn(batch.getId(), toRemove);
+		}
+
+		for (Long topicId : requestedSet) {
+			if (existingTopicIds.contains(topicId)) {
+				continue;
+			}
+			Topic topic = topicRepository.getReferenceById(topicId);
+			ClassTopic classTopic = new ClassTopic();
+			classTopic.setClassBatch(batch);
+			classTopic.setTopic(topic);
+			classTopic.setStatus("PLANNED");
+			classTopicRepository.save(classTopic);
+		}
+
+		logger.info("Instructor {} planned {} topic(s) for scheduleId: {} (batchId: {})", instructor.getStaffId(),
+				requestedSet.size(), scheduleId, batch.getId());
+
+		return classTopicMapper.toResponseList(classTopicRepository.findByClassBatchId(batch.getId()));
+	}
+
+	@Override
+	public List<ClassTopicResponse> getPlannedTopics(Long scheduleId, String staffId) {
+
+		ClassSchedule schedule = classScheduleRepository.findById(scheduleId)
+				.orElseThrow(() -> new ResourceNotFoundException("Class schedule not found: " + scheduleId));
+
+		if (!isScheduleInstructor(schedule, staffId)) {
+			throw new UnauthorizedAccessException(
+					"Instructor " + staffId + " is not assigned to schedule: " + scheduleId);
+		}
+
+		ClassBatch batch = schedule.getClassBatch();
+		if (batch == null) {
+			return List.of();
+		}
+
+		return classTopicMapper.toResponseList(classTopicRepository.findByClassBatchId(batch.getId()));
+	}
+
+	// Mirrors ClassScheduleRepository.findAllForInstructor: legacy single-staff column,
+	// the schedule's own instructors, or (when the schedule has none of its own) the batch's instructors.
+	private boolean isScheduleInstructor(ClassSchedule schedule, String staffId) {
+		if (staffId == null) {
+			return false;
+		}
+		if (schedule.getStaff() != null && staffId.equals(schedule.getStaff().getStaffId())) {
+			return true;
+		}
+		if (schedule.getInstructors() != null && !schedule.getInstructors().isEmpty()) {
+			return schedule.getInstructors().stream().anyMatch(s -> staffId.equals(s.getStaffId()));
+		}
+		return schedule.getClassBatch() != null && schedule.getClassBatch().getInstructors() != null
+				&& schedule.getClassBatch().getInstructors().stream().anyMatch(s -> staffId.equals(s.getStaffId()));
 	}
 
 	private String displayLevel(CourseLevel level) {
