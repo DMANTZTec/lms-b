@@ -3,6 +3,8 @@ package com.dmantz.lms.controller;
 import java.util.List;
 
 import com.dmantz.lms.dto.response.*;
+import com.dmantz.lms.entity.SubmissionFilter;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
@@ -90,12 +92,12 @@ public class InstructorDashboardController {
 	
 	@GetMapping("/submissions")
 	public ResponseEntity<List<StudentTaskSubmissionResponse>> getTaskSubmissions(
-	        @RequestParam String staffId,
-	        @RequestParam(required = false) String courseId) {
+	        @RequestParam String InstructorId,
+	        @RequestParam(required = false, defaultValue = "ALL") SubmissionFilter filter) {
 
-	    logger.info("Fetching task submissions for staffId: {} courseId: {}", staffId, courseId);
+	    logger.info("Received submissions request for staffId: {}, filter: {}", InstructorId, filter);
 
-	    List<StudentTaskSubmissionResponse> response = instructorDashboardService.getTaskSubmissions(staffId, courseId);
+	    List<StudentTaskSubmissionResponse> response = instructorDashboardService.getTaskSubmissions(InstructorId, filter);
 
 	    return ResponseEntity.ok(response);
 	}
@@ -139,4 +141,27 @@ public class InstructorDashboardController {
 		return ResponseEntity.ok(response);
 	}
 
+	@GetMapping("/coursesSummaries")
+	public ResponseEntity<List<InstructorCourseSummaryResponse>> getMyCourseSummaries(
+	        @RequestParam String instructorId) {
+
+	    logger.info("Received request for course summaries, instructorId: {}", instructorId);
+
+	    List<InstructorCourseSummaryResponse> response = instructorDashboardService.getMyCourseSummaries(instructorId);
+
+	    return ResponseEntity.ok(response);
+	}
+	
+	@GetMapping("/pending-reviews")
+	public ResponseEntity<List<StudentTaskSubmissionResponse>> getPendingReviews(
+	        @RequestParam String instructorId) {
+
+	    logger.info("Received pending-reviews request for instructorId: {}", instructorId);
+
+	    List<StudentTaskSubmissionResponse> response = instructorDashboardService.getPendingReviews(instructorId);
+
+	    logger.info("Returning {} pending review(s) for instructorId: {}", response.size(), instructorId);
+
+	    return ResponseEntity.ok(response);
+	}
 }

@@ -83,4 +83,20 @@
 			<column name="staff_id" />
 		</createIndex>
 	</changeSet>
+	
+	
+		<changeSet id="202609091200" author="Tejaswini">
+
+		<addColumn tableName="student_task_submission">
+			<column name="review_status" type="VARCHAR(30)" defaultValue="PENDING_REVIEW">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+
+		<createIndex indexName="idx_sts_review_status"
+			tableName="student_task_submission">
+			<column name="review_status" />
+		</createIndex>
+
+	</changeSet>
 </databaseChangeLog>

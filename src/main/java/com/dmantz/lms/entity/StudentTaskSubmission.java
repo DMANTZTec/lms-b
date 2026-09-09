@@ -50,6 +50,10 @@ public class StudentTaskSubmission extends AuditFields {
 
     @Column(name = "reviewed_at")
     private LocalDateTime reviewedAt;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "review_status", nullable = false, length = 30)
+    private ReviewStatus reviewStatus;
 
     public Long getId() {
         return id;
@@ -138,4 +142,14 @@ public class StudentTaskSubmission extends AuditFields {
     public void setReviewedAt(LocalDateTime reviewedAt) {
         this.reviewedAt = reviewedAt;
     }
+
+	public ReviewStatus getReviewStatus() {
+		return reviewStatus;
+	}
+
+	public void setReviewStatus(ReviewStatus reviewStatus) {
+		this.reviewStatus = reviewStatus;
+	}
+    
+    
 }

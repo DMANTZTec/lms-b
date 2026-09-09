@@ -96,7 +96,7 @@ public class StudentTaskSubmissionServiceImpl implements StudentTaskSubmissionSe
 
 		StudentTaskSubmission saved = submissionRepository.save(submission);
 
-		task.setStatus(StudentTaskStatus.SUBMITTED);
+		task.setStatus(StudentTaskStatus.COMPLETED);
 		studentTaskRepository.save(task);
 
 		logger.info("Task submission {} is pending review from instructor: {}", saved.getId(), instructor.getStaffId());

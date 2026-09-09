@@ -14,10 +14,12 @@ public class StudentTaskSubmissionResponse {
     private String submissionNotes;
     private List<AttachmentResponse> attachments;
     private String status;
+    private String reviewStatus;  
     private LocalDateTime submittedAt;
     private String reviewFeedback;
     private Integer pointsAwarded;
     private LocalDateTime reviewedAt;
+    
 
     public Long getId() {
         return id;
@@ -122,4 +124,14 @@ public class StudentTaskSubmissionResponse {
     public void setReviewedAt(LocalDateTime reviewedAt) {
         this.reviewedAt = reviewedAt;
     }
+
+	public String getReviewStatus() {
+		return reviewStatus;
+	}
+
+	public void setReviewStatus(String reviewStatus) {
+		this.reviewStatus = reviewStatus;
+	}
+    
+    
 }
