@@ -282,37 +282,26 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 	}
 
 	@Override
-	public ClassScheduleResponse modifySchedule(Long scheduleId, AddScheduleRequest request) {
+	public ClassScheduleResponse rescheduleClass(Long scheduleId, RescheduleClassRequest request) {
 
-		logger.info("Modifying schedule with id: {}", scheduleId);
+		logger.info("Rescheduling class with id: {}", scheduleId);
 
 		ClassSchedule schedule = classScheduleRepository.findById(scheduleId).orElseThrow(() -> {
-			logger.warn("Schedule not found with id: {} during modifySchedule", scheduleId);
+			logger.warn("Schedule not found with id: {} during rescheduleClass", scheduleId);
 			return new ResourceNotFoundException("Schedule not found with id: " + scheduleId);
 		});
 
-		if (request.getClassName() != null) {
-			schedule.setClassName(request.getClassName());
-		}
-
-		if (request.getClassDate() != null) {
-			schedule.setClassDate(request.getClassDate());
-		}
-
-		if (request.getStartTime() != null) {
-			schedule.setStartTime(request.getStartTime());
-		}
-
-		if (request.getEndTime() != null) {
-			schedule.setEndTime(request.getEndTime());
-		}
+		schedule.setClassName(request.getClassName());
+		schedule.setClassDate(request.getClassDate());
+		schedule.setStartTime(request.getStartTime());
+		schedule.setEndTime(request.getEndTime());
 
 		// Instructors are not assigned per schedule — they are always derived from
 		// the schedule's batch (ClassBatch.instructors), so no staff update here.
 
 		ClassSchedule updated = classScheduleRepository.save(schedule);
 
-		logger.info("Schedule modified successfully with id: {}", scheduleId);
+		logger.info("Class rescheduled successfully with id: {}", scheduleId);
 		return classScheduleMapper.toResponse(updated);
 	}
 
@@ -482,6 +471,21 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 	                                )
 	                );
 
+	                response.setEndTime(
+	                        schedule.getEndTime()
+	                                .format(
+	                                        DateTimeFormatter.ofPattern(
+	                                                "hh:mm a"
+	                                        )
+	                                )
+	                );
+
+	                response.setStatus(
+	                        schedule.getStatus() != null
+	                                ? schedule.getStatus().name()
+	                                : null
+	                );
+
 	                response.setDate(
 	                        schedule.getClassDate()
 	                                .format(
@@ -505,6 +509,11 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 	                        schedule.getClassBatch()
 	                                .getCourse()
 	                                .getCourseTitle()
+	                );
+	                response.setCourseId(
+	                        schedule.getClassBatch()
+	                                .getCourse()
+	                                .getCourseId()
 	                );
 	                return response;
 	            })

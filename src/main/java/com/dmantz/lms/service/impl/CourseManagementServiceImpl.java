@@ -744,6 +744,25 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 		return topics.stream().map(topicMapper::toResponseDto).collect(Collectors.toList());
 	}
 
+	// ====================== Get All Topics by Course Id ======================
+
+	@Override
+	public List<TopicResponseDto> getTopicsByCourseId(String courseId) {
+
+		logger.info("Fetching topics for courseId: {}", courseId);
+
+		courseRepository.findByCourseIdAndIsDeletedFalse(courseId).orElseThrow(() -> {
+			logger.warn("Course not found with id: {}", courseId);
+			return new ResourceNotFoundException("Course not found with id: " + courseId);
+		});
+
+		List<Topic> topics = topicRepository
+				.findByChapter_Course_CourseIdOrderByChapter_ChapterNumAscTopicNumAsc(courseId);
+
+		logger.debug("Found {} topics for courseId: {}", topics.size(), courseId);
+		return topics.stream().map(topicMapper::toResponseDto).collect(Collectors.toList());
+	}
+
 	// ====================== Get Topic by Id and Chapter Id
 	// =========================
 

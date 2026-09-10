@@ -80,16 +80,16 @@ public class ClassAdminController {
 		return ResponseEntity.ok(response);
 	}
 
-	// Modify schedule
-	@PutMapping("/courseschedule/{scheduleId}")
-	public ResponseEntity<ClassScheduleResponse> modifySchedule(@PathVariable Long scheduleId,
-			@RequestBody AddScheduleRequest request) {
+	// Reschedule class
+	@PutMapping("/schedules/{scheduleId}/reschedule")
+	public ResponseEntity<ClassScheduleResponse> rescheduleClass(@PathVariable Long scheduleId,
+			@Valid @RequestBody RescheduleClassRequest request) {
 
-		logger.info("PUT /schedules/{} - Mosdifying schedule", scheduleId);
+		logger.info("PUT /schedules/{}/reschedule - Rescheduling class", scheduleId);
 
-		ClassScheduleResponse response = classAdminService.modifySchedule(scheduleId, request);
+		ClassScheduleResponse response = classAdminService.rescheduleClass(scheduleId, request);
 
-		logger.info("Schedule modified successfully with id: {}", scheduleId);
+		logger.info("Class rescheduled successfully with id: {}", scheduleId);
 		return ResponseEntity.ok(response);
 	}
 

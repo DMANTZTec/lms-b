@@ -35,6 +35,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -318,14 +319,28 @@ public class EnrollmentBatchServiceImpl implements EnrollmentBatchService {
 		item.setTime(time);
 
 		/*
-		 * Instructor
+		 * Schedule status
 		 */
-		if (schedule.getStaff() != null) {
+		item.setStatus(schedule.getStatus() != null ? schedule.getStatus().name() : null);
 
-			item.setInstructor(schedule.getStaff().getFirstNm() + " " + schedule.getStaff().getLastNm());
+		/*
+		 * Instructor(s) — schedules no longer carry a single legacy `staff`
+		 * reference; instructors live on `schedule.getInstructors()`, falling
+		 * back to the batch's instructors for schedules created before
+		 * per-schedule instructor storage existed.
+		 */
+		Set<Staff> instructors = schedule.getInstructors();
 
-		} else {
+		if ((instructors == null || instructors.isEmpty()) && schedule.getClassBatch() != null) {
+			instructors = schedule.getClassBatch().getInstructors();
+		}
+
+		if (instructors == null || instructors.isEmpty()) {
 			item.setInstructor("Not Assigned");
+		} else {
+			item.setInstructor(instructors.stream()
+					.map(staff -> staff.getFirstNm() + " " + staff.getLastNm())
+					.collect(Collectors.joining(", ")));
 		}
 
 		return item;

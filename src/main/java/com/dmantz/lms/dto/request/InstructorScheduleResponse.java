@@ -4,10 +4,13 @@ public class InstructorScheduleResponse {
 
     private Long id;
     private String time;
+    private String endTime;
     private String date;
     private String batchName;
     private String course;
+    private String courseId;
     private String className;
+    private String status;
 
 
     public Long getId() {
@@ -56,5 +59,29 @@ public class InstructorScheduleResponse {
     
     public void setClassName(String className) {
     			this.className = className;
+    }
+
+    public String getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
+    }
+
+    public String getCourseId() {
+        return courseId;
+    }
+
+    public void setCourseId(String courseId) {
+        this.courseId = courseId;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

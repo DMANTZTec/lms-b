@@ -8,6 +8,8 @@ public class ScheduleItemResponse {
 
     private String instructor;
 
+    private String status;
+
 
     public String getTitle() {
         return title;
@@ -33,5 +35,12 @@ public class ScheduleItemResponse {
         this.instructor = instructor;
     }
 
- 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
 }

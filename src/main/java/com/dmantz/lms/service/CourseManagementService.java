@@ -62,6 +62,9 @@ public interface CourseManagementService {
 //	get all topics in a chapter
 	List<TopicResponseDto> getTopicsByChapterId(Long chapterId);
 
+//	get all topics across every chapter of a course
+	List<TopicResponseDto> getTopicsByCourseId(String courseId);
+
 //	get topic by id and chapterId
 	TopicResponseDto getTopicByIdAndChapterId(Long topicId, Long chapterId);
 

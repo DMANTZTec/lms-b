@@ -1,11 +1,14 @@
 package com.dmantz.lms.dto.response;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
 public class ClassScheduleResponse {
     private Long scheduleId;
+	private Long updatedBy;
+	private LocalDateTime updatedDt;
 	private Long batchId;
 	private String batchName;
 	private String className;
@@ -124,6 +127,22 @@ public class ClassScheduleResponse {
 
 	public void setInstructors(List<BatchInstructorResponse> instructors) {
 		this.instructors = instructors;
+	}
+
+	public Long getUpdatedBy() {
+		return updatedBy;
+	}
+
+	public void setUpdatedBy(Long updatedBy) {
+		this.updatedBy = updatedBy;
+	}
+
+	public LocalDateTime getUpdatedDt() {
+		return updatedDt;
+	}
+
+	public void setUpdatedDt(LocalDateTime updatedDt) {
+		this.updatedDt = updatedDt;
 	}
 
 }

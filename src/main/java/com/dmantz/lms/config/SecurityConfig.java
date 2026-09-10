@@ -1,5 +1,6 @@
 package com.dmantz.lms.config;
 
+import com.dmantz.lms.repository.StaffRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -15,9 +16,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
+    private final StaffRepository staffRepository;
 
-    public SecurityConfig(JwtUtil jwtUtil) {
+    public SecurityConfig(JwtUtil jwtUtil, StaffRepository staffRepository) {
         this.jwtUtil = jwtUtil;
+        this.staffRepository = staffRepository;
     }
 
     @Bean
@@ -116,7 +119,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
 
                 .addFilterBefore(
-                        new JwtFilter(jwtUtil),
+                        new JwtFilter(jwtUtil, staffRepository),
                         UsernamePasswordAuthenticationFilter.class
                 );
 

@@ -22,6 +22,9 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
     
     
     boolean existsByChapter_IdAndTopicNm(Long chapterId, String topicNm);
- 
+
     List<Topic> findByChapter_Id(Long chapterId);
+
+    // Get all topics across every chapter of a course, ordered by chapter then topic position
+    List<Topic> findByChapter_Course_CourseIdOrderByChapter_ChapterNumAscTopicNumAsc(String courseId);
 }

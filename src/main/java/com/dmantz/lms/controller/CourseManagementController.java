@@ -274,6 +274,19 @@ public class CourseManagementController {
 		return ResponseEntity.ok(topics);
 	}
 
+	// ================ Get All Topics by Course Id=====================
+
+	@GetMapping("/course/{courseId}/topics")
+	public ResponseEntity<List<TopicResponseDto>> getTopicsByCourseId(@PathVariable String courseId) {
+
+		logger.info("GET /course/{}/topics - Fetching topics for courseId: {}", courseId, courseId);
+
+		List<TopicResponseDto> topics = courseManagementService.getTopicsByCourseId(courseId);
+
+		logger.debug("Returning {} topics for courseId: {}", topics.size(), courseId);
+		return ResponseEntity.ok(topics);
+	}
+
 	// ====================== Get Topic by Id and Chapter Id
 	// =========================
 

@@ -25,6 +25,8 @@ public interface ClassScheduleMapper {
     @Mapping(source = "classBatch.id", target = "batchId")
     @Mapping(source = "classBatch.className", target = "batchName")
     @Mapping(source = "className", target = "className")
+    @Mapping(source = "updatedBy", target = "updatedBy")
+    @Mapping(source = "updatedDt", target = "updatedDt")
     @Mapping(target = "dayOfWeek", expression = "java(getDayOfWeek(entity))")
     @Mapping(target = "instructors", expression = "java(getBatchInstructors(entity))")
     ClassScheduleResponse toResponse(ClassSchedule entity);

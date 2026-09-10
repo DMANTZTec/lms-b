@@ -1,5 +1,6 @@
 package com.dmantz.lms.config;
 
+import com.dmantz.lms.repository.StaffRepository;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -16,9 +17,11 @@ import java.util.List;
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final StaffRepository staffRepository;
 
-    public JwtFilter(JwtUtil jwtUtil) {
+    public JwtFilter(JwtUtil jwtUtil, StaffRepository staffRepository) {
         this.jwtUtil = jwtUtil;
+        this.staffRepository = staffRepository;
     }
 
     @Override
@@ -60,6 +63,14 @@ public class JwtFilter extends OncePerRequestFilter {
                                 email,
                                 null,
                                 List.of(new SimpleGrantedAuthority("ROLE_" + role)));
+
+                // Resolve the numeric staff id up front, outside any JPA flush, so
+                // JpaAuditConfig's AuditorAware can read it without querying the DB
+                // mid-flush (which caused "Could not commit JPA transaction" errors).
+                if (!"STUDENT".equals(role)) {
+                    staffRepository.findByEmailId(email)
+                            .ifPresent(staff -> authentication.setDetails(staff.getId()));
+                }
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
