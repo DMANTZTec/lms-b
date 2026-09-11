@@ -739,6 +739,50 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 	}
 
 	@Override
+	public ScheduleMessageResponse addScheduleMessage(Long scheduleId, ScheduleMessageRequest request) {
+
+		logger.info("Adding message for scheduleId: {}", scheduleId);
+
+		ClassSchedule schedule = classScheduleRepository.findById(scheduleId).orElseThrow(() -> {
+			logger.warn("Schedule not found with id: {} during addScheduleMessage", scheduleId);
+			return new ResourceNotFoundException("Schedule not found with id: " + scheduleId);
+		});
+
+		schedule.setMessage(request.getMessage());
+
+		ClassSchedule saved = classScheduleRepository.save(schedule);
+
+		logger.debug("Message added successfully for scheduleId: {}", scheduleId);
+		return toScheduleMessageResponse(saved);
+	}
+
+	@Override
+	public ScheduleMessageResponse getScheduleMessage(Long scheduleId) {
+
+		logger.info("Fetching message for scheduleId: {}", scheduleId);
+
+		ClassSchedule schedule = classScheduleRepository.findById(scheduleId).orElseThrow(() -> {
+			logger.warn("Schedule not found with id: {} during getScheduleMessage", scheduleId);
+			return new ResourceNotFoundException("Schedule not found with id: " + scheduleId);
+		});
+
+		logger.debug("Message fetched successfully for scheduleId: {}", scheduleId);
+		return toScheduleMessageResponse(schedule);
+	}
+
+	private ScheduleMessageResponse toScheduleMessageResponse(ClassSchedule schedule) {
+
+		ScheduleMessageResponse response = new ScheduleMessageResponse();
+
+		response.setScheduleId(schedule.getId());
+		response.setMessage(schedule.getMessage());
+		response.setUpdatedBy(schedule.getUpdatedBy());
+		response.setUpdatedDt(schedule.getUpdatedDt());
+
+		return response;
+	}
+
+	@Override
 	public ClassResponse getBatchById(Long batchId) {
 
 		logger.info("Fetching batch with id: {}", batchId);

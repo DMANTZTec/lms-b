@@ -2,6 +2,8 @@ package com.dmantz.lms.dto.response;
 
 import com.dmantz.lms.entity.CourseStatus;
 
+import java.time.LocalDate;
+
 public class CourseProgressSummaryResponse {
 
 	private String courseId;
@@ -18,7 +20,10 @@ public class CourseProgressSummaryResponse {
 
 	private double coursePercentage;
 	private boolean completed;
-	
+	private CourseStatus courseStatus;
+	private LocalDate startDate;
+	private LocalDate endDate;
+
 	public String getCourseId() {
 		return courseId;
 	}
@@ -97,6 +102,30 @@ public class CourseProgressSummaryResponse {
 
 	public void setCompleted(boolean completed) {
 		this.completed = completed;
+	}
+
+	public CourseStatus getCourseStatus() {
+		return courseStatus;
+	}
+
+	public void setCourseStatus(CourseStatus courseStatus) {
+		this.courseStatus = courseStatus;
+	}
+
+	public LocalDate getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(LocalDate startDate) {
+		this.startDate = startDate;
+	}
+
+	public LocalDate getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(LocalDate endDate) {
+		this.endDate = endDate;
 	}
 
 }

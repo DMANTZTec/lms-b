@@ -5,7 +5,6 @@ import com.dmantz.lms.entity.*;
 import com.dmantz.lms.exceptions.ResourceNotFoundException;
 import com.dmantz.lms.mapper.ClassBatchMapper;
 import com.dmantz.lms.mapper.ClassScheduleMapper;
-import com.dmantz.lms.mapper.StudentCourseMapper;
 import com.dmantz.lms.repository.*;
 import com.dmantz.lms.service.StudentDashboardService;
 
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,32 +27,62 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 
 	private final ClassScheduleRepository classScheduleRepository;
 	private final ClassScheduleMapper classScheduleMapper;
-	private final ClassBatchRepository classBatchRepository;
 	private final StaffRepository staffRepository;
-	private final StudentCourseRepository studentCourseRepository;
-	private final StudentCourseMapper studentCourseMapper;
 	private final StudentRepository studentRepository;
 	private final CourseRepository courseRepository;
 	private final StudentTopicReferenceProgressRepository progressRepository;
 	private final ClassBatchMapper classBatchMapper;
+	private final EnrollmentRepository enrollmentRepository;
+	private final EnrollmentBatchRepository enrollmentBatchRepository;
+	private final ProgramCourseRepository programCourseRepository;
 
 	public StudentDashboardServiceImpl(ClassScheduleRepository classScheduleRepository,
-			ClassScheduleMapper classScheduleMapper, ClassBatchRepository classBatchRepository,
-			StaffRepository staffRepository, StudentCourseRepository studentCourseRepository,
-			StudentCourseMapper studentCourseMapper, StudentRepository studentRepository,
-			CourseRepository courseRepository, StudentTopicReferenceProgressRepository progressRepository,
-			ClassBatchMapper classBatchMapper) {
+			ClassScheduleMapper classScheduleMapper, StaffRepository staffRepository,
+			StudentRepository studentRepository, CourseRepository courseRepository,
+			StudentTopicReferenceProgressRepository progressRepository, ClassBatchMapper classBatchMapper,
+			EnrollmentRepository enrollmentRepository, EnrollmentBatchRepository enrollmentBatchRepository,
+			ProgramCourseRepository programCourseRepository) {
 
 		this.classScheduleRepository = classScheduleRepository;
 		this.classScheduleMapper = classScheduleMapper;
-		this.classBatchRepository = classBatchRepository;
 		this.staffRepository = staffRepository;
-		this.studentCourseRepository = studentCourseRepository;
-		this.studentCourseMapper = studentCourseMapper;
 		this.studentRepository = studentRepository;
 		this.courseRepository = courseRepository;
 		this.progressRepository = progressRepository;
 		this.classBatchMapper = classBatchMapper;
+		this.enrollmentRepository = enrollmentRepository;
+		this.enrollmentBatchRepository = enrollmentBatchRepository;
+		this.programCourseRepository = programCourseRepository;
+	}
+
+	// Courses a student is enrolled in via the enrollment table: direct course
+	// enrollments, plus every course under any program enrollment. Cancelled
+	// enrollments are excluded. This is the single source of truth for "which
+	// courses does this student have" across getMyCourses/progress/class-info.
+	private List<Course> getEnrolledCourses(String studentId) {
+
+		List<Enrollment> enrollments = enrollmentRepository.findByStudentStudentId(studentId).stream()
+				.filter(e -> e.getStatus() != EnrollmentStatus.CANCELLED).toList();
+
+		Map<Long, Course> courseMap = new LinkedHashMap<>();
+
+		for (Enrollment enrollment : enrollments) {
+
+			if (enrollment.getEnrollmentType() == EnrollmentType.COURSE && enrollment.getCourse() != null) {
+
+				courseMap.putIfAbsent(enrollment.getCourse().getId(), enrollment.getCourse());
+
+			} else if (enrollment.getEnrollmentType() == EnrollmentType.PROGRAM && enrollment.getProgram() != null) {
+
+				for (Course course : programCourseRepository
+						.findCoursesByProgramId(enrollment.getProgram().getProgramId())) {
+
+					courseMap.putIfAbsent(course.getId(), course);
+				}
+			}
+		}
+
+		return new ArrayList<>(courseMap.values());
 	}
 
 	// ================= WEEKLY SCHEDULE =================
@@ -92,9 +120,9 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 
 		logger.info("Fetching courses for studentId: {}", studentId);
 
-		List<StudentCourse> allCourses = studentCourseRepository.findByStudent_StudentId(studentId);
+		List<Course> enrolledCourses = getEnrolledCourses(studentId);
 
-		if (allCourses.isEmpty()) {
+		if (enrolledCourses.isEmpty()) {
 			logger.warn("No courses found for studentId: {}", studentId);
 			throw new ResourceNotFoundException("No courses found for student: " + studentId);
 		}
@@ -105,34 +133,25 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 		long ongoing = 0;
 		long completed = 0;
 
-		for (StudentCourse sc : allCourses) {
+		for (Course course : enrolledCourses) {
 
-			CourseProgressSummaryResponse progress = getCourseProgressSummary(sc.getCourse().getCourseId(),
-					sc.getStudent().getStudentId());
+			CourseProgressSummaryResponse progress = getCourseProgressSummary(course.getCourseId(), studentId);
 
-			double percentage = progress.getCoursePercentage();
+			CourseStatus derivedStatus = progress.getCourseStatus();
 
-			CourseStatus derivedStatus;
-
-			if (percentage == 0) {
-				derivedStatus = CourseStatus.PLANNED;
-				planned++;
-			} else if (percentage == 100) {
-				derivedStatus = CourseStatus.COMPLETED;
-				completed++;
-			} else {
-				derivedStatus = CourseStatus.ACTIVE;
-				ongoing++;
+			switch (derivedStatus) {
+				case PLANNED -> planned++;
+				case COMPLETED -> completed++;
+				case ACTIVE -> ongoing++;
 			}
 
 			MyCourseResponse dto = new MyCourseResponse();
-			dto.setCourseId(sc.getCourse().getCourseId());
-			dto.setCourseName(sc.getCourse().getCourseTitle());
+			dto.setCourseId(course.getCourseId());
+			dto.setCourseName(course.getCourseTitle());
 			dto.setStatus(derivedStatus.name());
-			dto.setProgress(percentage);
-			dto.setStartDate(sc.getStart_dt() != null ? sc.getStart_dt().toLocalDate() : null);
-
-			dto.setEndDate(sc.getCompletedDt() != null ? sc.getCompletedDt().toLocalDate() : null);
+			dto.setProgress(progress.getCoursePercentage());
+			dto.setStartDate(progress.getStartDate());
+			dto.setEndDate(progress.getEndDate());
 
 			courseResponses.add(dto);
 		}
@@ -143,7 +162,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 
 		StudentMyCoursesResponse response = new StudentMyCoursesResponse();
 
-		response.setTotalCourses(allCourses.size());
+		response.setTotalCourses(enrolledCourses.size());
 		response.setPlanned(planned);
 		response.setOngoing(ongoing);
 		response.setCompleted(completed);
@@ -174,8 +193,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 		Long internalStudentId = student.getId();
 		Long internalCourseId = course.getId();
 
-		boolean enrolled = studentCourseRepository.findByStudent_IdAndCourse_Id(internalStudentId, internalCourseId)
-				.isPresent();
+		boolean enrolled = getEnrolledCourses(studentId).stream().anyMatch(c -> c.getId().equals(internalCourseId));
 
 		if (!enrolled) {
 			logger.error("Student {} not enrolled in course {}", studentId, courseId);
@@ -354,30 +372,48 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 
 		double percentage = totalReferences == 0 ? 0.0 : (completedReferences * 100.0) / totalReferences;
 
-		StudentCourse sc = studentCourseRepository.findByStudent_IdAndCourse_Id(internalStudentId, internalCourseId)
-				.orElseThrow(() -> {
-					logger.error("Enrollment not found for studentId: {} and courseId: {}", studentId, courseId);
+		boolean enrolled = getEnrolledCourses(studentId).stream()
+				.anyMatch(c -> c.getId().equals(internalCourseId));
 
-					return new ResourceNotFoundException("Enrollment not found");
-				});
+		if (!enrolled) {
+			logger.error("Enrollment not found for studentId: {} and courseId: {}", studentId, courseId);
 
-		if (percentage == 0) {
-			sc.setStatus(CourseStatus.PLANNED);
-		} else if (percentage == 100) {
-			sc.setStatus(CourseStatus.COMPLETED);
+			throw new ResourceNotFoundException("Enrollment not found");
+		}
+
+		// Status reflects batch enrollment/lifecycle (enrollment -> enrollment_batch -> class_batch),
+		// not content progress %: no batch assignment yet -> PLANNED, assigned to a batch still
+		// running -> ACTIVE, assigned batch finished -> COMPLETED. Percentage is informational only.
+		List<EnrollmentBatch> batchAssignments = enrollmentBatchRepository
+				.findByEnrollment_Student_IdAndClassBatch_Course_Id(internalStudentId, internalCourseId);
+
+		boolean anyOngoing = batchAssignments.stream()
+				.anyMatch(eb -> eb.getClassBatch().getStatus() != ClassStatus.COMPLETED);
+
+		CourseStatus courseStatus;
+		LocalDate batchStartDate = null;
+		LocalDate batchEndDate = null;
+
+		if (batchAssignments.isEmpty()) {
+
+			courseStatus = CourseStatus.PLANNED;
+
+		} else if (anyOngoing) {
+
+			courseStatus = CourseStatus.ACTIVE;
+
+			batchStartDate = batchAssignments.stream()
+					.filter(eb -> eb.getClassBatch().getStatus() != ClassStatus.COMPLETED)
+					.map(eb -> eb.getClassBatch().getStartDate()).filter(Objects::nonNull)
+					.min(LocalDate::compareTo).orElse(null);
+
 		} else {
-			sc.setStatus(CourseStatus.ACTIVE);
-		}
 
-		if (percentage > 0 && sc.getStart_dt() == null) {
-			sc.setStart_dt(LocalDateTime.now());
-		}
+			courseStatus = CourseStatus.COMPLETED;
 
-		if (percentage == 100 && sc.getCompletedDt() == null) {
-			sc.setCompletedDt(LocalDateTime.now());
+			batchEndDate = batchAssignments.stream().map(eb -> eb.getClassBatch().getEndDate())
+					.filter(Objects::nonNull).max(LocalDate::compareTo).orElse(null);
 		}
-
-		studentCourseRepository.save(sc);
 
 		CourseProgressSummaryResponse response = new CourseProgressSummaryResponse();
 
@@ -391,6 +427,9 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 		response.setCompletedReferences(completedReferences);
 		response.setCoursePercentage(percentage);
 		response.setCompleted(totalReferences > 0 && completedReferences == totalReferences);
+		response.setCourseStatus(courseStatus);
+		response.setStartDate(batchStartDate);
+		response.setEndDate(batchEndDate);
 
 		logger.info("Course progress summary fetched successfully for courseId: {} and studentId: {}", courseId,
 				studentId);
@@ -405,7 +444,13 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 
 		logger.info("Fetching class info for studentId: {}", studentId);
 
-		List<ClassBatch> batches = classBatchRepository.findByStudentId(Long.valueOf(studentId));
+		Map<Long, ClassBatch> batchMap = new LinkedHashMap<>();
+
+		for (EnrollmentBatch eb : enrollmentBatchRepository.findByEnrollmentStudentStudentId(studentId)) {
+			batchMap.putIfAbsent(eb.getClassBatch().getId(), eb.getClassBatch());
+		}
+
+		List<ClassBatch> batches = new ArrayList<>(batchMap.values());
 
 		if (batches.isEmpty()) {
 			logger.warn("No class batches found for studentId: {}", studentId);

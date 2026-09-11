@@ -254,6 +254,31 @@ public class ClassAdminController {
 	    return ResponseEntity.ok(response);
 	}
 	
+	// Add / update schedule message
+	@PostMapping("/schedules/{scheduleId}/message")
+	public ResponseEntity<ScheduleMessageResponse> addScheduleMessage(@PathVariable Long scheduleId,
+			@Valid @RequestBody ScheduleMessageRequest request) {
+
+		logger.info("POST /schedules/{}/message - Adding message", scheduleId);
+
+		ScheduleMessageResponse response = classAdminService.addScheduleMessage(scheduleId, request);
+
+		logger.info("Message added successfully for scheduleId: {}", scheduleId);
+		return ResponseEntity.ok(response);
+	}
+
+	// Get schedule message
+	@GetMapping("/schedules/{scheduleId}/message")
+	public ResponseEntity<ScheduleMessageResponse> getScheduleMessage(@PathVariable Long scheduleId) {
+
+		logger.info("GET /schedules/{}/message - Fetching message", scheduleId);
+
+		ScheduleMessageResponse response = classAdminService.getScheduleMessage(scheduleId);
+
+		logger.debug("Message fetched successfully for scheduleId: {}", scheduleId);
+		return ResponseEntity.ok(response);
+	}
+
 	@GetMapping("/courseschedule/classes/{batchId}")
 	public ResponseEntity<ClassResponse> getBatchById(@PathVariable Long batchId) {
 

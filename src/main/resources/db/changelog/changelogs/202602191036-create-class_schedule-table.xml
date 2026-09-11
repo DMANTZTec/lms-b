@@ -104,4 +104,14 @@
 
     </changeSet>
 
+<changeSet id="202609111600-add-message-to-class_schedule" author="Afsheen">
+
+        <addColumn tableName="class_schedule">
+
+            <column name="message" type="VARCHAR(1000)"/>
+
+        </addColumn>
+
+    </changeSet>
+
 </databaseChangeLog>

@@ -55,6 +55,9 @@ public class ClassSchedule extends AuditFields {
     @Column(length = 500)
     private String location;     // for offline classes
 
+    @Column(length = 1000)
+    private String message;      // note/announcement posted by staff for this schedule
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ClassMode mode;   // ONLINE / OFFLINE
@@ -133,6 +136,14 @@ public class ClassSchedule extends AuditFields {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public ClassMode getMode() {
