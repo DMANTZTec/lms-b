@@ -1,0 +1,58 @@
+# ============================================
+# LMS Application - Production Profile
+# ============================================
+# Activate: SPRING_PROFILES_ACTIVE=prod
+# ============================================
+
+spring:
+  # ------------------------------------------
+  # Datasource
+  # ------------------------------------------
+  datasource:
+    url: jdbc:mysql://lms-mysql-prod:3306/lms_db
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # ------------------------------------------
+  # JPA / Hibernate
+  # ------------------------------------------
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+
+  # ------------------------------------------
+  # Mail Credentials
+  # ------------------------------------------
+  mail:
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+
+# ------------------------------------------
+# Logging
+# ------------------------------------------
+logging:
+  level:
+    com.dmantz.lms: WARN
+    org.springframework.security: WARN
+    org.hibernate.SQL: ERROR
+
+# ------------------------------------------
+# Strapi CMS
+# ------------------------------------------
+strapi:
+  url: ${STRAPI_URL}
+  api:
+    token: ${STRAPI_API_TOKEN}
+
+# ------------------------------------------
+# Twilio SMS
+# ------------------------------------------
+twilio:
+  account:
+    sid: ${TWILIO_ACCOUNT_SID}
+  auth:
+    token: ${TWILIO_AUTH_TOKEN}
+  from:
+    number: ${TWILIO_FROM_NUMBER}

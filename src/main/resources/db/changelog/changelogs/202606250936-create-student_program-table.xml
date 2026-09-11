@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+
+    <changeSet id="202606250936" author="gk">
+
+        <createTable tableName="student_program">
+
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"
+                             primaryKeyName="PK_STUDENT_PROGRAM"
+                             nullable="false"/>
+            </column>
+
+            <column name="student_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="program_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="status"
+                    type="VARCHAR(30)"
+                    defaultValue="PLANNED">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="enrollment_date" type="DATE"/>
+
+            <!-- Audit fields -->
+            <column name="created_by" type="BIGINT"/>
+            <column name="created_dt" type="TIMESTAMP"/>
+            <column name="updated_by" type="BIGINT"/>
+            <column name="updated_dt" type="TIMESTAMP"/>
+
+        </createTable>
+
+        <!-- Student foreign key -->
+        <addForeignKeyConstraint
+                baseTableName="student_program"
+                baseColumnNames="student_id"
+                referencedTableName="student"
+                referencedColumnNames="id"
+                constraintName="FK_STUDENT_PROGRAM_STUDENT"/>
+
+        <!-- Program foreign key -->
+        <addForeignKeyConstraint
+                baseTableName="student_program"
+                baseColumnNames="program_id"
+                referencedTableName="program"
+                referencedColumnNames="id"
+                constraintName="FK_STUDENT_PROGRAM_PROGRAM"/>
+
+        <!-- Prevent duplicate student-program assignments -->
+        <addUniqueConstraint
+                tableName="student_program"
+                columnNames="student_id, program_id"
+                constraintName="UK_STUDENT_PROGRAM"/>
+
+        <createIndex indexName="idx_student_program_student_id" tableName="student_program">
+            <column name="student_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_student_program_program_id" tableName="student_program">
+            <column name="program_id"/>
+        </createIndex>
+
+    </changeSet>
+
+</databaseChangeLog>

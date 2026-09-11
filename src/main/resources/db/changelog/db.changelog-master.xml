@@ -7,7 +7,7 @@
            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.15.xsd">
 
     <!-- Student table -->
-    <include file="db/changelog/changelogs/202601221937-create-student-table.xml"/>
+    <include file="db/changelog/changelogs/202601241537-create-student-table.xml"/>
 
     <!-- Staff table -->
     <include file="db/changelog/changelogs/202601231710-create-staff-table.xml"/>
@@ -16,20 +16,104 @@
     <include file="db/changelog/changelogs/202601221953-create-role-table.xml"/>
 
     <!-- Provider table -->
-    <include file="db/changelog/changelogs/202601230958-create-provider-table.xml"/>
+    <include file="db/changelog/changelogs/202601291347-create-provider-table.xml"/>
 
     <!-- Subject table -->
-    <include file="db/changelog/changelogs/202601231006-create-subject-table.xml"/>
+    <include file="db/changelog/changelogs/202601291349-create-subject-table.xml"/>
 
     <!-- Course table -->
-    <include file="db/changelog/changelogs/202601231012-create-course-table.xml"/>
+    <include file="db/changelog/changelogs/202601291350-create-course-table.xml"/>
 
     <!-- Chapter table -->
-    <include file="db/changelog/changelogs/202601231700-create-chapter-table.xml"/>
+    <include file="db/changelog/changelogs/202601291351-create-chapter-table.xml"/>
 
     <!-- Topic table -->
-    <include file="db/changelog/changelogs/202601231708-create-topic-table.xml"/>
+    <include file="db/changelog/changelogs/202601291348-create-topic-table.xml"/>
 
     <!-- Topic Reference table -->
-    <include file="db/changelog/changelogs/202601231709-create-topic_reference-table.xml"/>
+    <include file="db/changelog/changelogs/202601291355-create-topic_reference-table.xml"/>
+
+    <!-- Student OTP table -->
+    <include file="db/changelog/changelogs/202606130346-create-student_otp-table.xml"/>
+
+    <!-- Staff OTP table -->
+    <include file="db/changelog/changelogs/202601241041-create-staff_otp-table.xml"/>
+
+    <!-- Staff role table -->
+    <include file="db/changelog/changelogs/202601291209-create-staff_role-table.xml"/>
+
+    <!-- Student-course table -->
+    <include file="db/changelog/changelogs/202602211020-create-student_course-table.xml"/>
+
+    <!--Class Batch table -->
+    <include file="db/changelog/changelogs/202602191038-create-class_batch-table.xml"/>
+
+    <!-- Class Schedule table -->
+    <include file="db/changelog/changelogs/202602191036-create-class_schedule-table.xml"/>
+
+    <!-- Program table -->
+    <include file="db/changelog/changelogs/202602191207-create-program-table.xml"/>
+
+    <!-- Program Course table -->
+    <include file="db/changelog/changelogs/202602211541-create-program_course-table.xml"/>
+
+    <!-- Student Topic Reference Progress table -->
+    <include file="db/changelog/changelogs/202602261518-create-student_topic_reference_progress-table.xml"/>
+
+    <!-- Class Topic table -->
+    <include file="/db/changelog/changelogs/202604071034-create-class_topic-table.xml"/>
+
+    <!-- Class Student table -->
+    <include file="/db/changelog/changelogs/202604061158-create-class_student-table.xml"/>
+
+    <!-- Student task table -->
+    <include file="/db/changelog/changelogs/202604141226-create-student_task-table.xml"/>
+
+    <!-- Student task Mentor table -->
+    <include file="/db/changelog/changelogs/202604141227-create-student_task_mentor-table.xml"/>
+    
+    <!-- Staff Course table -->
+    <include file="db/changelog/changelogs/202606090439-create-staff_course-table.xml"/>
+
+    <!-- Student Registration otp table -->
+    <include file="/db/changelog/changelogs/202606121240-create-student_registration_otp-table.xml"/>
+    
+    <!-- Class Batch Instructor table -->
+    <include file="db/changelog/changelogs/202606220307-create-class-batch-instructor-table.xml"/>
+
+    <!-- Student Program table -->
+    <include file="db/changelog/changelogs/202606250936-create-student_program-table.xml"/>
+
+    <!-- contactus table -->
+    <include file="db/changelog/changelogs/202606271027-create-contactus-table.xml"/>
+    
+    <!-- course_fee table -->
+    <include file="db/changelog/changelogs/202606291520-create-course_fee-table.xml"/>
+    
+     <!-- program_fee table -->
+    <include file="db/changelog/changelogs/202607021258-create-program_fee-table.xml"/>
+
+    <!-- staff_password_token table -->
+    <include file="db/changelog/changelogs/202607101029-create-staff_password_token-table.xml"/>
+    
+    <!-- studen table -->
+    <include file="db/changelog/changelogs/202608061241-create-success_stories-table.xml"/>
+    
+    <!--  social media table  -->
+	<include file="db/changelog/changelogs/202608071117-create-social-media-table.xml"/>
+	
+	<include file = "db/changelog/changelogs/202608261219-create-learner_path-table.xml"/>
+	
+	<include file = "db/changelog/changelogs/202608260338-create-enrollement-table.xml"/>
+	
+	<include file = "db/changelog/changelogs/202609011103-create-enrollment-batch-table.xml"/>
+
+	<!-- Class Schedule Instructor table -->
+	<include file="db/changelog/changelogs/202609041200-create-class_schedule_instructor-table.xml"/>
+
+	<!-- Normalize legacy class_batch.status values for ClassStatus enum mapping -->
+	<include file="db/changelog/changelogs/202609051430-normalize-class_batch-status.xml"/>
+	
+	<include file="db/changelog/changelogs/202609041742-create-student-task-submission-table.xml"/>
+
 </databaseChangeLog>

@@ -1,0 +1,88 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # MySQL Database
+  # ============================================
+  mysql:
+    image: mysql:8.0
+    container_name: lms-mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: lms_db
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpassword}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - lms-network
+
+  # ============================================
+  # LMS Spring Boot Application
+  # ============================================
+  lms-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lms-app
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+
+      # Database
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+      # Spring Security
+      SPRING_SECURITY_USERNAME: ${SPRING_SECURITY_USERNAME}
+      SPRING_SECURITY_PASSWORD: ${SPRING_SECURITY_PASSWORD}
+
+      # Mail
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+
+      # Strapi
+      STRAPI_URL: ${STRAPI_URL:-http://lms-strapi:1337}
+      STRAPI_API_TOKEN: ${STRAPI_API_TOKEN}
+
+      # Twilio
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN}
+      TWILIO_FROM_NUMBER: ${TWILIO_FROM_NUMBER}
+
+      # JVM tuning
+      JAVA_OPTS: ${JAVA_OPTS:--Xms512m -Xmx1024m}
+    volumes:
+      - app-logs:/app/logs
+    networks:
+      - lms-network
+
+# ============================================
+# Volumes
+# ============================================
+volumes:
+  mysql-data:
+    driver: local
+  app-logs:
+    driver: local
+
+# ============================================
+# Network
+# ============================================
+networks:
+  lms-network:
+    driver: bridge

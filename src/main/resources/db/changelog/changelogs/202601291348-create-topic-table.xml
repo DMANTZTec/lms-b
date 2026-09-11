@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+           http://www.liquibase.org/xml/ns/dbchangelog
+           http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.15.xsd">
+
+    <changeSet id="202601291348" author="shiva">
+
+        <createTable tableName="topic">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <!-- Topic number -->
+            <column name="topic_num" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="topic_nm" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="description" type="TEXT"/>
+
+            <column name="chapter_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="expected_time_min" type="BIGINT"/>
+
+            <column name="created_by" type="BIGINT"/>
+
+            <column name="created_dt"
+                    type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="updated_by" type="BIGINT"/>
+
+            <column name="updated_dt"
+                    type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP">
+            </column>
+        </createTable>
+
+        <!-- FK: topic → chapter -->
+        <addForeignKeyConstraint
+                baseTableName="topic"
+                baseColumnNames="chapter_id"
+                referencedTableName="chapter"
+                referencedColumnNames="id"
+                constraintName="fk_topic_chapter"/>
+
+        <!-- Optional: unique topic number per chapter -->
+        <addUniqueConstraint
+                tableName="topic"
+                columnNames="chapter_id, topic_num"
+                constraintName="uk_topic_chapter_topic_num"/>
+
+    </changeSet>
+
+
+</databaseChangeLog>

@@ -1,0 +1,167 @@
+package com.dmantz.lms.controller;
+
+import java.util.List;
+
+import com.dmantz.lms.dto.response.*;
+import com.dmantz.lms.entity.SubmissionFilter;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.dmantz.lms.dto.request.InstructorTaskRequest;
+import com.dmantz.lms.dto.request.PlanClassTopicsRequest;
+import com.dmantz.lms.service.InstructorDashboardService;
+
+import jakarta.validation.Valid;
+
+@RestController
+@RequestMapping("/api/instructor")
+public class InstructorDashboardController {
+
+	private static final Logger logger = LogManager.getLogger(InstructorDashboardController.class);
+
+	private final InstructorDashboardService instructorDashboardService;
+
+	public InstructorDashboardController(InstructorDashboardService instructorDashboardService) {
+		this.instructorDashboardService = instructorDashboardService;
+	}
+
+	@PostMapping("/tasks")
+	public ResponseEntity<InstructorTaskResponse> createTask(@Valid @RequestBody InstructorTaskRequest request) {
+
+		logger.info("Received instructor create-task request for assignedBy: {} courseId: {} chapterId: {} topicId: {}",
+				request.getAssignedBy(), request.getCourseId(), request.getChapterId(), request.getTopicId());
+
+		InstructorTaskResponse response = instructorDashboardService.createTask(request);
+
+		logger.info("Instructor task assigned to {} students in course {}", response.getAssignedStudentCount(),
+				response.getCourseId());
+
+		return ResponseEntity.ok(response);
+	}
+
+
+	@GetMapping("/batches")
+	public ResponseEntity<InstructorBatchSummaryResponse> getBatchSummary(@RequestParam String instructorId) {
+
+		logger.info("Received request for active/completed batch summary for instructorId: {}", instructorId);
+
+		InstructorBatchSummaryResponse response = instructorDashboardService.getBatchSummary(instructorId);
+
+		logger.info("Returning {} active and {} completed batches for instructorId: {}",
+				response.getActiveBatchCount(), response.getCompletedBatchCount(), instructorId);
+
+		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/class-stats")
+	public ResponseEntity<InstructorClassStatsResponse> getClassStats(@RequestParam String instructorId) {
+
+		logger.info("Received request for classes-taken/scheduled/hours-spent stats for instructorId: {}",
+				instructorId);
+
+		InstructorClassStatsResponse response = instructorDashboardService.getClassStats(instructorId);
+
+		logger.info("Returning classesTaken: {}, scheduled: {}, hoursSpent: {} for instructorId: {}",
+				response.getClassesTaken(), response.getScheduled(), response.getHoursSpent(), instructorId);
+
+		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/student-stats")
+	public ResponseEntity<InstructorStudentStatsResponse> getStudentStats(@RequestParam String instructorId) {
+
+		logger.info("Received request for active/total student stats for instructorId: {}", instructorId);
+
+		InstructorStudentStatsResponse response = instructorDashboardService.getStudentStats(instructorId);
+
+		logger.info("Returning activeStudents: {}, totalStudents: {} for instructorId: {}",
+				response.getActiveStudents(), response.getTotalStudents(), instructorId);
+
+		return ResponseEntity.ok(response);
+	}
+	
+	@GetMapping("/submissions")
+	public ResponseEntity<List<StudentTaskSubmissionResponse>> getTaskSubmissions(
+	        @RequestParam String InstructorId,
+	        @RequestParam(required = false, defaultValue = "ALL") SubmissionFilter filter) {
+
+	    logger.info("Received submissions request for staffId: {}, filter: {}", InstructorId, filter);
+
+	    List<StudentTaskSubmissionResponse> response = instructorDashboardService.getTaskSubmissions(InstructorId, filter);
+
+	    return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/courses")
+	public ResponseEntity<List<InstructorCourseResponse>> getMyCourses(@RequestParam String instructorId) {
+
+		logger.info("Received request for my-courses payload for instructorId: {}", instructorId);
+
+		List<InstructorCourseResponse> response = instructorDashboardService.getMyCourses(instructorId);
+
+		logger.info("Returning {} course(s) for instructorId: {}", response.size(), instructorId);
+
+		return ResponseEntity.ok(response);
+	}
+
+	// "Plan Class" popup on a Class Schedule row: pick which course topics this class occurrence covers.
+	@PutMapping("/schedule/{scheduleId}/topics")
+	public ResponseEntity<List<ClassTopicResponse>> planClassTopics(@PathVariable Long scheduleId,
+			@Valid @RequestBody PlanClassTopicsRequest request) {
+
+		logger.info("PUT /schedule/{}/topics - staffId: {} planning {} topic(s)", scheduleId, request.getStaffId(),
+				request.getTopicIds() == null ? 0 : request.getTopicIds().size());
+
+		List<ClassTopicResponse> response = instructorDashboardService.planClassTopics(scheduleId, request);
+
+		logger.info("Schedule {} now has {} planned topic(s)", scheduleId, response.size());
+
+		return ResponseEntity.ok(response);
+	}
+
+	// Pre-fills the "Plan Class" popup with whatever is already planned for this schedule's class.
+	@GetMapping("/schedule/{scheduleId}/topics")
+	public ResponseEntity<List<ClassTopicResponse>> getPlannedTopics(@PathVariable Long scheduleId,
+			@RequestParam String staffId) {
+
+		logger.info("GET /schedule/{}/topics - Fetching planned topics for staffId: {}", scheduleId, staffId);
+
+		List<ClassTopicResponse> response = instructorDashboardService.getPlannedTopics(scheduleId, staffId);
+
+		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/coursesSummaries")
+	public ResponseEntity<List<InstructorCourseSummaryResponse>> getMyCourseSummaries(
+	        @RequestParam String instructorId) {
+
+	    logger.info("Received request for course summaries, instructorId: {}", instructorId);
+
+	    List<InstructorCourseSummaryResponse> response = instructorDashboardService.getMyCourseSummaries(instructorId);
+
+	    return ResponseEntity.ok(response);
+	}
+	
+	@GetMapping("/pending-reviews")
+	public ResponseEntity<List<StudentTaskSubmissionResponse>> getPendingReviews(
+	        @RequestParam String instructorId) {
+
+	    logger.info("Received pending-reviews request for instructorId: {}", instructorId);
+
+	    List<StudentTaskSubmissionResponse> response = instructorDashboardService.getPendingReviews(instructorId);
+
+	    logger.info("Returning {} pending review(s) for instructorId: {}", response.size(), instructorId);
+
+	    return ResponseEntity.ok(response);
+	}
+}

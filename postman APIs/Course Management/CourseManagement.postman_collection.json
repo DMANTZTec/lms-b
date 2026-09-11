@@ -1,0 +1,1300 @@
+{
+  "info": {
+    "_postman_id": "cc5d30b2-f1d5-43c3-aec6-73428ec39266",
+    "name": "CourseManagement",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "49260644",
+    "_collection_link": "https://go.postman.co/collection/49260644-cc5d30b2-f1d5-43c3-aec6-73428ec39266?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Create Subject API",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"subjectNm\": \"Java Programming\",\r\n  \"subjectShortCd\": \"JV\",\r\n  \"subjectCategory\": \"Programming\",\r\n  \"description\": \"Core Java concepts including OOP, collections, streams, and exception handling.\"\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:9090/api/subject/create?staffId=SF00001",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "subject",
+            "create"
+          ],
+          "query": [
+            {
+              "key": "staffId",
+              "value": "SF00001"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update SubjectAPI",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"subjectNm\": \"Frontend Development\",\r\n  \"subjectShortCd\": \"FD\",\r\n  \"subjectCategory\": \"Web Development\",\r\n  \"description\": \"HTML, CSS, JavaScript, and modern frontend frameworks.\"\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:9090/api/subject/update/1?staffId=SF00001",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "subject",
+            "update",
+            "1"
+          ],
+          "query": [
+            {
+              "key": "staffId",
+              "value": "SF00001"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Subject API",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9090/api/subject/delete/1?staffId=SF00001",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "subject",
+            "delete",
+            "1"
+          ],
+          "query": [
+            {
+              "key": "staffId",
+              "value": "SF00001"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "View subjects API",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9090/api/subject/view-subjects",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "subject",
+            "view-subjects"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Course API",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"courseTitle\": \"Java Full Stack Programming\",\r\n  \"description\": \"Master Java programming with core Java, collections, multithreading, JDBC, Spring Boot, REST APIs, and backend development projects.\",\r\n  \"language\": \"English\",\r\n  \"skills\": [\r\n    \"Core Java\",\r\n    \"Collections Framework\",\r\n    \"Multithreading\",\r\n    \"JDBC\",\r\n    \"Spring Boot\",\r\n    \"REST API Development\"\r\n  ],\r\n  \"subjectId\": 1,\r\n  \"providerId\": 1,\r\n  \"level\": \"BEGINNER\",\r\n  \"courseImage\": \"java-fullstack-course.jpg\",\r\n  \"introVideo\": \"https://youtube.com/watch?v=BGTx91t8q50\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:9090/api/course/create?staffId=SF00001",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "course",
+            "create"
+          ],
+          "query": [
+            {
+              "key": "staffId",
+              "value": "SF00001"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update Course API",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"courseTitle\": \"Java Spring Boot Enterprise Development\",\r\n  \"description\": \"Learn enterprise-level Java development using Spring Boot, Microservices, Security, JPA, Hibernate, and RESTful APIs with hands-on projects.\",\r\n  \"language\": \"English\",\r\n  \"skills\": [\r\n    \"Spring Boot\",\r\n    \"Hibernate\",\r\n    \"JPA\",\r\n    \"Microservices\",\r\n    \"Spring Security\",\r\n    \"REST APIs\"\r\n  ],\r\n  \"subjectId\": 1,\r\n  \"providerId\": 1,\r\n  \"level\": \"INTERMEDIATE\",\r\n  \"courseImage\": \"springboot-enterprise-course.jpg\",\r\n  \"introVideo\": \"https://youtube.com/watch?v=vtPkZShrvXQ\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:9090/api/course/update/1?staffId=SF00001",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "course",
+            "update",
+            "1"
+          ],
+          "query": [
+            {
+              "key": "staffId",
+              "value": "SF00001"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Course API",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9090/api/course/delete/1?staffId=SF00001",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "course",
+            "delete",
+            "1"
+          ],
+          "query": [
+            {
+              "key": "staffId",
+              "value": "SF00001"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "View Course API",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9090/api/course/view-courses",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "course",
+            "view-courses"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "View Courses by Subject API",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9090/api/subjects/1/view-courses",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "subjects",
+            "1",
+            "view-courses"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Chapter API",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"courseId\": \"JV001\",\r\n  \"chapterNm\": \"Core Java Fundamentals\",\r\n  \"chapterDesc\": \"Understand Java basics such as classes, objects, methods, constructors, loops, arrays, and object-oriented programming concepts.\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:9090/api/chapter/create?staffId=SF00001",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "chapter",
+            "create"
+          ],
+          "query": [
+            {
+              "key": "staffId",
+              "value": "SF00001"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update Chapter API",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"courseId\": \"JV001\",\r\n  \"chapterNm\": \"Core Java Fundamentals\",\r\n  \"chapterDesc\": \"Understand Java basics such as classes, objects, methods, constructors, loops, arrays, and object-oriented programming concepts.\"\r\n}\r\n\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:9090/api/update/1?staffId=SF00001",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "update",
+            "1"
+          ],
+          "query": [
+            {
+              "key": "staffId",
+              "value": "SF00001"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Chapter API",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9090/api/delete/1?staffId=SF00001",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "delete",
+            "1"
+          ],
+          "query": [
+            {
+              "key": "staffId",
+              "value": "SF00001"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "View all Chapters API",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9090/api/chapters/getAll",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "chapters",
+            "getAll"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "View Chapter by ChapterId API",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9090/api/get/1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "get",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Move a Chapter",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9090/api/1/movechapter?targetPosition=3",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "1",
+            "movechapter"
+          ],
+          "query": [
+            {
+              "key": "targetPosition",
+              "value": "3"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Move a Topic",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9090/api/1/movetopic?targetPosition=4",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "1",
+            "movetopic"
+          ],
+          "query": [
+            {
+              "key": "targetPosition",
+              "value": "4"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update SubjectAPI",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"subjectNm\": \"Frontend Development\",\r\n  \"subjectShortCd\": \"FD\",\r\n  \"subjectCategory\": \"Web Development\",\r\n  \"description\": \"HTML, CSS, JavaScript, and modern frontend frameworks.\"\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:9090/api/subject/update/1?staffId=SF00001",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "subject",
+            "update",
+            "1"
+          ],
+          "query": [
+            {
+              "key": "staffId",
+              "value": "SF00001"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Topic API",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"chapterId\": 1,\r\n  \"topicName\": \"Java Classes and Objects\",\r\n  \"description\": \"Understand the fundamentals of classes, objects, methods, constructors, and object creation in Java.\",\r\n  \"expectedTimeMin\": 60,\r\n  \"staffId\": \"SF00001\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:9090/api/topics",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "topics"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Topics by ChapterID  API",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9090/api/topics?chapterId=1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "topics"
+          ],
+          "query": [
+            {
+              "key": "chapterId",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Topics by TopicID and ChapterID API",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9090/api/topics/1?chapterId=1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "topics",
+            "1"
+          ],
+          "query": [
+            {
+              "key": "chapterId",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update Topic API",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"chapterId\": 1,\r\n  \"topicName\": \"Java Exception Handling and Collections\",\r\n  \"description\": \"Understand Java exception handling, try-catch blocks, custom exceptions, and the Java Collections Framework including List, Set, and Map.\",\r\n  \"expectedTimeMin\": 90,\r\n  \"staffId\": \"SF00001\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:9090/api/topics/1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "topics",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Topic API",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9090/api/topics/1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "topics",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Topic Reference (Document)",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"refValue\": {\r\n    \"title\": \"Core Java Notes PDF\",\r\n    \"type\": \"PDF\",\r\n    \"url\": \"https://example.com/pdfs/core-java-notes.pdf\",\r\n    \"fileSize\": \"5 MB\"\r\n  },\r\n  \"refBy\": \"TOPIC\",\r\n  \"refById\": 1\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:9090/api/topics/1/references/document",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "topics",
+            "1",
+            "references",
+            "document"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Topic Reference (Video)",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"refValue\": {\r\n    \"title\": \"Java Introduction Video\",\r\n    \"type\": \"VIDEO\",\r\n    \"url\": \"https://youtube.com/watch?v=eIrMbAQSU34\",\r\n    \"duration\": \"45 mins\"\r\n  },\r\n  \"refBy\": \"TOPIC\",\r\n  \"refById\": 1\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:9090/api/topics/1/references/video",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "topics",
+            "1",
+            "references",
+            "video"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Topic Reference (Url)",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"refValue\": {\r\n    \"title\": \"Official Java Documentation\",\r\n    \"type\": \"URL\",\r\n    \"url\": \"https://docs.oracle.com/javase/tutorial/\"\r\n  },\r\n  \"refBy\": \"TOPIC\",\r\n  \"refById\": 1\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:9090/api/topics/1/references/url",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "topics",
+            "1",
+            "references",
+            "url"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create a Program",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"programTitle\": \"Full Stack Java Developer Program\",\r\n  \"description\": \"A comprehensive training program covering Core Java, Spring Boot, REST APIs, database management, and full stack application development with real-time projects.\",\r\n  \"durationInMonths\": 6,\r\n  \"providerId\": 1\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:9090/api/add/program",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "add",
+            "program"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Add a Course to Program",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"programId\": \"PRG001\",\r\n  \"courseIds\": [\r\n    \"JV001\",\r\n    \"JV002\"\r\n  ]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:9090/api/add/course/program",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "add",
+            "course",
+            "program"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "View All Programs",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9090/api/getAll/program",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "getAll",
+            "program"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "View Program by ID",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9090/api/getById/program/1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "getById",
+            "program",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update a Program",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"programTitle\": \"Full Stack Java  Developer Program\",\r\n  \"description\": \"A comprehensive training program covering Core Java, Spring Boot, REST APIs, database management, and full stack application development with real-time projects.\",\r\n  \"durationInMonths\": 8,\r\n  \"providerId\": 1\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:9090/api/update/program/1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "update",
+            "program",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete a Course from Program",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9090/api/remove/course/1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "remove",
+            "course",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete a Program",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9090/api/delete/program/1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "delete",
+            "program",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "View Chapter by CourseID",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg0OTM3NDMsImV4cCI6MTc3ODU4MDE0M30.CK_LhRnHooLD2p2O57mxzwh6g5mvcQLKvYYz4TZyijg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9090/api/course/JV001/chapters",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "course",
+            "JV001",
+            "chapters"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Course Detail API",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWphc3dpbmkuYWxlQGdtYWlsLmNvbSIsInJvbGUiOiJBZG1pbiIsInVzZXJJZCI6IlNGMDAwMDEiLCJpYXQiOjE3Nzg2NjQ1MjIsImV4cCI6MTc3ODc1MDkyMn0.VscJ88nMEjoxOSEqMa029tafUSPRPLSCQTFcPZ0hFfg",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:9090/api/coursedetails/JV001",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9090",
+          "path": [
+            "api",
+            "coursedetails",
+            "JV001"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

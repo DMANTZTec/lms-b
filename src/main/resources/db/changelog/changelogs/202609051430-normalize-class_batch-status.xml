@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!--
+        class_batch.status is now mapped to the ClassStatus enum (SCHEDULED / COMPLETED / CANCELLED)
+        in code, but the column's original default was the literal 'ACTIVE', which is not a valid
+        ClassStatus constant. Normalize any existing 'ACTIVE' rows to SCHEDULED so they still load
+        correctly under @Enumerated(EnumType.STRING).
+    -->
+    <changeSet id="202609051430" author="Afsheen">
+        <update tableName="class_batch">
+            <column name="status" value="SCHEDULED"/>
+            <where>status = 'ACTIVE'</where>
+        </update>
+    </changeSet>
+
+</databaseChangeLog>

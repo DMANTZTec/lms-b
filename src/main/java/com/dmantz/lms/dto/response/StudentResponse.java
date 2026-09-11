@@ -1,0 +1,257 @@
+package com.dmantz.lms.dto.response;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+
+import com.dmantz.lms.entity.Country;
+import com.dmantz.lms.entity.State;
+
+public class StudentResponse {
+	private Long id;
+
+	private String studentId;
+	private String loginId;
+
+	private String firstNm;
+	private String lastNm;
+
+	private String gender;
+	private LocalDate dob;
+
+	private String addr1;
+	private String addr2;
+	private String city;
+	private State state;
+	private Country country;
+	private String pin;
+
+	private String emailId;
+	private String mobileNum;
+
+	private String status;
+	private String enabled;
+
+	private String emergencyContactNm;
+	private String emergencyContactNum;
+
+	private String profileImg;
+
+	private Long createdBy;
+	private LocalDateTime createdDt;
+
+	private Long updatedBy;
+	private LocalDateTime updatedDt;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getStudentId() {
+		return studentId;
+	}
+
+	public void setStudentId(String studentId) {
+		this.studentId = studentId;
+	}
+
+	public String getLoginId() {
+		return loginId;
+	}
+
+	public void setLoginId(String loginId) {
+		this.loginId = loginId;
+	}
+
+	public String getFirstNm() {
+		return firstNm;
+	}
+
+	public void setFirstNm(String firstNm) {
+		this.firstNm = firstNm;
+	}
+
+	public String getLastNm() {
+		return lastNm;
+	}
+
+	public void setLastNm(String lastNm) {
+		this.lastNm = lastNm;
+	}
+
+	public String getGender() {
+		return gender;
+	}
+
+	public void setGender(String gender) {
+		this.gender = gender;
+	}
+
+	public LocalDate getDob() {
+		return dob;
+	}
+
+	public void setDob(LocalDate dob) {
+		this.dob = dob;
+	}
+
+	public String getAddr1() {
+		return addr1;
+	}
+
+	public void setAddr1(String addr1) {
+		this.addr1 = addr1;
+	}
+
+	public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
+	}
+
+
+	public State getState() {
+		return state;
+	}
+
+	public void setState(State state) {
+		this.state = state;
+	}
+
+	public Country getCountry() {
+		return country;
+	}
+
+	public void setCountry(Country country) {
+		this.country = country;
+	}
+
+	public String getPin() {
+		return pin;
+	}
+
+	public void setPin(String pin) {
+		this.pin = pin;
+	}
+
+	public String getEmailId() {
+		return emailId;
+	}
+
+	public void setEmailId(String emailId) {
+		this.emailId = emailId;
+	}
+
+	public String getMobileNum() {
+		return mobileNum;
+	}
+
+	public void setMobileNum(String mobileNum) {
+		this.mobileNum = mobileNum;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public String getEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(String enabled) {
+		this.enabled = enabled;
+	}
+
+	public String getEmergencyContactNm() {
+		return emergencyContactNm;
+	}
+
+	public void setEmergencyContactNm(String emergencyContactNm) {
+		this.emergencyContactNm = emergencyContactNm;
+	}
+
+	public String getEmergencyContactNum() {
+		return emergencyContactNum;
+	}
+
+	public void setEmergencyContactNum(String emergencyContactNum) {
+		this.emergencyContactNum = emergencyContactNum;
+	}
+
+	
+
+	public String getProfileImg() {
+		return profileImg;
+	}
+
+	public void setProfileImg(String profileImg) {
+		this.profileImg = profileImg;
+	}
+
+	public Long getCreatedBy() {
+		return createdBy;
+	}
+
+	public void setCreatedBy(Long createdBy) {
+		this.createdBy = createdBy;
+	}
+
+	public LocalDateTime getCreatedDt() {
+		return createdDt;
+	}
+
+	public void setCreatedDt(LocalDateTime createdDt) {
+		this.createdDt = createdDt;
+	}
+
+	public Long getUpdatedBy() {
+		return updatedBy;
+	}
+
+	public void setUpdatedBy(Long updatedBy) {
+		this.updatedBy = updatedBy;
+	}
+
+	public LocalDateTime getUpdatedDt() {
+		return updatedDt;
+	}
+
+	public void setUpdatedDt(LocalDateTime updatedDt) {
+		this.updatedDt = updatedDt;
+	}
+	
+	
+
+	public String getAddr2() {
+		return addr2;
+	}
+
+	public void setAddr2(String addr2) {
+		this.addr2 = addr2;
+	}
+
+	@Override
+	public String toString() {
+		return "StudentResponse [id=" + id + ", studentId=" + studentId + ", loginId=" + loginId + ", firstNm="
+				+ firstNm + ", lastNm=" + lastNm + ", gender=" + gender + ", dob=" + dob + ", addr1=" + addr1
+				+ ", addr2=" + addr2 + ", city=" + city + ", state=" + state + ", country=" + country + ", pin=" + pin
+				+ ", emailId=" + emailId + ", mobileNum=" + mobileNum + ", status=" + status + ", enabled=" + enabled
+				+ ", emergencyContactNm=" + emergencyContactNm + ", emergencyContactNum=" + emergencyContactNum
+				+ ", profileImg=" + profileImg + ", createdBy=" + createdBy + ", createdDt=" + createdDt
+				+ ", updatedBy=" + updatedBy + ", updatedDt=" + updatedDt + "]";
+	}
+
+
+
+	
+}
