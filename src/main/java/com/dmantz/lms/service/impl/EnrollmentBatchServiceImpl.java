@@ -324,6 +324,11 @@ public class EnrollmentBatchServiceImpl implements EnrollmentBatchService {
 		item.setStatus(schedule.getStatus() != null ? schedule.getStatus().name() : null);
 
 		/*
+		 * Message/note posted by staff for this schedule
+		 */
+		item.setMessage(schedule.getMessage());
+
+		/*
 		 * Instructor(s) — schedules no longer carry a single legacy `staff`
 		 * reference; instructors live on `schedule.getInstructors()`, falling
 		 * back to the batch's instructors for schedules created before
