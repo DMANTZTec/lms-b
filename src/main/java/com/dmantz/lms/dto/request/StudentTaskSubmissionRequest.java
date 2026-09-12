@@ -1,5 +1,7 @@
 package com.dmantz.lms.dto.request;
 
+import com.dmantz.lms.entity.GitDetail;
+
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,6 +20,8 @@ public class StudentTaskSubmissionRequest {
 
 	@NotEmpty(message = "At least one attachment is required")
 	private List<MultipartFile> attachments;
+
+	private List<GitDetail> git;
 
 	public Long getStudentTaskId() {
 		return studentTaskId;
@@ -50,4 +54,13 @@ public class StudentTaskSubmissionRequest {
 	public void setAttachments(List<MultipartFile> attachments) {
 		this.attachments = attachments;
 	}
+
+	public List<GitDetail> getGit() {
+		return git;
+	}
+
+	public void setGit(List<GitDetail> git) {
+		this.git = git;
+	}
+
 }

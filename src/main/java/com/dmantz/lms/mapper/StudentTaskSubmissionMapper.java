@@ -17,6 +17,7 @@ public interface StudentTaskSubmissionMapper {
     @Mapping(target = "student", source = "student")
     @Mapping(target = "instructor", source = "instructor")
     @Mapping(target = "attachments", ignore = true)
+    @Mapping(target = "git", ignore = true)
     @Mapping(target = "status", constant = "COMPLETED")
     @Mapping(target = "reviewStatus", constant = "PENDING_REVIEW")
     @Mapping(target = "submittedAt", expression = "java(java.time.LocalDateTime.now())")
