@@ -35,13 +35,15 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 	private final EnrollmentRepository enrollmentRepository;
 	private final EnrollmentBatchRepository enrollmentBatchRepository;
 	private final ProgramCourseRepository programCourseRepository;
+	private final StudentTaskSubmissionRepository studentTaskSubmissionRepository;
 
 	public StudentDashboardServiceImpl(ClassScheduleRepository classScheduleRepository,
 			ClassScheduleMapper classScheduleMapper, StaffRepository staffRepository,
 			StudentRepository studentRepository, CourseRepository courseRepository,
 			StudentTopicReferenceProgressRepository progressRepository, ClassBatchMapper classBatchMapper,
 			EnrollmentRepository enrollmentRepository, EnrollmentBatchRepository enrollmentBatchRepository,
-			ProgramCourseRepository programCourseRepository) {
+			ProgramCourseRepository programCourseRepository,
+			StudentTaskSubmissionRepository studentTaskSubmissionRepository) {
 
 		this.classScheduleRepository = classScheduleRepository;
 		this.classScheduleMapper = classScheduleMapper;
@@ -53,6 +55,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 		this.enrollmentRepository = enrollmentRepository;
 		this.enrollmentBatchRepository = enrollmentBatchRepository;
 		this.programCourseRepository = programCourseRepository;
+		this.studentTaskSubmissionRepository = studentTaskSubmissionRepository;
 	}
 
 	// Courses a student is enrolled in via the enrollment table: direct course
@@ -511,6 +514,46 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 		response.setOverallProgress(overallProgress);
 
 		logger.info("Dashboard summary fetched successfully for studentId: {}", studentId);
+
+		return response;
+	}
+
+	// ================= COMPLETED TASKS PER WEEK =================
+
+	@Override
+	public List<WeeklyTaskCompletionResponse> getCompletedTasksPerWeek(String studentId, int weeks) {
+
+		logger.info("Fetching completed tasks per week for studentId: {}", studentId);
+
+		studentRepository.findByStudentId(studentId).orElseThrow(() -> {
+			logger.error("Student not found with studentId: {}", studentId);
+			return new ResourceNotFoundException("Student not found: " + studentId);
+		});
+
+		int numberOfWeeks = weeks <= 0 ? 4 : Math.min(weeks, 52);
+
+		LocalDate currentWeekStart = LocalDate.now().with(DayOfWeek.MONDAY);
+
+		List<WeeklyTaskCompletionResponse> response = new ArrayList<>();
+
+		for (int i = numberOfWeeks - 1; i >= 0; i--) {
+
+			LocalDate weekStart = currentWeekStart.minusWeeks(i);
+			LocalDate weekEnd = weekStart.plusDays(6);
+
+			List<StudentTaskSubmission> submissions = studentTaskSubmissionRepository
+					.findByStudent_StudentIdAndSubmittedAtBetween(studentId, weekStart.atStartOfDay(),
+							weekEnd.plusDays(1).atStartOfDay());
+
+			WeeklyTaskCompletionResponse weekDto = new WeeklyTaskCompletionResponse();
+			weekDto.setWeekStart(weekStart);
+			weekDto.setWeekEnd(weekEnd);
+			weekDto.setCompletedTaskCount(submissions.size());
+
+			response.add(weekDto);
+		}
+
+		logger.info("Completed tasks per week fetched successfully for studentId: {}", studentId);
 
 		return response;
 	}

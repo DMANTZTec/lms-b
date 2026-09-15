@@ -188,4 +188,28 @@ public class StudentDashboardController {
 
         return ResponseEntity.ok(response);
     }
+
+    // ================= COMPLETED TASKS PER WEEK =================
+
+    @GetMapping("/completed-tasks-per-week/{studentId}")
+    public ResponseEntity<List<WeeklyTaskCompletionResponse>> getCompletedTasksPerWeek(
+            @PathVariable String studentId,
+            @RequestParam(defaultValue = "4") int weeks) {
+
+        logger.info(
+                "Received request to fetch completed tasks per week for studentId: {} weeks: {}",
+                studentId,
+                weeks
+        );
+
+        List<WeeklyTaskCompletionResponse> response =
+                dashboardService.getCompletedTasksPerWeek(studentId, weeks);
+
+        logger.info(
+                "Completed tasks per week fetched successfully for studentId: {}",
+                studentId
+        );
+
+        return ResponseEntity.ok(response);
+    }
 }
