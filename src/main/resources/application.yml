@@ -23,6 +23,9 @@ spring:
   # Database
   # ------------------------------------------
   datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:lms_db}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 20
@@ -47,7 +50,7 @@ spring:
   liquibase:
     enabled: true
     change-log: classpath:db/changelog/db.changelog-master.xml
-    default-schema: lms_db
+    default-schema: ${DB_NAME:lms_db}
     drop-first: false
 
   # ------------------------------------------
