@@ -90,8 +90,8 @@ pipeline {
                 withCredentials([
                     usernamePassword(
                         credentialsId: 'github-lms',
-                        usernameVariable: 'lmsappuser',
-                        passwordVariable: 'Dmantz$123'
+                        usernameVariable: 'DB_USERNAME',
+                        passwordVariable: 'DB_PASSWORD'
                     )
                 ]) {
                     sh """
