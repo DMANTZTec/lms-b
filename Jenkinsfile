@@ -105,18 +105,19 @@ pipeline {
 
                         echo "Starting LMS container..."
 
-                        docker run -d \
-                            --name lms-app-${params.ENVIRONMENT} \
-                            -p ${params.APP_PORT}:${CONTAINER_PORT} \
-                            -e SPRING_PROFILES_ACTIVE=${params.ENVIRONMENT} \
-                            -e DB_HOST=103.12.1.147 \
-                            -e DB_PORT=3306 \
-                            -e DB_NAME=lms \
-                            -e DB_USERNAME="\$DB_USERNAME" \
-                            -e DB_PASSWORD="\$DB_PASSWORD" \
-                            -v /var/log/lms:/logs \
-                            --restart unless-stopped \
-                            ${IMAGE_NAME}:latest
+                       docker run -d \
+                           --name lms-app-${params.ENVIRONMENT} \
+                           -p ${params.APP_PORT}:${CONTAINER_PORT} \
+                           --add-host=host.docker.internal:host-gateway \
+                           -e SPRING_PROFILES_ACTIVE=${params.ENVIRONMENT} \
+                           -e DB_HOST=host.docker.internal \
+                           -e DB_PORT=3306 \
+                           -e DB_NAME=lms \
+                           -e DB_USERNAME="\$DB_USERNAME" \
+                           -e DB_PASSWORD="\$DB_PASSWORD" \
+                           -v /var/log/lms:/logs \
+                           --restart unless-stopped \
+                           ${IMAGE_NAME}:latest
 
                         echo "========================================"
                         echo "LMS container started"
