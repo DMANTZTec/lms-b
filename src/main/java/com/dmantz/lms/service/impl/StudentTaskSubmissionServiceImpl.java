@@ -52,7 +52,7 @@ public class StudentTaskSubmissionServiceImpl implements StudentTaskSubmissionSe
 	public StudentTaskSubmissionServiceImpl(StudentTaskSubmissionRepository submissionRepository,
 			StudentTaskRepository studentTaskRepository, StudentRepository studentRepository,
 			StaffCourseRepository staffCourseRepository, StudentTaskSubmissionMapper submissionMapper) {
-
+		super();
 		this.submissionRepository = submissionRepository;
 		this.studentTaskRepository = studentTaskRepository;
 		this.studentRepository = studentRepository;
@@ -93,6 +93,7 @@ public class StudentTaskSubmissionServiceImpl implements StudentTaskSubmissionSe
 
 		StudentTaskSubmission submission = submissionMapper.toEntity(request, task, student, instructor);
 		submission.setAttachments(uploadedAttachments);
+		submission.setGit(request.getGit());
 
 		StudentTaskSubmission saved = submissionRepository.save(submission);
 
@@ -100,7 +101,6 @@ public class StudentTaskSubmissionServiceImpl implements StudentTaskSubmissionSe
 		studentTaskRepository.save(task);
 
 		logger.info("Task submission {} is pending review from instructor: {}", saved.getId(), instructor.getStaffId());
-
 		logger.info("Task submitted successfully with submissionId: {}", saved.getId());
 
 		return submissionMapper.toResponse(saved);

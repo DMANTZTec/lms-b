@@ -99,4 +99,12 @@
 		</createIndex>
 
 	</changeSet>
+
+	<changeSet id="202609111700" author="Tejaswini">
+
+		<addColumn tableName="student_task_submission">
+			<column name="git" type="JSON" />
+		</addColumn>
+
+	</changeSet>
 </databaseChangeLog>

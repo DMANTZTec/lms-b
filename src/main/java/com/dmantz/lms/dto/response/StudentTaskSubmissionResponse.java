@@ -1,5 +1,7 @@
 package com.dmantz.lms.dto.response;
 
+import com.dmantz.lms.entity.GitDetail;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -13,6 +15,7 @@ public class StudentTaskSubmissionResponse {
     private String taskTitle;
     private String submissionNotes;
     private List<AttachmentResponse> attachments;
+    private List<GitDetail> git;
     private String status;
     private String reviewStatus;  
     private LocalDateTime submittedAt;
@@ -83,6 +86,14 @@ public class StudentTaskSubmissionResponse {
 
     public void setAttachments(List<AttachmentResponse> attachments) {
         this.attachments = attachments;
+    }
+
+    public List<GitDetail> getGit() {
+        return git;
+    }
+
+    public void setGit(List<GitDetail> git) {
+        this.git = git;
     }
 
     public String getStatus() {
