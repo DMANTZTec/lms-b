@@ -1,6 +1,7 @@
 package com.dmantz.lms.controller;
 
 import com.dmantz.lms.dto.request.AssignStudentToBatchRequest;
+import com.dmantz.lms.dto.request.SwitchStudentBatchRequest;
 import com.dmantz.lms.dto.response.DailyScheduleResponse;
 import com.dmantz.lms.dto.response.EnrollmentBatchResponse;
 import com.dmantz.lms.service.EnrollmentBatchService;
@@ -107,7 +108,26 @@ public class EnrollmentBatchController {
 
 
     // ==========================================================
-    // 5. STUDENT WEEKLY SCHEDULE
+    // 5. SWITCH STUDENT FROM ONE BATCH TO ANOTHER
+    // ==========================================================
+
+    @PutMapping("/switch")
+    public ResponseEntity<EnrollmentBatchResponse>
+    switchStudentBatch(
+            @Valid
+            @RequestBody
+            SwitchStudentBatchRequest request
+    ) {
+
+        EnrollmentBatchResponse response =
+                service.switchStudentBatch(request);
+
+        return ResponseEntity.ok(response);
+    }
+
+
+    // ==========================================================
+    // 6. STUDENT WEEKLY SCHEDULE
     // ==========================================================
 
     @GetMapping("/students/{studentId}/weekly-schedule")

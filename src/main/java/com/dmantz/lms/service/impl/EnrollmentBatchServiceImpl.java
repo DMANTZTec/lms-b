@@ -1,6 +1,7 @@
 package com.dmantz.lms.service.impl;
 
 import com.dmantz.lms.dto.request.AssignStudentToBatchRequest;
+import com.dmantz.lms.dto.request.SwitchStudentBatchRequest;
 import com.dmantz.lms.dto.response.DailyScheduleResponse;
 import com.dmantz.lms.dto.response.EnrollmentBatchResponse;
 import com.dmantz.lms.dto.response.ScheduleItemResponse;
@@ -232,6 +233,71 @@ public class EnrollmentBatchServiceImpl implements EnrollmentBatchService {
 				.orElseThrow(() -> new RuntimeException("EnrollmentBatch not found with id: " + enrollmentBatchId));
 
 		enrollmentBatchRepository.delete(enrollmentBatch);
+	}
+
+	// =========================================================
+	// SWITCH STUDENT FROM ONE BATCH TO ANOTHER
+	// =========================================================
+
+	@Override
+	public EnrollmentBatchResponse switchStudentBatch(SwitchStudentBatchRequest request) {
+
+		/*
+		 * 1. Find the student's current batch assignment
+		 */
+		EnrollmentBatch enrollmentBatch = enrollmentBatchRepository
+				.findByEnrollmentIdAndClassBatchId(request.getEnrollmentId(), request.getFromBatchId())
+				.orElseThrow(() -> new RuntimeException(
+						"Student is not assigned to the given batch with id: " + request.getFromBatchId()));
+
+		/*
+		 * 2. Find batch the student is being moved to
+		 */
+		ClassBatch targetBatch = classBatchRepository.findById(request.getToBatchId())
+				.orElseThrow(() -> new RuntimeException("Batch not found with id: " + request.getToBatchId()));
+
+		/*
+		 * 3. Both batches must belong to the same course
+		 */
+		String currentCourseId = enrollmentBatch.getClassBatch().getCourse().getCourseId();
+		String targetCourseId = targetBatch.getCourse().getCourseId();
+
+		if (!currentCourseId.equals(targetCourseId)) {
+			throw new RuntimeException("Cannot switch student to a batch of a different course");
+		}
+
+		/*
+		 * 4. Prevent switching to a batch the student is already assigned to
+		 */
+		if (enrollmentBatchRepository.existsByEnrollmentIdAndClassBatchId(request.getEnrollmentId(),
+				request.getToBatchId())) {
+
+			throw new RuntimeException("Student is already assigned to the target batch");
+		}
+
+		/*
+		 * 5. Check target batch capacity
+		 */
+		if (targetBatch.getCapacity() != null) {
+
+			long currentStudentCount = enrollmentBatchRepository.countByClassBatchId(targetBatch.getId());
+
+			if (currentStudentCount >= targetBatch.getCapacity()) {
+
+				throw new RuntimeException("Batch capacity is full");
+			}
+		}
+
+		/*
+		 * 6. Move the assignment to the new batch
+		 */
+		enrollmentBatch.setClassBatch(targetBatch);
+		enrollmentBatch.setAssignedBy(getAuthenticatedStaff());
+		enrollmentBatch.setAssignedDate(LocalDateTime.now());
+
+		EnrollmentBatch saved = enrollmentBatchRepository.save(enrollmentBatch);
+
+		return mapper.toResponse(saved);
 	}
 
 	// =========================================================

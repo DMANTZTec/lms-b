@@ -1,6 +1,7 @@
 package com.dmantz.lms.service;
 
 import com.dmantz.lms.dto.request.AssignStudentToBatchRequest;
+import com.dmantz.lms.dto.request.SwitchStudentBatchRequest;
 import com.dmantz.lms.dto.response.DailyScheduleResponse;
 import com.dmantz.lms.dto.response.EnrollmentBatchResponse;
 
@@ -26,6 +27,11 @@ public interface EnrollmentBatchService {
 
     void removeStudentFromBatch(
             Long enrollmentBatchId
+    );
+
+    EnrollmentBatchResponse
+    switchStudentBatch(
+            SwitchStudentBatchRequest request
     );
 
     List<DailyScheduleResponse> getStudentWeeklySchedule(
