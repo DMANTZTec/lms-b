@@ -74,27 +74,37 @@ pipeline {
             }
         }
 
+        ```groovy
         stage('Deploy Container') {
             steps {
                 echo "Deploying LMS container..."
 
-                sh """
-                    docker stop ${CONTAINER_NAME} || true
-                    docker rm ${CONTAINER_NAME} || true
+                withCredentials([
+                    string(credentialsId: 'twilio-account-sid', variable: 'TWILIO_ACCOUNT_SID'),
+                    string(credentialsId: 'twilio-auth-token', variable: 'TWILIO_AUTH_TOKEN'),
+                    string(credentialsId: 'twilio-from-number', variable: 'TWILIO_FROM_NUMBER')
+                ]) {
+                    sh """
+                        docker stop ${CONTAINER_NAME} || true
+                        docker rm ${CONTAINER_NAME} || true
 
-                    docker run -d \
-                        --name ${CONTAINER_NAME} \
-                        -p ${params.APP_PORT}:${CONTAINER_PORT} \
-                        -e SPRING_PROFILES_ACTIVE=${params.ENVIRONMENT} \
-                        -e STRAPI_URL="http://localhost:1337" \
-                       -e TWILIO_ACCOUNT_SID="${TWILIO_ACCOUNT_SID}" \
-                       -e TWILIO_AUTH_TOKEN="${TWILIO_AUTH_TOKEN}" \
-                        -v /var/log/lms:/logs \
-                        --restart unless-stopped \
-                        ${IMAGE_NAME}:latest
-                """
+                        docker run -d \
+                            --name ${CONTAINER_NAME} \
+                            -p ${params.APP_PORT}:${CONTAINER_PORT} \
+                            -e SPRING_PROFILES_ACTIVE=${params.ENVIRONMENT} \
+                            -e STRAPI_URL="http://localhost:1337" \
+                            -e TWILIO_ACCOUNT_SID="\${TWILIO_ACCOUNT_SID}" \
+                            -e TWILIO_AUTH_TOKEN="\${TWILIO_AUTH_TOKEN}" \
+                            -e TWILIO_FROM_NUMBER="\${TWILIO_FROM_NUMBER}" \
+                            -v /var/log/lms:/logs \
+                            --restart unless-stopped \
+                            ${IMAGE_NAME}:latest
+                    """
+                }
             }
         }
+        ```
+
 
         stage('Verify Container') {
             steps {
