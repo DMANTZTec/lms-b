@@ -18,6 +18,7 @@ pipeline {
     environment {
         IMAGE_NAME = "lms-springboot-app"
         CONTAINER_PORT = "9090"
+        CONTAINER_NAME = "lms-app-${params.ENVIRONMENT}"
     }
 
     tools {
@@ -32,26 +33,18 @@ pipeline {
 
         stage('Setup') {
             steps {
-                echo '========================================'
-                echo 'LMS Backend Jenkins Pipeline'
-                echo '========================================'
-                echo "Environment     : ${params.ENVIRONMENT}"
-                echo "Host Port       : ${params.APP_PORT}"
-                echo 'Branch          : devops_ns'
-                echo "Image           : ${IMAGE_NAME}"
-                echo "Container       : lms-app-${params.ENVIRONMENT}"
-                echo "Container Port  : ${CONTAINER_PORT}"
-                echo '========================================'
-
-                sh 'java -version'
-                sh 'mvn -version'
-                sh 'docker --version'
+                echo "========================================"
+                echo " LMS Deployment"
+                echo " Environment : ${params.ENVIRONMENT}"
+                echo " Host Port   : ${params.APP_PORT}"
+                echo " Container   : ${CONTAINER_NAME}"
+                echo "========================================"
             }
         }
 
         stage('Checkout') {
             steps {
-                echo 'Checking out LMS backend from GitHub...'
+                echo "Checking out LMS source code..."
 
                 git(
                     branch: 'devops_ns',
@@ -63,7 +56,7 @@ pipeline {
 
         stage('Clean & Build') {
             steps {
-                echo 'Cleaning and building LMS backend...'
+                echo "Building LMS application..."
 
                 sh '''
                     mvn clean package -DskipTests
@@ -73,101 +66,65 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                echo 'Building LMS Docker image...'
+                echo "Building Docker image..."
 
                 sh """
-                    docker build \
-                        -t ${IMAGE_NAME}:latest \
-                        .
+                    docker build -t ${IMAGE_NAME}:latest .
                 """
             }
         }
 
         stage('Deploy Container') {
             steps {
-                echo 'Deploying LMS application...'
+                echo "Deploying LMS container..."
 
-                withCredentials([
-                    usernamePassword(
-                        credentialsId: 'lms-db-credentials',
-                        usernameVariable: 'DB_USERNAME',
-                        passwordVariable: 'DB_PASSWORD'
-                    )
-                ]) {
-                    sh """
-                        echo "Stopping existing container if present..."
+                sh """
+                    docker stop ${CONTAINER_NAME} || true
+                    docker rm ${CONTAINER_NAME} || true
 
-                        if docker ps -aq -f name=^/lms-app-${params.ENVIRONMENT}\$ | grep -q .; then
-                            echo "Existing container found: lms-app-${params.ENVIRONMENT}"
-                            docker stop lms-app-${params.ENVIRONMENT} || true
-                            docker rm lms-app-${params.ENVIRONMENT} || true
-                        fi
-
-                        echo "Starting LMS container..."
-
-                       docker run -d \
-                           --name lms-app-${params.ENVIRONMENT} \
-                           -p ${params.APP_PORT}:${CONTAINER_PORT} \
-                           --add-host=host.docker.internal:host-gateway \
-                           -e SPRING_PROFILES_ACTIVE=${params.ENVIRONMENT} \
-                           -e DB_HOST=host.docker.internal \
-                           -e DB_PORT=3306 \
-                           -e DB_NAME=lms \
-                           -e DB_USERNAME="\$DB_USERNAME" \
-                           -e DB_PASSWORD="\$DB_PASSWORD" \
-                           -v /var/log/lms:/logs \
-                           --restart unless-stopped \
-                           ${IMAGE_NAME}:latest
-
-                        echo "========================================"
-                        echo "LMS container started"
-                        echo "========================================"
-
-                        docker ps -f name=lms-app-${params.ENVIRONMENT}
-                    """
-                }
+                    docker run -d \
+                        --name ${CONTAINER_NAME} \
+                        -p ${params.APP_PORT}:${CONTAINER_PORT} \
+                        -e SPRING_PROFILES_ACTIVE=${params.ENVIRONMENT} \
+                        -v /var/log/lms:/logs \
+                        --restart unless-stopped \
+                        ${IMAGE_NAME}:latest
+                """
             }
         }
 
         stage('Verify Container') {
             steps {
-                sh """
-                    echo "========================================"
-                    echo "VERIFYING LMS CONTAINER"
-                    echo "========================================"
+                echo "Waiting for LMS application to start..."
 
-                    for i in \$(seq 1 12); do
+                sh '''
+                    sleep 20
 
-                        if ! docker ps --format '{{.Names}}' | grep -q "^lms-app-${params.ENVIRONMENT}\$"; then
-                            echo "Container has stopped."
-                            break
-                        fi
+                    echo "----------------------------------------"
+                    echo "Docker Container Status"
+                    echo "----------------------------------------"
 
-                        if docker logs lms-app-${params.ENVIRONMENT} 2>&1 | grep -q "Started .*Application"; then
-                            echo "========================================"
-                            echo "Spring Boot started successfully!"
-                            echo "========================================"
-                            exit 0
-                        fi
+                    docker ps -a --filter "name=${CONTAINER_NAME}"
 
-                        echo "Waiting for Spring Boot... attempt \$i/12"
-                        sleep 5
-                    done
+                    echo "----------------------------------------"
+                    echo "LMS Application Logs"
+                    echo "----------------------------------------"
 
-                    echo "========================================"
-                    echo "APPLICATION FAILED TO START"
-                    echo "========================================"
+                    docker logs --tail 100 ${CONTAINER_NAME}
 
-                    docker ps -a -f name=lms-app-${params.ENVIRONMENT}
+                    echo "----------------------------------------"
+                    echo "Checking application startup..."
+                    echo "----------------------------------------"
 
-                    echo "========================================"
-                    echo "APPLICATION LOGS"
-                    echo "========================================"
-
-                    docker logs lms-app-${params.ENVIRONMENT} --tail 100
-
-                    exit 1
-                """
+                    if docker logs ${CONTAINER_NAME} 2>&1 | grep -q "Started .*Application"; then
+                        echo "LMS application started successfully."
+                    else
+                        echo "LMS application failed to start."
+                        echo "Showing complete logs:"
+                        docker logs ${CONTAINER_NAME}
+                        exit 1
+                    fi
+                '''
             }
         }
     }
@@ -177,18 +134,17 @@ pipeline {
         success {
             echo """
             ========================================
-            Jenkins Pipeline SUCCESS
+            LMS DEPLOYMENT SUCCESSFUL
             ========================================
-
-            Application : LMS Backend
             Environment : ${params.ENVIRONMENT}
+            Container   : ${CONTAINER_NAME}
             Host Port   : ${params.APP_PORT}
-            Container   : lms-app-${params.ENVIRONMENT}
-            Image       : ${IMAGE_NAME}:latest
 
-            Swagger:
+            Application :
+            http://SERVER_IP:${params.APP_PORT}/lms
+
+            Swagger :
             http://SERVER_IP:${params.APP_PORT}/lms/swagger-ui/index.html
-
             ========================================
             """
         }
@@ -196,20 +152,15 @@ pipeline {
         failure {
             echo """
             ========================================
-            Jenkins Pipeline FAILED
+            LMS DEPLOYMENT FAILED
             ========================================
+            Container : ${CONTAINER_NAME}
 
-            Application : LMS Backend
-            Environment : ${params.ENVIRONMENT}
-            Container   : lms-app-${params.ENVIRONMENT}
-
-            Check Jenkins Console Output.
-
-            Docker logs:
-            docker logs lms-app-${params.ENVIRONMENT}
-
+            Check logs using:
+            docker logs ${CONTAINER_NAME}
             ========================================
             """
         }
     }
 }
+
