@@ -5,9 +5,11 @@ import com.dmantz.lms.dto.request.UpdateClassRequest;
 import com.dmantz.lms.dto.response.ClassResponse;
 import com.dmantz.lms.dto.response.StudentClassResponse;
 import com.dmantz.lms.entity.ClassBatch;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
 
 @Mapper(
@@ -33,6 +35,7 @@ public interface ClassBatchMapper {
     @Mapping(source = "course.courseTitle", target = "courseName")
     StudentClassResponse toDto(ClassBatch entity);
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "course", ignore = true)
     @Mapping(source = "batchName", target = "className")

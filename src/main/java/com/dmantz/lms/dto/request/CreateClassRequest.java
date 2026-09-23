@@ -1,5 +1,6 @@
 package com.dmantz.lms.dto.request;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -29,6 +30,10 @@ public class CreateClassRequest {
 
 	@NotEmpty
 	private List<String> selectedInstructors;
+
+	// Maximum number of students the batch can hold; null means unlimited.
+	@Min(1)
+	private Integer capacity;
 
 	public String getBatchName() {
 		return batchName;
@@ -76,6 +81,14 @@ public class CreateClassRequest {
 
 	public void setSelectedInstructors(List<String> selectedInstructors) {
 		this.selectedInstructors = selectedInstructors;
+	}
+
+	public Integer getCapacity() {
+		return capacity;
+	}
+
+	public void setCapacity(Integer capacity) {
+		this.capacity = capacity;
 	}
 
 	// Inner class for day time slot

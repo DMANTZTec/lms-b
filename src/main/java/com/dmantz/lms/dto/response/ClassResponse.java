@@ -17,6 +17,7 @@ public class ClassResponse {
     private String batchName;
     private LocalDate startDate;
     private LocalDate endDate;
+    private Integer capacity;
     private Integer totalSchedulesGenerated;
     private List<ClassScheduleResponse> schedules;
     public Long getBatchId() {
@@ -61,6 +62,14 @@ public class ClassResponse {
 
     public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
+    }
+
+    public Integer getCapacity() {
+        return capacity;
+    }
+
+    public void setCapacity(Integer capacity) {
+        this.capacity = capacity;
     }
 
     public Integer getTotalSchedulesGenerated() {

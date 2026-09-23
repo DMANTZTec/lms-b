@@ -7,6 +7,7 @@ import com.dmantz.lms.dto.response.EnrollmentBatchResponse;
 import com.dmantz.lms.dto.response.ScheduleItemResponse;
 import com.dmantz.lms.entity.ClassBatch;
 import com.dmantz.lms.entity.ClassSchedule;
+import com.dmantz.lms.entity.ClassStatus;
 import com.dmantz.lms.entity.Enrollment;
 import com.dmantz.lms.entity.EnrollmentBatch;
 import com.dmantz.lms.entity.EnrollmentStatus;
@@ -257,7 +258,24 @@ public class EnrollmentBatchServiceImpl implements EnrollmentBatchService {
 				.orElseThrow(() -> new RuntimeException("Batch not found with id: " + request.getToBatchId()));
 
 		/*
-		 * 3. Both batches must belong to the same course
+		 * 3. Batch can only be switched while the student's current batch has
+		 * not started yet — once a batch is ongoing or completed, the
+		 * student can no longer be moved out of it.
+		 */
+		if (isBatchStarted(enrollmentBatch.getClassBatch())) {
+			throw new RuntimeException("Cannot switch batch: current batch has already started or is completed");
+		}
+
+		/*
+		 * 4. The target batch must also not have started yet — students
+		 * cannot be switched into an ongoing or completed batch.
+		 */
+		if (isBatchStarted(targetBatch)) {
+			throw new RuntimeException("Cannot switch batch: target batch has already started or is completed");
+		}
+
+		/*
+		 * 5. Both batches must belong to the same course
 		 */
 		String currentCourseId = enrollmentBatch.getClassBatch().getCourse().getCourseId();
 		String targetCourseId = targetBatch.getCourse().getCourseId();
@@ -267,7 +285,7 @@ public class EnrollmentBatchServiceImpl implements EnrollmentBatchService {
 		}
 
 		/*
-		 * 4. Prevent switching to a batch the student is already assigned to
+		 * 6. Prevent switching to a batch the student is already assigned to
 		 */
 		if (enrollmentBatchRepository.existsByEnrollmentIdAndClassBatchId(request.getEnrollmentId(),
 				request.getToBatchId())) {
@@ -276,7 +294,7 @@ public class EnrollmentBatchServiceImpl implements EnrollmentBatchService {
 		}
 
 		/*
-		 * 5. Check target batch capacity
+		 * 7. Check target batch capacity
 		 */
 		if (targetBatch.getCapacity() != null) {
 
@@ -289,7 +307,7 @@ public class EnrollmentBatchServiceImpl implements EnrollmentBatchService {
 		}
 
 		/*
-		 * 6. Move the assignment to the new batch
+		 * 8. Move the assignment to the new batch
 		 */
 		enrollmentBatch.setClassBatch(targetBatch);
 		enrollmentBatch.setAssignedBy(getAuthenticatedStaff());
@@ -416,6 +434,29 @@ public class EnrollmentBatchServiceImpl implements EnrollmentBatchService {
 
 		return item;
 	}
+	// =========================================================
+	// CHECK WHETHER A BATCH HAS ALREADY STARTED (ONGOING/COMPLETED)
+	// =========================================================
+
+	private boolean isBatchStarted(ClassBatch batch) {
+
+		LocalDate today = LocalDate.now();
+
+		if (batch.getStatus() == ClassStatus.COMPLETED || batch.getStatus() == ClassStatus.CANCELLED) {
+			return true;
+		}
+
+		if (batch.getEndDate() != null && !batch.getEndDate().isAfter(today)) {
+			return true;
+		}
+
+		if (batch.getStartDate() != null && !batch.getStartDate().isAfter(today)) {
+			return true;
+		}
+
+		return false;
+	}
+
 	// =========================================================
 	// GET AUTHENTICATED STAFF
 	// =========================================================

@@ -84,6 +84,10 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 		});
 
 		// 2. Create ClassBatch
+		if (request.getCapacity() != null && request.getCapacity() <= 0) {
+			throw new RuntimeException("Batch capacity must be greater than 0");
+		}
+
 		ClassBatch classBatch = classBatchMapper.toEntity(request);
 		classBatch.setCourse(course);
 		classBatch.setStatus(ClassStatus.SCHEDULED);
@@ -214,6 +218,10 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 	public ClassResponse modifyClass(Long batchId, UpdateClassRequest request) {
 
 		logger.info("Modifying class with batchId: {}", batchId);
+
+		if (request.getCapacity() != null && request.getCapacity() <= 0) {
+			throw new RuntimeException("Batch capacity must be greater than 0");
+		}
 
 		ClassBatch classBatch = classBatchRepository.findById(batchId).orElseThrow(() -> {
 			logger.warn("ClassBatch not found with id: {} during modifyClass", batchId);
