@@ -74,7 +74,6 @@ pipeline {
             }
         }
 
-        ```groovy
         stage('Deploy Container') {
             steps {
                 echo "Deploying LMS container..."
@@ -103,8 +102,6 @@ pipeline {
                 }
             }
         }
-        ```
-
 
         stage('Verify Container') {
             steps {
