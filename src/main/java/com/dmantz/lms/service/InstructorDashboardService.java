@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.dmantz.lms.dto.request.InstructorTaskRequest;
 import com.dmantz.lms.dto.request.PlanClassTopicsRequest;
+import com.dmantz.lms.dto.request.ReviewSubmissionRequest;
 import com.dmantz.lms.dto.response.*;
 import com.dmantz.lms.entity.SubmissionFilter;
 
@@ -28,4 +29,7 @@ public interface InstructorDashboardService {
 	List<ClassTopicResponse> getPlannedTopics(Long scheduleId, String staffId);
 
 	List<StudentTaskSubmissionResponse> getPendingReviews(String instructorId);
+
+	StudentTaskSubmissionResponse reviewSubmission(Long submissionId, String instructorId,
+			ReviewSubmissionRequest request);
 }

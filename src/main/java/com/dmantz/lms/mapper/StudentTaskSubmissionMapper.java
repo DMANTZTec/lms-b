@@ -23,6 +23,7 @@ public interface StudentTaskSubmissionMapper {
     @Mapping(target = "submittedAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "reviewFeedback", ignore = true)
     @Mapping(target = "pointsAwarded", ignore = true)
+    @Mapping(target = "overallRating", ignore = true)
     @Mapping(target = "reviewedAt", ignore = true)
     @Mapping(target = "createdDt", ignore = true)
     @Mapping(target = "updatedDt", ignore = true)

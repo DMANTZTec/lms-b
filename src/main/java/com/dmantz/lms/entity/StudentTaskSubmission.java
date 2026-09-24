@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -51,6 +52,9 @@ public class StudentTaskSubmission extends AuditFields {
 
 	@Column(name = "points_awarded")
 	private Integer pointsAwarded;
+
+	@Column(name = "overall_rating", precision = 2, scale = 1)
+	private BigDecimal overallRating;
 
 	@Column(name = "reviewed_at")
 	private LocalDateTime reviewedAt;
@@ -145,6 +149,14 @@ public class StudentTaskSubmission extends AuditFields {
 
 	public void setPointsAwarded(Integer pointsAwarded) {
 		this.pointsAwarded = pointsAwarded;
+	}
+
+	public BigDecimal getOverallRating() {
+		return overallRating;
+	}
+
+	public void setOverallRating(BigDecimal overallRating) {
+		this.overallRating = overallRating;
 	}
 
 	public LocalDateTime getReviewedAt() {

@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.dmantz.lms.dto.request.InstructorTaskRequest;
 import com.dmantz.lms.dto.request.PlanClassTopicsRequest;
+import com.dmantz.lms.dto.request.ReviewSubmissionRequest;
 import com.dmantz.lms.exceptions.ResourceNotFoundException;
 import com.dmantz.lms.exceptions.UnauthorizedAccessException;
 import com.dmantz.lms.mapper.ClassTopicMapper;
@@ -656,5 +657,44 @@ public class InstructorDashboardServiceImpl implements InstructorDashboardServic
 
 	    return pendingSubmissions.stream().map(studentTaskSubmissionMapper::toResponse).toList();
 	}
-	
+
+	@Override
+	@Transactional
+	public StudentTaskSubmissionResponse reviewSubmission(Long submissionId, String instructorId,
+			ReviewSubmissionRequest request) {
+
+		Staff instructor = staffRepository.findByStaffId(instructorId)
+				.orElseThrow(() -> new ResourceNotFoundException("Instructor not found: " + instructorId));
+
+		StudentTaskSubmission submission = studentTaskSubmissionRepository.findById(submissionId)
+				.orElseThrow(() -> new ResourceNotFoundException("Submission not found: " + submissionId));
+
+		String courseId = submission.getStudentTask() != null ? submission.getStudentTask().getCourseId() : null;
+		boolean assignedToCourse = courseId != null
+				&& staffCourseRepository.existsByStaff_StaffIdAndCourse_CourseId(instructor.getStaffId(), courseId);
+		if (!assignedToCourse) {
+			throw new UnauthorizedAccessException("Instructor " + instructor.getStaffId()
+					+ " is not assigned to the course of submission: " + submissionId);
+		}
+
+		if (submission.getReviewStatus() == ReviewStatus.REVIEWED) {
+			logger.info("Submission {} was already reviewed; overwriting previous review", submissionId);
+		}
+
+		LocalDateTime now = LocalDateTime.now();
+		submission.setOverallRating(request.getOverallRating());
+		submission.setReviewFeedback(request.getFeedbackMessage().trim());
+		submission.setReviewStatus(ReviewStatus.REVIEWED);
+		submission.setReviewedAt(now);
+		submission.setUpdatedBy(instructor.getId());
+		submission.setUpdatedDt(now);
+
+		StudentTaskSubmission saved = studentTaskSubmissionRepository.save(submission);
+
+		logger.info("Instructor {} reviewed submission {} with rating {}", instructor.getStaffId(), submissionId,
+				request.getOverallRating());
+
+		return studentTaskSubmissionMapper.toResponse(saved);
+	}
+
 }

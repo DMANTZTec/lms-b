@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dmantz.lms.dto.request.InstructorTaskRequest;
 import com.dmantz.lms.dto.request.PlanClassTopicsRequest;
+import com.dmantz.lms.dto.request.ReviewSubmissionRequest;
 import com.dmantz.lms.service.InstructorDashboardService;
 
 import jakarta.validation.Valid;
@@ -163,5 +164,18 @@ public class InstructorDashboardController {
 	    logger.info("Returning {} pending review(s) for instructorId: {}", response.size(), instructorId);
 
 	    return ResponseEntity.ok(response);
+	}
+
+	@PostMapping("/submissions/{submissionId}/review")
+	public ResponseEntity<StudentTaskSubmissionResponse> reviewSubmission(@PathVariable Long submissionId,
+			@RequestParam String instructorId, @Valid @RequestBody ReviewSubmissionRequest request) {
+
+		logger.info("POST /submissions/{}/review - instructorId: {}, overallRating: {}", submissionId, instructorId,
+				request.getOverallRating());
+
+		StudentTaskSubmissionResponse response = instructorDashboardService.reviewSubmission(submissionId,
+				instructorId, request);
+
+		return ResponseEntity.ok(response);
 	}
 }

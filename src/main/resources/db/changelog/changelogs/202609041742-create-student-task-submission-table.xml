@@ -107,4 +107,12 @@
 		</addColumn>
 
 	</changeSet>
+
+	<changeSet id="202609241200" author="Afsheen">
+
+		<addColumn tableName="student_task_submission">
+			<column name="overall_rating" type="DECIMAL(2,1)" />
+		</addColumn>
+
+	</changeSet>
 </databaseChangeLog>

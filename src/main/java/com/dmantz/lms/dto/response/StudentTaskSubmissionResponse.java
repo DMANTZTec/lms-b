@@ -2,6 +2,7 @@ package com.dmantz.lms.dto.response;
 
 import com.dmantz.lms.entity.GitDetail;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -21,6 +22,7 @@ public class StudentTaskSubmissionResponse {
     private LocalDateTime submittedAt;
     private String reviewFeedback;
     private Integer pointsAwarded;
+    private BigDecimal overallRating;
     private LocalDateTime reviewedAt;
     
 
@@ -126,6 +128,14 @@ public class StudentTaskSubmissionResponse {
 
     public void setPointsAwarded(Integer pointsAwarded) {
         this.pointsAwarded = pointsAwarded;
+    }
+
+    public BigDecimal getOverallRating() {
+        return overallRating;
+    }
+
+    public void setOverallRating(BigDecimal overallRating) {
+        this.overallRating = overallRating;
     }
 
     public LocalDateTime getReviewedAt() {

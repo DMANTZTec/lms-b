@@ -52,6 +52,9 @@ public class SecurityConfig {
                         		"/api/success-stories/**").permitAll()
                         .requestMatchers("/api/learner-paths",
                                 "/api/learner-paths/**").permitAll()
+                        // Social media links are read-only public; create/update/delete still need a token
+                        .requestMatchers(HttpMethod.GET, "/api/social-media",
+                                "/api/social-media/active").permitAll()
 
 
                         // STUDENT PUBLIC APIs
