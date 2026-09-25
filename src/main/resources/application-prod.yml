@@ -9,7 +9,7 @@ spring:
   # Datasource
   # ------------------------------------------
   datasource:
-    url: jdbc:mysql://lms-mysql-prod:3306/lms_db
+    url: jdbc:mysql://lms-mysql-prod:3306/lms
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -21,6 +21,12 @@ spring:
     hibernate:
       ddl-auto: none
     show-sql: false
+
+  # ------------------------------------------
+  # Liquibase
+  # ------------------------------------------
+  liquibase:
+    default-schema: ${DB_NAME:lms}
 
   # ------------------------------------------
   # Mail Credentials
