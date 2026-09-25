@@ -14,6 +14,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.*;
@@ -554,6 +556,57 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 		}
 
 		logger.info("Completed tasks per week fetched successfully for studentId: {}", studentId);
+
+		return response;
+	}
+
+	// ================= INSTRUCTOR RATING PER WEEK =================
+
+	@Override
+	public List<WeeklyInstructorRatingResponse> getInstructorRatingPerWeek(String studentId, int weeks) {
+
+		logger.info("Fetching instructor rating per week for studentId: {}", studentId);
+
+		studentRepository.findByStudentId(studentId).orElseThrow(() -> {
+			logger.error("Student not found with studentId: {}", studentId);
+			return new ResourceNotFoundException("Student not found: " + studentId);
+		});
+
+		int numberOfWeeks = weeks <= 0 ? 4 : Math.min(weeks, 52);
+
+		LocalDate currentWeekStart = LocalDate.now().with(DayOfWeek.MONDAY);
+		LocalDate rangeStart = currentWeekStart.minusWeeks(numberOfWeeks - 1);
+
+		// Ratings are attributed to the week the instructor reviewed the task
+		List<StudentTaskSubmission> ratedSubmissions = studentTaskSubmissionRepository
+				.findByStudent_StudentIdAndReviewStatusAndOverallRatingIsNotNullAndReviewedAtBetween(studentId,
+						ReviewStatus.REVIEWED, rangeStart.atStartOfDay(), currentWeekStart.plusWeeks(1).atStartOfDay());
+
+		Map<LocalDate, List<BigDecimal>> ratingsByWeek = ratedSubmissions.stream()
+				.collect(Collectors.groupingBy(s -> s.getReviewedAt().toLocalDate().with(DayOfWeek.MONDAY),
+						Collectors.mapping(StudentTaskSubmission::getOverallRating, Collectors.toList())));
+
+		List<WeeklyInstructorRatingResponse> response = new ArrayList<>();
+
+		for (int i = numberOfWeeks - 1; i >= 0; i--) {
+
+			LocalDate weekStart = currentWeekStart.minusWeeks(i);
+			List<BigDecimal> ratings = ratingsByWeek.getOrDefault(weekStart, List.of());
+
+			BigDecimal averageRating = ratings.isEmpty() ? BigDecimal.ZERO.setScale(1)
+					: ratings.stream().reduce(BigDecimal.ZERO, BigDecimal::add)
+							.divide(BigDecimal.valueOf(ratings.size()), 1, RoundingMode.HALF_UP);
+
+			WeeklyInstructorRatingResponse weekDto = new WeeklyInstructorRatingResponse();
+			weekDto.setWeekStart(weekStart);
+			weekDto.setWeekEnd(weekStart.plusDays(6));
+			weekDto.setAverageRating(averageRating);
+			weekDto.setRatedTaskCount(ratings.size());
+
+			response.add(weekDto);
+		}
+
+		logger.info("Instructor rating per week fetched successfully for studentId: {}", studentId);
 
 		return response;
 	}

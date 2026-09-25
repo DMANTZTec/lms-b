@@ -212,4 +212,28 @@ public class StudentDashboardController {
 
         return ResponseEntity.ok(response);
     }
+
+    // ================= INSTRUCTOR RATING PER WEEK =================
+
+    @GetMapping("/instructor-rating-per-week/{studentId}")
+    public ResponseEntity<List<WeeklyInstructorRatingResponse>> getInstructorRatingPerWeek(
+            @PathVariable String studentId,
+            @RequestParam(defaultValue = "4") int weeks) {
+
+        logger.info(
+                "Received request to fetch instructor rating per week for studentId: {} weeks: {}",
+                studentId,
+                weeks
+        );
+
+        List<WeeklyInstructorRatingResponse> response =
+                dashboardService.getInstructorRatingPerWeek(studentId, weeks);
+
+        logger.info(
+                "Instructor rating per week fetched successfully for studentId: {}",
+                studentId
+        );
+
+        return ResponseEntity.ok(response);
+    }
 }
