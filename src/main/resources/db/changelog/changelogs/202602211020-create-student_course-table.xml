@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet id="202602211020" author="shivashankar">
+
+        <createTable tableName="student_course">
+
+            <!-- Primary Key -->
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <!-- Relationships -->
+            <column name="student_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="course_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- Enum -->
+            <column name="status" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- Entity fields -->
+            <column name="start_dt" type="TIMESTAMP"/>
+            <column name="enrolled_dt" type="TIMESTAMP"/>
+            <column name="completed_dt" type="TIMESTAMP"/>
+
+            <!-- Audit fields (from AuditFields base class) -->
+            <column name="created_by" type="BIGINT"/>
+            <column name="created_dt" type="TIMESTAMP"/>
+            <column name="updated_by" type="BIGINT"/>
+            <column name="updated_dt" type="TIMESTAMP"/>
+
+        </createTable>
+
+        <!-- FK: student -->
+        <addForeignKeyConstraint
+                baseTableName="student_course"
+                baseColumnNames="student_id"
+                referencedTableName="student"
+                referencedColumnNames="id"
+                constraintName="fk_student_course_student"
+                onDelete="CASCADE"/>
+
+        <!-- FK: course -->
+        <addForeignKeyConstraint
+                baseTableName="student_course"
+                baseColumnNames="course_id"
+                referencedTableName="course"
+                referencedColumnNames="id"
+                constraintName="fk_student_course_course"
+                onDelete="CASCADE"/>
+
+        <!-- Unique constraint -->
+        <addUniqueConstraint
+                tableName="student_course"
+                columnNames="student_id, course_id"
+                constraintName="uk_student_course_unique"/>
+
+    </changeSet>
+
+</databaseChangeLog>

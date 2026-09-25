@@ -1,0 +1,14 @@
+package com.dmantz.lms.entity;
+
+public enum OtpPurpose {
+
+    LOGIN,
+    FORGOT_PASSWORD,
+    PASSWORD_RESET_SUCCESS,
+    STAFF_LOGIN,
+    STAFF_FORGOT_PASSWORD,
+    STAFF_PASSWORD_RESET_SUCCESS,
+    REGISTRATION,
+    PASSWORD_CHANGE_SUCCESS;
+
+}

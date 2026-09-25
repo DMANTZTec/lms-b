@@ -1,0 +1,491 @@
+package com.dmantz.lms.service.impl;
+
+import com.dmantz.lms.dto.request.AssignStudentToBatchRequest;
+import com.dmantz.lms.dto.request.SwitchStudentBatchRequest;
+import com.dmantz.lms.dto.response.DailyScheduleResponse;
+import com.dmantz.lms.dto.response.EnrollmentBatchResponse;
+import com.dmantz.lms.dto.response.ScheduleItemResponse;
+import com.dmantz.lms.entity.ClassBatch;
+import com.dmantz.lms.entity.ClassSchedule;
+import com.dmantz.lms.entity.ClassStatus;
+import com.dmantz.lms.entity.Enrollment;
+import com.dmantz.lms.entity.EnrollmentBatch;
+import com.dmantz.lms.entity.EnrollmentStatus;
+import com.dmantz.lms.entity.Staff;
+import com.dmantz.lms.mapper.EnrollmentBatchMapper;
+import com.dmantz.lms.repository.ClassBatchRepository;
+import com.dmantz.lms.repository.ClassScheduleRepository;
+import com.dmantz.lms.repository.EnrollmentBatchRepository;
+import com.dmantz.lms.repository.EnrollmentRepository;
+import com.dmantz.lms.repository.StaffRepository;
+import com.dmantz.lms.service.EnrollmentBatchService;
+
+import jakarta.transaction.Transactional;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
+import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+@Service
+@Transactional
+public class EnrollmentBatchServiceImpl implements EnrollmentBatchService {
+
+	private final EnrollmentBatchRepository enrollmentBatchRepository;
+	private final EnrollmentRepository enrollmentRepository;
+	private final ClassBatchRepository classBatchRepository;
+	private final ClassScheduleRepository classScheduleRepository;
+	private final StaffRepository staffRepository;
+	private final EnrollmentBatchMapper mapper;
+
+	public EnrollmentBatchServiceImpl(EnrollmentBatchRepository enrollmentBatchRepository,
+			EnrollmentRepository enrollmentRepository, ClassBatchRepository classBatchRepository,
+			ClassScheduleRepository classScheduleRepository, StaffRepository staffRepository,
+			EnrollmentBatchMapper mapper) {
+
+		this.enrollmentBatchRepository = enrollmentBatchRepository;
+		this.enrollmentRepository = enrollmentRepository;
+		this.classBatchRepository = classBatchRepository;
+		this.classScheduleRepository = classScheduleRepository;
+		this.staffRepository = staffRepository;
+		this.mapper = mapper;
+	}
+
+	// =========================================================
+	// ASSIGN ENROLLED STUDENT TO BATCH
+	// =========================================================
+
+	@Override
+	public EnrollmentBatchResponse assignStudentToBatch(AssignStudentToBatchRequest request) {
+
+		/*
+		 * 1. Find enrollment
+		 */
+		Enrollment enrollment = enrollmentRepository.findById(request.getEnrollmentId())
+				.orElseThrow(() -> new RuntimeException("Enrollment not found with id: " + request.getEnrollmentId()));
+
+		/*
+		 * 2. Find batch
+		 */
+		ClassBatch batch = classBatchRepository.findById(request.getBatchId())
+				.orElseThrow(() -> new RuntimeException("Batch not found with id: " + request.getBatchId()));
+
+		/*
+		 * 4. Validate that student's enrollment belongs to the course of this batch.
+		 */
+		validateEnrollmentForBatch(enrollment, batch);
+
+		/*
+		 * 5. Prevent duplicate assignment
+		 */
+		if (enrollmentBatchRepository.existsByEnrollmentIdAndClassBatchId(enrollment.getId(), batch.getId())) {
+
+			throw new RuntimeException("Student is already assigned to this batch");
+		}
+
+		/*
+		 * 6. Check batch capacity
+		 */
+		if (batch.getCapacity() != null) {
+
+			long currentStudentCount = enrollmentBatchRepository.countByClassBatchId(batch.getId());
+
+			if (currentStudentCount >= batch.getCapacity()) {
+
+				throw new RuntimeException("Batch capacity is full");
+			}
+		}
+
+		/*
+		 * 7. Get staff from existing authentication
+		 *
+		 * Request does NOT contain staffId.
+		 */
+		Staff authenticatedStaff = getAuthenticatedStaff();
+
+		/*
+		 * 8. Create EnrollmentBatch
+		 */
+		EnrollmentBatch enrollmentBatch = new EnrollmentBatch();
+
+		enrollmentBatch.setEnrollment(enrollment);
+
+		enrollmentBatch.setClassBatch(batch);
+
+		enrollmentBatch.setAssignedBy(authenticatedStaff);
+
+		enrollmentBatch.setAssignedDate(LocalDateTime.now());
+
+		/*
+		 * 9. Save
+		 */
+		EnrollmentBatch saved = enrollmentBatchRepository.save(enrollmentBatch);
+
+		/*
+		 * 10. Convert entity → response using MapStruct
+		 */
+		return mapper.toResponse(saved);
+	}
+
+	// =========================================================
+	// VALIDATE ENROLLMENT COURSE
+	// =========================================================
+
+	private void validateEnrollmentForBatch(Enrollment enrollment, ClassBatch batch) {
+
+		if (batch.getCourse() == null) {
+
+			throw new RuntimeException("Batch is not associated with a course");
+		}
+
+		String batchCourseId = batch.getCourse().getCourseId();
+
+		/*
+		 * CASE 1: Student directly enrolled in a course.
+		 *
+		 * Enrollment ↓ Course
+		 */
+		if (enrollment.getCourse() != null) {
+
+			String enrolledCourseId = enrollment.getCourse().getCourseId();
+
+			if (!batchCourseId.equals(enrolledCourseId)) {
+
+				throw new RuntimeException("Student is not enrolled in the course " + "of this batch");
+			}
+
+			return;
+		}
+
+		/*
+		 * CASE 2: Student enrolled through a program.
+		 *
+		 * Enrollment ↓ Program ↓ Courses
+		 */
+		if (enrollment.getProgram() != null) {
+
+			boolean courseExists = enrollment.getProgram().getProgramCourses().stream()
+					.anyMatch(course -> batchCourseId.equals(course.getCourse().getCourseId()));
+
+			if (!courseExists) {
+
+				throw new RuntimeException("Batch course does not belong " + "to student's enrolled program");
+			}
+
+			return;
+		}
+
+		throw new RuntimeException("Enrollment has neither course nor program");
+	}
+
+	// =========================================================
+	// GET ALL STUDENTS IN A BATCH
+	// =========================================================
+
+	@Override
+	public List<EnrollmentBatchResponse> getStudentsByBatch(Long batchId) {
+
+		/*
+		 * Make sure batch exists
+		 */
+		classBatchRepository.findById(batchId)
+				.orElseThrow(() -> new RuntimeException("Batch not found with id: " + batchId));
+
+		/*
+		 * Get all students assigned to batch
+		 */
+		return enrollmentBatchRepository.findByClassBatchId(batchId).stream().map(mapper::toResponse).toList();
+	}
+
+	// =========================================================
+	// GET ENROLLMENT-BATCH BY ID
+	// =========================================================
+
+	@Override
+	public EnrollmentBatchResponse getEnrollmentBatch(Long enrollmentBatchId) {
+
+		EnrollmentBatch enrollmentBatch = enrollmentBatchRepository.findById(enrollmentBatchId)
+				.orElseThrow(() -> new RuntimeException("EnrollmentBatch not found with id: " + enrollmentBatchId));
+
+		return mapper.toResponse(enrollmentBatch);
+	}
+
+	// =========================================================
+	// REMOVE STUDENT FROM BATCH
+	// =========================================================
+
+	@Override
+	public void removeStudentFromBatch(Long enrollmentBatchId) {
+
+		EnrollmentBatch enrollmentBatch = enrollmentBatchRepository.findById(enrollmentBatchId)
+				.orElseThrow(() -> new RuntimeException("EnrollmentBatch not found with id: " + enrollmentBatchId));
+
+		enrollmentBatchRepository.delete(enrollmentBatch);
+	}
+
+	// =========================================================
+	// SWITCH STUDENT FROM ONE BATCH TO ANOTHER
+	// =========================================================
+
+	@Override
+	public EnrollmentBatchResponse switchStudentBatch(SwitchStudentBatchRequest request) {
+
+		/*
+		 * 1. Find the student's current batch assignment
+		 */
+		EnrollmentBatch enrollmentBatch = enrollmentBatchRepository
+				.findByEnrollmentIdAndClassBatchId(request.getEnrollmentId(), request.getFromBatchId())
+				.orElseThrow(() -> new RuntimeException(
+						"Student is not assigned to the given batch with id: " + request.getFromBatchId()));
+
+		/*
+		 * 2. Find batch the student is being moved to
+		 */
+		ClassBatch targetBatch = classBatchRepository.findById(request.getToBatchId())
+				.orElseThrow(() -> new RuntimeException("Batch not found with id: " + request.getToBatchId()));
+
+		/*
+		 * 3. Batch can only be switched while the student's current batch has
+		 * not started yet — once a batch is ongoing or completed, the
+		 * student can no longer be moved out of it.
+		 */
+		if (isBatchStarted(enrollmentBatch.getClassBatch())) {
+			throw new RuntimeException("Cannot switch batch: current batch has already started or is completed");
+		}
+
+		/*
+		 * 4. The target batch must also not have started yet — students
+		 * cannot be switched into an ongoing or completed batch.
+		 */
+		if (isBatchStarted(targetBatch)) {
+			throw new RuntimeException("Cannot switch batch: target batch has already started or is completed");
+		}
+
+		/*
+		 * 5. Both batches must belong to the same course
+		 */
+		String currentCourseId = enrollmentBatch.getClassBatch().getCourse().getCourseId();
+		String targetCourseId = targetBatch.getCourse().getCourseId();
+
+		if (!currentCourseId.equals(targetCourseId)) {
+			throw new RuntimeException("Cannot switch student to a batch of a different course");
+		}
+
+		/*
+		 * 6. Prevent switching to a batch the student is already assigned to
+		 */
+		if (enrollmentBatchRepository.existsByEnrollmentIdAndClassBatchId(request.getEnrollmentId(),
+				request.getToBatchId())) {
+
+			throw new RuntimeException("Student is already assigned to the target batch");
+		}
+
+		/*
+		 * 7. Check target batch capacity
+		 */
+		if (targetBatch.getCapacity() != null) {
+
+			long currentStudentCount = enrollmentBatchRepository.countByClassBatchId(targetBatch.getId());
+
+			if (currentStudentCount >= targetBatch.getCapacity()) {
+
+				throw new RuntimeException("Batch capacity is full");
+			}
+		}
+
+		/*
+		 * 8. Move the assignment to the new batch
+		 */
+		enrollmentBatch.setClassBatch(targetBatch);
+		enrollmentBatch.setAssignedBy(getAuthenticatedStaff());
+		enrollmentBatch.setAssignedDate(LocalDateTime.now());
+
+		EnrollmentBatch saved = enrollmentBatchRepository.save(enrollmentBatch);
+
+		return mapper.toResponse(saved);
+	}
+
+	// =========================================================
+	// GET STUDENT WEEKLY SCHEDULE
+	// =========================================================
+	@Override
+	public List<DailyScheduleResponse> getStudentWeeklySchedule(String studentId) {
+
+		/*
+		 * 1. Get student's batch assignments
+		 */
+		List<EnrollmentBatch> assignments = enrollmentBatchRepository.findByEnrollmentStudentStudentId(studentId);
+
+		if (assignments.isEmpty()) {
+			return List.of();
+		}
+
+		/*
+		 * 2. Extract batch IDs
+		 */
+		List<Long> batchIds = assignments.stream().map(assignment -> assignment.getClassBatch().getId()).distinct()
+				.toList();
+
+		/*
+		 * 3. Calculate current week range
+		 *
+		 * Monday -> Sunday
+		 */
+		LocalDate today = LocalDate.now();
+
+		LocalDate startDate = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+
+		LocalDate endDate = startDate.plusDays(6);
+
+		/*
+		 * 4. Fetch schedules for current week
+		 */
+		List<ClassSchedule> schedules = classScheduleRepository
+				.findByClassBatchIdInAndClassDateBetweenOrderByClassDateAscStartTimeAsc(batchIds, startDate, endDate);
+		/*
+		 * 5. Group schedules by day
+		 */
+		Map<String, List<ClassSchedule>> schedulesByDay = new LinkedHashMap<>();
+
+		for (ClassSchedule schedule : schedules) {
+
+			String day = schedule.getClassDate().getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+
+			schedulesByDay.computeIfAbsent(day, key -> new ArrayList<>()).add(schedule);
+		}
+
+		/*
+		 * 6. Convert grouped schedules to response
+		 */
+		return schedulesByDay.entrySet().stream().map(entry -> {
+
+			DailyScheduleResponse response = new DailyScheduleResponse();
+
+			response.setDay(entry.getKey());
+
+			List<ScheduleItemResponse> items = entry.getValue().stream().map(this::convertToScheduleItem).toList();
+
+			response.setItems(items);
+
+			return response;
+		}).toList();
+	}
+
+	private ScheduleItemResponse convertToScheduleItem(ClassSchedule schedule) {
+
+		ScheduleItemResponse item = new ScheduleItemResponse();
+
+		/*
+		 * Course / Class title
+		 */
+		item.setTitle(schedule.getClassBatch().getCourse().getCourseTitle());
+
+		/*
+		 * Time formatting
+		 */
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm a");
+
+		String time = schedule.getStartTime().format(formatter) + " - " + schedule.getEndTime().format(formatter);
+
+		item.setTime(time);
+
+		/*
+		 * Schedule status
+		 */
+		item.setStatus(schedule.getStatus() != null ? schedule.getStatus().name() : null);
+
+		/*
+		 * Message/note posted by staff for this schedule
+		 */
+		item.setMessage(schedule.getMessage());
+
+		/*
+		 * Instructor(s) — schedules no longer carry a single legacy `staff`
+		 * reference; instructors live on `schedule.getInstructors()`, falling
+		 * back to the batch's instructors for schedules created before
+		 * per-schedule instructor storage existed.
+		 */
+		Set<Staff> instructors = schedule.getInstructors();
+
+		if ((instructors == null || instructors.isEmpty()) && schedule.getClassBatch() != null) {
+			instructors = schedule.getClassBatch().getInstructors();
+		}
+
+		if (instructors == null || instructors.isEmpty()) {
+			item.setInstructor("Not Assigned");
+		} else {
+			item.setInstructor(instructors.stream()
+					.map(staff -> staff.getFirstNm() + " " + staff.getLastNm())
+					.collect(Collectors.joining(", ")));
+		}
+
+		return item;
+	}
+	// =========================================================
+	// CHECK WHETHER A BATCH HAS ALREADY STARTED (ONGOING/COMPLETED)
+	// =========================================================
+
+	private boolean isBatchStarted(ClassBatch batch) {
+
+		LocalDate today = LocalDate.now();
+
+		if (batch.getStatus() == ClassStatus.COMPLETED || batch.getStatus() == ClassStatus.CANCELLED) {
+			return true;
+		}
+
+		if (batch.getEndDate() != null && !batch.getEndDate().isAfter(today)) {
+			return true;
+		}
+
+		if (batch.getStartDate() != null && !batch.getStartDate().isAfter(today)) {
+			return true;
+		}
+
+		return false;
+	}
+
+	// =========================================================
+	// GET AUTHENTICATED STAFF
+	// =========================================================
+
+	private Staff getAuthenticatedStaff() {
+
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+		if (authentication == null || !authentication.isAuthenticated()) {
+
+			throw new RuntimeException("Authenticated staff is required");
+		}
+
+		// Your JWT authentication returns email
+		String email = authentication.getName();
+
+		return staffRepository.findByEmailId(email)
+				.orElseThrow(() -> new RuntimeException("Staff not found with email: " + email));
+	}
+
+	@Override
+	public List<EnrollmentBatchResponse> getEnrolledBatchesByStudentId(String studentId) {
+
+		List<EnrollmentBatch> enrollmentBatches = enrollmentBatchRepository.findByEnrollmentStudentStudentId(studentId);
+
+		if (enrollmentBatches.isEmpty()) {
+			return List.of();
+		}
+
+		return enrollmentBatches.stream().map(mapper::toResponse).toList();
+	}
+}

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+           http://www.liquibase.org/xml/ns/dbchangelog
+           http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="202602261518" author="shiva">
+
+        <!-- 🔹 Create Table -->
+        <createTable tableName="student_topic_reference_progress">
+
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"
+                             primaryKeyName="pk_student_topic_ref_progress"
+                             nullable="false"/>
+            </column>
+
+            <column name="student_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="topic_reference_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="completed" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="completed_at" type="TIMESTAMP"/>
+
+        </createTable>
+
+        <!-- 🔹 Unique Constraint -->
+        <addUniqueConstraint
+                tableName="student_topic_reference_progress"
+                columnNames="student_id, topic_reference_id"
+                constraintName="uk_student_topic_reference"/>
+
+        <!-- 🔹 Foreign Key: student -->
+        <addForeignKeyConstraint
+                baseTableName="student_topic_reference_progress"
+                baseColumnNames="student_id"
+                constraintName="fk_progress_student"
+                referencedTableName="student"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
+        <!-- 🔹 Foreign Key: topic_reference -->
+        <addForeignKeyConstraint
+                baseTableName="student_topic_reference_progress"
+                baseColumnNames="topic_reference_id"
+                constraintName="fk_progress_topic_reference"
+                referencedTableName="topic_reference"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
+    </changeSet>
+
+</databaseChangeLog>
