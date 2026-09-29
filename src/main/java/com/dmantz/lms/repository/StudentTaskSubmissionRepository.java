@@ -24,4 +24,6 @@ public interface StudentTaskSubmissionRepository extends JpaRepository<StudentTa
 
     List<StudentTaskSubmission> findByStudent_StudentIdAndReviewStatusAndOverallRatingIsNotNullAndReviewedAtBetween(
             String studentId, ReviewStatus reviewStatus, LocalDateTime start, LocalDateTime end);
+    
+    List<StudentTaskSubmission> findByStudentTask_IdIn(List<Long> taskIds);
 }

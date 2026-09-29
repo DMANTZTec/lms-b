@@ -1,64 +1,91 @@
+
 package com.dmantz.lms.dto.response;
 
 import java.util.List;
 
 public class StudentTaskResponse {
 
-	private String id;
-	private String title;
-	private String description;
-	private String courseId;
-	private List<String> tags;
+    private String id;
+    private String title;
+    private String description;
+    private String courseId;
+    private List<String> tags;
 
-	public StudentTaskResponse() {
-	}
+    private Double overallRating;
+    private String reviewStatus;
+    private String reviewFeedback;
 
-	public StudentTaskResponse(String id, String title, String description, List<String> tags) {
-		this.id = id;
-		this.title = title;
-		this.description = description;
-		this.tags = tags;
-	}
+    public StudentTaskResponse() {
+    }
 
-	public String getId() {
-		return id;
-	}
+    public StudentTaskResponse(String id, String title, String description, List<String> tags) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.tags = tags;
+    }
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    public String getId() {
+        return id;
+    }
 
-	public String getTitle() {
-		return title;
-	}
+    public void setId(String id) {
+        this.id = id;
+    }
 
-	public void setTitle(String title) {
-		this.title = title;
-	}
+    public String getTitle() {
+        return title;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public List<String> getTags() {
-		return tags;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	public void setTags(List<String> tags) {
-		this.tags = tags;
-	}
+    public List<String> getTags() {
+        return tags;
+    }
 
-	public String getCourseId() {
-		return courseId;
-	}
+    public void setTags(List<String> tags) {
+        this.tags = tags;
+    }
 
-	public void setCourseId(String courseId) {
-		this.courseId = courseId;
-	}
+    public String getCourseId() {
+        return courseId;
+    }
 
+    public void setCourseId(String courseId) {
+        this.courseId = courseId;
+    }
 
+    public Double getOverallRating() {
+        return overallRating;
+    }
+
+    public void setOverallRating(Double overallRating) {
+        this.overallRating = overallRating;
+    }
+
+    public String getReviewStatus() {
+        return reviewStatus;
+    }
+
+    public void setReviewStatus(String reviewStatus) {
+        this.reviewStatus = reviewStatus;
+    }
+
+    public String getReviewFeedback() {
+        return reviewFeedback;
+    }
+
+    public void setReviewFeedback(String reviewFeedback) {
+        this.reviewFeedback = reviewFeedback;
+    }
 }

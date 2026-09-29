@@ -12,6 +12,7 @@ import com.dmantz.lms.entity.AssignedByType;
 import com.dmantz.lms.entity.Chapter;
 import com.dmantz.lms.entity.ClassBatch;
 import com.dmantz.lms.entity.Course;
+import com.dmantz.lms.entity.ReviewStatus;
 import com.dmantz.lms.entity.Student;
 import com.dmantz.lms.entity.StudentNeedHelpRequest;
 import com.dmantz.lms.entity.StudentTask;
@@ -27,6 +28,7 @@ import com.dmantz.lms.repository.EnrollmentRepository;
 import com.dmantz.lms.repository.StudentCourseRepository;
 import com.dmantz.lms.repository.StudentRepository;
 import com.dmantz.lms.repository.StudentTaskRepository;
+import com.dmantz.lms.repository.StudentTaskSubmissionRepository;
 import com.dmantz.lms.repository.TopicRepository;
 import com.dmantz.lms.service.StudentTaskService;
 
@@ -55,12 +57,13 @@ public class StudentTaskServiceImpl implements StudentTaskService {
 	private final EnrollmentRepository enrollmentRepository;
 	private final ClassBatchRepository classBatchRepository;
 	private final EnrollmentBatchRepository enrollmentBatchRepository;
+	private final StudentTaskSubmissionRepository studentTaskSubmissionRepository;
 
 	public StudentTaskServiceImpl(StudentTaskRepository studentTaskRepository, StudentRepository studentRepository,
 			TopicRepository topicRepository, StudentTaskMapper studentTaskMapper,
 			StudentCourseRepository studentCourseRepository, CourseRepository courseRepository,
 			ChapterRepository chapterRepository, EnrollmentRepository enrollmentRepository,
-			ClassBatchRepository classBatchRepository, EnrollmentBatchRepository enrollmentBatchRepository) {
+			ClassBatchRepository classBatchRepository, EnrollmentBatchRepository enrollmentBatchRepository, StudentTaskSubmissionRepository studentTaskSubmissionRepository) {
 		super();
 		this.studentTaskRepository = studentTaskRepository;
 		this.studentRepository = studentRepository;
@@ -72,6 +75,7 @@ public class StudentTaskServiceImpl implements StudentTaskService {
 		this.enrollmentRepository = enrollmentRepository;
 		this.classBatchRepository = classBatchRepository;
 		this.enrollmentBatchRepository = enrollmentBatchRepository;
+		this.studentTaskSubmissionRepository = studentTaskSubmissionRepository;
 	}
 
 	@Override
@@ -170,33 +174,64 @@ public class StudentTaskServiceImpl implements StudentTaskService {
 	@Override
 	public StudentTaskListResponse getTasksByStatus(String studentId, String statusFilter) {
 
-		logger.info("Fetching tasks for studentId: {} filtered by status: {}", studentId, statusFilter);
+	    logger.info("Fetching tasks for studentId: {} filtered by status: {}", studentId, statusFilter);
 
-		studentRepository.findByStudentId(studentId)
-				.orElseThrow(() -> new ResourceNotFoundException("Student not found: " + studentId));
+	    studentRepository.findByStudentId(studentId)
+	            .orElseThrow(() -> new ResourceNotFoundException("Student not found: " + studentId));
 
-		if (!"ACTIVE".equalsIgnoreCase(statusFilter) && !"COMPLETED".equalsIgnoreCase(statusFilter)) {
-			throw new IllegalArgumentException("Invalid status filter. Allowed values: ACTIVE, COMPLETED");
-		}
+	    if (!"ACTIVE".equalsIgnoreCase(statusFilter) && !"COMPLETED".equalsIgnoreCase(statusFilter)) {
+	        throw new IllegalArgumentException("Invalid status filter. Allowed values: ACTIVE, COMPLETED");
+	    }
 
-		List<StudentTask> tasks;
+	    List<StudentTask> tasks;
 
-		if ("COMPLETED".equalsIgnoreCase(statusFilter)) {
-			tasks = studentTaskRepository.findByStudent_StudentIdAndStatus(studentId, StudentTaskStatus.COMPLETED);
-		} else {
-			// ACTIVE = everything not yet completed (NOT_STARTED, IN_PROGRESS, SUBMITTED,
-			// REVIEWED)
-			tasks = studentTaskRepository.findByStudent_StudentId(studentId).stream()
-					.filter(t -> t.getStatus() != StudentTaskStatus.COMPLETED).toList();
-		}
+	    if ("COMPLETED".equalsIgnoreCase(statusFilter)) {
+	        tasks = studentTaskRepository.findByStudent_StudentIdAndStatus(
+	                studentId, StudentTaskStatus.COMPLETED);
+	    } else {
+	        // ACTIVE = everything not yet completed
+	        tasks = studentTaskRepository.findByStudent_StudentId(studentId).stream()
+	                .filter(t -> t.getStatus() != StudentTaskStatus.COMPLETED)
+	                .toList();
+	    }
 
-		StudentTaskListResponse response = new StudentTaskListResponse();
-		response.setCount(tasks.size());
-		response.setTasks(tasks.stream().map(studentTaskMapper::toResponse).toList());
+	    StudentTaskListResponse response = new StudentTaskListResponse();
+	    response.setCount(tasks.size());
 
-		return response;
+	    response.setTasks(tasks.stream().map(task -> {
+
+	        StudentTaskResponse taskResponse = studentTaskMapper.toResponse(task);
+
+	        // Get existing submission for this task
+	        studentTaskSubmissionRepository
+	                .findByStudentTask_IdIn(List.of(task.getId()))
+	                .stream()
+	                .findFirst()
+	                .ifPresent(submission -> {
+
+	                    taskResponse.setOverallRating(
+	                            submission.getReviewStatus() == ReviewStatus.REVIEWED
+	                                    && submission.getOverallRating() != null
+	                                    ? submission.getOverallRating().doubleValue()
+	                                    : null);
+
+	                    taskResponse.setReviewStatus(
+	                            submission.getReviewStatus() != null
+	                                    ? submission.getReviewStatus().name()
+	                                    : ReviewStatus.PENDING_REVIEW.name());
+
+	                    taskResponse.setReviewFeedback(
+	                            submission.getReviewStatus() == ReviewStatus.REVIEWED
+	                                    ? submission.getReviewFeedback()
+	                                    : null);
+	                });
+
+	        return taskResponse;
+
+	    }).toList());
+
+	    return response;
 	}
-
 	@Override
 	public List<StudentTaskResponse> getAllTasks(String studentId) {
 
