@@ -115,4 +115,12 @@
 		</addColumn>
 
 	</changeSet>
+
+	<changeSet id="202609301200" author="Afsheen">
+
+		<addColumn tableName="student_task_submission">
+			<column name="review_criteria" type="JSON" />
+		</addColumn>
+
+	</changeSet>
 </databaseChangeLog>

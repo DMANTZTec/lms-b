@@ -1,6 +1,9 @@
 package com.dmantz.lms.dto.request;
 
 import java.math.BigDecimal;
+import java.util.List;
+
+import jakarta.validation.Valid;
 
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -19,6 +22,8 @@ public class ReviewSubmissionRequest {
 	@NotBlank(message = "Feedback message is required")
 	private String feedbackMessage;
 
+	private List<@Valid CriterionRatingRequest> criteria;
+
 	public BigDecimal getOverallRating() {
 		return overallRating;
 	}
@@ -33,5 +38,13 @@ public class ReviewSubmissionRequest {
 
 	public void setFeedbackMessage(String feedbackMessage) {
 		this.feedbackMessage = feedbackMessage;
+	}
+
+	public List<CriterionRatingRequest> getCriteria() {
+		return criteria;
+	}
+
+	public void setCriteria(List<CriterionRatingRequest> criteria) {
+		this.criteria = criteria;
 	}
 }

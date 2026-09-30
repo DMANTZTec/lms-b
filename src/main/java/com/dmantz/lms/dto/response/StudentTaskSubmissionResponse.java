@@ -1,5 +1,6 @@
 package com.dmantz.lms.dto.response;
 
+import com.dmantz.lms.entity.CriterionRating;
 import com.dmantz.lms.entity.GitDetail;
 
 import java.math.BigDecimal;
@@ -23,6 +24,7 @@ public class StudentTaskSubmissionResponse {
     private String reviewFeedback;
     private Integer pointsAwarded;
     private BigDecimal overallRating;
+    private List<CriterionRating> criteria;
     private LocalDateTime reviewedAt;
     
 
@@ -136,6 +138,14 @@ public class StudentTaskSubmissionResponse {
 
     public void setOverallRating(BigDecimal overallRating) {
         this.overallRating = overallRating;
+    }
+
+    public List<CriterionRating> getCriteria() {
+        return criteria;
+    }
+
+    public void setCriteria(List<CriterionRating> criteria) {
+        this.criteria = criteria;
     }
 
     public LocalDateTime getReviewedAt() {
