@@ -70,6 +70,9 @@ public class StudentServiceImpl implements StudentService {
 	@Value("${strapi.api.token}")
 	private String strapiApiToken;
 
+	@Value("${strapi.upload.folder-id:2}")
+	private Long strapiUploadFolderId;
+
 	private final RestTemplate restTemplate = new RestTemplate();
 
 	public StudentServiceImpl(StudentRepository studentRepository, StudentOtpRepository otpRepository,
@@ -406,6 +409,10 @@ public class StudentServiceImpl implements StudentService {
 			try {
 				MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
 				body.add("files", new FileSystemResource(tempFile));
+
+				// Save uploaded file inside Strapi Media Library -> LMS Content
+				// (applied by lms-strapi/src/extensions/upload/strapi-server.js)
+				body.add("fileInfo", "{\"folder\":" + strapiUploadFolderId + "}");
 
 				HttpHeaders headers = new HttpHeaders();
 				headers.set("Authorization", "Bearer " + strapiApiToken);

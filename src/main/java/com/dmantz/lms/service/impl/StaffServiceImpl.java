@@ -77,6 +77,9 @@ public class StaffServiceImpl implements StaffService {
 	@Value("${strapi.api.token}")
 	private String strapiApiToken;
 
+	@Value("${strapi.upload.folder-id:2}")
+	private Long strapiUploadFolderId;
+
 	private final RestTemplate restTemplate = new RestTemplate();
 
 	@Override
@@ -197,8 +200,6 @@ public class StaffServiceImpl implements StaffService {
 			throw new OtpSendingException("Failed to send OTP via " + channel + ": " + ex.getMessage(), ex);
 		}
 
-		
-
 		logger.info("Staff creation completed successfully for staffId: {}", savedStaff.getStaffId());
 
 		return staffMapper.toResponse(savedStaff);
@@ -216,6 +217,10 @@ public class StaffServiceImpl implements StaffService {
 			try {
 				MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
 				body.add("files", new FileSystemResource(tempFile));
+
+				// Save uploaded file inside Strapi Media Library -> LMS Content
+				// (applied by lms-strapi/src/extensions/upload/strapi-server.js)
+				body.add("fileInfo", "{\"folder\":" + strapiUploadFolderId + "}");
 
 				HttpHeaders headers = new HttpHeaders();
 				headers.set("Authorization", "Bearer " + strapiApiToken);
@@ -243,6 +248,41 @@ public class StaffServiceImpl implements StaffService {
 			throw new RuntimeException("Failed to upload profile image to Strapi", e);
 		}
 	}
+
+//	private String uploadToStrapi(MultipartFile file) {
+//		try {
+//			File tempFile = File.createTempFile("upload-", file.getOriginalFilename());
+//			file.transferTo(tempFile);
+//			try {
+//				MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+//				body.add("files", new FileSystemResource(tempFile));
+//
+//				HttpHeaders headers = new HttpHeaders();
+//				headers.set("Authorization", "Bearer " + strapiApiToken);
+//				headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+//
+//				ResponseEntity<String> response = restTemplate.exchange(strapiUrl + "/api/upload", HttpMethod.POST,
+//						new HttpEntity<>(body, headers), String.class);
+//
+//				JsonNode root = new ObjectMapper().readTree(response.getBody());
+//				JsonNode fileNode = root.get(0);
+//
+//				if (fileNode == null) {
+//					throw new RuntimeException("Invalid Strapi upload response: " + response.getBody());
+//				}
+//
+//				String fileUrl = strapiUrl + fileNode.get("url").asText();
+//				logger.info("Profile image uploaded to Strapi: {}", fileUrl);
+//				return fileUrl;
+//
+//			} finally {
+//				tempFile.delete();
+//			}
+//		} catch (Exception e) {
+//			logger.error("Failed to upload profile image to Strapi", e);
+//			throw new RuntimeException("Failed to upload profile image to Strapi", e);
+//		}
+//	}
 
 	@Override
 	public void setPassword(SetStaffPasswordRequest request) {
@@ -428,38 +468,30 @@ public class StaffServiceImpl implements StaffService {
 		return response;
 	}
 
-@Override
+	@Override
 	@Transactional
-	public StaffResponse updateStaff(
-	        String staffId,
-	        StaffUpdateRequest request) {
+	public StaffResponse updateStaff(String staffId, StaffUpdateRequest request) {
 
-	    Staff staff = staffRepository.findByStaffId(staffId)
-	            .orElseThrow(() ->
-	                    new RuntimeException(
-	                            "Staff not found with ID: " + staffId
-	                    ));
+		Staff staff = staffRepository.findByStaffId(staffId)
+				.orElseThrow(() -> new RuntimeException("Staff not found with ID: " + staffId));
 
-	    // Update all normal fields using MapStruct
-	    staffMapper.updateEntity(request, staff);
+		// Update all normal fields using MapStruct
+		staffMapper.updateEntity(request, staff);
 
-	    // Update roles separately
-	    Set<Role> roles = new HashSet<>(
-	            roleRepository.findAllById(request.getRoleIds())
-	    );
+		// Update roles separately
+		Set<Role> roles = new HashSet<>(roleRepository.findAllById(request.getRoleIds()));
 
-	    if (roles.size() != request.getRoleIds().size()) {
-	        throw new RuntimeException(
-	                "One or more selected roles are invalid"
-	        );
-	    }
+		if (roles.size() != request.getRoleIds().size()) {
+			throw new RuntimeException("One or more selected roles are invalid");
+		}
 
-	    staff.setRoles(roles);
+		staff.setRoles(roles);
 
-	    Staff updatedStaff = staffRepository.save(staff);
+		Staff updatedStaff = staffRepository.save(staff);
 
-	    return staffMapper.toResponse(updatedStaff);
+		return staffMapper.toResponse(updatedStaff);
 	}
+
 	@Override
 	public StaffResponse updateProfileImage(String staffId, MultipartFile file) {
 
@@ -470,6 +502,8 @@ public class StaffServiceImpl implements StaffService {
 			throw new BadRequestException("Profile image is required.");
 		}
 
+		String oldImgUrl = staff.getProfileImg();
+
 		// Upload image to Strapi
 		String imageUrl = uploadToStrapi(file);
 
@@ -477,6 +511,17 @@ public class StaffServiceImpl implements StaffService {
 		staff.setProfileImg(imageUrl);
 
 		Staff savedStaff = staffRepository.save(staff);
+
+		// Delete old image from Strapi only after the new one is saved, so a failed
+		// upload never leaves the staff without a profile image
+		if (oldImgUrl != null && !oldImgUrl.isBlank() && !oldImgUrl.equals(imageUrl)) {
+			try {
+				deleteFromStrapiByUrl(oldImgUrl);
+			} catch (Exception e) {
+				logger.warn("New profile image saved for staffId: {} but old image could not be deleted: {}", staffId,
+						oldImgUrl);
+			}
+		}
 
 		return staffMapper.toResponse(savedStaff);
 	}
@@ -578,116 +623,95 @@ public class StaffServiceImpl implements StaffService {
 	@Override
 	public ResendOtpResponse resendLoginOtp(ResendStaffOtpRequest request) {
 
-	    String identifier = request.getEmailIdOrMobileNo();
+		String identifier = request.getEmailIdOrMobileNo();
 
-	    logger.info("Resend OTP requested for: {}", identifier);
+		logger.info("Resend OTP requested for: {}", identifier);
 
-	    Staff staff;
+		Staff staff;
 
-	    // Find staff using email or mobile
-	    if (identifier.contains("@")) {
+		// Find staff using email or mobile
+		if (identifier.contains("@")) {
 
-	        staff = staffRepository.findByEmailId(identifier)
-	                .orElseThrow(() -> {
-	                    logger.warn("Staff not found with email: {}", identifier);
-	                    return new RuntimeException("Staff not found");
-	                });
+			staff = staffRepository.findByEmailId(identifier).orElseThrow(() -> {
+				logger.warn("Staff not found with email: {}", identifier);
+				return new RuntimeException("Staff not found");
+			});
 
-	    } else {
+		} else {
 
-	        staff = (Staff) staffRepository.findByMobileNum(identifier)
-	                .orElseThrow(() -> {
-	                    logger.warn("Staff not found with mobile: {}", identifier);
-	                    return new RuntimeException("Staff not found");
-	                });
-	    }
+			staff = (Staff) staffRepository.findByMobileNum(identifier).orElseThrow(() -> {
+				logger.warn("Staff not found with mobile: {}", identifier);
+				return new RuntimeException("Staff not found");
+			});
+		}
 
-	    if (!"Y".equals(staff.getEnabled())) {
+		if (!"Y".equals(staff.getEnabled())) {
 
-	        logger.warn("Disabled account for staffId: {}", staff.getStaffId());
+			logger.warn("Disabled account for staffId: {}", staff.getStaffId());
 
-	        throw new RuntimeException("Account disabled");
-	    }
+			throw new RuntimeException("Account disabled");
+		}
 
-	    // Expire previous login OTP
-	    staffOtpRepository
-	            .findTopByStaffIdOrderByCreatedDtDesc(staff.getStaffId())
-	            .ifPresent(oldOtp -> {
+		// Expire previous login OTP
+		staffOtpRepository.findTopByStaffIdOrderByCreatedDtDesc(staff.getStaffId()).ifPresent(oldOtp -> {
 
-	                oldOtp.setStatus(OtpStatus.EXPIRED);
-	                oldOtp.setUpdatedDt(LocalDateTime.now());
+			oldOtp.setStatus(OtpStatus.EXPIRED);
+			oldOtp.setUpdatedDt(LocalDateTime.now());
 
-	                staffOtpRepository.save(oldOtp);
-	            });
+			staffOtpRepository.save(oldOtp);
+		});
 
-	    // Generate new OTP
-	    StaffOtp newOtp = generateStaffOtp(staff.getStaffId());
+		// Generate new OTP
+		StaffOtp newOtp = generateStaffOtp(staff.getStaffId());
 
-	    try {
+		try {
 
-	        if (identifier.contains("@")) {
+			if (identifier.contains("@")) {
 
-	            // Send OTP through email
-	            emailService.sendOtpEmail(
-	                    staff.getEmailId(),
-	                    newOtp.getOtp(),
-	                    OtpPurpose.LOGIN
-	            );
+				// Send OTP through email
+				emailService.sendOtpEmail(staff.getEmailId(), newOtp.getOtp(), OtpPurpose.LOGIN);
 
-	            logger.info(
-	                    "Login OTP sent successfully through email to staffId: {}",
-	                    staff.getStaffId()
-	            );
+				logger.info("Login OTP sent successfully through email to staffId: {}", staff.getStaffId());
 
-	        } else {
+			} else {
 
-	            // Send OTP through SMS
-	            smsService.sendOtpSms(
-	                    staff.getMobileNum(),
-	                    newOtp.getOtp(),
-	                    OtpPurpose.STAFF_LOGIN
-	            );
+				// Send OTP through SMS
+				smsService.sendOtpSms(staff.getMobileNum(), newOtp.getOtp(), OtpPurpose.STAFF_LOGIN);
 
-	            logger.info(
-	                    "Staff login OTP sent successfully through SMS to staffId: {}",
-	                    staff.getStaffId()
-	            );
-	        }
+				logger.info("Staff login OTP sent successfully through SMS to staffId: {}", staff.getStaffId());
+			}
 
-	        newOtp.setStatus(OtpStatus.SENT);
-	        newOtp.setUpdatedDt(LocalDateTime.now());
+			newOtp.setStatus(OtpStatus.SENT);
+			newOtp.setUpdatedDt(LocalDateTime.now());
 
-	        staffOtpRepository.save(newOtp);
+			staffOtpRepository.save(newOtp);
 
-	    } catch (Exception e) {
+		} catch (Exception e) {
 
-	        logger.error(
-	                "Failed to send OTP for staffId: {}",
-	                staff.getStaffId(),
-	                e
-	        );
+			logger.error("Failed to send OTP for staffId: {}", staff.getStaffId(), e);
 
-	        newOtp.setStatus(OtpStatus.FAILED);
-	        newOtp.setUpdatedDt(LocalDateTime.now());
+			newOtp.setStatus(OtpStatus.FAILED);
+			newOtp.setUpdatedDt(LocalDateTime.now());
 
-	        staffOtpRepository.save(newOtp);
+			staffOtpRepository.save(newOtp);
 
-	        throw new RuntimeException("Failed to send OTP");
-	    }
-	    ResendOtpResponse response = new ResendOtpResponse();
+			throw new RuntimeException("Failed to send OTP");
+		}
+		ResendOtpResponse response = new ResendOtpResponse();
 
-	    response.setStaffId(staff.getStaffId());
+		response.setStaffId(staff.getStaffId());
 
-	    if (identifier.contains("@")) {
-	        response.setEmail(staff.getEmailId());
-	    } else {
-	        response.setEmail(staff.getMobileNum());
-	    }
+		if (identifier.contains("@")) {
+			response.setEmail(staff.getEmailId());
+		} else {
+			response.setEmail(staff.getMobileNum());
+		}
 
-	    response.setMessage("OTP resent successfully");
+		response.setMessage("OTP resent successfully");
 
-	    return response;
+		return response;
 	}
+
 	@Override
 	public Page<StaffResponse> getActiveStaff(int page, int size) {
 
@@ -790,38 +814,32 @@ public class StaffServiceImpl implements StaffService {
 			throw new RuntimeException("Failed to delete profile image from Strapi", e);
 		}
 	}
-	
+
 	@Override
 	@Transactional
-	public StaffResponse updateStaff1(
-	        String staffId,
-	        StaffUpdateReq1 request) {
+	public StaffResponse updateStaff1(String staffId, StaffUpdateReq1 request) {
 
-	    Staff staff = staffRepository.findByStaffId(staffId)
-	            .orElseThrow(() ->
-	                    new ResourceNotFoundException("Staff not found"));
+		Staff staff = staffRepository.findByStaffId(staffId)
+				.orElseThrow(() -> new ResourceNotFoundException("Staff not found"));
 
-	    // DTO → Entity
-	    staffMapper.updateEntity(request, staff);
+		// DTO → Entity
+		staffMapper.updateEntity(request, staff);
 
-	    // Update roles
-	    if (request.getRoles() != null && !request.getRoles().isEmpty()) {
+		// Update roles
+		if (request.getRoles() != null && !request.getRoles().isEmpty()) {
 
-	        Set<Role> roles = request.getRoles()
-	                .stream()
-	                .map(roleName -> roleRepository.findByRoleNm(roleName)
-	                        .orElseThrow(() ->
-	                                new ResourceNotFoundException(
-	                                        "Role not found: " + roleName)))
-	                .collect(Collectors.toSet());
+			Set<Role> roles = request.getRoles().stream()
+					.map(roleName -> roleRepository.findByRoleNm(roleName)
+							.orElseThrow(() -> new ResourceNotFoundException("Role not found: " + roleName)))
+					.collect(Collectors.toSet());
 
-	        staff.setRoles(roles);
-	    }
+			staff.setRoles(roles);
+		}
 
-	    Staff updatedStaff = staffRepository.save(staff);
+		Staff updatedStaff = staffRepository.save(staff);
 
-	    // Entity → Response
-	    return staffMapper.toResponse(updatedStaff);
+		// Entity → Response
+		return staffMapper.toResponse(updatedStaff);
 	}
 
 	@Override

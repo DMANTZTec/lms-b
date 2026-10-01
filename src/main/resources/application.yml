@@ -100,6 +100,8 @@
     url: ${STRAPI_URL:http://localhost:1337}
     api:
       token: ${STRAPI_API_TOKEN}
+    upload:
+      folder-id: ${STRAPI_UPLOAD_FOLDER_ID:2}
 
 
   # ------------------------------------------
