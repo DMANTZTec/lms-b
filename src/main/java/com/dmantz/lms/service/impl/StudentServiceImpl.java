@@ -8,7 +8,6 @@ import com.dmantz.lms.dto.response.StudentResponse;
 import com.dmantz.lms.entity.*;
 import com.dmantz.lms.exceptions.BadRequestException;
 import com.dmantz.lms.exceptions.DuplicateValuesException;
-import com.dmantz.lms.exceptions.InvalidOtpChannelException;
 import com.dmantz.lms.exceptions.InvalidPasswordException;
 import com.dmantz.lms.exceptions.OtpSendingException;
 import com.dmantz.lms.exceptions.ResourceNotFoundException;
@@ -106,11 +105,6 @@ public class StudentServiceImpl implements StudentService {
 			throw new DuplicateValuesException("Mobile number already exists");
 		}
 
-		OtpChannel channel = request.getOtpChannel();
-		if (channel == null) {
-			throw new InvalidOtpChannelException("OTP channel must be specified: EMAIL or MOBILE");
-		}
-
 		// remove any old/stale pending registration rows for this email or mobile
 		List<StudentRegistrationOTP> oldPending = studentRegistrationOtpRepository
 				.findAllByEmailIdOrMobileNum(request.getEmailId(), request.getMobileNum());
@@ -130,59 +124,55 @@ public class StudentServiceImpl implements StudentService {
 		// Generate OTP
 		StudentOtp otp = generateOtp(savedRegistration);
 
+		// Send the same OTP to both email and mobile number
+		boolean emailSent = false;
+		boolean smsSent = false;
+		Exception lastError = null;
+
 		try {
-			switch (channel) {
-
-			case EMAIL:
-				if (savedRegistration.getEmailId() == null || savedRegistration.getEmailId().isBlank()) {
-					throw new InvalidOtpChannelException("Email not provided. Cannot send OTP via EMAIL.");
-				}
-				emailService.sendOtpEmail(savedRegistration.getEmailId(), otp.getOtp(), OtpPurpose.REGISTRATION);
-				logger.info("Registration OTP sent via EMAIL to: {}", savedRegistration.getEmailId());
-				break;
-
-			case MOBILE:
-				if (savedRegistration.getMobileNum() == null || savedRegistration.getMobileNum().isBlank()) {
-					throw new InvalidOtpChannelException("Mobile number not provided. Cannot send OTP via MOBILE.");
-				}
-				smsService.sendOtpSms(savedRegistration.getMobileNum(), otp.getOtp(), OtpPurpose.REGISTRATION);
-				logger.info("Registration OTP sent via MOBILE to: {}", savedRegistration.getMobileNum());
-				break;
-
-			default:
-				throw new InvalidOtpChannelException("Invalid OTP channel: " + channel);
-			}
-
-			otp.setStatus(OtpStatus.SENT);
-			otp.setUpdatedDt(LocalDateTime.now());
-			otpRepository.save(otp);
-
-		} catch (InvalidOtpChannelException ex) {
-			otp.setStatus(OtpStatus.FAILED);
-			otp.setUpdatedDt(LocalDateTime.now());
-			otpRepository.save(otp);
-			logger.error("Invalid channel during registration OTP send: {}", ex.getMessage());
-			throw ex;
-
+			emailService.sendOtpEmail(savedRegistration.getEmailId(), otp.getOtp(), OtpPurpose.REGISTRATION);
+			emailSent = true;
+			logger.info("Registration OTP sent via EMAIL to: {}", savedRegistration.getEmailId());
 		} catch (Exception ex) {
-			otp.setStatus(OtpStatus.FAILED);
-			otp.setUpdatedDt(LocalDateTime.now());
-			otpRepository.save(otp);
-			logger.error("Failed to send OTP via {} during registration: {}", channel, ex.getMessage(), ex);
-			throw new OtpSendingException("Failed to send OTP via " + channel + ": " + ex.getMessage(), ex);
+			lastError = ex;
+			logger.error("Failed to send registration OTP via EMAIL to: {}", savedRegistration.getEmailId(), ex);
 		}
+
+		try {
+			smsService.sendOtpSms(savedRegistration.getMobileNum(), otp.getOtp(), OtpPurpose.REGISTRATION);
+			smsSent = true;
+			logger.info("Registration OTP sent via MOBILE to: {}", savedRegistration.getMobileNum());
+		} catch (Exception ex) {
+			lastError = ex;
+			logger.error("Failed to send registration OTP via MOBILE to: {}", savedRegistration.getMobileNum(), ex);
+		}
+
+		otp.setUpdatedDt(LocalDateTime.now());
+
+		// Fail only if the OTP could not be delivered to either email or mobile
+		if (!emailSent && !smsSent) {
+			otp.setStatus(OtpStatus.FAILED);
+			otpRepository.save(otp);
+			throw new OtpSendingException("Failed to send OTP to email and mobile number: " + lastError.getMessage(),
+					lastError);
+		}
+
+		otp.setStatus(OtpStatus.SENT);
+		otpRepository.save(otp);
+
+		String sentVia = emailSent && smsSent ? "email and mobile number" : emailSent ? "email" : "mobile number";
 
 		RegistrationResponse response = new RegistrationResponse();
 		response.setEmailId(savedRegistration.getEmailId());
 		response.setMobileNum(savedRegistration.getMobileNum());
 		response.setStatus("SUCCESS");
-		response.setMessage("OTP sent successfully via " + channel);
+		response.setMessage("OTP sent successfully to " + sentVia);
 		return response;
 	}
 
 	@Override
 	@Transactional
-	public StudentResponse verifyOtp(OtpVerifyRequest request) {
+	public StudentResponse verifyOtp(StudentOtpVerifyRequest request) {
 
 		String identifier = request.getEmailIdOrMobileNo();
 		logger.info("OTP verification started for identifier: {}", identifier);
@@ -278,19 +268,50 @@ public class StudentServiceImpl implements StudentService {
 		return savedOtp;
 	}
 
+	// Sends the OTP to the mobile number if the student entered their mobile number,
+	// otherwise to the email. Returns where it was sent.
+	private String sendOtpToIdentifier(String identifier, Student student, StudentOtp otp, OtpPurpose purpose) {
+
+		try {
+			if (identifier.equals(student.getMobileNum())) {
+				smsService.sendOtpSms(student.getMobileNum(), otp.getOtp(), purpose);
+				logger.info("{} OTP sent to mobile: {}", purpose, student.getMobileNum());
+				markOtp(otp, OtpStatus.SENT);
+				return "mobile number";
+			}
+
+			if (student.getEmailId() == null || student.getEmailId().isBlank()) {
+				throw new BadRequestException("Email not available for this account. Please use your mobile number.");
+			}
+			emailService.sendOtpEmail(student.getEmailId(), otp.getOtp(), purpose);
+			logger.info("{} OTP sent to email: {}", purpose, student.getEmailId());
+			markOtp(otp, OtpStatus.SENT);
+			return "email";
+
+		} catch (BadRequestException ex) {
+			markOtp(otp, OtpStatus.FAILED);
+			throw ex;
+
+		} catch (Exception ex) {
+			markOtp(otp, OtpStatus.FAILED);
+			logger.error("Failed to send {} OTP for identifier {}: {}", purpose, identifier, ex.getMessage(), ex);
+			throw new OtpSendingException("Failed to send OTP: " + ex.getMessage(), ex);
+		}
+	}
+
+	private void markOtp(StudentOtp otp, OtpStatus status) {
+		otp.setStatus(status);
+		otp.setUpdatedDt(LocalDateTime.now());
+		otpRepository.save(otp);
+	}
+
 	@Override
 	@Transactional
 	public StudentLoginResponse login(StudentLoginRequest request) {
 
 		logger.info("Login attempt for username: {}", request.getUsername());
 
-		// ── 1. Validate channel ──────────────────────────────────
-		OtpChannel channel = request.getOtpChannel();
-		if (channel == null) {
-			throw new InvalidOtpChannelException("OTP channel must be specified: EMAIL or MOBILE");
-		}
-
-		// ── 2. Look up student ───────────────────────────────────
+		// ── 1. Look up student ───────────────────────────────────
 		String username = request.getUsername();
 		Student student = studentRepository.findByEmailIdOrMobileNumOrLoginId(username, username, username);
 
@@ -302,67 +323,26 @@ public class StudentServiceImpl implements StudentService {
 			throw new RuntimeException("Account is disabled");
 		}
 
-		// ── 3. Verify password ───────────────────────────────────
+		// ── 2. Verify password ───────────────────────────────────
 		if (!passwordEncoder.matches(request.getPassword(), student.getPassword())) {
 			throw new RuntimeException("Invalid credentials");
 		}
 
-		// ── 4. Generate OTP ──────────────────────────────────────
+		// ── 3. Generate OTP ──────────────────────────────────────
 		StudentOtp otp = generateOtp(student.getEmailId(), student.getMobileNum(), OtpPurpose.LOGIN);
 
-		// ── 5. Send OTP via requested channel ────────────────────
-		try {
-			switch (channel) {
-			case EMAIL:
-				if (student.getEmailId() == null || student.getEmailId().isBlank()) {
-					throw new InvalidOtpChannelException(
-							"Email not available for this account. Cannot send OTP via EMAIL.");
-				}
-				emailService.sendOtpEmail(student.getEmailId(), otp.getOtp(), OtpPurpose.LOGIN);
-				logger.info("Login OTP sent via EMAIL to: {}", student.getEmailId());
-				break;
+		// ── 4. Send OTP to the entered email / mobile number ─────
+		String sentTo = sendOtpToIdentifier(username, student, otp, OtpPurpose.LOGIN);
 
-			case MOBILE:
-				if (student.getMobileNum() == null || student.getMobileNum().isBlank()) {
-					throw new InvalidOtpChannelException(
-							"Mobile number not available for this account. Cannot send OTP via MOBILE.");
-				}
-				smsService.sendOtpSms(student.getMobileNum(), otp.getOtp(), OtpPurpose.LOGIN);
-				logger.info("Login OTP sent via MOBILE to: {}", student.getMobileNum());
-				break;
-
-			default:
-				throw new InvalidOtpChannelException("Invalid OTP channel: " + channel);
-			}
-
-			otp.setStatus(OtpStatus.SENT);
-			otp.setUpdatedDt(LocalDateTime.now());
-			otpRepository.save(otp);
-
-		} catch (InvalidOtpChannelException ex) {
-			otp.setStatus(OtpStatus.FAILED);
-			otp.setUpdatedDt(LocalDateTime.now());
-			otpRepository.save(otp);
-			logger.error("Invalid channel during login OTP send: {}", ex.getMessage());
-			throw ex;
-
-		} catch (Exception ex) {
-			otp.setStatus(OtpStatus.FAILED);
-			otp.setUpdatedDt(LocalDateTime.now());
-			otpRepository.save(otp);
-			logger.error("Failed to send login OTP via {}: {}", channel, ex.getMessage(), ex);
-			throw new OtpSendingException("Failed to send OTP via " + channel + ": " + ex.getMessage(), ex);
-		}
-
-		// ── 6. Build response ────────────────────────────────────
+		// ── 5. Build response ────────────────────────────────────
 		StudentLoginResponse response = studentMapper.toLoginResponse(student);
-		response.setMessage("OTP sent successfully via " + channel);
+		response.setMessage("OTP sent successfully to your " + sentTo);
 		return response;
 	}
 
 	@Override
 	@Transactional
-	public StudentLoginResponse verifyLoginOtp(OtpVerifyRequest request) {
+	public StudentLoginResponse verifyLoginOtp(StudentOtpVerifyRequest request) {
 
 		String identifier = request.getEmailIdOrMobileNo();
 		logger.info("Verifying login OTP for identifier: {}", identifier);
@@ -538,13 +518,7 @@ public class StudentServiceImpl implements StudentService {
 	public void forgotPassword(ForgotPasswordRequest request) {
 
 		String identifier = request.getEmailIdOrMobileNo();
-		OtpChannel channel = request.getOtpChannel();
-
-		logger.info("Forgot password requested for identifier: {} via channel: {}", identifier, channel);
-
-		if (channel == null) {
-			throw new InvalidOtpChannelException("OTP channel must be specified: EMAIL or MOBILE");
-		}
+		logger.info("Forgot password requested for identifier: {}", identifier);
 
 		Student student = studentRepository.findByEmailIdOrMobileNumOrLoginId(identifier, identifier, identifier);
 		if (student == null) {
@@ -557,51 +531,9 @@ public class StudentServiceImpl implements StudentService {
 
 		StudentOtp otp = generateOtp(student.getEmailId(), student.getMobileNum(), OtpPurpose.FORGOT_PASSWORD);
 
-		try {
-			switch (channel) {
+		String sentTo = sendOtpToIdentifier(identifier, student, otp, OtpPurpose.FORGOT_PASSWORD);
 
-			case EMAIL:
-				if (student.getEmailId() == null || student.getEmailId().isBlank()) {
-					throw new InvalidOtpChannelException(
-							"Email not available for this account. Cannot send OTP via EMAIL.");
-				}
-				emailService.sendOtpEmail(student.getEmailId(), otp.getOtp(), OtpPurpose.FORGOT_PASSWORD);
-				logger.info("Forgot password OTP sent via EMAIL to: {}", student.getEmailId());
-				break;
-
-			case MOBILE:
-				if (student.getMobileNum() == null || student.getMobileNum().isBlank()) {
-					throw new InvalidOtpChannelException(
-							"Mobile number not available for this account. Cannot send OTP via MOBILE.");
-				}
-				smsService.sendOtpSms(student.getMobileNum(), otp.getOtp(), OtpPurpose.FORGOT_PASSWORD);
-				logger.info("Forgot password OTP sent via MOBILE to: {}", student.getMobileNum());
-				break;
-
-			default:
-				throw new InvalidOtpChannelException("Invalid OTP channel: " + channel);
-			}
-
-			otp.setStatus(OtpStatus.SENT);
-			otp.setUpdatedDt(LocalDateTime.now());
-			otpRepository.save(otp);
-
-		} catch (InvalidOtpChannelException ex) {
-			otp.setStatus(OtpStatus.FAILED);
-			otp.setUpdatedDt(LocalDateTime.now());
-			otpRepository.save(otp);
-			logger.error("Invalid channel during forgot password OTP send: {}", ex.getMessage());
-			throw ex;
-
-		} catch (Exception ex) {
-			otp.setStatus(OtpStatus.FAILED);
-			otp.setUpdatedDt(LocalDateTime.now());
-			otpRepository.save(otp);
-			logger.error("Failed to send forgot password OTP via {}: {}", channel, ex.getMessage(), ex);
-			throw new OtpSendingException("Failed to send OTP via " + channel + ": " + ex.getMessage(), ex);
-		}
-
-		logger.info("Forgot password OTP sent successfully via {} for identifier: {}", channel, identifier);
+		logger.info("Forgot password OTP sent successfully to {} for identifier: {}", sentTo, identifier);
 
 	}
 
@@ -703,58 +635,53 @@ public class StudentServiceImpl implements StudentService {
 			throw new IllegalArgumentException("Either emailId or mobileNum must be provided");
 		}
 
-		OtpChannel channel = request.getOtpChannel();
-		if (channel == null) {
-			throw new InvalidOtpChannelException("OTP channel must be specified");
-		}
+		boolean hasEmail = emailId != null && !emailId.isBlank();
+		boolean hasMobile = mobileNum != null && !mobileNum.isBlank();
 
 		// Generate new OTP
 		StudentOtp otp = generateOtp(emailId, mobileNum, request.getPurpose());
 
-		try {
-			switch (channel) {
-			case EMAIL:
-				if (emailId == null || emailId.isBlank()) {
-					throw new InvalidOtpChannelException("Email not provided");
-				}
+		// Send the same OTP to whichever of email / mobile number was provided
+		boolean emailSent = false;
+		boolean smsSent = false;
+		Exception lastError = null;
 
+		if (hasEmail) {
+			try {
 				emailService.sendOtpEmail(emailId, otp.getOtp(), request.getPurpose());
-				logger.info("OTP resent via EMAIL to {}", emailId);
-				break;
-
-			case MOBILE:
-				if (mobileNum == null || mobileNum.isBlank()) {
-					throw new InvalidOtpChannelException("Mobile number not provided");
-				}
-
-				smsService.sendOtpSms(mobileNum, otp.getOtp(), request.getPurpose());
-				logger.info("OTP resent via MOBILE to {}", mobileNum);
-				break;
-
-			default:
-				throw new InvalidOtpChannelException("Invalid OTP channel");
+				emailSent = true;
+				logger.info("OTP resent to email: {}", emailId);
+			} catch (Exception ex) {
+				lastError = ex;
+				logger.error("Failed to resend OTP to email: {}", emailId, ex);
 			}
-
-			otp.setStatus(OtpStatus.SENT);
-			otp.setUpdatedDt(LocalDateTime.now());
-			otpRepository.save(otp);
-
-		} catch (Exception ex) {
-
-			otp.setStatus(OtpStatus.FAILED);
-			otp.setUpdatedDt(LocalDateTime.now());
-			otpRepository.save(otp);
-
-			logger.error("Failed to resend OTP", ex);
-
-			throw new OtpSendingException("Failed to resend OTP: " + ex.getMessage(), ex);
 		}
+
+		if (hasMobile) {
+			try {
+				smsService.sendOtpSms(mobileNum, otp.getOtp(), request.getPurpose());
+				smsSent = true;
+				logger.info("OTP resent to mobile: {}", mobileNum);
+			} catch (Exception ex) {
+				lastError = ex;
+				logger.error("Failed to resend OTP to mobile: {}", mobileNum, ex);
+			}
+		}
+
+		if (!emailSent && !smsSent) {
+			markOtp(otp, OtpStatus.FAILED);
+			throw new OtpSendingException("Failed to resend OTP: " + lastError.getMessage(), lastError);
+		}
+
+		markOtp(otp, OtpStatus.SENT);
+
+		String sentTo = emailSent && smsSent ? "email and mobile number" : emailSent ? "email" : "mobile number";
 
 		RegistrationResponse response = new RegistrationResponse();
 		response.setEmailId(emailId);
 		response.setMobileNum(mobileNum);
 		response.setStatus("SUCCESS");
-		response.setMessage("OTP resent successfully via " + channel);
+		response.setMessage("OTP resent successfully to " + sentTo);
 		return response;
 	}
 

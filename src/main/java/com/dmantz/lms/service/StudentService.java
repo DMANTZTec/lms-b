@@ -14,11 +14,11 @@ public interface StudentService {
 
 	RegistrationResponse register(StudentRegistrationRequest request);
 
-	StudentResponse verifyOtp(OtpVerifyRequest request);
+	StudentResponse verifyOtp(StudentOtpVerifyRequest request);
 
 	StudentLoginResponse login(StudentLoginRequest request);
 
-	StudentLoginResponse verifyLoginOtp(OtpVerifyRequest request);
+	StudentLoginResponse verifyLoginOtp(StudentOtpVerifyRequest request);
 
 	List<StudentResponse> getAllStudents();
 
