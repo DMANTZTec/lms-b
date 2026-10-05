@@ -85,15 +85,15 @@ public class StudentController {
 
 	// ================= FORGOT PASSWORD =================
 	@PostMapping("/forgot-password")
-	public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+	public ResponseEntity<Map<String, String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
 
 		logger.info("Forgot password request received for identifier: {}", request.getEmailIdOrMobileNo());
 
-		studentService.forgotPassword(request);
+		String message = studentService.forgotPassword(request);
 
 		logger.info("Forgot password OTP sent successfully for identifier: {}", request.getEmailIdOrMobileNo());
 
-		return ResponseEntity.ok("OTP sent successfully to " + request.getEmailIdOrMobileNo());
+		return ResponseEntity.ok(Map.of("message", message));
 	}
 
 	// ================= RESET PASSWORD =================

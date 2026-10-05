@@ -22,7 +22,7 @@ public interface StudentService {
 
 	List<StudentResponse> getAllStudents();
 
-	void forgotPassword(ForgotPasswordRequest request);
+	String forgotPassword(ForgotPasswordRequest request);
 
 	void resetPassword(ResetPasswordRequest request);
 

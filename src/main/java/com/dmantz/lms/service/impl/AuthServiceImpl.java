@@ -5,14 +5,12 @@ import com.dmantz.lms.dto.request.StaffLoginRequest;
 import com.dmantz.lms.dto.request.StudentLoginRequest;
 import com.dmantz.lms.dto.response.StaffLoginResponse;
 import com.dmantz.lms.dto.response.StudentLoginResponse;
-import com.dmantz.lms.entity.OtpChannel;
 import com.dmantz.lms.entity.OtpPurpose;
 import com.dmantz.lms.entity.OtpStatus;
 import com.dmantz.lms.entity.Staff;
 import com.dmantz.lms.entity.StaffOtp;
 import com.dmantz.lms.entity.Student;
 import com.dmantz.lms.entity.StudentOtp;
-import com.dmantz.lms.exceptions.InvalidOtpChannelException;
 import com.dmantz.lms.repository.StaffOtpRepository;
 import com.dmantz.lms.repository.StaffRepository;
 import com.dmantz.lms.repository.StudentOtpRepository;
@@ -199,38 +197,29 @@ public class AuthServiceImpl implements AuthService {
 		// GENERATE OTP
 		StaffOtp otp = generateStaffOtp(staff);
 
+		// Send OTP to the mobile number if the staff entered their mobile number,
+		// otherwise to the email
+		String sentTo;
+
 		try {
 
-			// CHECK OTP CHANNEL
-			OtpChannel channel = request.getOtpChannel();
-
-			if (channel == null) {
-				throw new InvalidOtpChannelException("OTP channel must be specified: EMAIL or MOBILE");
-			}
-
-			switch (channel) {
-
-			case EMAIL:
-
-				// SEND OTP EMAIL
-				emailService.sendOtpEmail(staff.getEmailId(), otp.getOtp(), OtpPurpose.LOGIN);
-
-				logger.info("Login OTP sent successfully to email: {}", staff.getEmailId());
-
-				break;
-
-			case MOBILE:
+			if (username.equals(staff.getMobileNum())) {
 
 				// SEND OTP SMS USING TWILIO
 				smsService.sendOtpSms(staff.getMobileNum(), otp.getOtp(), OtpPurpose.STAFF_LOGIN);
 
 				logger.info("Login OTP sent successfully to mobile: {}", staff.getMobileNum());
 
-				break;
+				sentTo = "mobile number";
 
-			default:
+			} else {
 
-				throw new InvalidOtpChannelException("Invalid OTP channel: " + channel);
+				// SEND OTP EMAIL
+				emailService.sendOtpEmail(staff.getEmailId(), otp.getOtp(), OtpPurpose.LOGIN);
+
+				logger.info("Login OTP sent successfully to email: {}", staff.getEmailId());
+
+				sentTo = "email";
 			}
 
 			otp.setStatus(OtpStatus.SENT);
@@ -262,7 +251,7 @@ public class AuthServiceImpl implements AuthService {
 		// TOKEN SHOULD BE NULL BEFORE OTP VERIFICATION
 		response.setToken(null);
 
-		response.setMessage("OTP sent successfully via " + request.getOtpChannel());
+		response.setMessage("OTP sent to " + sentTo);
 
 		logger.info("OTP sent successfully for staffId: {}", staff.getStaffId());
 

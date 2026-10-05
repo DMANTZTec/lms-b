@@ -94,13 +94,6 @@ public class StaffServiceImpl implements StaffService {
 			throw new DuplicateValuesException("Email already exists");
 		}
 
-		// Validate OTP channel
-		OtpChannel channel = request.getOtpChannel();
-		if (channel == null) {
-			logger.warn("OTP channel not specified for staff email: {}", request.getEmailId());
-			throw new InvalidOtpChannelException("OTP channel must be specified: EMAIL or MOBILE");
-		}
-
 		// Create Staff
 		Staff staff = staffMapper.toEntity(request);
 		staff.setStaffId(generateStaffId());
@@ -146,63 +139,55 @@ public class StaffServiceImpl implements StaffService {
 		// Generate OTP
 		StaffOtp otp = generateStaffOtp(savedStaff.getStaffId());
 
+		// Send the password setup link to both email and mobile number
+		boolean emailSent = false;
+		boolean smsSent = false;
+		Exception lastError = null;
+
 		try {
+			emailService.sendStaffPasswordSetupMail(savedStaff.getEmailId(), savedStaff.getFirstNm(),
+					passwordToken.getToken());
+			emailSent = true;
+			logger.info("Staff password setup email sent to: {}", savedStaff.getEmailId());
+		} catch (Exception ex) {
+			lastError = ex;
+			logger.error("Failed to send staff password setup email to: {}", savedStaff.getEmailId(), ex);
+		}
 
-			switch (channel) {
-
-			case EMAIL:
-
-				emailService.sendStaffPasswordSetupMail(savedStaff.getEmailId(), savedStaff.getFirstNm(),
-						passwordToken.getToken());
-
-				logger.info("Staff password setup email sent to: {}", savedStaff.getEmailId());
-
-				break;
-
-			case MOBILE:
-
+		if (savedStaff.getMobileNum() != null && !savedStaff.getMobileNum().isBlank()) {
+			try {
 				smsService.sendStaffPasswordSetupSms(savedStaff.getMobileNum(), savedStaff.getFirstNm(),
 						passwordToken.getToken());
-
+				smsSent = true;
 				logger.info("Staff password setup SMS sent to: {}", savedStaff.getMobileNum());
-
-				break;
-
-			default:
-				throw new InvalidOtpChannelException("Invalid OTP channel: " + channel);
+			} catch (Exception ex) {
+				lastError = ex;
+				logger.error("Failed to send staff password setup SMS to: {}", savedStaff.getMobileNum(), ex);
 			}
-
-			// Mark OTP as sent
-			otp.setStatus(OtpStatus.SENT);
-			otp.setUpdatedDt(LocalDateTime.now());
-			staffOtpRepository.save(otp);
-
-			logger.info("Staff OTP status updated to SENT for staffId: {}", savedStaff.getStaffId());
-
-		} catch (InvalidOtpChannelException ex) {
-
-			otp.setStatus(OtpStatus.FAILED);
-			otp.setUpdatedDt(LocalDateTime.now());
-			staffOtpRepository.save(otp);
-
-			logger.error("Invalid OTP channel during staff creation: {}", ex.getMessage());
-
-			throw ex;
-
-		} catch (Exception ex) {
-
-			otp.setStatus(OtpStatus.FAILED);
-			otp.setUpdatedDt(LocalDateTime.now());
-			staffOtpRepository.save(otp);
-
-			logger.error("Failed to send staff OTP via {} for staffId: {}", channel, savedStaff.getStaffId(), ex);
-
-			throw new OtpSendingException("Failed to send OTP via " + channel + ": " + ex.getMessage(), ex);
 		}
+
+		otp.setUpdatedDt(LocalDateTime.now());
+
+		// Fail only if the link could not be delivered to either email or mobile
+		if (!emailSent && !smsSent) {
+			otp.setStatus(OtpStatus.FAILED);
+			staffOtpRepository.save(otp);
+			throw new OtpSendingException("Failed to send password setup link to email and mobile number: "
+					+ lastError.getMessage(), lastError);
+		}
+
+		otp.setStatus(OtpStatus.SENT);
+		staffOtpRepository.save(otp);
+
+		logger.info("Staff OTP status updated to SENT for staffId: {}", savedStaff.getStaffId());
+
+		String sentTo = emailSent && smsSent ? "email and mobile number" : emailSent ? "email" : "mobile number";
 
 		logger.info("Staff creation completed successfully for staffId: {}", savedStaff.getStaffId());
 
-		return staffMapper.toResponse(savedStaff);
+		StaffResponse response = staffMapper.toResponse(savedStaff);
+		response.setMessage("Password setup link sent to " + sentTo);
+		return response;
 	}
 
 	private String generateStaffId() {
@@ -374,32 +359,11 @@ public class StaffServiceImpl implements StaffService {
 
 		String identifier = request.getEmailIdOrMobileNo();
 
-		// Validate OTP channel
-		if (request.getChannel() == null) {
-			throw new InvalidOtpChannelException("OTP channel must be specified: EMAIL or MOBILE");
-		}
-
 		// Fetch staff using email or mobile
-		Staff staff;
-
-		if (request.getChannel() == OtpChannel.EMAIL) {
-
-			staff = staffRepository.findByEmailId(identifier).orElseThrow(() -> {
-				logger.error("Staff not found for email: {}", identifier);
-				return new ResourceNotFoundException("Staff not found");
-			});
-
-		} else if (request.getChannel() == OtpChannel.MOBILE) {
-
-			staff = (Staff) staffRepository.findByMobileNum(identifier).orElseThrow(() -> {
-				logger.error("Staff not found for mobile: {}", identifier);
-				return new ResourceNotFoundException("Staff not found");
-			});
-
-		} else {
-
-			throw new InvalidOtpChannelException("Invalid OTP channel: " + request.getChannel());
-		}
+		Staff staff = staffRepository.findByLoginId(identifier).orElseThrow(() -> {
+			logger.error("Staff not found for identifier: {}", identifier);
+			return new ResourceNotFoundException("Staff not found");
+		});
 
 		// Fetch latest OTP using staffId
 		StaffOtp otp = staffOtpRepository.findTopByStaffIdOrderByCreatedDtDesc(staff.getStaffId()).orElseThrow(() -> {
@@ -707,7 +671,7 @@ public class StaffServiceImpl implements StaffService {
 			response.setEmail(staff.getMobileNum());
 		}
 
-		response.setMessage("OTP resent successfully");
+		response.setMessage(identifier.contains("@") ? "OTP sent to email" : "OTP sent to mobile number");
 
 		return response;
 	}

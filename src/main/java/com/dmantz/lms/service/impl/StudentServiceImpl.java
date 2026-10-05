@@ -166,7 +166,7 @@ public class StudentServiceImpl implements StudentService {
 		response.setEmailId(savedRegistration.getEmailId());
 		response.setMobileNum(savedRegistration.getMobileNum());
 		response.setStatus("SUCCESS");
-		response.setMessage("OTP sent successfully to " + sentVia);
+		response.setMessage("OTP sent to " + sentVia);
 		return response;
 	}
 
@@ -336,7 +336,7 @@ public class StudentServiceImpl implements StudentService {
 
 		// ── 5. Build response ────────────────────────────────────
 		StudentLoginResponse response = studentMapper.toLoginResponse(student);
-		response.setMessage("OTP sent successfully to your " + sentTo);
+		response.setMessage("OTP sent to " + sentTo);
 		return response;
 	}
 
@@ -515,7 +515,7 @@ public class StudentServiceImpl implements StudentService {
 	}
 
 	@Override
-	public void forgotPassword(ForgotPasswordRequest request) {
+	public String forgotPassword(ForgotPasswordRequest request) {
 
 		String identifier = request.getEmailIdOrMobileNo();
 		logger.info("Forgot password requested for identifier: {}", identifier);
@@ -534,6 +534,7 @@ public class StudentServiceImpl implements StudentService {
 		String sentTo = sendOtpToIdentifier(identifier, student, otp, OtpPurpose.FORGOT_PASSWORD);
 
 		logger.info("Forgot password OTP sent successfully to {} for identifier: {}", sentTo, identifier);
+		return "OTP sent to " + sentTo;
 
 	}
 
@@ -681,7 +682,7 @@ public class StudentServiceImpl implements StudentService {
 		response.setEmailId(emailId);
 		response.setMobileNum(mobileNum);
 		response.setStatus("SUCCESS");
-		response.setMessage("OTP resent successfully to " + sentTo);
+		response.setMessage("OTP sent to " + sentTo);
 		return response;
 	}
 
