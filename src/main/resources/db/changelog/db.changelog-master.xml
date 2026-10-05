@@ -116,4 +116,7 @@
 	
 	<include file="db/changelog/changelogs/202609041742-create-student-task-submission-table.xml"/>
 
+    <!-- schedule_attendance table -->
+    <include file="db/changelog/changelogs/202610051102-create-schedule_attendance-table.xml"/>
+
 </databaseChangeLog>
