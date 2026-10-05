@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+           http://www.liquibase.org/xml/ns/dbchangelog
+           http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.15.xsd">
+
+    <changeSet id="202602211541" author="shiva">
+
+        <createTable tableName="program_course">
+
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="program_id" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="course_id" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+
+        <addUniqueConstraint
+                tableName="program_course"
+                columnNames="program_id, course_id"
+                constraintName="uk_program_course"/>
+
+        <!-- FK to PROGRAM -->
+        <addForeignKeyConstraint
+                baseTableName="program_course"
+                baseColumnNames="program_id"
+                constraintName="fk_program_course_program"
+                referencedTableName="program"
+                referencedColumnNames="program_id"
+                onDelete="CASCADE"
+                onUpdate="CASCADE"/>
+
+        <!-- FK to COURSE -->
+        <addForeignKeyConstraint
+                baseTableName="program_course"
+                baseColumnNames="course_id"
+                constraintName="fk_program_course_course"
+                referencedTableName="course"
+                referencedColumnNames="course_id"
+                onDelete="CASCADE"
+                onUpdate="CASCADE"/>
+
+    </changeSet>
+
+</databaseChangeLog>

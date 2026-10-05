@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+           http://www.liquibase.org/xml/ns/dbchangelog
+           http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.15.xsd">
+
+    <changeSet id="202601241041" author="shiva">
+
+        <createTable tableName="staff_otp">
+
+            <column name="id" type="CHAR(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="staff_id" type="VARCHAR(7)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="otp" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="attempts_num" type="INT" defaultValueNumeric="0"/>
+
+            <column name="status" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_by" type="BIGINT"/>
+
+            <column name="created_dt" type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="updated_by" type="BIGINT"/>
+
+            <column name="updated_dt" type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+
+        <!-- Foreign Key -->
+        <addForeignKeyConstraint
+                constraintName="fk_staff_otp_staff"
+                baseTableName="staff_otp"
+                baseColumnNames="staff_id"
+                referencedTableName="staff"
+                referencedColumnNames="staff_id"/>
+
+    </changeSet>
+
+</databaseChangeLog>

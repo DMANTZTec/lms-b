@@ -1,0 +1,203 @@
+{
+  "info": {
+    "_postman_id": "a685f7fc-fc03-49a8-94e9-c1b0a5b2cb8d",
+    "name": "Student",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "49454707",
+    "_collection_link": "https://go.postman.co/collection/49454707-a685f7fc-fc03-49a8-94e9-c1b0a5b2cb8d?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Student registration API",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"firstNm\": \"Shivaaa\",\r\n  \"lastNm\": \"Shankar\",\r\n  \"gender\": \"MALE\",\r\n  \"dob\": \"1998-05-14\",\r\n  \"addr1\": \"12, MG Road\",\r\n  \"addr2\": \"Near Bus Stand\",\r\n  \"city\": \"Chennai\",\r\n  \"state\": \"Tamil Nadu\",\r\n  \"country\": \"India\",\r\n  \"pin\": \"600001\",\r\n  \"emailId\": \"shivashankar@gmail.com\",\r\n  \"mobileNum\": \"9550108787\",\r\n  \"password\": \"Shiva@123\",\r\n  \"emergencyContactNm\": \"Ramesh\",\r\n  \"emergencyContactNum\": \"9840012345\",\r\n  \"profile_img\": \"profile1.png\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/student/register",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "student",
+            "register"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "view students API",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/student/view-students",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "student",
+            "view-students"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Student Login API",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"username\": \"shivashankar@gmail.com\",\r\n  \"password\": \"Shiva@123\"\r\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/student/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "student",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Student otp verify API",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"studentId\": \"S000001\",\r\n  \"otp\": \"508659\"\r\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/student/otp-verify",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "student",
+            "otp-verify"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Student Forgot password API",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"email\": \"shivashankar@gmail.com\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/student/forgot-password",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "student",
+            "forgot-password"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Student Reset password API",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"studentId\": \"S000001\",\r\n  \"otp\": \"956321\",\r\n  \"newPassword\": \"Shiva@123456\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/student/reset-password",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "student",
+            "reset-password"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Student update API",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"firstNm\": \"Shivaaa\",\r\n  \"lastNm\": \"Shankar\",\r\n  \"gender\": \"MALE\",\r\n  \"addr1\": \"12, MG Road\",\r\n  \"addr2\": \"Near Bus Stand\",\r\n  \"city\": \"Chennai\",\r\n  \"state\": \"Tamil Nadu\",\r\n  \"country\": \"India\",\r\n  \"pin\": \"508005\",\r\n  \"mobileNum\": \"9550108787\",\r\n  \"emergencyContactNm\": \"Ramesh\",\r\n  \"emergencyContactNum\": \"9840012345\"\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/student/update/S000001",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "student",
+            "update",
+            "S000001"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
