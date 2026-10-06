@@ -219,7 +219,7 @@ public class AuthServiceImpl implements AuthService {
 
 				logger.info("Login OTP sent successfully to email: {}", staff.getEmailId());
 
-				sentTo = "email";
+				sentTo = "mail";
 			}
 
 			otp.setStatus(OtpStatus.SENT);
@@ -251,7 +251,7 @@ public class AuthServiceImpl implements AuthService {
 		// TOKEN SHOULD BE NULL BEFORE OTP VERIFICATION
 		response.setToken(null);
 
-		response.setMessage("OTP sent to " + sentTo);
+		response.setMessage("Enter the code sent to your " + sentTo);
 
 		logger.info("OTP sent successfully for staffId: {}", staff.getStaffId());
 

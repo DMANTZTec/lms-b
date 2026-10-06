@@ -94,7 +94,7 @@ public class StudentServiceImpl implements StudentService {
 	@Override
 	@Transactional
 	public RegistrationResponse register(StudentRegistrationRequest request) {
-
+  
 		logger.info("Registration started for email: {}", request.getEmailId());
 
 		if (studentRepository.existsByEmailId(request.getEmailId())) {

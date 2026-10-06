@@ -671,7 +671,7 @@ public class StaffServiceImpl implements StaffService {
 			response.setEmail(staff.getMobileNum());
 		}
 
-		response.setMessage(identifier.contains("@") ? "OTP sent to email" : "OTP sent to mobile number");
+		response.setMessage(identifier.contains("@") ? "Enter the code sent to your mail" : "Enter the code sent to your mobile number");
 
 		return response;
 	}
