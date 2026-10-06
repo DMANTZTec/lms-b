@@ -5,6 +5,7 @@ public class StudentLoginResponse {
     private String role;
     private String studentId;
     private String email;
+    private String mobileNum;
     private String token;
     private String message;
 
@@ -32,6 +33,14 @@ public class StudentLoginResponse {
         this.email = email;
     }
 
+    public String getMobileNum() {
+        return mobileNum;
+    }
+
+    public void setMobileNum(String mobileNum) {
+        this.mobileNum = mobileNum;
+    }
+
     public String getToken() {
         return token;
     }
@@ -54,6 +63,7 @@ public class StudentLoginResponse {
                 "role='" + role + '\'' +
                 ", studentId='" + studentId + '\'' +
                 ", email='" + email + '\'' +
+                ", mobileNum='" + mobileNum + '\'' +
                 ", token='" + token + '\'' +
                 ", message='" + message + '\'' +
                 '}';

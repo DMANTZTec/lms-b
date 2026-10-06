@@ -1,11 +1,10 @@
 package com.dmantz.lms.dto.request;
 
-
-public class OtpVerifyRequest {
+public class StudentOtpVerifyRequest {
 
 	private String emailIdOrMobileNo;
 	private String otp;
-	
+
 	public String getEmailIdOrMobileNo() {
 		return emailIdOrMobileNo;
 	}
@@ -21,5 +20,4 @@ public class OtpVerifyRequest {
 	public void setOtp(String otp) {
 		this.otp = otp;
 	}
-
 }

@@ -56,6 +56,10 @@ public class StudentTaskSubmission extends AuditFields {
 	@Column(name = "overall_rating", precision = 2, scale = 1)
 	private BigDecimal overallRating;
 
+	@JdbcTypeCode(SqlTypes.JSON)
+	@Column(name = "review_criteria", columnDefinition = "json")
+	private List<CriterionRating> criteria;
+
 	@Column(name = "reviewed_at")
 	private LocalDateTime reviewedAt;
 
@@ -157,6 +161,14 @@ public class StudentTaskSubmission extends AuditFields {
 
 	public void setOverallRating(BigDecimal overallRating) {
 		this.overallRating = overallRating;
+	}
+
+	public List<CriterionRating> getCriteria() {
+		return criteria;
+	}
+
+	public void setCriteria(List<CriterionRating> criteria) {
+		this.criteria = criteria;
 	}
 
 	public LocalDateTime getReviewedAt() {

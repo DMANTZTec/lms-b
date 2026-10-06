@@ -684,6 +684,10 @@ public class InstructorDashboardServiceImpl implements InstructorDashboardServic
 		LocalDateTime now = LocalDateTime.now();
 		submission.setOverallRating(request.getOverallRating());
 		submission.setReviewFeedback(request.getFeedbackMessage().trim());
+		submission.setCriteria(request.getCriteria() == null ? null
+				: request.getCriteria().stream()
+						.map(c -> new CriterionRating(c.getCriterion().trim(), c.getRating()))
+						.toList());
 		submission.setReviewStatus(ReviewStatus.REVIEWED);
 		submission.setReviewedAt(now);
 		submission.setUpdatedBy(instructor.getId());
