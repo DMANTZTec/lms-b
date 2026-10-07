@@ -247,6 +247,7 @@ public class AuthServiceImpl implements AuthService {
 		response.setRole(role);
 		response.setStaffId(staff.getStaffId());
 		response.setEmail(staff.getEmailId());
+		response.setMobileNum(staff.getMobileNum());
 
 		// TOKEN SHOULD BE NULL BEFORE OTP VERIFICATION
 		response.setToken(null);

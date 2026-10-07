@@ -425,6 +425,7 @@ public class StaffServiceImpl implements StaffService {
 
 		response.setStaffId(staff.getStaffId());
 		response.setEmail(staff.getEmailId());
+		response.setMobileNum(staff.getMobileNum());
 		response.setRole(role);
 		response.setToken(token);
 		response.setMessage("Login successful");

@@ -336,7 +336,7 @@ public class StudentServiceImpl implements StudentService {
 
 		// ── 5. Build response ────────────────────────────────────
 		StudentLoginResponse response = studentMapper.toLoginResponse(student);
-		response.setMessage("OTP sent to " + sentTo);
+		response.setMessage("Enter the code sent to your " + sentTo);
 		return response;
 	}
 
