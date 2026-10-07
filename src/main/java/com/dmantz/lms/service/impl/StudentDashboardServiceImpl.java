@@ -38,6 +38,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 	private final EnrollmentBatchRepository enrollmentBatchRepository;
 	private final ProgramCourseRepository programCourseRepository;
 	private final StudentTaskSubmissionRepository studentTaskSubmissionRepository;
+	private final ScheduleAttendanceRepository scheduleAttendanceRepository;
 
 	public StudentDashboardServiceImpl(ClassScheduleRepository classScheduleRepository,
 			ClassScheduleMapper classScheduleMapper, StaffRepository staffRepository,
@@ -45,7 +46,8 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 			StudentTopicReferenceProgressRepository progressRepository, ClassBatchMapper classBatchMapper,
 			EnrollmentRepository enrollmentRepository, EnrollmentBatchRepository enrollmentBatchRepository,
 			ProgramCourseRepository programCourseRepository,
-			StudentTaskSubmissionRepository studentTaskSubmissionRepository) {
+			StudentTaskSubmissionRepository studentTaskSubmissionRepository,
+			ScheduleAttendanceRepository scheduleAttendanceRepository) {
 
 		this.classScheduleRepository = classScheduleRepository;
 		this.classScheduleMapper = classScheduleMapper;
@@ -58,6 +60,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 		this.enrollmentBatchRepository = enrollmentBatchRepository;
 		this.programCourseRepository = programCourseRepository;
 		this.studentTaskSubmissionRepository = studentTaskSubmissionRepository;
+		this.scheduleAttendanceRepository = scheduleAttendanceRepository;
 	}
 
 	// Courses a student is enrolled in via the enrollment table: direct course
@@ -607,6 +610,87 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 		}
 
 		logger.info("Instructor rating per week fetched successfully for studentId: {}", studentId);
+
+		return response;
+	}
+
+	// ================= CLASSES ATTENDED PER WEEK =================
+
+	@Override
+	public List<WeeklyClassesAttendedResponse> getClassesAttendedPerWeek(String studentId, int weeks) {
+
+		logger.info("Fetching classes attended per week for studentId: {}", studentId);
+
+		studentRepository.findByStudentId(studentId).orElseThrow(() -> {
+			logger.error("Student not found with studentId: {}", studentId);
+			return new ResourceNotFoundException("Student not found: " + studentId);
+		});
+
+		int numberOfWeeks = weeks <= 0 ? 4 : Math.min(weeks, 52);
+
+		LocalDate currentWeekStart = LocalDate.now().with(DayOfWeek.MONDAY);
+
+		List<WeeklyClassesAttendedResponse> response = new ArrayList<>();
+
+		for (int i = numberOfWeeks - 1; i >= 0; i--) {
+
+			LocalDate weekStart = currentWeekStart.minusWeeks(i);
+			LocalDate weekEnd = weekStart.plusDays(6);
+
+			int attendedCount = (int) scheduleAttendanceRepository
+					.countByStudent_StudentIdAndStatusAndSchedule_ClassDateBetween(
+							studentId, AttendanceStatus.PRESENT, weekStart, weekEnd);
+
+			WeeklyClassesAttendedResponse weekDto = new WeeklyClassesAttendedResponse();
+			weekDto.setWeekStart(weekStart);
+			weekDto.setWeekEnd(weekEnd);
+			weekDto.setClassesAttendedCount(attendedCount);
+
+			response.add(weekDto);
+		}
+
+		logger.info("Classes attended per week fetched successfully for studentId: {}", studentId);
+
+		return response;
+	}
+
+	// ================= CLASSES ATTENDANCE SUMMARY =================
+
+	@Override
+	public StudentClassesAttendanceResponse getClassesAttendanceSummary(String studentId) {
+
+		logger.info("Fetching classes attendance summary for studentId: {}", studentId);
+
+		studentRepository.findByStudentId(studentId).orElseThrow(() -> {
+			logger.error("Student not found with studentId: {}", studentId);
+			return new ResourceNotFoundException("Student not found: " + studentId);
+		});
+
+		LocalDate today = LocalDate.now();
+		LocalDate startOfMonth = today.withDayOfMonth(1);
+		LocalDate endOfMonth = today.withDayOfMonth(today.lengthOfMonth());
+
+		int attended = (int) scheduleAttendanceRepository
+				.countByStudent_StudentIdAndStatus(studentId, AttendanceStatus.PRESENT);
+		int skipped = (int) scheduleAttendanceRepository
+				.countByStudent_StudentIdAndStatus(studentId, AttendanceStatus.ABSENT);
+		int monthAttended = (int) scheduleAttendanceRepository
+				.countByStudent_StudentIdAndStatusAndSchedule_ClassDateBetween(
+						studentId, AttendanceStatus.PRESENT, startOfMonth, endOfMonth);
+		int monthSkipped = (int) scheduleAttendanceRepository
+				.countByStudent_StudentIdAndStatusAndSchedule_ClassDateBetween(
+						studentId, AttendanceStatus.ABSENT, startOfMonth, endOfMonth);
+
+		ClassesAttendanceStatsResponse stats = new ClassesAttendanceStatsResponse();
+		stats.setAttended(attended);
+		stats.setSkipped(skipped);
+		stats.setMonthAttended(monthAttended);
+		stats.setMonthSkipped(monthSkipped);
+
+		StudentClassesAttendanceResponse response = new StudentClassesAttendanceResponse();
+		response.setClasses(stats);
+
+		logger.info("Classes attendance summary fetched successfully for studentId: {}", studentId);
 
 		return response;
 	}
