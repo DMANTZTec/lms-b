@@ -18,6 +18,7 @@ public interface StudentTaskMapper {
 	@Mapping(target = "courseId", source = "courseId")
 	@Mapping(target = "chapter", ignore = true)
 	@Mapping(target = "topic", ignore = true)
+	@Mapping(target = "schedule", ignore = true)
 	@Mapping(target = "student", ignore = true)
 	@Mapping(target = "assignedBy", ignore = true)
 	@Mapping(target = "assignedByType", ignore = true)

@@ -31,6 +31,11 @@ public class StudentTask extends AuditFields {
 	@JoinColumn(name = "topic_id")
 	private Topic topic;
 
+	// Set only for tasks created from a specific class schedule.
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "schedule_id")
+	private ClassSchedule schedule;
+
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "student_id", referencedColumnName = "student_id", nullable = false, columnDefinition = "CHAR(7)")
 	private Student student;
@@ -104,6 +109,14 @@ public class StudentTask extends AuditFields {
 
 	public void setTopic(Topic topic) {
 		this.topic = topic;
+	}
+
+	public ClassSchedule getSchedule() {
+		return schedule;
+	}
+
+	public void setSchedule(ClassSchedule schedule) {
+		this.schedule = schedule;
 	}
 
 	public Student getStudent() {
