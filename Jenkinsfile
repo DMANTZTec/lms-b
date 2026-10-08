@@ -117,7 +117,7 @@ pipeline {
                 echo "Waiting for LMS application to start..."
 
                 sh '''
-                    sleep 10
+                    sleep 30
 
                     echo "----------------------------------------"
                     echo "Docker Container Status"
