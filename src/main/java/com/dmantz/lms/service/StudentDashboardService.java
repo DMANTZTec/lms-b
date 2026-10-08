@@ -24,4 +24,8 @@ public interface StudentDashboardService {
 	List<WeeklyTaskCompletionResponse> getCompletedTasksPerWeek(String studentId, int weeks);
 
 	List<WeeklyInstructorRatingResponse> getInstructorRatingPerWeek(String studentId, int weeks);
+
+	List<WeeklyClassesAttendedResponse> getClassesAttendedPerWeek(String studentId, int weeks);
+
+	StudentClassesAttendanceResponse getClassesAttendanceSummary(String studentId);
 }
