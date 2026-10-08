@@ -74,6 +74,15 @@ pipeline {
             }
         }
 
+        stage('Approval') {
+            steps {
+                input(
+                    message: "Approve deployment to ${params.ENVIRONMENT}?",
+                    ok: "Approve"
+                )
+            }
+        }
+
         stage('Deploy Container') {
             steps {
                 echo "Deploying LMS container..."
@@ -108,7 +117,7 @@ pipeline {
                 echo "Waiting for LMS application to start..."
 
                 sh '''
-                    sleep 20
+                    sleep 10
 
                     echo "----------------------------------------"
                     echo "Docker Container Status"
