@@ -554,6 +554,16 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 	                                .name()
 	                );
 
+	                response.setPresentCount(
+	                        attendanceService
+	                                .getPresentCount(schedule.getId())
+	                );
+
+	                response.setAttendanceRate(
+	                        attendanceService
+	                                .getAttendanceRate(schedule.getId())
+	                );
+
 	                return response;
 	            })
 	            .toList();

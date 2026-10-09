@@ -202,6 +202,17 @@ public class AttendanceServiceImpl implements AttendanceService {
         return deriveSessionStatus(scheduleId);
     }
 
+    @Override
+    public int getPresentCount(Long scheduleId) {
+        return (int) scheduleAttendanceRepository.countByScheduleIdAndStatus(scheduleId, AttendanceStatus.PRESENT);
+    }
+
+    @Override
+    public double getAttendanceRate(Long scheduleId) {
+        int total = (int) scheduleAttendanceRepository.countByScheduleId(scheduleId);
+        return AttendanceMapper.computeAttendanceRate(getPresentCount(scheduleId), total);
+    }
+
     private SessionStatus deriveSessionStatus(Long scheduleId) {
         List<ScheduleAttendance> all = scheduleAttendanceRepository.findByScheduleIdOrderByStudentStudentIdAsc(scheduleId);
         if (all.isEmpty()) {

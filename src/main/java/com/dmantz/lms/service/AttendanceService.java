@@ -9,6 +9,10 @@ public interface AttendanceService {
 
     SessionStatus getSessionStatus(Long scheduleId);
 
+    int getPresentCount(Long scheduleId);
+
+    double getAttendanceRate(Long scheduleId);
+
     ScheduleAttendanceResponse getScheduleAttendance(Long scheduleId);
 
     MarkAttendanceResponse markAttendance(Long scheduleId, MarkAttendanceRequest request);

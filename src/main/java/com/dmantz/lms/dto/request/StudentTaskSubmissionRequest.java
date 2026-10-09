@@ -4,6 +4,7 @@ import com.dmantz.lms.entity.GitDetail;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -22,6 +23,9 @@ public class StudentTaskSubmissionRequest {
 	private List<MultipartFile> attachments;
 
 	private List<GitDetail> git;
+
+	@PositiveOrZero(message = "Time spent must be zero or positive")
+	private Integer timeSpentInMinutes;
 
 	public Long getStudentTaskId() {
 		return studentTaskId;
@@ -61,6 +65,14 @@ public class StudentTaskSubmissionRequest {
 
 	public void setGit(List<GitDetail> git) {
 		this.git = git;
+	}
+
+	public Integer getTimeSpentInMinutes() {
+		return timeSpentInMinutes;
+	}
+
+	public void setTimeSpentInMinutes(Integer timeSpentInMinutes) {
+		this.timeSpentInMinutes = timeSpentInMinutes;
 	}
 
 }

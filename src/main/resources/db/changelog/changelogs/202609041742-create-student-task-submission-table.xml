@@ -123,4 +123,12 @@
 		</addColumn>
 
 	</changeSet>
+
+	<changeSet id="202610091200" author="Afsheen">
+
+		<addColumn tableName="student_task_submission">
+			<column name="time_spent_in_minutes" type="INT" />
+		</addColumn>
+
+	</changeSet>
 </databaseChangeLog>
