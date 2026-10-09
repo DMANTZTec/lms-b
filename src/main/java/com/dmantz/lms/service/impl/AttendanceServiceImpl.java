@@ -4,6 +4,8 @@ import com.dmantz.lms.dto.request.MarkAttendanceRequest;
 import com.dmantz.lms.dto.response.AttendanceStudentResponse;
 import com.dmantz.lms.dto.response.MarkAttendanceResponse;
 import com.dmantz.lms.dto.response.ScheduleAttendanceResponse;
+import com.dmantz.lms.dto.response.ScheduleTaskSummaryResponse;
+import com.dmantz.lms.dto.response.StudentTaskStatusResponse;
 import com.dmantz.lms.entity.*;
 import com.dmantz.lms.mapper.AttendanceMapper;
 import com.dmantz.lms.repository.ClassScheduleRepository;
@@ -11,6 +13,8 @@ import com.dmantz.lms.repository.EnrollmentBatchRepository;
 import com.dmantz.lms.repository.ScheduleAttendanceRepository;
 import com.dmantz.lms.repository.StaffRepository;
 import com.dmantz.lms.repository.StudentRepository;
+import com.dmantz.lms.repository.StudentTaskRepository;
+import com.dmantz.lms.repository.StudentTaskSubmissionRepository;
 import com.dmantz.lms.service.AttendanceService;
 import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
@@ -18,8 +22,12 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -34,17 +42,23 @@ public class AttendanceServiceImpl implements AttendanceService {
     private final StudentRepository studentRepository;
     private final StaffRepository staffRepository;
     private final EnrollmentBatchRepository enrollmentBatchRepository;
+    private final StudentTaskRepository studentTaskRepository;
+    private final StudentTaskSubmissionRepository submissionRepository;
 
     public AttendanceServiceImpl(ClassScheduleRepository classScheduleRepository,
                                  ScheduleAttendanceRepository scheduleAttendanceRepository,
                                  StudentRepository studentRepository,
                                  StaffRepository staffRepository,
-                                 EnrollmentBatchRepository enrollmentBatchRepository) {
+                                 EnrollmentBatchRepository enrollmentBatchRepository,
+                                 StudentTaskRepository studentTaskRepository,
+                                 StudentTaskSubmissionRepository submissionRepository) {
         this.classScheduleRepository = classScheduleRepository;
         this.scheduleAttendanceRepository = scheduleAttendanceRepository;
         this.studentRepository = studentRepository;
         this.staffRepository = staffRepository;
         this.enrollmentBatchRepository = enrollmentBatchRepository;
+        this.studentTaskRepository = studentTaskRepository;
+        this.submissionRepository = submissionRepository;
     }
 
     @Override
@@ -83,7 +97,7 @@ public class AttendanceServiceImpl implements AttendanceService {
             course = cs.getClassName();
         }
 
-        return AttendanceMapper.toScheduleAttendanceResponse(
+        ScheduleAttendanceResponse response = AttendanceMapper.toScheduleAttendanceResponse(
                 scheduleId,
                 batchName,
                 course,
@@ -97,6 +111,63 @@ public class AttendanceServiceImpl implements AttendanceService {
                 markedByStaffId,
                 students
         );
+
+        attachScheduleTasks(scheduleId, response);
+
+        return response;
+    }
+
+    // A schedule task is stored as one StudentTask row per student. Rows created by the same
+    // "create task" call (same title, topic, assigner and start time) form one logical task,
+    // identified by the lowest StudentTask id in the group.
+    private void attachScheduleTasks(Long scheduleId, ScheduleAttendanceResponse response) {
+        List<StudentTask> scheduleTasks = studentTaskRepository.findBySchedule_IdOrderByIdAsc(scheduleId);
+
+        Map<String, Long> taskIdByGroup = new HashMap<>();
+        Map<Long, ScheduleTaskSummaryResponse> taskSummaries = new LinkedHashMap<>();
+        // taskId -> (studentId -> StudentTask)
+        Map<Long, Map<String, StudentTask>> studentTaskByTask = new HashMap<>();
+
+        for (StudentTask st : scheduleTasks) {
+            Long taskId = taskIdByGroup.computeIfAbsent(taskGroupKey(st), k -> st.getId());
+            taskSummaries.computeIfAbsent(taskId, id -> new ScheduleTaskSummaryResponse(
+                    id,
+                    st.getTopic() != null ? st.getTopic().getTopicNm() : null,
+                    st.getTitle()));
+            studentTaskByTask.computeIfAbsent(taskId, id -> new HashMap<>())
+                    .putIfAbsent(st.getStudent().getStudentId(), st);
+        }
+
+        // Latest submission per StudentTask
+        Map<Long, StudentTaskSubmission> latestSubmission = new HashMap<>();
+        if (!scheduleTasks.isEmpty()) {
+            List<Long> studentTaskIds = scheduleTasks.stream().map(StudentTask::getId).toList();
+            for (StudentTaskSubmission sub : submissionRepository.findByStudentTask_IdIn(studentTaskIds)) {
+                latestSubmission.merge(sub.getStudentTask().getId(), sub,
+                        (a, b) -> b.getSubmittedAt().isAfter(a.getSubmittedAt()) ? b : a);
+            }
+        }
+
+        for (AttendanceStudentResponse student : response.getStudents()) {
+            List<StudentTaskStatusResponse> statuses = new ArrayList<>();
+            for (Long taskId : taskSummaries.keySet()) {
+                StudentTask st = studentTaskByTask.get(taskId).get(student.getStudentId());
+                StudentTaskSubmission sub = st != null ? latestSubmission.get(st.getId()) : null;
+                statuses.add(new StudentTaskStatusResponse(
+                        taskId,
+                        st != null ? st.getId() : null,
+                        sub != null ? sub.getId() : null,
+                        sub != null && sub.getReviewStatus() != null ? sub.getReviewStatus().name() : "NOT_SUBMITTED"));
+            }
+            student.setTaskStatuses(statuses);
+        }
+
+        response.setTasks(new ArrayList<>(taskSummaries.values()));
+    }
+
+    private String taskGroupKey(StudentTask st) {
+        return st.getTitle() + "|" + (st.getTopic() != null ? st.getTopic().getId() : null)
+                + "|" + st.getAssignedBy() + "|" + st.getStartDt();
     }
 
     @Override

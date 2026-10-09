@@ -18,6 +18,8 @@ public class ScheduleAttendanceResponse {
     private LocalDateTime markedAt;
     private String markedBy;
 
+    private List<ScheduleTaskSummaryResponse> tasks = new ArrayList<>();
+
     private List<AttendanceStudentResponse> students = new ArrayList<>();
 
     public Long getScheduleId() {
@@ -106,6 +108,14 @@ public class ScheduleAttendanceResponse {
 
     public void setMarkedBy(String markedBy) {
         this.markedBy = markedBy;
+    }
+
+    public List<ScheduleTaskSummaryResponse> getTasks() {
+        return tasks;
+    }
+
+    public void setTasks(List<ScheduleTaskSummaryResponse> tasks) {
+        this.tasks = tasks;
     }
 
     public List<AttendanceStudentResponse> getStudents() {

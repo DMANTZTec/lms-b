@@ -1,5 +1,8 @@
 package com.dmantz.lms.dto.response;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class AttendanceStudentResponse {
 
     private String studentId;
@@ -10,6 +13,7 @@ public class AttendanceStudentResponse {
     private String profileImg;
     private String enabled;
     private String status; // UNMARKED | PRESENT | ABSENT
+    private List<StudentTaskStatusResponse> taskStatuses = new ArrayList<>();
 
     public String getStudentId() {
         return studentId;
@@ -73,5 +77,13 @@ public class AttendanceStudentResponse {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public List<StudentTaskStatusResponse> getTaskStatuses() {
+        return taskStatuses;
+    }
+
+    public void setTaskStatuses(List<StudentTaskStatusResponse> taskStatuses) {
+        this.taskStatuses = taskStatuses;
     }
 }
