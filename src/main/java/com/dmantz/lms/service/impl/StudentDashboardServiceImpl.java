@@ -69,23 +69,34 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 	// courses does this student have" across getMyCourses/progress/class-info.
 	private List<Course> getEnrolledCourses(String studentId) {
 
+		return getEnrolledCoursesWithEnrollment(studentId).stream().map(EnrolledCourse::course).toList();
+	}
+
+	// A course paired with the enrollment that grants it (the program enrollment
+	// for courses reached through a program).
+	private record EnrolledCourse(Course course, Long enrollmentId) {
+	}
+
+	private List<EnrolledCourse> getEnrolledCoursesWithEnrollment(String studentId) {
+
 		List<Enrollment> enrollments = enrollmentRepository.findByStudentStudentId(studentId).stream()
 				.filter(e -> e.getStatus() != EnrollmentStatus.CANCELLED).toList();
 
-		Map<Long, Course> courseMap = new LinkedHashMap<>();
+		Map<Long, EnrolledCourse> courseMap = new LinkedHashMap<>();
 
 		for (Enrollment enrollment : enrollments) {
 
 			if (enrollment.getEnrollmentType() == EnrollmentType.COURSE && enrollment.getCourse() != null) {
 
-				courseMap.putIfAbsent(enrollment.getCourse().getId(), enrollment.getCourse());
+				courseMap.putIfAbsent(enrollment.getCourse().getId(),
+						new EnrolledCourse(enrollment.getCourse(), enrollment.getId()));
 
 			} else if (enrollment.getEnrollmentType() == EnrollmentType.PROGRAM && enrollment.getProgram() != null) {
 
 				for (Course course : programCourseRepository
 						.findCoursesByProgramId(enrollment.getProgram().getProgramId())) {
 
-					courseMap.putIfAbsent(course.getId(), course);
+					courseMap.putIfAbsent(course.getId(), new EnrolledCourse(course, enrollment.getId()));
 				}
 			}
 		}
@@ -128,7 +139,7 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 
 		logger.info("Fetching courses for studentId: {}", studentId);
 
-		List<Course> enrolledCourses = getEnrolledCourses(studentId);
+		List<EnrolledCourse> enrolledCourses = getEnrolledCoursesWithEnrollment(studentId);
 
 		if (enrolledCourses.isEmpty()) {
 			logger.warn("No courses found for studentId: {}", studentId);
@@ -141,7 +152,9 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 		long ongoing = 0;
 		long completed = 0;
 
-		for (Course course : enrolledCourses) {
+		for (EnrolledCourse enrolledCourse : enrolledCourses) {
+
+			Course course = enrolledCourse.course();
 
 			CourseProgressSummaryResponse progress = getCourseProgressSummary(course.getCourseId(), studentId);
 
@@ -154,6 +167,9 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 			}
 
 			MyCourseResponse dto = new MyCourseResponse();
+			if (derivedStatus == CourseStatus.PLANNED) {
+				dto.setEnrollmentId(enrolledCourse.enrollmentId());
+			}
 			dto.setCourseId(course.getCourseId());
 			dto.setCourseName(course.getCourseTitle());
 			dto.setStatus(derivedStatus.name());
@@ -652,6 +668,78 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 		logger.info("Classes attended per week fetched successfully for studentId: {}", studentId);
 
 		return response;
+	}
+
+	// ================= HOURS SPENT PER WEEK =================
+
+	// Hours = self-reported task time from submissions, by submission week.
+	@Override
+	public List<WeeklyHoursSpentResponse> getHoursSpentPerWeek(String studentId, int weeks) {
+
+		logger.info("Fetching hours spent per week for studentId: {}", studentId);
+
+		studentRepository.findByStudentId(studentId).orElseThrow(() -> {
+			logger.error("Student not found with studentId: {}", studentId);
+			return new ResourceNotFoundException("Student not found: " + studentId);
+		});
+
+		int numberOfWeeks = weeks <= 0 ? 4 : Math.min(weeks, 52);
+
+		LocalDate currentWeekStart = LocalDate.now().with(DayOfWeek.MONDAY);
+		LocalDate rangeStart = currentWeekStart.minusWeeks(numberOfWeeks - 1);
+
+		Map<LocalDate, Long> taskMinutesByWeek = studentTaskSubmissionRepository
+				.findByStudent_StudentIdAndSubmittedAtBetween(studentId, rangeStart.atStartOfDay(),
+						currentWeekStart.plusWeeks(1).atStartOfDay())
+				.stream().filter(s -> s.getTimeSpentInMinutes() != null && s.getTimeSpentInMinutes() > 0)
+				.collect(Collectors.groupingBy(s -> s.getSubmittedAt().toLocalDate().with(DayOfWeek.MONDAY),
+						Collectors.summingLong(StudentTaskSubmission::getTimeSpentInMinutes)));
+
+		List<WeeklyHoursSpentResponse> response = new ArrayList<>();
+
+		for (int i = numberOfWeeks - 1; i >= 0; i--) {
+
+			LocalDate weekStart = currentWeekStart.minusWeeks(i);
+
+			WeeklyHoursSpentResponse weekDto = new WeeklyHoursSpentResponse();
+			weekDto.setWeekStart(weekStart);
+			weekDto.setWeekEnd(weekStart.plusDays(6));
+			weekDto.setTotalHours(toHours(taskMinutesByWeek.getOrDefault(weekStart, 0L)));
+
+			response.add(weekDto);
+		}
+
+		logger.info("Hours spent per week fetched successfully for studentId: {}", studentId);
+
+		return response;
+	}
+
+	// ================= TOTAL HOURS SPENT =================
+
+	// All-time version of getHoursSpentPerWeek, same rules.
+	@Override
+	public TotalHoursSpentResponse getTotalHoursSpent(String studentId) {
+
+		logger.info("Fetching total hours spent for studentId: {}", studentId);
+
+		studentRepository.findByStudentId(studentId).orElseThrow(() -> {
+			logger.error("Student not found with studentId: {}", studentId);
+			return new ResourceNotFoundException("Student not found: " + studentId);
+		});
+
+		long taskMinutes = studentTaskSubmissionRepository.sumTimeSpentInMinutesByStudentId(studentId);
+
+		TotalHoursSpentResponse response = new TotalHoursSpentResponse();
+		response.setTotalHours(toHours(taskMinutes));
+
+		logger.info("Total hours spent for studentId: {} is {}", studentId, response.getTotalHours());
+
+		return response;
+	}
+
+	// Minutes to hours, rounded to 1 decimal place
+	private static double toHours(long minutes) {
+		return Math.round((minutes / 60.0) * 10) / 10.0;
 	}
 
 	// ================= CLASSES ATTENDANCE SUMMARY =================

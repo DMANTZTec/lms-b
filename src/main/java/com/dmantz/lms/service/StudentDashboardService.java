@@ -27,5 +27,9 @@ public interface StudentDashboardService {
 
 	List<WeeklyClassesAttendedResponse> getClassesAttendedPerWeek(String studentId, int weeks);
 
+	List<WeeklyHoursSpentResponse> getHoursSpentPerWeek(String studentId, int weeks);
+
+	TotalHoursSpentResponse getTotalHoursSpent(String studentId);
+
 	StudentClassesAttendanceResponse getClassesAttendanceSummary(String studentId);
 }
