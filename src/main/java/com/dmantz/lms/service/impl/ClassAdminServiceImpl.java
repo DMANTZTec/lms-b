@@ -20,9 +20,11 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.coyote.BadRequestException;
@@ -670,6 +672,43 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 			cr.setTotalSchedulesGenerated(schedules.size());
 			cr.setSchedules(classScheduleMapper.toDtoList(schedules));
 			return cr;
+		}).toList();
+	}
+
+	// Same batches as getClassesByCourse, but only a schedule count instead of the
+	// full schedule list.
+	@Override
+	public List<BatchSummaryResponse> getBatchSummariesByCourse(String courseId) {
+
+		logger.info("Fetching batch summaries for courseId: {}", courseId);
+
+		Course course = courseRepository.findByCourseIdAndIsDeletedFalse(courseId)
+				.orElseThrow(() -> new CourseNotFoundException("Course not found: " + courseId));
+
+		List<ClassBatch> batches = classBatchRepository.findByCourse_CourseId(courseId);
+
+		if (batches.isEmpty()) {
+			logger.warn("No batches found for courseId: {}", courseId);
+			return List.of();
+		}
+
+		Map<Long, Long> scheduleCountByBatch = new HashMap<>();
+		for (Object[] row : classScheduleRepository.countSchedulesPerBatchByCourseId(courseId)) {
+			scheduleCountByBatch.put((Long) row[0], (Long) row[1]);
+		}
+
+		return batches.stream().map(batch -> {
+			BatchSummaryResponse dto = new BatchSummaryResponse();
+			dto.setBatchId(batch.getId());
+			dto.setCourseId(courseId);
+			dto.setCourseName(course.getCourseTitle());
+			dto.setBatchName(batch.getClassName());
+			dto.setStartDate(batch.getStartDate());
+			dto.setEndDate(batch.getEndDate());
+			dto.setStatus(batch.getStatus() != null ? batch.getStatus().name() : null);
+			dto.setCapacity(batch.getCapacity());
+			dto.setScheduleCount(scheduleCountByBatch.getOrDefault(batch.getId(), 0L));
+			return dto;
 		}).toList();
 	}
 
