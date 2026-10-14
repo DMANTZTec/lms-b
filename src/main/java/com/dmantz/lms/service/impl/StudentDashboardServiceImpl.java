@@ -406,29 +406,43 @@ public class StudentDashboardServiceImpl implements StudentDashboardService {
 		}
 
 		// Status reflects batch enrollment/lifecycle (enrollment -> enrollment_batch -> class_batch),
-		// not content progress %: no batch assignment yet -> PLANNED, assigned to a batch still
-		// running -> ACTIVE, assigned batch finished -> COMPLETED. Percentage is informational only.
+		// not content progress %: no batch assignment yet, or assigned only to a batch whose start
+		// date is still in the future -> PLANNED, assigned to a batch that has started and is still
+		// running -> ACTIVE, assigned batch finished -> COMPLETED. Cancelled batches are ignored.
+		// Percentage is informational only.
 		List<EnrollmentBatch> batchAssignments = enrollmentBatchRepository
 				.findByEnrollment_Student_IdAndClassBatch_Course_Id(internalStudentId, internalCourseId);
 
-		boolean anyOngoing = batchAssignments.stream()
-				.anyMatch(eb -> eb.getClassBatch().getStatus() != ClassStatus.COMPLETED);
+		LocalDate today = LocalDate.now();
+
+		List<ClassBatch> openBatches = batchAssignments.stream().map(EnrollmentBatch::getClassBatch)
+				.filter(cb -> cb.getStatus() == ClassStatus.SCHEDULED).toList();
+
+		boolean anyStarted = openBatches.stream()
+				.anyMatch(cb -> cb.getStartDate() == null || !cb.getStartDate().isAfter(today));
+
+		boolean anyCompleted = batchAssignments.stream()
+				.anyMatch(eb -> eb.getClassBatch().getStatus() == ClassStatus.COMPLETED);
 
 		CourseStatus courseStatus;
 		LocalDate batchStartDate = null;
 		LocalDate batchEndDate = null;
 
-		if (batchAssignments.isEmpty()) {
-
-			courseStatus = CourseStatus.PLANNED;
-
-		} else if (anyOngoing) {
+		if (anyStarted) {
 
 			courseStatus = CourseStatus.ACTIVE;
 
-			batchStartDate = batchAssignments.stream()
-					.filter(eb -> eb.getClassBatch().getStatus() != ClassStatus.COMPLETED)
-					.map(eb -> eb.getClassBatch().getStartDate()).filter(Objects::nonNull)
+			batchStartDate = openBatches.stream()
+					.filter(cb -> cb.getStartDate() == null || !cb.getStartDate().isAfter(today))
+					.map(ClassBatch::getStartDate).filter(Objects::nonNull)
+					.min(LocalDate::compareTo).orElse(null);
+
+		} else if (!openBatches.isEmpty() || !anyCompleted) {
+
+			// Not in any batch yet, or the assigned batch has not reached its start date.
+			courseStatus = CourseStatus.PLANNED;
+
+			batchStartDate = openBatches.stream().map(ClassBatch::getStartDate).filter(Objects::nonNull)
 					.min(LocalDate::compareTo).orElse(null);
 
 		} else {
