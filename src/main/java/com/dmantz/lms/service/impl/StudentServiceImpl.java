@@ -94,7 +94,7 @@ public class StudentServiceImpl implements StudentService {
 	@Override
 	@Transactional
 	public RegistrationResponse register(StudentRegistrationRequest request) {
-
+  
 		logger.info("Registration started for email: {}", request.getEmailId());
 
 		if (studentRepository.existsByEmailId(request.getEmailId())) {
@@ -336,7 +336,7 @@ public class StudentServiceImpl implements StudentService {
 
 		// ── 5. Build response ────────────────────────────────────
 		StudentLoginResponse response = studentMapper.toLoginResponse(student);
-		response.setMessage("OTP sent to " + sentTo);
+		response.setMessage("Enter the code sent to your " + sentTo);
 		return response;
 	}
 

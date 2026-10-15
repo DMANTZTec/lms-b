@@ -14,6 +14,8 @@ public class InstructorScheduleResponse {
     private String courseId;
     private String className;
     private String status;
+    private Integer presentCount;
+    private Double attendanceRate;
 
 
     public Long getId() {
@@ -110,5 +112,21 @@ public class InstructorScheduleResponse {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Integer getPresentCount() {
+        return presentCount;
+    }
+
+    public void setPresentCount(Integer presentCount) {
+        this.presentCount = presentCount;
+    }
+
+    public Double getAttendanceRate() {
+        return attendanceRate;
+    }
+
+    public void setAttendanceRate(Double attendanceRate) {
+        this.attendanceRate = attendanceRate;
     }
 }

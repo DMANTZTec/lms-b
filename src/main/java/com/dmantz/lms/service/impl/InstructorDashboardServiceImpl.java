@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.dmantz.lms.dto.request.InstructorTaskRequest;
 import com.dmantz.lms.dto.request.PlanClassTopicsRequest;
 import com.dmantz.lms.dto.request.ReviewSubmissionRequest;
+import com.dmantz.lms.dto.request.ScheduleTaskRequest;
 import com.dmantz.lms.exceptions.ResourceNotFoundException;
 import com.dmantz.lms.exceptions.UnauthorizedAccessException;
 import com.dmantz.lms.mapper.ClassTopicMapper;
@@ -170,6 +171,94 @@ public class InstructorDashboardServiceImpl implements InstructorDashboardServic
 		return new InstructorTaskResponse(request.getTitle(), request.getDescription(), course.getCourseId(),
 				savedTasks.size(), savedTasks.stream().map(studentTaskMapper::toResponse).toList());
 	}
+
+	// Task tied to one class schedule: only the instructor(s) of that schedule may create it,
+	// and it is assigned to the students placed in the schedule's batch.
+	@Override
+	@Transactional
+	public InstructorTaskResponse createScheduleTask(Long scheduleId, ScheduleTaskRequest request) {
+
+		ClassSchedule schedule = classScheduleRepository.findById(scheduleId)
+				.orElseThrow(() -> new ResourceNotFoundException("Class schedule not found: " + scheduleId));
+
+		Staff instructor = staffRepository.findByStaffId(request.getAssignedBy())
+				.orElseThrow(() -> new ResourceNotFoundException("Instructor not found: " + request.getAssignedBy()));
+
+		if (!isScheduleInstructor(schedule, instructor.getStaffId())) {
+			throw new UnauthorizedAccessException(
+					"Instructor " + instructor.getStaffId() + " is not assigned to schedule: " + scheduleId);
+		}
+
+		ClassBatch batch = schedule.getClassBatch();
+		if (batch == null || batch.getCourse() == null) {
+			throw new ResourceNotFoundException("Schedule " + scheduleId + " has no associated class batch/course");
+		}
+		Course course = batch.getCourse();
+
+		logger.info("Instructor {} creating task for scheduleId: {} (batchId: {}, courseId: {})",
+				instructor.getStaffId(), scheduleId, batch.getId(), course.getCourseId());
+
+		Chapter chapter = chapterRepository.findById(request.getChapterId())
+				.orElseThrow(() -> new ResourceNotFoundException("Chapter not found: " + request.getChapterId()));
+		if (chapter.getCourse() == null || !chapter.getCourse().getCourseId().equals(course.getCourseId())) {
+			throw new IllegalArgumentException("Selected chapter does not belong to this schedule's course");
+		}
+
+		Topic topic = topicRepository.findById(request.getTopicId())
+				.orElseThrow(() -> new ResourceNotFoundException("Topic not found: " + request.getTopicId()));
+		if (topic.getChapter() == null || !topic.getChapter().getId().equals(chapter.getId())) {
+			throw new IllegalArgumentException("Selected topic does not belong to the selected chapter");
+		}
+
+		Map<String, Student> uniqueStudents = new LinkedHashMap<>();
+		for (EnrollmentBatch enrollmentBatch : enrollmentBatchRepository.findWithStudentsByClassBatchId(batch.getId())) {
+			Enrollment enrollment = enrollmentBatch.getEnrollment();
+			if (enrollment == null || enrollment.getStudent() == null
+					|| enrollment.getStatus() == EnrollmentStatus.CANCELLED) {
+				continue;
+			}
+			uniqueStudents.putIfAbsent(enrollment.getStudent().getStudentId(), enrollment.getStudent());
+		}
+
+		if (uniqueStudents.isEmpty()) {
+			throw new ResourceNotFoundException("No students are assigned to the batch of schedule: " + scheduleId);
+		}
+
+		LocalDateTime now = LocalDateTime.now();
+		List<StudentTask> savedTasks = new ArrayList<>();
+
+		for (Student student : uniqueStudents.values()) {
+			StudentTask task = new StudentTask();
+			task.setTitle(request.getTitle());
+			task.setDescription(request.getDescription());
+			task.setCourseId(course.getCourseId());
+			task.setCourse(course);
+			task.setChapter(chapter);
+			task.setTopic(topic);
+			task.setSchedule(schedule);
+			task.setStudent(student);
+			task.setAssignedBy(instructor.getStaffId());
+			task.setAssignedByType(AssignedByType.INSTRUCTOR);
+			task.setStatus(StudentTaskStatus.ACTIVE);
+			task.setStartDt(now);
+			task.setNeedHelp(false);
+			task.setCreatedBy(instructor.getId());
+			task.setCreatedDt(now);
+			task.setUpdatedBy(instructor.getId());
+			task.setUpdatedDt(now);
+			savedTasks.add(studentTaskRepository.save(task));
+		}
+
+		logger.info("Instructor {} assigned task '{}' to {} students for scheduleId {}", instructor.getStaffId(),
+				request.getTitle(), savedTasks.size(), scheduleId);
+
+		InstructorTaskResponse response = new InstructorTaskResponse(request.getTitle(), request.getDescription(),
+				course.getCourseId(), savedTasks.size(),
+				savedTasks.stream().map(studentTaskMapper::toResponse).toList());
+		response.setScheduleId(scheduleId);
+		return response;
+	}
+
 	@Override
 	public InstructorBatchSummaryResponse getBatchSummary(String instructorId) {
 

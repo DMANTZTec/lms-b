@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,4 +26,9 @@ public interface ScheduleAttendanceRepository extends JpaRepository<ScheduleAtte
     @Modifying
     @Query("delete from ScheduleAttendance sa where sa.schedule.id = :scheduleId")
     void deleteByScheduleId(@Param("scheduleId") Long scheduleId);
+
+    long countByStudent_StudentIdAndStatus(String studentId, AttendanceStatus status);
+
+    long countByStudent_StudentIdAndStatusAndSchedule_ClassDateBetween(String studentId, AttendanceStatus status,
+                                                                       LocalDate startDate, LocalDate endDate);
 }

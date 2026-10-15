@@ -18,6 +18,7 @@ public class StudentTaskSubmissionResponse {
     private String submissionNotes;
     private List<AttachmentResponse> attachments;
     private List<GitDetail> git;
+    private Integer timeSpentInMinutes;
     private String status;
     private String reviewStatus;  
     private LocalDateTime submittedAt;
@@ -98,6 +99,14 @@ public class StudentTaskSubmissionResponse {
 
     public void setGit(List<GitDetail> git) {
         this.git = git;
+    }
+
+    public Integer getTimeSpentInMinutes() {
+        return timeSpentInMinutes;
+    }
+
+    public void setTimeSpentInMinutes(Integer timeSpentInMinutes) {
+        this.timeSpentInMinutes = timeSpentInMinutes;
     }
 
     public String getStatus() {

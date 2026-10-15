@@ -5,6 +5,7 @@ public class StaffLoginResponse {
     private String role;
     private String staffId;
     private String email;
+    private String mobileNum;
     private String token;
     private String message;
 
@@ -30,6 +31,14 @@ public class StaffLoginResponse {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getMobileNum() {
+        return mobileNum;
+    }
+
+    public void setMobileNum(String mobileNum) {
+        this.mobileNum = mobileNum;
     }
 
     public String getToken() {
