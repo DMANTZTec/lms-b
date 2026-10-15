@@ -52,9 +52,7 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 	@Value("${strapi.api.token}")
 	private String strapiApiToken;
 
-	@Value("${strapi.upload.folder-id:2}")
-	private Long strapiUploadFolderId;
-
+	
 	private final RestTemplate restTemplate = new RestTemplate();
 
 	private final SubjectRepository subjectRepository;
@@ -971,12 +969,15 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 			// Upload file
 			body.add("files", new FileSystemResource(tempFile));
 
+			logger.info("Uploading file to Strapi: {}", file.getOriginalFilename());
 		
-			body.add("fileInfo", "{\"folder\":" + strapiUploadFolderId + "}");
-
+			//body.add("fileInfo", "{\"folder\":" + strapiUploadFolderId + "/LMS Content" + "}");
+			//body.add("fileInfo", "{\"folder\":" + "\"/LMS Content\"" + "}");
+			//body.add("folder", "/LMS Content");
+			logger.info("Strapi upload folder info: {}", body.get("fileInfo"));
 			HttpHeaders headers = buildStrapiAuthHeaders();
 			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-
+			logger.info("Uploading file to Strapi: {}", file.getOriginalFilename());
 			ResponseEntity<String> response = restTemplate.exchange(strapiUrl + "/api/upload", HttpMethod.POST,
 					new HttpEntity<>(body, headers), String.class);
 

@@ -52,10 +52,10 @@
   # ============================================
 
   strapi:
-    url: http://localhost:1337
+    url: http://103.12.1.147:1337
     api:
-      token: b8e6bf164fa277d7b9418884fcd7302f715635fbe5646ebf8bbf5da9acc9fe22969365ee032eacbac9df366f6b58ab98bb4b8a98cb758864ce4d1041dd57e2105d89ebfd50ada470a4d0473ab6cb10f4397b19726803cad4c5eea07fa0a105bf973ffcbc7bcc7f67eb90d4a36353722e13b40fc083b05350fc5e54df6f45084f
-
+      token: 24847fa3c2e963f5f3b1b8cb32943052300fed92bebda2bdb2aa66692fc62dded6fae7858b58158dd9b9eeca20222c885e57cba9945522ec1e29607d165daf6ad1f9f2d336251bfc52bcb697c5ea5e66574bcf0f6dfabc60a6442328785dc58fd3a7a88ffb70cb3113b64f7f9e5a22b8476e92eed180d5a5747a9847ebc57e1e
+   
 
   # ============================================
   # Twilio
