@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+     xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="
+     http://www.liquibase.org/xml/ns/dbchangelog
+     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.15.xsd">
+
+<changeSet id="202609041200-create-class_schedule_instructor"
+           author="afsheen">
+
+    <createTable tableName="class_schedule_instructor">
+
+        <column name="schedule_id" type="BIGINT">
+            <constraints nullable="false"/>
+        </column>
+
+        <column name="staff_id" type="VARCHAR(50)">
+            <constraints nullable="false"/>
+        </column>
+
+    </createTable>
+
+    <addPrimaryKey
+            tableName="class_schedule_instructor"
+            columnNames="schedule_id, staff_id"
+            constraintName="pk_class_schedule_instructor"/>
+
+    <addForeignKeyConstraint
+            baseTableName="class_schedule_instructor"
+            baseColumnNames="schedule_id"
+            referencedTableName="class_schedule"
+            referencedColumnNames="id"
+            constraintName="fk_class_schedule_instructor_schedule"
+            onDelete="CASCADE"/>
+
+    <addForeignKeyConstraint
+            baseTableName="class_schedule_instructor"
+            baseColumnNames="staff_id"
+            referencedTableName="staff"
+            referencedColumnNames="staff_id"
+            constraintName="fk_class_schedule_instructor_staff"
+            onDelete="CASCADE"/>
+
+    <createIndex
+            tableName="class_schedule_instructor"
+            indexName="idx_class_schedule_instructor_schedule_id">
+
+        <column name="schedule_id"/>
+
+    </createIndex>
+
+    <createIndex
+            tableName="class_schedule_instructor"
+            indexName="idx_class_schedule_instructor_staff_id">
+
+        <column name="staff_id"/>
+
+    </createIndex>
+
+</changeSet>
+
+
+</databaseChangeLog>

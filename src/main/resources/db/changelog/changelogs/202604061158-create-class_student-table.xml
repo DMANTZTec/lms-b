@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet id="202604061158" author="shiva">
+
+        <createTable tableName="class_student">
+
+            <!-- Primary Key -->
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <!-- Foreign Keys -->
+            <column name="class_batch_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="student_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- Enum stored as String -->
+            <column name="status" type="VARCHAR(50)"/>
+
+            <!-- Dates -->
+            <column name="enrolled_dt" type="TIMESTAMP"/>
+            <column name="start_dt" type="TIMESTAMP"/>
+            <column name="completed_dt" type="TIMESTAMP"/>
+
+            <!-- Audit Fields -->
+            <column name="created_by" type="BIGINT"/>
+            <column name="created_dt" type="TIMESTAMP"/>
+            <column name="updated_by" type="BIGINT"/>
+            <column name="updated_dt" type="TIMESTAMP"/>
+
+        </createTable>
+
+        <!-- FK: class_batch -->
+        <addForeignKeyConstraint
+                baseTableName="class_student"
+                baseColumnNames="class_batch_id"
+                referencedTableName="class_batch"
+                referencedColumnNames="id"
+                constraintName="fk_class_student_class_batch"/>
+
+        <!-- FK: student -->
+        <addForeignKeyConstraint
+                baseTableName="class_student"
+                baseColumnNames="student_id"
+                referencedTableName="student"
+                referencedColumnNames="id"
+                constraintName="fk_class_student_student"/>
+
+        <!-- Unique Constraint -->
+        <addUniqueConstraint
+                tableName="class_student"
+                columnNames="class_batch_id, student_id"
+                constraintName="uk_class_student_unique"/>
+
+    </changeSet>
+
+</databaseChangeLog>

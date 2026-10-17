@@ -1,0 +1,72 @@
+  # ============================================
+  # LMS Application - UAT Profile
+  # ============================================
+
+  spring:
+
+    # ------------------------------------------
+    # Datasource
+    # ------------------------------------------
+    datasource:
+      url: jdbc:mysql://103.12.1.147:3306/lms
+      username: lmsappuser
+      password: "Dmantz$123"
+      driver-class-name: com.mysql.cj.jdbc.Driver
+
+    # ------------------------------------------
+    # Liquibase
+    # ------------------------------------------
+    liquibase:
+      enabled: true
+      default-schema: lms
+
+    # ------------------------------------------
+    # JPA
+    # ------------------------------------------
+    jpa:
+      hibernate:
+        ddl-auto: none
+      show-sql: false
+
+    # ------------------------------------------
+    # Mail
+    # ------------------------------------------
+    mail:
+      username: saisowmyach0228@gmail.com
+      password: "vrbw zfmg ipbe blwx"
+
+
+  # ============================================
+  # Logging
+  # ============================================
+
+  logging:
+    level:
+      com.dmantz.lms: INFO
+      org.springframework.security: INFO
+      org.hibernate.SQL: WARN
+
+
+  # ============================================
+  # Strapi
+  # ============================================
+
+  strapi:
+    url: http://103.12.1.147:1337
+    api:
+      token: 24847fa3c2e963f5f3b1b8cb32943052300fed92bebda2bdb2aa66692fc62dded6fae7858b58158dd9b9eeca20222c885e57cba9945522ec1e29607d165daf6ad1f9f2d336251bfc52bcb697c5ea5e66574bcf0f6dfabc60a6442328785dc58fd3a7a88ffb70cb3113b64f7f9e5a22b8476e92eed180d5a5747a9847ebc57e1e
+   
+
+  # ============================================
+  # Twilio
+  # ============================================
+
+  # Twilio
+  twilio:
+    account:
+      sid: ${TWILIO_ACCOUNT_SID}
+    auth:
+      token: ${TWILIO_AUTH_TOKEN}
+    from:
+      number: ${TWILIO_FROM_NUMBER}
+

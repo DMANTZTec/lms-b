@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="202610051102" author="shiva">
+
+        <createTable tableName="schedule_attendance">
+
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints
+                        primaryKey="true"
+                        nullable="false"
+                        primaryKeyName="pk_schedule_attendance"/>
+            </column>
+
+            <column name="schedule_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- FIXED: Student.student_id is CHAR(7) -->
+            <column name="student_id" type="CHAR(7)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="status" type="VARCHAR(20)" defaultValue="UNMARKED">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="marked_by_staff_id" type="VARCHAR(20)"/>
+
+            <column name="marked_at" type="DATETIME"/>
+
+            <column name="created_dt" type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP"/>
+
+            <column name="created_by" type="BIGINT"/>
+
+            <column name="updated_dt" type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP"/>
+
+            <column name="updated_by" type="BIGINT"/>
+
+        </createTable>
+
+        <addUniqueConstraint
+                tableName="schedule_attendance"
+                columnNames="schedule_id, student_id"
+                constraintName="uk_schedule_attendance_schedule_student"/>
+
+        <addForeignKeyConstraint
+                baseTableName="schedule_attendance"
+                baseColumnNames="schedule_id"
+                referencedTableName="class_schedule"
+                referencedColumnNames="id"
+                constraintName="fk_schedule_attendance_schedule"/>
+
+        <addForeignKeyConstraint
+                baseTableName="schedule_attendance"
+                baseColumnNames="student_id"
+                referencedTableName="student"
+                referencedColumnNames="student_id"
+                constraintName="fk_schedule_attendance_student"/>
+
+        <addForeignKeyConstraint
+                baseTableName="schedule_attendance"
+                baseColumnNames="marked_by_staff_id"
+                referencedTableName="staff"
+                referencedColumnNames="staff_id"
+                constraintName="fk_schedule_attendance_marked_by"/>
+
+    </changeSet>
+
+</databaseChangeLog>
