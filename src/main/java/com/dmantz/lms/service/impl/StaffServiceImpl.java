@@ -234,40 +234,6 @@ public class StaffServiceImpl implements StaffService {
 		}
 	}
 
-//	private String uploadToStrapi(MultipartFile file) {
-//		try {
-//			File tempFile = File.createTempFile("upload-", file.getOriginalFilename());
-//			file.transferTo(tempFile);
-//			try {
-//				MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-//				body.add("files", new FileSystemResource(tempFile));
-//
-//				HttpHeaders headers = new HttpHeaders();
-//				headers.set("Authorization", "Bearer " + strapiApiToken);
-//				headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-//
-//				ResponseEntity<String> response = restTemplate.exchange(strapiUrl + "/api/upload", HttpMethod.POST,
-//						new HttpEntity<>(body, headers), String.class);
-//
-//				JsonNode root = new ObjectMapper().readTree(response.getBody());
-//				JsonNode fileNode = root.get(0);
-//
-//				if (fileNode == null) {
-//					throw new RuntimeException("Invalid Strapi upload response: " + response.getBody());
-//				}
-//
-//				String fileUrl = strapiUrl + fileNode.get("url").asText();
-//				logger.info("Profile image uploaded to Strapi: {}", fileUrl);
-//				return fileUrl;
-//
-//			} finally {
-//				tempFile.delete();
-//			}
-//		} catch (Exception e) {
-//			logger.error("Failed to upload profile image to Strapi", e);
-//			throw new RuntimeException("Failed to upload profile image to Strapi", e);
-//		}
-//	}
 
 	@Override
 	public void setPassword(SetStaffPasswordRequest request) {
@@ -407,7 +373,7 @@ public class StaffServiceImpl implements StaffService {
 		}
 
 		// GET ROLE
-		String role = staff.getRoles().stream().findFirst().map(Role::getRoleNm).orElse("STAFF");
+		List<String> role = staff.getRoles().stream().map(Role::getRoleNm).toList();
 
 		// GENERATE JWT TOKEN
 		String token = jwtUtil.generateToken(staff.getEmailId(), role, staff.getStaffId());
@@ -426,7 +392,7 @@ public class StaffServiceImpl implements StaffService {
 		response.setStaffId(staff.getStaffId());
 		response.setEmail(staff.getEmailId());
 		response.setMobileNum(staff.getMobileNum());
-		response.setRole(role);
+		response.setRole((staff.getRoles().stream().map(Role::getRoleNm).toList()));
 		response.setToken(token);
 		response.setMessage("Login successful");
 

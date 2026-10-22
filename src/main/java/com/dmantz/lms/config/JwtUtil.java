@@ -6,15 +6,16 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.List;
 
 @Component
 public class JwtUtil {
 
 	private final String SECRET = "mySuperSecretKeyForJwtRestroProject1234567890";
 
-	public String generateToken(String email, String role, String userId) {
+	public String generateToken(String email,  List<String> roles, String userId) {
 
-		return Jwts.builder().setSubject(email).claim("role", role).claim("userId", userId).setIssuedAt(new Date())
+		return Jwts.builder().setSubject(email).claim("role", roles).claim("userId", userId).setIssuedAt(new Date())
 				.setExpiration(new Date(System.currentTimeMillis() + 86400000))
 				.signWith(SignatureAlgorithm.HS256, SECRET).compact();
 	}
@@ -24,9 +25,9 @@ public class JwtUtil {
 		return getClaims(token).getSubject();
 	}
 
-	public String extractRole(String token) {
+	public List<String> extractRole(String token) {
 
-		return getClaims(token).get("role", String.class);
+		return getClaims(token).get("role", List.class);
 	}
 
 	public String extractUserId(String token) {

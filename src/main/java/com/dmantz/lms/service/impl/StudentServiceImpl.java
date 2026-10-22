@@ -374,8 +374,11 @@ public class StudentServiceImpl implements StudentService {
 		otp.setUpdatedDt(LocalDateTime.now());
 		otpRepository.save(otp);
 
-		String token = jwtUtil.generateToken(student.getEmailId(), "STUDENT", String.valueOf(student.getStudentId()));
-
+		String token = jwtUtil.generateToken(
+			    student.getEmailId(),
+			    List.of("STUDENT"),
+			    String.valueOf(student.getStudentId())
+			);
 		StudentLoginResponse response = studentMapper.toLoginResponse(student);
 		response.setToken(token);
 		response.setMessage("Login successful");

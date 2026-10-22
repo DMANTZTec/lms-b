@@ -1,20 +1,22 @@
 package com.dmantz.lms.dto.response;
 
+import java.util.List;
+
 public class StaffLoginResponse {
 
-    private String role;
+    private List<String> role;
     private String staffId;
     private String email;
     private String mobileNum;
     private String token;
     private String message;
 
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
+    public List<String> getRole() {
+		return role;
+	}
+    
+    public void setRole(List<String> role) {
+    			this.role = role;
     }
 
     public String getStaffId() {
