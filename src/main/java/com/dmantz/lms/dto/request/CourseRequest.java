@@ -16,7 +16,7 @@ public class CourseRequest {
 
 	@NotBlank(message = "Course title is required")
 	@Size(max = 255, message = "Course title must be at most 255 characters")
-	@Pattern(regexp = "^[A-Za-z0-9 \\-&+()]+$", message = "Course title can contain letters, numbers, spaces, hyphens, ampersand, plus, and parentheses only")
+	@Pattern(regexp = "^[A-Za-z0-9 \\-&+/()]+$", message = "Course title can contain letters, numbers, spaces, hyphens, ampersand, plus, and parentheses only")
 	private String courseTitle;
 
 	@NotBlank(message = "description is required")
