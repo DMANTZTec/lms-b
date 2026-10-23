@@ -488,7 +488,7 @@ public class StaffServiceImpl implements StaffService {
 
 		staffPasswordTokenRepository.save(passwordToken);
 
-		String resetLink = "http://localhost:5173/reset-password?token=" + token;
+		String resetLink = "http://103.12.1.147:30280/reset-password?token=" + token;
 
 		if (identifier.contains("@")) {
 
