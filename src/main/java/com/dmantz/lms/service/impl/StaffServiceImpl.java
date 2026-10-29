@@ -424,6 +424,44 @@ public class StaffServiceImpl implements StaffService {
 	}
 
 	@Override
+	@Transactional
+	public StaffResponse updateStaffDetails(String staffId, StaffDetailsUpdateRequest request) {
+
+		Staff staff = staffRepository.findByStaffId(staffId)
+				.orElseThrow(() -> new ResourceNotFoundException("Staff not found with ID: " + staffId));
+
+		// Email & mobile must stay unique across staff
+		if (request.getEmail() != null && staffRepository.existsByEmailIdAndStaffIdNot(request.getEmail(), staffId)) {
+			throw new DuplicateValuesException("Email already exists: " + request.getEmail());
+		}
+
+		if (request.getMobileNum() != null
+				&& staffRepository.existsByMobileNumAndStaffIdNot(request.getMobileNum(), staffId)) {
+			throw new DuplicateValuesException("Mobile number already exists: " + request.getMobileNum());
+		}
+
+		// Update all normal fields using MapStruct
+		staffMapper.updateEntity(request, staff);
+
+		// Update roles separately
+		if (request.getRoleIds() != null && !request.getRoleIds().isEmpty()) {
+
+			Set<Role> roles = new HashSet<>(roleRepository.findAllById(request.getRoleIds()));
+
+			if (roles.size() != request.getRoleIds().size()) {
+				throw new BadRequestException("One or more selected roles are invalid");
+			}
+
+			staff.setRoles(roles);
+		}
+
+		Staff updatedStaff = staffRepository.save(staff);
+
+		logger.info("Staff details updated successfully for staffId: {}", staffId);
+		return staffMapper.toResponse(updatedStaff);
+	}
+
+	@Override
 	public StaffResponse updateProfileImage(String staffId, MultipartFile file) {
 
 		Staff staff = staffRepository.findByStaffId(staffId)

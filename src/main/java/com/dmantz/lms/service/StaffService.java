@@ -49,5 +49,10 @@ public interface StaffService {
             StaffUpdateRequest request
     );
 
+    StaffResponse updateStaffDetails(
+            String staffId,
+            StaffDetailsUpdateRequest request
+    );
+
 }
 
