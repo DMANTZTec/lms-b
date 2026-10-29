@@ -118,6 +118,17 @@ public class StaffController {
 		return ResponseEntity.ok(response);
 	}
 
+	@PutMapping("/{staffId}/update-details")
+	public ResponseEntity<StaffResponse> updateStaffDetails(@PathVariable String staffId,
+			@Valid @RequestBody StaffDetailsUpdateRequest request) {
+
+		logger.info("Request received to update staff details with staffId: {}", staffId);
+		StaffResponse response = staffService.updateStaffDetails(staffId, request);
+
+		logger.info("Staff details updated successfully with staffId: {}", staffId);
+		return ResponseEntity.ok(response);
+	}
+
 	@PutMapping(value = "/{staffId}/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<StaffResponse> updateProfileImage(@PathVariable String staffId,
 			@RequestParam("file") MultipartFile file) {
