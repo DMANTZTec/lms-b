@@ -29,6 +29,8 @@ public interface StudentTaskRepository extends JpaRepository<StudentTask, Long> 
 
 	List<StudentTask> findByStudent_StudentId(String studentId);
 
+	List<StudentTask> findByStudent_StudentIdInAndCourseId(List<String> studentIds, String courseId);
+
 	List<StudentTask> findBySchedule_IdOrderByIdAsc(Long scheduleId);
 
 	Optional<Student> findByIdAndStudent_StudentId(Long taskid, String studentId);

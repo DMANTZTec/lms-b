@@ -31,4 +31,13 @@ public interface ScheduleAttendanceRepository extends JpaRepository<ScheduleAtte
 
     long countByStudent_StudentIdAndStatusAndSchedule_ClassDateBetween(String studentId, AttendanceStatus status,
                                                                        LocalDate startDate, LocalDate endDate);
+
+    @Query("""
+            select sa
+            from ScheduleAttendance sa
+            join fetch sa.schedule cs
+            join fetch sa.student st
+            where cs.classBatch.id = :batchId
+            """)
+    List<ScheduleAttendance> findForBatchReport(@Param("batchId") Long batchId);
 }

@@ -1,13 +1,19 @@
 package com.dmantz.lms.service.impl;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -39,8 +45,10 @@ import com.dmantz.lms.repository.EnrollmentBatchRepository;
 import com.dmantz.lms.repository.EnrollmentRepository;
 import com.dmantz.lms.repository.StaffCourseRepository;
 import com.dmantz.lms.repository.StaffRepository;
+import com.dmantz.lms.repository.ScheduleAttendanceRepository;
 import com.dmantz.lms.repository.StudentTaskRepository;
 import com.dmantz.lms.repository.StudentTaskSubmissionRepository;
+import com.dmantz.lms.repository.StudentTopicReferenceProgressRepository;
 import com.dmantz.lms.repository.TopicRepository;
 import com.dmantz.lms.service.InstructorDashboardService;
 
@@ -65,8 +73,11 @@ public class InstructorDashboardServiceImpl implements InstructorDashboardServic
 	private final StudentTaskSubmissionMapper studentTaskSubmissionMapper;
 	private final ClassTopicRepository classTopicRepository;
 	private final ClassTopicMapper classTopicMapper;
+	private final StudentTopicReferenceProgressRepository studentTopicReferenceProgressRepository;
+	private final ScheduleAttendanceRepository scheduleAttendanceRepository;
 
-
+	private static final List<String> REPORT_CRITERIA_ORDER = List.of("Task Completion", "Technical Correctness",
+			"Code Quality", "Problem Solving", "Understanding");
 
 	public InstructorDashboardServiceImpl(StaffRepository staffRepository, ClassBatchRepository classBatchRepository,
 			CourseRepository courseRepository, ChapterRepository chapterRepository, TopicRepository topicRepository,
@@ -75,7 +86,9 @@ public class InstructorDashboardServiceImpl implements InstructorDashboardServic
 			ClassScheduleRepository classScheduleRepository, StaffCourseRepository staffCourseRepository,
 			StudentTaskSubmissionRepository studentTaskSubmissionRepository,
 			StudentTaskSubmissionMapper studentTaskSubmissionMapper, ClassTopicRepository classTopicRepository,
-			ClassTopicMapper classTopicMapper) {
+			ClassTopicMapper classTopicMapper,
+			StudentTopicReferenceProgressRepository studentTopicReferenceProgressRepository,
+			ScheduleAttendanceRepository scheduleAttendanceRepository) {
 		super();
 		this.staffRepository = staffRepository;
 		this.classBatchRepository = classBatchRepository;
@@ -92,6 +105,8 @@ public class InstructorDashboardServiceImpl implements InstructorDashboardServic
 		this.studentTaskSubmissionMapper = studentTaskSubmissionMapper;
 		this.classTopicRepository = classTopicRepository;
 		this.classTopicMapper = classTopicMapper;
+		this.studentTopicReferenceProgressRepository = studentTopicReferenceProgressRepository;
+		this.scheduleAttendanceRepository = scheduleAttendanceRepository;
 	}
 
 	@Override
@@ -788,6 +803,361 @@ public class InstructorDashboardServiceImpl implements InstructorDashboardServic
 				request.getOverallRating());
 
 		return studentTaskSubmissionMapper.toResponse(saved);
+	}
+
+	// ================= STUDENT REPORTS =================
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<InstructorStudentReportResponse> getStudentReports(Long batchId, String courseId, String period,
+			String status, String search) {
+
+		ClassBatch batch = classBatchRepository.findById(batchId)
+				.orElseThrow(() -> new ResourceNotFoundException("Batch not found: " + batchId));
+
+		Course course = batch.getCourse();
+		if (course == null) {
+			throw new ResourceNotFoundException("Batch " + batchId + " is not linked to any course");
+		}
+
+		if (courseId == null || courseId.isBlank()) {
+			throw new IllegalArgumentException("courseId is required");
+		}
+		if (!courseId.trim().equalsIgnoreCase(course.getCourseId())) {
+			throw new IllegalArgumentException("Batch " + batchId + " does not belong to course " + courseId);
+		}
+
+		String statusFilter = normalizeReportStatus(status);
+		LocalDate startDate = resolveReportStartDate(period);
+
+		logger.info("Building student reports for batchId: {}, courseId: {}, period: {}, status: {}", batchId,
+				course.getCourseId(), period, statusFilter);
+
+		Map<String, EnrollmentBatch> batchStudents = new LinkedHashMap<>();
+		for (EnrollmentBatch enrollmentBatch : enrollmentBatchRepository.findWithStudentsByClassBatchId(batchId)) {
+			Enrollment enrollment = enrollmentBatch.getEnrollment();
+			if (enrollment == null || enrollment.getStudent() == null
+					|| enrollment.getStatus() == EnrollmentStatus.CANCELLED) {
+				continue;
+			}
+			batchStudents.putIfAbsent(enrollment.getStudent().getStudentId(), enrollmentBatch);
+		}
+
+		if (batchStudents.isEmpty()) {
+			logger.info("No active students found in batchId: {}", batchId);
+			return List.of();
+		}
+
+		List<String> studentIds = new ArrayList<>(batchStudents.keySet());
+
+		// Course topics and the references that must all be completed for a topic to count as done.
+		Map<Long, Set<Long>> topicReferenceIds = new LinkedHashMap<>();
+		int totalTopics = 0;
+		for (Chapter chapter : course.getChapters()) {
+			for (Topic topic : chapter.getTopics()) {
+				totalTopics++;
+				Set<Long> referenceIds = new LinkedHashSet<>();
+				if (topic.getReferences() != null) {
+					for (TopicReference reference : topic.getReferences()) {
+						if (reference.getId() != null) {
+							referenceIds.add(reference.getId());
+						}
+					}
+				}
+				topicReferenceIds.put(topic.getId(), referenceIds);
+			}
+		}
+
+		Map<String, Set<Long>> completedReferencesByStudent = new LinkedHashMap<>();
+		for (StudentTopicReferenceProgress progress : studentTopicReferenceProgressRepository
+				.findByStudent_StudentIdIn(studentIds)) {
+			if (progress.getStudent() == null || progress.getTopicReference() == null
+					|| !Boolean.TRUE.equals(progress.getCompleted())) {
+				continue;
+			}
+			completedReferencesByStudent
+					.computeIfAbsent(progress.getStudent().getStudentId(), key -> new LinkedHashSet<>())
+					.add(progress.getTopicReference().getId());
+		}
+
+		Map<String, List<StudentTask>> tasksByStudent = studentTaskRepository
+				.findByStudent_StudentIdInAndCourseId(studentIds, course.getCourseId()).stream()
+				.filter(task -> isWithinReportPeriod(
+						task.getStartDt() != null ? task.getStartDt() : task.getCreatedDt(), startDate))
+				.collect(Collectors.groupingBy(task -> task.getStudent().getStudentId()));
+
+		Map<String, List<StudentTaskSubmission>> reviewsByStudent = studentTaskSubmissionRepository
+				.findByStudent_StudentIdInAndStudentTask_CourseId(studentIds, course.getCourseId()).stream()
+				.filter(submission -> submission.getReviewStatus() == ReviewStatus.REVIEWED
+						&& submission.getOverallRating() != null)
+				.filter(submission -> isWithinReportPeriod(
+						submission.getReviewedAt() != null ? submission.getReviewedAt() : submission.getSubmittedAt(),
+						startDate))
+				.collect(Collectors.groupingBy(submission -> submission.getStudent().getStudentId()));
+
+		Map<String, int[]> attendanceByStudent = new LinkedHashMap<>();
+		for (ScheduleAttendance attendance : scheduleAttendanceRepository.findForBatchReport(batchId)) {
+			if (attendance.getStudent() == null || attendance.getSchedule() == null) {
+				continue;
+			}
+			LocalDate classDate = attendance.getSchedule().getClassDate();
+			if (!isWithinReportPeriod(classDate == null ? null : classDate.atStartOfDay(), startDate)) {
+				continue;
+			}
+			int[] counts = attendanceByStudent.computeIfAbsent(attendance.getStudent().getStudentId(),
+					key -> new int[2]);
+			if (attendance.getStatus() == AttendanceStatus.PRESENT) {
+				counts[0]++;
+			} else if (attendance.getStatus() == AttendanceStatus.ABSENT) {
+				counts[1]++;
+			}
+		}
+
+		String normalizedSearch = search == null ? null : search.trim().toLowerCase(Locale.ROOT);
+		List<InstructorStudentReportResponse> reports = new ArrayList<>();
+
+		for (EnrollmentBatch enrollmentBatch : batchStudents.values()) {
+			Student student = enrollmentBatch.getEnrollment().getStudent();
+			String studentId = student.getStudentId();
+
+			InstructorStudentReportResponse report = new InstructorStudentReportResponse();
+			report.setStudentId(studentId);
+			report.setStudentName(buildStudentName(student));
+			report.setEmailId(student.getEmailId());
+			report.setProfileImg(student.getProfileImg());
+			report.setBatchId(batch.getId());
+			report.setBatchName(batch.getClassName());
+			report.setCourseId(course.getCourseId());
+			report.setCourseName(course.getCourseTitle());
+
+			Set<Long> completedReferences = completedReferencesByStudent.getOrDefault(studentId, Set.of());
+			int completedTopics = 0;
+			for (Set<Long> referenceIds : topicReferenceIds.values()) {
+				if (!referenceIds.isEmpty() && completedReferences.containsAll(referenceIds)) {
+					completedTopics++;
+				}
+			}
+			report.setCompletedTopics(completedTopics);
+			report.setTotalTopics(totalTopics);
+
+			List<StudentTask> tasks = tasksByStudent.getOrDefault(studentId, List.of());
+			int tasksCompleted = (int) tasks.stream()
+					.filter(task -> task.getStatus() == StudentTaskStatus.COMPLETED).count();
+			report.setTasksTotal(tasks.size());
+			report.setTasksCompleted(tasksCompleted);
+
+			List<StudentTaskSubmission> reviews = reviewsByStudent.getOrDefault(studentId, List.of());
+			report.setAverageScore(averageRating(reviews));
+			report.setCriteria(buildCriteria(reviews));
+
+			int[] attendanceCounts = attendanceByStudent.getOrDefault(studentId, new int[2]);
+			int markedClasses = attendanceCounts[0] + attendanceCounts[1];
+			double attendancePercentage = markedClasses == 0 ? 0.0
+					: roundTo1Decimal(attendanceCounts[0] * 100.0 / markedClasses);
+			report.setAttendancePercentage(attendancePercentage);
+
+			LocalDateTime joinedAt = enrollmentBatch.getAssignedDate();
+			if (joinedAt == null && enrollmentBatch.getEnrollment() != null) {
+				joinedAt = enrollmentBatch.getEnrollment().getEnrollmentDate();
+			}
+			if (joinedAt == null) {
+				joinedAt = student.getCreatedDt();
+			}
+			report.setJoinedAt(joinedAt);
+			report.setJoinedDaysAgo(
+					joinedAt == null ? 0 : Math.max(0, ChronoUnit.DAYS.between(joinedAt.toLocalDate(), LocalDate.now())));
+
+			Double taskCompletion = tasks.isEmpty() ? null : tasksCompleted * 100.0 / tasks.size();
+			Double topicProgress = totalTopics == 0 ? null : completedTopics * 100.0 / totalTopics;
+			Double attendanceMetric = markedClasses == 0 ? null : attendancePercentage;
+
+			String derivedStatus = deriveReportStatus(attendanceMetric, taskCompletion, report.getAverageScore(),
+					topicProgress);
+			report.setStatus(derivedStatus);
+
+			if (normalizedSearch != null && !normalizedSearch.isEmpty()) {
+				String name = report.getStudentName() == null ? "" : report.getStudentName().toLowerCase(Locale.ROOT);
+				if (!name.contains(normalizedSearch) && !studentId.toLowerCase(Locale.ROOT).contains(normalizedSearch)) {
+					continue;
+				}
+			}
+
+			if (!"ALL".equals(statusFilter) && !derivedStatus.equals(statusFilter)) {
+				continue;
+			}
+
+			reports.add(report);
+		}
+
+		reports.sort(Comparator.comparing(
+				report -> report.getStudentName() == null ? "" : report.getStudentName(),
+				String.CASE_INSENSITIVE_ORDER));
+
+		logger.info("Returning {} student report row(s) for batchId: {}, courseId: {}", reports.size(), batchId,
+				course.getCourseId());
+
+		return reports;
+	}
+
+	private String buildStudentName(Student student) {
+		String firstName = student.getFirstNm() == null ? "" : student.getFirstNm().trim();
+		String lastName = student.getLastNm() == null ? "" : student.getLastNm().trim();
+		return (firstName + " " + lastName).trim();
+	}
+
+	private LocalDate resolveReportStartDate(String period) {
+		if (period == null || period.isBlank() || period.equalsIgnoreCase("all")
+				|| period.equalsIgnoreCase("all days") || period.equalsIgnoreCase("all_days")) {
+			return null;
+		}
+
+		int days;
+		try {
+			days = Integer.parseInt(period.trim());
+		} catch (NumberFormatException ex) {
+			throw new IllegalArgumentException("Invalid period: " + period + ". Allowed values: 7, 30, 90, All");
+		}
+
+		if (days <= 0) {
+			throw new IllegalArgumentException("Invalid period: " + period + ". Allowed values: 7, 30, 90, All");
+		}
+
+		return LocalDate.now().minusDays(days - 1L);
+	}
+
+	private String normalizeReportStatus(String status) {
+		if (status == null || status.isBlank() || status.equalsIgnoreCase("all")) {
+			return "ALL";
+		}
+
+		String normalized = status.trim().toUpperCase(Locale.ROOT).replace(' ', '_');
+		if (!normalized.equals("AT_RISK") && !normalized.equals("WATCH") && !normalized.equals("ON_TRACK")) {
+			throw new IllegalArgumentException(
+					"Invalid status: " + status + ". Allowed values: AT_RISK, WATCH, ON_TRACK, All");
+		}
+		return normalized;
+	}
+
+	private boolean isWithinReportPeriod(LocalDateTime value, LocalDate startDate) {
+		if (startDate == null) {
+			return true;
+		}
+		return value != null && !value.toLocalDate().isBefore(startDate);
+	}
+
+	private BigDecimal averageRating(List<StudentTaskSubmission> reviews) {
+		if (reviews.isEmpty()) {
+			return null;
+		}
+		BigDecimal total = BigDecimal.ZERO;
+		for (StudentTaskSubmission review : reviews) {
+			total = total.add(review.getOverallRating());
+		}
+		return total.divide(BigDecimal.valueOf(reviews.size()), 1, RoundingMode.HALF_UP);
+	}
+
+	private List<InstructorStudentReportResponse.Criterion> buildCriteria(List<StudentTaskSubmission> reviews) {
+		Map<String, List<BigDecimal>> ratingsByCriterion = new LinkedHashMap<>();
+		Map<String, String> displayNames = new LinkedHashMap<>();
+
+		for (StudentTaskSubmission review : reviews) {
+			if (review.getCriteria() == null) {
+				continue;
+			}
+			for (CriterionRating criterionRating : review.getCriteria()) {
+				if (criterionRating == null || criterionRating.getCriterion() == null
+						|| criterionRating.getRating() == null) {
+					continue;
+				}
+				String criterion = criterionRating.getCriterion().trim();
+				if (criterion.isEmpty()) {
+					continue;
+				}
+				String key = criterion.toLowerCase(Locale.ROOT);
+				displayNames.putIfAbsent(key, canonicalCriterionName(criterion));
+				ratingsByCriterion.computeIfAbsent(key, ignored -> new ArrayList<>())
+						.add(criterionRating.getRating());
+			}
+		}
+
+		List<InstructorStudentReportResponse.Criterion> criteria = new ArrayList<>();
+		for (Map.Entry<String, List<BigDecimal>> entry : ratingsByCriterion.entrySet()) {
+			List<BigDecimal> ratings = entry.getValue();
+			BigDecimal total = ratings.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
+			BigDecimal average = total.divide(BigDecimal.valueOf(ratings.size()), 1, RoundingMode.HALF_UP);
+			criteria.add(new InstructorStudentReportResponse.Criterion(average, displayNames.get(entry.getKey())));
+		}
+
+		criteria.sort(Comparator
+				.comparingInt((InstructorStudentReportResponse.Criterion criterion) -> criteriaOrder(criterion.getCriterion()))
+				.thenComparing(InstructorStudentReportResponse.Criterion::getCriterion,
+						String.CASE_INSENSITIVE_ORDER));
+		return criteria;
+	}
+
+	private String canonicalCriterionName(String criterion) {
+		for (String canonical : REPORT_CRITERIA_ORDER) {
+			if (canonical.equalsIgnoreCase(criterion)) {
+				return canonical;
+			}
+		}
+		return criterion;
+	}
+
+	private int criteriaOrder(String criterion) {
+		if (criterion == null) {
+			return Integer.MAX_VALUE;
+		}
+		for (int index = 0; index < REPORT_CRITERIA_ORDER.size(); index++) {
+			if (REPORT_CRITERIA_ORDER.get(index).equalsIgnoreCase(criterion)) {
+				return index;
+			}
+		}
+		return Integer.MAX_VALUE;
+	}
+
+	private String deriveReportStatus(Double attendancePercentage, Double taskCompletion, BigDecimal averageScore,
+			Double topicProgress) {
+
+		double scorePercentage = averageScore == null ? -1 : averageScore.doubleValue() * 20.0;
+
+		boolean atRisk = (attendancePercentage != null && attendancePercentage < 50)
+				|| (taskCompletion != null && taskCompletion < 40)
+				|| (scorePercentage >= 0 && scorePercentage < 50);
+		if (atRisk) {
+			return "AT_RISK";
+		}
+
+		List<Double> metrics = new ArrayList<>();
+		if (attendancePercentage != null) {
+			metrics.add(attendancePercentage);
+		}
+		if (taskCompletion != null) {
+			metrics.add(taskCompletion);
+		}
+		if (scorePercentage >= 0) {
+			metrics.add(scorePercentage);
+		}
+		if (topicProgress != null) {
+			metrics.add(topicProgress);
+		}
+
+		if (metrics.isEmpty()) {
+			return "ON_TRACK";
+		}
+
+		double averageMetric = metrics.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+
+		boolean watch = averageMetric < 70
+				|| (attendancePercentage != null && attendancePercentage < 75)
+				|| (taskCompletion != null && taskCompletion < 60)
+				|| (scorePercentage >= 0 && scorePercentage < 70);
+
+		return watch ? "WATCH" : "ON_TRACK";
+	}
+
+	private double roundTo1Decimal(double value) {
+		return Math.round(value * 10.0) / 10.0;
 	}
 
 }

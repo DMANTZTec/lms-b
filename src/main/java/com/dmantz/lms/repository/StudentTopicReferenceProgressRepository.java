@@ -12,4 +12,6 @@ public interface StudentTopicReferenceProgressRepository extends JpaRepository<S
 	Optional<StudentTopicReferenceProgress> findByStudent_IdAndTopicReference_Id(Long studentId, Long referenceId);
 
 	List<StudentTopicReferenceProgress> findByStudent_StudentId(String studentId);
+
+	List<StudentTopicReferenceProgress> findByStudent_StudentIdIn(List<String> studentIds);
 }

@@ -181,6 +181,22 @@ public class InstructorDashboardController {
 	    return ResponseEntity.ok(response);
 	}
 
+	@GetMapping("/student-reports")
+	public ResponseEntity<List<InstructorStudentReportResponse>> getStudentReports(@RequestParam Long batchId,
+			@RequestParam String courseId, @RequestParam(required = false) String period,
+			@RequestParam(required = false) String status, @RequestParam(required = false) String search) {
+
+		logger.info("Received student-reports request for batchId: {}, courseId: {}, period: {}, status: {}, search: {}",
+				batchId, courseId, period, status, search);
+
+		List<InstructorStudentReportResponse> response = instructorDashboardService.getStudentReports(batchId, courseId,
+				period, status, search);
+
+		logger.info("Returning {} student report row(s) for batchId: {}", response.size(), batchId);
+
+		return ResponseEntity.ok(response);
+	}
+
 	@PostMapping("/submissions/{submissionId}/review")
 	public ResponseEntity<StudentTaskSubmissionResponse> reviewSubmission(@PathVariable Long submissionId,
 			@RequestParam String instructorId, @Valid @RequestBody ReviewSubmissionRequest request) {

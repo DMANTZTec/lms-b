@@ -29,6 +29,9 @@ public interface StudentTaskSubmissionRepository extends JpaRepository<StudentTa
     
     List<StudentTaskSubmission> findByStudentTask_IdIn(List<Long> taskIds);
 
+    List<StudentTaskSubmission> findByStudent_StudentIdInAndStudentTask_CourseId(List<String> studentIds,
+            String courseId);
+
     @Query("select coalesce(sum(s.timeSpentInMinutes), 0) from StudentTaskSubmission s "
             + "where s.student.studentId = :studentId and s.timeSpentInMinutes > 0")
     long sumTimeSpentInMinutesByStudentId(@Param("studentId") String studentId);

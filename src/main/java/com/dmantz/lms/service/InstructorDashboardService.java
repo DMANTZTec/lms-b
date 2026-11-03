@@ -35,4 +35,7 @@ public interface InstructorDashboardService {
 
 	StudentTaskSubmissionResponse reviewSubmission(Long submissionId, String instructorId,
 			ReviewSubmissionRequest request);
+
+	List<InstructorStudentReportResponse> getStudentReports(Long batchId, String courseId, String period, String status,
+			String search);
 }
