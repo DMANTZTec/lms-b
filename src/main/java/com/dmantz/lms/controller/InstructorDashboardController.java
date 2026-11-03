@@ -181,6 +181,21 @@ public class InstructorDashboardController {
 	    return ResponseEntity.ok(response);
 	}
 
+	@GetMapping("/courses-with-batches")
+	public ResponseEntity<List<InstructorCourseBatchesResponse>> getCoursesWithBatches(
+			@RequestParam String instructorId) {
+
+		logger.info("Received courses-with-batches request for instructorId: {}", instructorId);
+
+		List<InstructorCourseBatchesResponse> response = instructorDashboardService
+				.getCoursesWithBatches(instructorId);
+
+		logger.info("Returning {} course(s) with assigned batches for instructorId: {}", response.size(),
+				instructorId);
+
+		return ResponseEntity.ok(response);
+	}
+
 	@GetMapping("/student-reports")
 	public ResponseEntity<List<InstructorStudentReportResponse>> getStudentReports(@RequestParam Long batchId,
 			@RequestParam String courseId, @RequestParam(required = false) String period,

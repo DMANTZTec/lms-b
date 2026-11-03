@@ -38,4 +38,6 @@ public interface InstructorDashboardService {
 
 	List<InstructorStudentReportResponse> getStudentReports(Long batchId, String courseId, String period, String status,
 			String search);
+
+	List<InstructorCourseBatchesResponse> getCoursesWithBatches(String instructorId);
 }

@@ -734,7 +734,50 @@ public class InstructorDashboardServiceImpl implements InstructorDashboardServic
 
 	    return result;
 	}
-	
+
+	// Courses of the batches this instructor is assigned to, each with only the
+	// instructor's own batches.
+	@Override
+	public List<InstructorCourseBatchesResponse> getCoursesWithBatches(String instructorId) {
+
+		Staff instructor = staffRepository.findByStaffId(instructorId)
+				.orElseThrow(() -> new ResourceNotFoundException("Instructor not found: " + instructorId));
+
+		logger.info("Fetching courses and assigned batches for instructor: {}", instructor.getStaffId());
+
+		List<ClassBatch> batches = classBatchRepository.findByInstructors_StaffId(instructor.getStaffId());
+
+		Map<String, InstructorCourseBatchesResponse> courses = new LinkedHashMap<>();
+
+		for (ClassBatch batch : batches) {
+			Course course = batch.getCourse();
+			if (course == null || course.isDeleted()) {
+				continue;
+			}
+
+			InstructorCourseBatchesResponse courseResponse = courses.computeIfAbsent(course.getCourseId(),
+					key -> new InstructorCourseBatchesResponse(course.getCourseId(), course.getCourseTitle()));
+
+			courseResponse.getBatches().add(new InstructorCourseBatchesResponse.Batch(batch.getId(),
+					batch.getClassName()));
+		}
+
+		List<InstructorCourseBatchesResponse> result = new ArrayList<>(courses.values());
+
+		result.sort(Comparator.comparing(
+				course -> course.getCourseName() == null ? "" : course.getCourseName(),
+				String.CASE_INSENSITIVE_ORDER));
+
+		for (InstructorCourseBatchesResponse course : result) {
+			course.getBatches().sort(Comparator.comparing(InstructorCourseBatchesResponse.Batch::getBatchId,
+					Comparator.nullsLast(Comparator.naturalOrder())));
+		}
+
+		logger.info("Instructor {} has {} course(s) with assigned batches", instructor.getStaffId(), result.size());
+
+		return result;
+	}
+
 	@Override
 	public List<StudentTaskSubmissionResponse> getPendingReviews(String instructorId) {
 
