@@ -10,4 +10,7 @@ public interface EmailService {
 
     void sendResetPasswordEmail(String toEmail, String staffName, String resetLink);
 
+    void sendStudentNotificationEmail(String toEmail, String studentName, String instructorName,
+            String courseTitle, String batchName, String message);
+
 }

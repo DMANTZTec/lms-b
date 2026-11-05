@@ -122,4 +122,7 @@
     <!-- student_task.schedule_id for schedule-scoped instructor tasks -->
     <include file="db/changelog/changelogs/202610081200-add-schedule_id-to-student_task.xml"/>
 
+    <!-- student_notification table: instructor -> student messages -->
+    <include file="db/changelog/changelogs/202611051200-create-student_notification-table.xml"/>
+
 </databaseChangeLog>

@@ -249,4 +249,42 @@ public class EmailServiceImpl implements EmailService {
 			throw new RuntimeException("Failed to send reset password email.", ex);
 		}
 	}
+
+	@Override
+	public void sendStudentNotificationEmail(String toEmail, String studentName, String instructorName,
+			String courseTitle, String batchName, String message) {
+
+		logger.info("Preparing instructor notification email for: {}", toEmail);
+
+		if (toEmail == null || toEmail.isBlank()) {
+			throw new IllegalArgumentException("Recipient email must not be null or blank");
+		}
+
+		String subject = "LMS - New message from your instructor"
+				+ (courseTitle != null && !courseTitle.isBlank() ? " (" + courseTitle + ")" : "");
+
+		String body = "Hello " + (studentName == null || studentName.isBlank() ? "Student" : studentName) + ",\n\n"
+				+ "You have a new message from your instructor " + instructorName + ".\n\n"
+				+ "Course: " + courseTitle + "\n"
+				+ "Batch: " + batchName + "\n\n"
+				+ "Message:\n" + message + "\n\n"
+				+ "You can also view this message in your LMS student dashboard.\n\n"
+				+ "Regards,\n"
+				+ "LMS Team";
+
+		try {
+			SimpleMailMessage mail = new SimpleMailMessage();
+			mail.setTo(toEmail);
+			mail.setSubject(subject);
+			mail.setText(body);
+
+			mailSender.send(mail);
+
+			logger.info("Instructor notification email sent successfully to: {}", toEmail);
+
+		} catch (MailException ex) {
+			logger.error("Failed to send instructor notification email to: {}", toEmail, ex);
+			throw new RuntimeException("Failed to send notification email.", ex);
+		}
+	}
 }

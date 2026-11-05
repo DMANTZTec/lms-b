@@ -3,6 +3,7 @@ package com.dmantz.lms.controller;
 import com.dmantz.lms.dto.response.*;
 import com.dmantz.lms.entity.CourseStatus;
 import com.dmantz.lms.service.StudentDashboardService;
+import com.dmantz.lms.service.StudentNotificationService;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,9 +20,12 @@ public class StudentDashboardController {
             LogManager.getLogger(StudentDashboardController.class);
 
     private final StudentDashboardService dashboardService;
+    private final StudentNotificationService notificationService;
 
-    public StudentDashboardController(StudentDashboardService dashboardService) {
+    public StudentDashboardController(StudentDashboardService dashboardService,
+            StudentNotificationService notificationService) {
         this.dashboardService = dashboardService;
+        this.notificationService = notificationService;
     }
 
     // ================= WEEKLY SCHEDULE =================
@@ -323,6 +327,29 @@ public class StudentDashboardController {
 
         logger.info(
                 "Classes attendance summary fetched successfully for studentId: {}",
+                studentId
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ================= NOTIFICATIONS (messages from instructors) =================
+
+    @GetMapping("/notifications/{studentId}")
+    public ResponseEntity<List<StudentNotificationResponse>> getNotifications(
+            @PathVariable String studentId) {
+
+        logger.info(
+                "Received request to fetch notifications for studentId: {}",
+                studentId
+        );
+
+        List<StudentNotificationResponse> response =
+                notificationService.getStudentNotifications(studentId);
+
+        logger.info(
+                "Returning {} notification(s) for studentId: {}",
+                response.size(),
                 studentId
         );
 

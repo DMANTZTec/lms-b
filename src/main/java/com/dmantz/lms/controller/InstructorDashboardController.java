@@ -21,7 +21,9 @@ import com.dmantz.lms.dto.request.InstructorTaskRequest;
 import com.dmantz.lms.dto.request.PlanClassTopicsRequest;
 import com.dmantz.lms.dto.request.ReviewSubmissionRequest;
 import com.dmantz.lms.dto.request.ScheduleTaskRequest;
+import com.dmantz.lms.dto.request.SendStudentNotificationRequest;
 import com.dmantz.lms.service.InstructorDashboardService;
+import com.dmantz.lms.service.StudentNotificationService;
 
 import jakarta.validation.Valid;
 
@@ -32,9 +34,12 @@ public class InstructorDashboardController {
 	private static final Logger logger = LogManager.getLogger(InstructorDashboardController.class);
 
 	private final InstructorDashboardService instructorDashboardService;
+	private final StudentNotificationService studentNotificationService;
 
-	public InstructorDashboardController(InstructorDashboardService instructorDashboardService) {
+	public InstructorDashboardController(InstructorDashboardService instructorDashboardService,
+			StudentNotificationService studentNotificationService) {
 		this.instructorDashboardService = instructorDashboardService;
+		this.studentNotificationService = studentNotificationService;
 	}
 
 	@PostMapping("/tasks")
@@ -221,6 +226,20 @@ public class InstructorDashboardController {
 
 		StudentTaskSubmissionResponse response = instructorDashboardService.reviewSubmission(submissionId,
 				instructorId, request);
+
+		return ResponseEntity.ok(response);
+	}
+
+	// Instructor sends a message to a student; delivered in-app (student dashboard) and/or by email.
+	@PostMapping("/notifications")
+	public ResponseEntity<StudentNotificationResponse> sendStudentNotification(@RequestParam String instructorId,
+			@Valid @RequestBody SendStudentNotificationRequest request) {
+
+		logger.info("POST /notifications - instructorId: {} -> studentId: {}, batchId: {}, courseId: {}, channels: {}",
+				instructorId, request.getStudentId(), request.getBatchId(), request.getCourseId(),
+				request.getChannels());
+
+		StudentNotificationResponse response = studentNotificationService.sendNotification(instructorId, request);
 
 		return ResponseEntity.ok(response);
 	}
