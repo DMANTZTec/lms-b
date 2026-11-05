@@ -74,6 +74,15 @@ pipeline {
             }
         }
 
+        stage('Approval') {
+            steps {
+                input(
+                    message: "Approve deployment to ${params.ENVIRONMENT}?",
+                    ok: "Approve"
+                )
+            }
+        }
+
         stage('Deploy Container') {
             steps {
                 echo "Deploying LMS container..."
@@ -91,7 +100,7 @@ pipeline {
                             --name ${CONTAINER_NAME} \
                             -p ${params.APP_PORT}:${CONTAINER_PORT} \
                             -e SPRING_PROFILES_ACTIVE=${params.ENVIRONMENT} \
-                            -e STRAPI_URL="http://localhost:1337" \
+                            -e STRAPI_URL="http://103.12.1.147:1337" \
                             -e TWILIO_ACCOUNT_SID="\${TWILIO_ACCOUNT_SID}" \
                             -e TWILIO_AUTH_TOKEN="\${TWILIO_AUTH_TOKEN}" \
                             -e TWILIO_FROM_NUMBER="\${TWILIO_FROM_NUMBER}" \
@@ -108,7 +117,7 @@ pipeline {
                 echo "Waiting for LMS application to start..."
 
                 sh '''
-                    sleep 20
+                    sleep 30
 
                     echo "----------------------------------------"
                     echo "Docker Container Status"

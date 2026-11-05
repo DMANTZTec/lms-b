@@ -41,6 +41,9 @@ public class StudentTaskSubmissionServiceImpl implements StudentTaskSubmissionSe
 	@Value("${strapi.api.token}")
 	private String strapiApiToken;
 
+	@Value("${strapi.upload.folder-id:2}")
+	private Long strapiUploadFolderId;
+
 	private final RestTemplate restTemplate = new RestTemplate();
 
 	private final StudentTaskSubmissionRepository submissionRepository;
@@ -152,6 +155,10 @@ public class StudentTaskSubmissionServiceImpl implements StudentTaskSubmissionSe
 		try {
 			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
 			body.add("files", new FileSystemResource(tempFile));
+
+			// Save uploaded file inside Strapi Media Library -> LMS Content
+			// (applied by lms-strapi/src/extensions/upload/strapi-server.js)
+			body.add("fileInfo", "{\"folder\":" + strapiUploadFolderId + "}");
 
 			HttpHeaders headers = buildStrapiAuthHeaders();
 			headers.setContentType(MediaType.MULTIPART_FORM_DATA);

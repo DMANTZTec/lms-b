@@ -140,7 +140,7 @@ public class EmailServiceImpl implements EmailService {
 
 
 		String setupLink =
-				"http://localhost:5173/staff/set-password?token=" + token;
+				"http://103.12.1.147:30280/staff/set-password?token=" + token;
 
 
 		String body =

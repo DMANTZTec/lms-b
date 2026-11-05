@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.dmantz.lms.entity.Provider;
 import com.dmantz.lms.entity.ReviewStatus;
@@ -26,4 +28,8 @@ public interface StudentTaskSubmissionRepository extends JpaRepository<StudentTa
             String studentId, ReviewStatus reviewStatus, LocalDateTime start, LocalDateTime end);
     
     List<StudentTaskSubmission> findByStudentTask_IdIn(List<Long> taskIds);
+
+    @Query("select coalesce(sum(s.timeSpentInMinutes), 0) from StudentTaskSubmission s "
+            + "where s.student.studentId = :studentId and s.timeSpentInMinutes > 0")
+    long sumTimeSpentInMinutesByStudentId(@Param("studentId") String studentId);
 }

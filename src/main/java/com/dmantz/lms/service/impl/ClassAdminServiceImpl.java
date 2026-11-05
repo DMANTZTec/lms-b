@@ -11,6 +11,7 @@ import com.dmantz.lms.mapper.ClassScheduleMapper;
 import com.dmantz.lms.mapper.ClassTopicMapper;
 import com.dmantz.lms.mapper.StudentCourseMapper;
 import com.dmantz.lms.repository.*;
+import com.dmantz.lms.service.AttendanceService;
 import com.dmantz.lms.service.ClassAdminService;
 import jakarta.transaction.Transactional;
 
@@ -19,9 +20,11 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.coyote.BadRequestException;
@@ -49,13 +52,17 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 	private final ClassTopicMapper classTopicMapper;
 	private final StaffCourseRepository staffCourseRepository;
 	private final StaffRoleRepository staffRoleRepository;
+	private final EnrollmentBatchRepository enrollmentBatchRepository;
+	private final AttendanceService attendanceService;
 
 	public ClassAdminServiceImpl(CourseRepository courseRepository, ClassBatchRepository classBatchRepository,
 			ClassBatchMapper classBatchMapper, ClassScheduleMapper classScheduleMapper, StaffRepository staffRepository,
 			ClassScheduleRepository classScheduleRepository, StudentRepository studentRepository,
 			StudentCourseRepository studentCourseRepository, StudentCourseMapper studentCourseMapper,
 			ClassTopicRepository classTopicRepository, TopicRepository topicRepository,
-			ClassTopicMapper classTopicMapper, StaffCourseRepository staffCourseRepository, StaffRoleRepository staffRoleRepository) {
+			ClassTopicMapper classTopicMapper, StaffCourseRepository staffCourseRepository,
+			StaffRoleRepository staffRoleRepository, EnrollmentBatchRepository enrollmentBatchRepository,
+			AttendanceService attendanceService) {
 		this.courseRepository = courseRepository;
 		this.classBatchRepository = classBatchRepository;
 		this.classBatchMapper = classBatchMapper;
@@ -70,6 +77,8 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 		this.classTopicMapper = classTopicMapper;
 		this.staffCourseRepository = staffCourseRepository;
 		this.staffRoleRepository = staffRoleRepository;
+		this.enrollmentBatchRepository = enrollmentBatchRepository;
+		this.attendanceService = attendanceService;
 	}
 
 	@Override
@@ -523,6 +532,40 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 	                                .getCourse()
 	                                .getCourseId()
 	                );
+
+	                // Attendance summary for this session.
+	                response.setBatchId(
+	                        schedule.getClassBatch().getId()
+	                );
+
+	                response.setStudentCount(
+	                        enrollmentBatchRepository.countByClassBatchId(
+	                                schedule.getClassBatch()
+	                                        .getId()
+	                        ) > 0
+	                                ? (int) enrollmentBatchRepository.countByClassBatchId(
+	                                        schedule.getClassBatch()
+	                                                .getId()
+	                                )
+	                                : 0
+	                );
+
+	                response.setSessionStatus(
+	                        attendanceService
+	                                .getSessionStatus(schedule.getId())
+	                                .name()
+	                );
+
+	                response.setPresentCount(
+	                        attendanceService
+	                                .getPresentCount(schedule.getId())
+	                );
+
+	                response.setAttendanceRate(
+	                        attendanceService
+	                                .getAttendanceRate(schedule.getId())
+	                );
+
 	                return response;
 	            })
 	            .toList();
@@ -629,6 +672,43 @@ public class ClassAdminServiceImpl implements ClassAdminService {
 			cr.setTotalSchedulesGenerated(schedules.size());
 			cr.setSchedules(classScheduleMapper.toDtoList(schedules));
 			return cr;
+		}).toList();
+	}
+
+	// Same batches as getClassesByCourse, but only a schedule count instead of the
+	// full schedule list.
+	@Override
+	public List<BatchSummaryResponse> getBatchSummariesByCourse(String courseId) {
+
+		logger.info("Fetching batch summaries for courseId: {}", courseId);
+
+		Course course = courseRepository.findByCourseIdAndIsDeletedFalse(courseId)
+				.orElseThrow(() -> new CourseNotFoundException("Course not found: " + courseId));
+
+		List<ClassBatch> batches = classBatchRepository.findByCourse_CourseId(courseId);
+
+		if (batches.isEmpty()) {
+			logger.warn("No batches found for courseId: {}", courseId);
+			return List.of();
+		}
+
+		Map<Long, Long> scheduleCountByBatch = new HashMap<>();
+		for (Object[] row : classScheduleRepository.countSchedulesPerBatchByCourseId(courseId)) {
+			scheduleCountByBatch.put((Long) row[0], (Long) row[1]);
+		}
+
+		return batches.stream().map(batch -> {
+			BatchSummaryResponse dto = new BatchSummaryResponse();
+			dto.setBatchId(batch.getId());
+			dto.setCourseId(courseId);
+			dto.setCourseName(course.getCourseTitle());
+			dto.setBatchName(batch.getClassName());
+			dto.setStartDate(batch.getStartDate());
+			dto.setEndDate(batch.getEndDate());
+			dto.setStatus(batch.getStatus() != null ? batch.getStatus().name() : null);
+			dto.setCapacity(batch.getCapacity());
+			dto.setScheduleCount(scheduleCountByBatch.getOrDefault(batch.getId(), 0L));
+			return dto;
 		}).toList();
 	}
 

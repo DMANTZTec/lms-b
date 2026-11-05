@@ -36,6 +36,9 @@ public class StudentTaskSubmission extends AuditFields {
 	@Column(name = "git", columnDefinition = "json")
 	private List<GitDetail> git;
 
+	@Column(name = "time_spent_in_minutes")
+	private Integer timeSpentInMinutes;
+
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "staff_id", referencedColumnName = "staff_id", nullable = false, columnDefinition = "VARCHAR(20)")
 	private Staff instructor;
@@ -113,6 +116,14 @@ public class StudentTaskSubmission extends AuditFields {
 
 	public void setGit(List<GitDetail> git) {
 		this.git = git;
+	}
+
+	public Integer getTimeSpentInMinutes() {
+		return timeSpentInMinutes;
+	}
+
+	public void setTimeSpentInMinutes(Integer timeSpentInMinutes) {
+		this.timeSpentInMinutes = timeSpentInMinutes;
 	}
 
 	public Staff getInstructor() {

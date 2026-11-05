@@ -1,6 +1,5 @@
 package com.dmantz.lms.dto.request;
 
-import com.dmantz.lms.entity.OtpChannel;
 import com.dmantz.lms.entity.OtpPurpose;
 
 public class ResendOtpRequest {
@@ -8,7 +7,6 @@ public class ResendOtpRequest {
     private String emailId;
     private String mobileNum;
     private OtpPurpose purpose;
-    private OtpChannel otpChannel;
 
     public String getEmailId() {
         return emailId;
@@ -34,21 +32,12 @@ public class ResendOtpRequest {
         this.purpose = purpose;
     }
 
-    public OtpChannel getOtpChannel() {
-        return otpChannel;
-    }
-
-    public void setOtpChannel(OtpChannel otpChannel) {
-        this.otpChannel = otpChannel;
-    }
-
     @Override
     public String toString() {
         return "ResendOtpRequest{" +
                 "emailId='" + emailId + '\'' +
                 ", mobileNum='" + mobileNum + '\'' +
                 ", purpose=" + purpose +
-                ", otpChannel=" + otpChannel +
                 '}';
     }
 }

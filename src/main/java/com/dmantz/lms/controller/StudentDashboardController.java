@@ -236,4 +236,96 @@ public class StudentDashboardController {
 
         return ResponseEntity.ok(response);
     }
+
+    // ================= CLASSES ATTENDED PER WEEK =================
+
+    @GetMapping("/Classes-Attended-per-week/{studentId}")
+    public ResponseEntity<List<WeeklyClassesAttendedResponse>> getClassesAttendedPerWeek(
+            @PathVariable String studentId,
+            @RequestParam(defaultValue = "4") int weeks) {
+
+        logger.info(
+                "Received request to fetch classes attended per week for studentId: {} weeks: {}",
+                studentId,
+                weeks
+        );
+
+        List<WeeklyClassesAttendedResponse> response =
+                dashboardService.getClassesAttendedPerWeek(studentId, weeks);
+
+        logger.info(
+                "Classes attended per week fetched successfully for studentId: {}",
+                studentId
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ================= HOURS SPENT PER WEEK =================
+
+    @GetMapping("/hours-spent-per-week/{studentId}")
+    public ResponseEntity<List<WeeklyHoursSpentResponse>> getHoursSpentPerWeek(
+            @PathVariable String studentId,
+            @RequestParam(defaultValue = "4") int weeks) {
+
+        logger.info(
+                "Received request to fetch hours spent per week for studentId: {} weeks: {}",
+                studentId,
+                weeks
+        );
+
+        List<WeeklyHoursSpentResponse> response =
+                dashboardService.getHoursSpentPerWeek(studentId, weeks);
+
+        logger.info(
+                "Hours spent per week fetched successfully for studentId: {}",
+                studentId
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ================= TOTAL HOURS SPENT =================
+
+    @GetMapping("/hours-spent/{studentId}")
+    public ResponseEntity<TotalHoursSpentResponse> getTotalHoursSpent(
+            @PathVariable String studentId) {
+
+        logger.info(
+                "Received request to fetch total hours spent for studentId: {}",
+                studentId
+        );
+
+        TotalHoursSpentResponse response =
+                dashboardService.getTotalHoursSpent(studentId);
+
+        logger.info(
+                "Total hours spent fetched successfully for studentId: {}",
+                studentId
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ================= CLASSES ATTENDANCE SUMMARY =================
+
+    @GetMapping("/classes-attendance/{studentId}")
+    public ResponseEntity<StudentClassesAttendanceResponse> getClassesAttendanceSummary(
+            @PathVariable String studentId) {
+
+        logger.info(
+                "Received request to fetch classes attendance summary for studentId: {}",
+                studentId
+        );
+
+        StudentClassesAttendanceResponse response =
+                dashboardService.getClassesAttendanceSummary(studentId);
+
+        logger.info(
+                "Classes attendance summary fetched successfully for studentId: {}",
+                studentId
+        );
+
+        return ResponseEntity.ok(response);
+    }
 }

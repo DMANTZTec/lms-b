@@ -87,11 +87,6 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
 	}
 
-	@ExceptionHandler(InvalidOtpChannelException.class)
-	public ResponseEntity<String> handleInvalidOtpChannel(InvalidOtpChannelException ex) {
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
-	}
-
 	@ExceptionHandler(OtpSendingException.class)
 	public ResponseEntity<String> handleOtpSending(OtpSendingException ex) {
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());

@@ -6,7 +6,6 @@ import com.dmantz.lms.dto.request.StudentTaskRequest;
 import com.dmantz.lms.dto.request.StudentTaskUpdateRequest;
 import com.dmantz.lms.dto.response.ChapterDropdownResponse;
 import com.dmantz.lms.dto.response.CourseDropdownResponse;
-import com.dmantz.lms.dto.response.HoursSpentResponse;
 import com.dmantz.lms.dto.response.StudentTaskListResponse;
 import com.dmantz.lms.dto.response.StudentTaskResponse;
 import com.dmantz.lms.dto.response.TopicDropdownResponse;

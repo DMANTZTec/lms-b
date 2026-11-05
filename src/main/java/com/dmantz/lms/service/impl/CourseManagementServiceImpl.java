@@ -52,6 +52,7 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 	@Value("${strapi.api.token}")
 	private String strapiApiToken;
 
+	
 	private final RestTemplate restTemplate = new RestTemplate();
 
 	private final SubjectRepository subjectRepository;
@@ -922,7 +923,41 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 		return headers;
 	}
 
-//  UPLOAD to Strapi (shared by document + video)
+////  UPLOAD to Strapi (shared by document + video)
+//	private JsonNode uploadToStrapi(MultipartFile file) throws Exception {
+//
+//		File tempFile = File.createTempFile("upload-", file.getOriginalFilename());
+//		file.transferTo(tempFile);
+//
+//		try {
+//			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+//			body.add("files", new FileSystemResource(tempFile));
+//
+//			HttpHeaders headers = buildStrapiAuthHeaders(); // ← token added
+//			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+//
+//			ResponseEntity<String> response = restTemplate.exchange(strapiUrl + "/api/upload", HttpMethod.POST,
+//					new HttpEntity<>(body, headers), String.class);
+//
+//			logger.info("Strapi upload status: {}", response.getStatusCode());
+//			logger.info("Strapi upload body:   {}", response.getBody());
+//
+//			ObjectMapper mapper = new ObjectMapper();
+//			JsonNode root = mapper.readTree(response.getBody());
+//			JsonNode fileNode = root.get(0);
+//
+//			if (fileNode == null) {
+//				throw new RuntimeException("Invalid Strapi upload response: " + response.getBody());
+//			}
+//
+//			return fileNode;
+//
+//		} finally {
+//			tempFile.delete();
+//		}
+//	}
+
+	// UPLOAD to Strapi (shared by document + video + images)
 	private JsonNode uploadToStrapi(MultipartFile file) throws Exception {
 
 		File tempFile = File.createTempFile("upload-", file.getOriginalFilename());
@@ -930,19 +965,28 @@ public class CourseManagementServiceImpl implements CourseManagementService {
 
 		try {
 			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+
+			// Upload file
 			body.add("files", new FileSystemResource(tempFile));
 
-			HttpHeaders headers = buildStrapiAuthHeaders(); // ← token added
+			logger.info("Uploading file to Strapi: {}", file.getOriginalFilename());
+		
+			//body.add("fileInfo", "{\"folder\":" + strapiUploadFolderId + "/LMS Content" + "}");
+			//body.add("fileInfo", "{\"folder\":" + "\"/LMS Content\"" + "}");
+			//body.add("folder", "/LMS Content");
+			logger.info("Strapi upload folder info: {}", body.get("fileInfo"));
+			HttpHeaders headers = buildStrapiAuthHeaders();
 			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-
+			logger.info("Uploading file to Strapi: {}", file.getOriginalFilename());
 			ResponseEntity<String> response = restTemplate.exchange(strapiUrl + "/api/upload", HttpMethod.POST,
 					new HttpEntity<>(body, headers), String.class);
 
 			logger.info("Strapi upload status: {}", response.getStatusCode());
-			logger.info("Strapi upload body:   {}", response.getBody());
+			logger.info("Strapi upload body: {}", response.getBody());
 
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode root = mapper.readTree(response.getBody());
+
 			JsonNode fileNode = root.get(0);
 
 			if (fileNode == null) {

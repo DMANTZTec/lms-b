@@ -1,3 +1,4 @@
+
 package com.dmantz.lms.config;
 
 import com.dmantz.lms.repository.StaffRepository;
@@ -25,9 +26,10 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain)
             throws ServletException, IOException {
 
         String path = request.getServletPath();
@@ -52,31 +54,37 @@ public class JwtFilter extends OncePerRequestFilter {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
 
             try {
-
                 String token = authHeader.substring(7);
 
                 String email = jwtUtil.extractEmail(token);
-                String role = jwtUtil.extractRole(token);
+                List<String> roles = jwtUtil.extractRole(token);
+
+                List<SimpleGrantedAuthority> authorities = roles.stream()
+                        .map(role ->
+                                new SimpleGrantedAuthority("ROLE_" + role))
+                        .toList();
 
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
                                 email,
                                 null,
-                                List.of(new SimpleGrantedAuthority("ROLE_" + role)));
+                                authorities);
 
-                // Resolve the numeric staff id up front, outside any JPA flush, so
-                // JpaAuditConfig's AuditorAware can read it without querying the DB
-                // mid-flush (which caused "Could not commit JPA transaction" errors).
-                if (!"STUDENT".equals(role)) {
+                // Resolve staff ID for JPA auditing.
+                // Students do not use the staff repository.
+                if (!roles.contains("STUDENT")) {
                     staffRepository.findByEmailId(email)
-                            .ifPresent(staff -> authentication.setDetails(staff.getId()));
+                            .ifPresent(staff ->
+                                    authentication.setDetails(staff.getId()));
                 }
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                SecurityContextHolder.getContext()
+                        .setAuthentication(authentication);
 
             } catch (ExpiredJwtException e) {
 
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setStatus(
+                        HttpServletResponse.SC_UNAUTHORIZED);
                 response.getWriter().write("JWT Token Expired");
                 return;
             }

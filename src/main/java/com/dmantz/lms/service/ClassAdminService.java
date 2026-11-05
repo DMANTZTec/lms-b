@@ -42,6 +42,8 @@ public interface ClassAdminService {
 // Add these 2 new methods
 	List<ClassResponse> getClassesByCourse(String courseId);
 
+	List<BatchSummaryResponse> getBatchSummariesByCourse(String courseId);
+
 	List<ClassScheduleResponse> getSchedulesByBatch(Long batchId);
 	
 	List<ClassScheduleResponse> getAllSchedules();

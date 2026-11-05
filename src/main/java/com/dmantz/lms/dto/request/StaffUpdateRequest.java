@@ -11,10 +11,6 @@ public class StaffUpdateRequest {
 
     private String lastNm;
 
-    private String emailId;
-
-    private String mobileNum;
-
     private LocalDate dob;
 
     private Gender gender;
@@ -37,22 +33,6 @@ public class StaffUpdateRequest {
 
     public void setLastNm(String lastNm) {
         this.lastNm = lastNm;
-    }
-
-    public String getEmailId() {
-        return emailId;
-    }
-
-    public void setEmailId(String emailId) {
-        this.emailId = emailId;
-    }
-
-    public String getMobileNum() {
-        return mobileNum;
-    }
-
-    public void setMobileNum(String mobileNum) {
-        this.mobileNum = mobileNum;
     }
 
     public LocalDate getDob() {

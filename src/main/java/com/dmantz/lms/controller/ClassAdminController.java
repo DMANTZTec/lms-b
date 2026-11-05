@@ -201,6 +201,15 @@ public class ClassAdminController {
 		return ResponseEntity.ok(response);
 	}
 
+	@GetMapping("/courseschedule/{courseId}/batches")
+	public ResponseEntity<List<BatchSummaryResponse>> getBatchSummariesByCourse(@PathVariable String courseId) {
+
+		logger.info("GET /courseschedule/{}/batches - Fetching batch summaries", courseId);
+		List<BatchSummaryResponse> response = classAdminService.getBatchSummariesByCourse(courseId);
+		logger.info("Returning {} batch summary(ies) for courseId: {}", response.size(), courseId);
+		return ResponseEntity.ok(response);
+	}
+
 	@GetMapping("/courseschedule/{batchId}/schedules")
 	public ResponseEntity<List<ClassScheduleResponse>> getSchedulesByBatch(@PathVariable Long batchId) {
 

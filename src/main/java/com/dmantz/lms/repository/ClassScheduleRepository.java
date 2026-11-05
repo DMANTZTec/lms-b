@@ -54,6 +54,11 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, Lo
  // ClassScheduleRepository
  	List<ClassSchedule> findByClassBatch_Id(Long batchId);
  	
+    // [batchId, scheduleCount] for every batch of the course that has schedules
+    @Query("select cs.classBatch.id, count(cs) from ClassSchedule cs "
+            + "where cs.classBatch.course.courseId = :courseId group by cs.classBatch.id")
+    List<Object[]> countSchedulesPerBatchByCourseId(@Param("courseId") String courseId);
+ 	
  	  List<ClassSchedule>
  	    findByClassBatchIdInAndClassDateBetweenOrderByClassDateAscStartTimeAsc(
  	            List<Long> batchIds,

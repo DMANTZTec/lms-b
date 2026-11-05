@@ -1,6 +1,5 @@
 package com.dmantz.lms.dto.request;
 
-import com.dmantz.lms.entity.OtpChannel;
 
 import jakarta.validation.constraints.NotBlank;
 
@@ -10,8 +9,6 @@ public class StaffLoginRequest {
 	private String username;
 	@NotBlank
 	private String password;
-
-	private OtpChannel otpChannel;
 
 	public String getUsername() {
 		return username;
@@ -27,14 +24,6 @@ public class StaffLoginRequest {
 
 	public void setPassword(String password) {
 		this.password = password;
-	}
-
-	public OtpChannel getOtpChannel() {
-		return otpChannel;
-	}
-
-	public void setOtpChannel(OtpChannel otpChannel) {
-		this.otpChannel = otpChannel;
 	}
 
 }

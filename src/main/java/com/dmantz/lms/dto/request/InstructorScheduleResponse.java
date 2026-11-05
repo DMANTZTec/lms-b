@@ -3,6 +3,9 @@ package com.dmantz.lms.dto.request;
 public class InstructorScheduleResponse {
 
     private Long id;
+    private Long batchId;
+    private Integer studentCount;
+    private String sessionStatus; // NOT_STARTED | IN_PROGRESS | MARKED
     private String time;
     private String endTime;
     private String date;
@@ -11,6 +14,8 @@ public class InstructorScheduleResponse {
     private String courseId;
     private String className;
     private String status;
+    private Integer presentCount;
+    private Double attendanceRate;
 
 
     public Long getId() {
@@ -19,6 +24,30 @@ public class InstructorScheduleResponse {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getBatchId() {
+        return batchId;
+    }
+
+    public void setBatchId(Long batchId) {
+        this.batchId = batchId;
+    }
+
+    public Integer getStudentCount() {
+        return studentCount;
+    }
+
+    public void setStudentCount(Integer studentCount) {
+        this.studentCount = studentCount;
+    }
+
+    public String getSessionStatus() {
+        return sessionStatus;
+    }
+
+    public void setSessionStatus(String sessionStatus) {
+        this.sessionStatus = sessionStatus;
     }
 
     public String getTime() {
@@ -83,5 +112,21 @@ public class InstructorScheduleResponse {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Integer getPresentCount() {
+        return presentCount;
+    }
+
+    public void setPresentCount(Integer presentCount) {
+        this.presentCount = presentCount;
+    }
+
+    public Double getAttendanceRate() {
+        return attendanceRate;
+    }
+
+    public void setAttendanceRate(Double attendanceRate) {
+        this.attendanceRate = attendanceRate;
     }
 }

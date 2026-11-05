@@ -5,12 +5,15 @@ import java.util.List;
 import com.dmantz.lms.dto.request.InstructorTaskRequest;
 import com.dmantz.lms.dto.request.PlanClassTopicsRequest;
 import com.dmantz.lms.dto.request.ReviewSubmissionRequest;
+import com.dmantz.lms.dto.request.ScheduleTaskRequest;
 import com.dmantz.lms.dto.response.*;
 import com.dmantz.lms.entity.SubmissionFilter;
 
 public interface InstructorDashboardService {
 
 	InstructorTaskResponse createTask(InstructorTaskRequest request);
+
+	InstructorTaskResponse createScheduleTask(Long scheduleId, ScheduleTaskRequest request);
 
 	InstructorBatchSummaryResponse getBatchSummary(String instructorId);
 

@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.dmantz.lms.dto.request.InstructorTaskRequest;
 import com.dmantz.lms.dto.request.PlanClassTopicsRequest;
 import com.dmantz.lms.dto.request.ReviewSubmissionRequest;
+import com.dmantz.lms.dto.request.ScheduleTaskRequest;
 import com.dmantz.lms.service.InstructorDashboardService;
 
 import jakarta.validation.Valid;
@@ -50,6 +51,20 @@ public class InstructorDashboardController {
 		return ResponseEntity.ok(response);
 	}
 
+	// Create a task from a Class Schedule row; assigned to the students of that schedule's batch.
+	@PostMapping("/schedule/{scheduleId}/tasks")
+	public ResponseEntity<InstructorTaskResponse> createScheduleTask(@PathVariable Long scheduleId,
+			@Valid @RequestBody ScheduleTaskRequest request) {
+
+		logger.info("POST /schedule/{}/tasks - assignedBy: {} chapterId: {} topicId: {}", scheduleId,
+				request.getAssignedBy(), request.getChapterId(), request.getTopicId());
+
+		InstructorTaskResponse response = instructorDashboardService.createScheduleTask(scheduleId, request);
+
+		logger.info("Schedule {} task assigned to {} students", scheduleId, response.getAssignedStudentCount());
+
+		return ResponseEntity.ok(response);
+	}
 
 	@GetMapping("/batches")
 	public ResponseEntity<InstructorBatchSummaryResponse> getBatchSummary(@RequestParam String instructorId) {

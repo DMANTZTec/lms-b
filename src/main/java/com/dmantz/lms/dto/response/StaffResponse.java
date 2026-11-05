@@ -1,6 +1,7 @@
 package com.dmantz.lms.dto.response;
 
 import com.dmantz.lms.entity.Gender;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -55,6 +56,10 @@ public class StaffResponse {
     private LocalDateTime updatedDt;
 
     private Set<String> roles;
+
+    // Only set by APIs that send a link/OTP, hidden from the response otherwise
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String message;
 
 
     public Long getId() {
@@ -251,6 +256,14 @@ public class StaffResponse {
 		this.updatedDt = updatedDt;
 	}
 
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
 	@Override
     public String toString() {
         return "StaffResponse{" +
@@ -277,6 +290,7 @@ public class StaffResponse {
                 ", dob=" + dob +
                 ", createdDt=" + createdDt +
                 ", roles=" + roles +
+                ", message='" + message + '\'' +
                 '}';
     }
 }

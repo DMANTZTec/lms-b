@@ -50,11 +50,15 @@ public class SecurityConfig {
                         .requestMatchers("/api/subject/view-subjects").permitAll()
                         .requestMatchers("/api/success-stories",
                         		"/api/success-stories/**").permitAll()
+                        // Chapter/topic listings are read-only public; creating topics (POST /api/topics) still needs a token
+                        .requestMatchers(HttpMethod.GET, "/api/course/{courseId}/chapters", "/api/topics").permitAll()
                         .requestMatchers("/api/learner-paths",
                                 "/api/learner-paths/**").permitAll()
                         // Social media links are read-only public; create/update/delete still need a token
                         .requestMatchers(HttpMethod.GET, "/api/social-media",
                                 "/api/social-media/active").permitAll()
+                        // Razorpay webhook is authenticated by its HMAC signature, not a JWT
+                        .requestMatchers(HttpMethod.POST, "/api/payments/webhook").permitAll()
 
 
                         // STUDENT PUBLIC APIs

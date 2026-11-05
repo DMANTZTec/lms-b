@@ -41,7 +41,7 @@ public class StudentController {
 	}
 
 	@PostMapping("/registration/verify-otp")
-	public ResponseEntity<StudentResponse> verifyOtp(@RequestBody OtpVerifyRequest request) {
+	public ResponseEntity<StudentResponse> verifyOtp(@RequestBody StudentOtpVerifyRequest request) {
 		logger.info("OTP verification request received for email: {}", request.getEmailIdOrMobileNo());
 		return ResponseEntity.ok(studentService.verifyOtp(request));
 	}
@@ -49,8 +49,7 @@ public class StudentController {
 	@PostMapping("/login")
 	public ResponseEntity<StudentLoginResponse> login(@RequestBody StudentLoginRequest request) {
 
-		logger.info("Login request received for username: {} via channel: {}", request.getUsername(),
-				request.getOtpChannel());
+		logger.info("Login request received for username: {}", request.getUsername());
 
 		StudentLoginResponse response = studentService.login(request);
 
@@ -60,7 +59,7 @@ public class StudentController {
 	}
 
 	@PostMapping("/verify-login-otp")
-	public ResponseEntity<StudentLoginResponse> verifyLoginOtp(@RequestBody OtpVerifyRequest request) {
+	public ResponseEntity<StudentLoginResponse> verifyLoginOtp(@RequestBody StudentOtpVerifyRequest request) {
 
 		logger.info("Login OTP verification request received for identifier: {}", request.getEmailIdOrMobileNo());
 
@@ -86,16 +85,15 @@ public class StudentController {
 
 	// ================= FORGOT PASSWORD =================
 	@PostMapping("/forgot-password")
-	public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+	public ResponseEntity<Map<String, String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
 
-		logger.info("Forgot password request received for iudentifier: {} via channel: {}",
-				request.getEmailIdOrMobileNo(), request.getOtpChannel());
+		logger.info("Forgot password request received for identifier: {}", request.getEmailIdOrMobileNo());
 
-		studentService.forgotPassword(request);
+		String message = studentService.forgotPassword(request);
 
 		logger.info("Forgot password OTP sent successfully for identifier: {}", request.getEmailIdOrMobileNo());
 
-		return ResponseEntity.ok("OTP sent successfully via " + request.getOtpChannel());
+		return ResponseEntity.ok(Map.of("message", message));
 	}
 
 	// ================= RESET PASSWORD =================

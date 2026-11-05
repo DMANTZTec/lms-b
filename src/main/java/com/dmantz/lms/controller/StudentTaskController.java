@@ -5,7 +5,6 @@ import com.dmantz.lms.dto.request.StudentTaskRequest;
 import com.dmantz.lms.dto.request.StudentTaskUpdateRequest;
 import com.dmantz.lms.dto.response.ChapterDropdownResponse;
 import com.dmantz.lms.dto.response.CourseDropdownResponse;
-import com.dmantz.lms.dto.response.HoursSpentResponse;
 import com.dmantz.lms.dto.response.StudentTaskListResponse;
 import com.dmantz.lms.dto.response.StudentTaskResponse;
 import com.dmantz.lms.dto.response.TopicDropdownResponse;
@@ -102,13 +101,6 @@ public class StudentTaskController {
 //		return ResponseEntity.ok(response);
 //	}
 //
-//	@GetMapping("/hours-spent/{studentId}")
-//	public ResponseEntity<HoursSpentResponse> getHoursSpent(@PathVariable String studentId) {
-//		logger.info("Received request to get hours spent for studentId: {}", studentId);
-//		HoursSpentResponse response = studentTaskService.getHoursSpent(studentId);
-//		logger.info("Hours spent retrieved successfully for studentId: {}", studentId);
-//		return ResponseEntity.ok(response);
-//	}
 //	// ================= UPDATE TASK =================
 //
 //	@PutMapping("/updatetask")

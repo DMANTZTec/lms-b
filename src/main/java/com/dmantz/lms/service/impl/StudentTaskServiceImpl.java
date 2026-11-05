@@ -4,7 +4,6 @@ import com.dmantz.lms.dto.request.StudentTaskRequest;
 import com.dmantz.lms.dto.request.StudentTaskUpdateRequest;
 import com.dmantz.lms.dto.response.ChapterDropdownResponse;
 import com.dmantz.lms.dto.response.CourseDropdownResponse;
-import com.dmantz.lms.dto.response.HoursSpentResponse;
 import com.dmantz.lms.dto.response.StudentTaskListResponse;
 import com.dmantz.lms.dto.response.StudentTaskResponse;
 import com.dmantz.lms.dto.response.TopicDropdownResponse;
@@ -271,23 +270,6 @@ public class StudentTaskServiceImpl implements StudentTaskService {
 //				request.getTopicId());
 //
 //		return studentTaskMapper.toResponse(updatedTask);
-//	}
-//	
-//	@Override
-//	public HoursSpentResponse getHoursSpent(String studentId) {
-//	    logger.info("Fetching hours spent for studentId: {}", studentId);
-//
-//	    // Check student exists
-//	    if (!studentRepository.existsByStudentId(studentId)) {
-//	        logger.error("Student not found for studentId: {}", studentId);
-//	        throw new ResourceNotFoundException("Student not found with studentId: " + studentId);
-//	    }
-//
-//	    Integer totalHours = studentTaskRepository.getTotalHoursSpent(studentId);
-//	    int hours = totalHours != null ? totalHours : 0;
-//
-//	    logger.info("Total hours spent for studentId: {} is {}", studentId, hours);
-//	    return new HoursSpentResponse(hours);
 //	}
 //	
 //	

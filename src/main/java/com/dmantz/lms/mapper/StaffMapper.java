@@ -1,6 +1,7 @@
 package com.dmantz.lms.mapper;
 
 import com.dmantz.lms.dto.request.StaffCreateRequest;
+import com.dmantz.lms.dto.request.StaffDetailsUpdateRequest;
 import com.dmantz.lms.dto.request.StaffRegistrationRequest;
 import com.dmantz.lms.dto.request.StaffUpdateReq1;
 import com.dmantz.lms.dto.request.StaffUpdateRequest;
@@ -76,6 +77,25 @@ public interface StaffMapper {
     @Mapping(target = "updatedDt", ignore = true)
     void updateEntity(
             StaffUpdateReq1 request,
+            @MappingTarget Staff staff
+    );
+
+
+    // Update Details API (includes email & mobile)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "staffId", ignore = true)
+    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "profileImg", ignore = true)
+    @Mapping(target = "roles", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "enabled", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "createdDt", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
+    @Mapping(target = "updatedDt", ignore = true)
+    @Mapping(source = "email", target = "emailId")
+    void updateEntity(
+            StaffDetailsUpdateRequest request,
             @MappingTarget Staff staff
     );
 

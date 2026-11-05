@@ -2,8 +2,13 @@ package com.dmantz.lms.dto.response;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 public class MyCourseResponse {
 
+    // Only populated for PLANNED courses; omitted from JSON otherwise.
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Long enrollmentId;
     private String courseId;
     private String courseName;
     private String status;
@@ -11,6 +16,14 @@ public class MyCourseResponse {
     private LocalDate startDate;
     private LocalDate endDate;
 
+
+    public Long getEnrollmentId() {
+        return enrollmentId;
+    }
+
+    public void setEnrollmentId(Long enrollmentId) {
+        this.enrollmentId = enrollmentId;
+    }
 
     public String getCourseId() {
         return courseId;

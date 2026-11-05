@@ -7,6 +7,7 @@ public class InstructorTaskResponse {
 	private String title;
 	private String description;
 	private String courseId;
+	private Long scheduleId;
 	private int assignedStudentCount;
 	private List<StudentTaskResponse> assignedTasks;
 
@@ -45,6 +46,14 @@ public class InstructorTaskResponse {
 
 	public void setCourseId(String courseId) {
 		this.courseId = courseId;
+	}
+
+	public Long getScheduleId() {
+		return scheduleId;
+	}
+
+	public void setScheduleId(Long scheduleId) {
+		this.scheduleId = scheduleId;
 	}
 
 	public int getAssignedStudentCount() {
