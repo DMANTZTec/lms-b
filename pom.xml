@@ -121,6 +121,13 @@
 			<version>10.1.5</version>
 		</dependency>
 
+		<!-- Razorpay SDK -->
+		<dependency>
+			<groupId>com.razorpay</groupId>
+			<artifactId>razorpay-java</artifactId>
+			<version>1.4.8</version>
+		</dependency>
+
 		<!-- OpenAPI -->
 		<dependency>
 			<groupId>org.springdoc</groupId>

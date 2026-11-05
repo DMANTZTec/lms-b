@@ -117,4 +117,19 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
 	}
 
+	@ExceptionHandler(BadRequestException.class)
+	public ResponseEntity<String> handleBadRequest(BadRequestException ex) {
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+	}
+
+	@ExceptionHandler(InvalidPaymentSignatureException.class)
+	public ResponseEntity<String> handleInvalidPaymentSignature(InvalidPaymentSignatureException ex) {
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+	}
+
+	@ExceptionHandler(PaymentGatewayException.class)
+	public ResponseEntity<String> handlePaymentGateway(PaymentGatewayException ex) {
+		return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(ex.getMessage());
+	}
+
 }

@@ -19,4 +19,7 @@ public interface CourseFeeRepository extends JpaRepository<CourseFee, Long> {
     boolean existsByCourse_IdAndEffectiveDate(Long courseId, LocalDate effectiveDate);
     
     Optional<CourseFee> findByCourse_IdAndEffectiveDate(Long courseId, LocalDate effectiveDate);
+
+    // Fee currently in effect (latest effective date on or before the given date)
+    Optional<CourseFee> findTopByCourse_IdAndEffectiveDateLessThanEqualOrderByEffectiveDateDesc(Long courseId, LocalDate date);
 }

@@ -116,4 +116,16 @@
 	
 	<include file="db/changelog/changelogs/202609041742-create-student-task-submission-table.xml"/>
 
+<<<<<<< Updated upstream
+=======
+    <!-- schedule_attendance table -->
+    <include file="db/changelog/changelogs/202610051102-create-schedule_attendance-table.xml"/>
+
+    <!-- student_task.schedule_id for schedule-scoped instructor tasks -->
+    <include file="db/changelog/changelogs/202610081200-add-schedule_id-to-student_task.xml"/>
+
+    <!-- payment table (Razorpay) -->
+    <include file="db/changelog/changelogs/202611041200-create-payment-table.xml"/>
+
+>>>>>>> Stashed changes
 </databaseChangeLog>

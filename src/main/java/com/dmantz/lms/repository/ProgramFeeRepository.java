@@ -17,4 +17,7 @@ public interface ProgramFeeRepository extends JpaRepository<ProgramFee, Long> {
 	boolean existsByProgram_IdAndEffectiveDate(Long programId, LocalDate effectiveDate);
 
 	Optional<ProgramFee> findByProgram_IdAndEffectiveDate(Long programId, LocalDate effectiveDate);
+
+	// Fee currently in effect (latest effective date on or before the given date)
+	Optional<ProgramFee> findTopByProgram_IdAndEffectiveDateLessThanEqualOrderByEffectiveDateDesc(Long programId, LocalDate date);
 }
