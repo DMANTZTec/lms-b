@@ -1,8 +1,11 @@
 package com.dmantz.lms.dto.request;
 
-public class EnrollmentRequest {
-	
-    private String studentId;
+
+/*
+ * Student checkout. Send exactly one of courseId / programId.
+ * The student is taken from the JWT, never from the body.
+ */
+public class CheckoutRequest {
 
     private String courseId;
 
@@ -23,12 +26,5 @@ public class EnrollmentRequest {
     public void setProgramId(String programId) {
         this.programId = programId;
     }
-    
-    public String getStudentId() {
-		return studentId;
-	}
-    
-    public void setStudentId(String studentId) {
-		this.studentId = studentId;
-	}
+
 }

@@ -60,6 +60,14 @@ public class SecurityConfig {
                         // Razorpay webhook is authenticated by its HMAC signature, not a JWT
                         .requestMatchers(HttpMethod.POST, "/api/payments/webhook").permitAll()
 
+                        // PAYMENT WORKFLOW
+                        // Student checkout (student is taken from the token)
+                        .requestMatchers(HttpMethod.POST, "/api/checkout").hasRole("STUDENT")
+                        // Admin enrollment (cash / waiver / pay later / online), refunds, payment reports
+                        .requestMatchers("/api/admin/enrollments/**", "/api/admin/payments/**").hasRole("ADMIN")
+                        // Cancelling an enrollment removes access
+                        .requestMatchers(HttpMethod.DELETE, "/api/enrollments/**").hasRole("ADMIN")
+
 
                         // STUDENT PUBLIC APIs
                         .requestMatchers(

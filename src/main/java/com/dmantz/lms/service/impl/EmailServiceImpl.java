@@ -1,5 +1,10 @@
 package com.dmantz.lms.service.impl;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+import com.dmantz.lms.exceptions.EmailSendingException;
+
 import com.dmantz.lms.entity.OtpPurpose;
 import com.dmantz.lms.service.EmailService;
 
@@ -247,6 +252,51 @@ public class EmailServiceImpl implements EmailService {
 			logger.error("Failed to send reset password email to: {}", toEmail, ex);
 
 			throw new RuntimeException("Failed to send reset password email.", ex);
+		}
+	}
+
+	@Override
+	public void sendPaymentRequestEmail(String toEmail,
+										String studentName,
+										String itemName,
+										BigDecimal amount,
+										LocalDateTime expiresAt) {
+
+		logger.info("Preparing payment request email for: {}", toEmail);
+
+		if (toEmail == null || toEmail.isBlank()) {
+			throw new IllegalArgumentException("Recipient email must not be null or blank");
+		}
+
+		String subject = "LMS - Complete your payment for " + itemName;
+
+		String body =
+				"Hello " + studentName + ",\n\n"
+						+ "You have been enrolled for " + itemName + ".\n\n"
+						+ "Amount payable: INR " + amount + "\n"
+						+ "Please complete the payment before "
+						+ expiresAt.format(java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a"))
+						+ ".\n\n"
+						+ "Log in to the LMS student portal and open My Payments to pay online.\n"
+						+ "Your course access starts as soon as the payment is confirmed.\n\n"
+						+ "Regards,\n"
+						+ "LMS Team";
+
+		try {
+
+			SimpleMailMessage message = new SimpleMailMessage();
+			message.setTo(toEmail);
+			message.setSubject(subject);
+			message.setText(body);
+
+			mailSender.send(message);
+
+			logger.info("Payment request email sent successfully to: {}", toEmail);
+
+		} catch (MailException ex) {
+
+			logger.error("Failed to send payment request email to: {}", toEmail, ex);
+			throw new EmailSendingException("Failed to send payment request email");
 		}
 	}
 }

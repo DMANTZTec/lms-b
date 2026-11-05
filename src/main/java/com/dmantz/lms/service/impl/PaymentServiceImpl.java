@@ -2,7 +2,6 @@ package com.dmantz.lms.service.impl;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -11,35 +10,28 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.dmantz.lms.config.SecurityUtils;
-import com.dmantz.lms.dto.request.CreatePaymentOrderRequest;
+import com.dmantz.lms.dto.request.CheckoutRequest;
 import com.dmantz.lms.dto.request.VerifyPaymentRequest;
-import com.dmantz.lms.dto.response.PaymentOrderResponse;
+import com.dmantz.lms.dto.response.CheckoutResponse;
 import com.dmantz.lms.dto.response.PaymentResponse;
-import com.dmantz.lms.entity.CourseFee;
 import com.dmantz.lms.entity.Enrollment;
-import com.dmantz.lms.entity.EnrollmentStatus;
-import com.dmantz.lms.entity.EnrollmentType;
 import com.dmantz.lms.entity.Payment;
 import com.dmantz.lms.entity.PaymentStatus;
-import com.dmantz.lms.entity.ProgramFee;
+import com.dmantz.lms.entity.Student;
 import com.dmantz.lms.exceptions.BadRequestException;
 import com.dmantz.lms.exceptions.InvalidPaymentSignatureException;
-import com.dmantz.lms.exceptions.PaymentGatewayException;
 import com.dmantz.lms.exceptions.ResourceNotFoundException;
 import com.dmantz.lms.exceptions.UnauthorizedAccessException;
-import com.dmantz.lms.repository.CourseFeeRepository;
 import com.dmantz.lms.repository.EnrollmentRepository;
 import com.dmantz.lms.repository.PaymentRepository;
-import com.dmantz.lms.repository.ProgramFeeRepository;
+import com.dmantz.lms.repository.StudentRepository;
 import com.dmantz.lms.service.PaymentService;
-import com.razorpay.Order;
-import com.razorpay.RazorpayClient;
+import com.dmantz.lms.service.impl.PaymentWorkflow.FeeQuote;
+import com.dmantz.lms.service.impl.PaymentWorkflow.PurchaseTarget;
 import com.razorpay.RazorpayException;
 import com.razorpay.Utils;
 
@@ -49,17 +41,10 @@ public class PaymentServiceImpl implements PaymentService {
 
     private static final Logger logger = LogManager.getLogger(PaymentServiceImpl.class);
 
-    private static final String PAYMENT_STATUS_PAID = "PAID";
-    private static final String PAYMENT_STATUS_FAILED = "FAILED";
-
+    private final PaymentWorkflow workflow;
     private final PaymentRepository paymentRepository;
     private final EnrollmentRepository enrollmentRepository;
-    private final CourseFeeRepository courseFeeRepository;
-    private final ProgramFeeRepository programFeeRepository;
-    private final RazorpayClient razorpayClient;
-
-    @Value("${razorpay.key-id}")
-    private String keyId;
+    private final StudentRepository studentRepository;
 
     @Value("${razorpay.key-secret}")
     private String keySecret;
@@ -67,93 +52,55 @@ public class PaymentServiceImpl implements PaymentService {
     @Value("${razorpay.webhook-secret:}")
     private String webhookSecret;
 
-    @Value("${razorpay.currency:INR}")
-    private String currency;
+    @Value("${payment.student-order-expiry-hours:24}")
+    private int studentOrderExpiryHours;
 
     public PaymentServiceImpl(
+            PaymentWorkflow workflow,
             PaymentRepository paymentRepository,
             EnrollmentRepository enrollmentRepository,
-            CourseFeeRepository courseFeeRepository,
-            ProgramFeeRepository programFeeRepository,
-            RazorpayClient razorpayClient) {
+            StudentRepository studentRepository) {
 
+        this.workflow = workflow;
         this.paymentRepository = paymentRepository;
         this.enrollmentRepository = enrollmentRepository;
-        this.courseFeeRepository = courseFeeRepository;
-        this.programFeeRepository = programFeeRepository;
-        this.razorpayClient = razorpayClient;
+        this.studentRepository = studentRepository;
     }
 
     // ============================================================
-    // CREATE ORDER
+    // CHECKOUT (student)
     // ============================================================
 
     @Override
-    public PaymentOrderResponse createOrder(CreatePaymentOrderRequest request) {
+    public CheckoutResponse checkout(CheckoutRequest request) {
 
-        Enrollment enrollment = getOwnedEnrollment(request.getEnrollmentId(), false);
+        // Student always comes from the token, never from the request body
+        Student me = studentRepository.findByEmailId(SecurityUtils.getCurrentUser())
+                .orElseThrow(() -> new UnauthorizedAccessException("Only students can use checkout"));
 
-        logger.info("Creating Razorpay order for enrollmentId: {}", enrollment.getId());
+        Student student = workflow.lockStudent(me.getStudentId());
+        PurchaseTarget target = workflow.resolveTarget(request.getCourseId(), request.getProgramId());
 
-        if (PAYMENT_STATUS_PAID.equals(enrollment.getPaymentStatus())) {
-            throw new BadRequestException("Enrollment is already paid");
+        logger.info("Checkout: student {} {} {}", student.getStudentId(), target.type(), target.id());
+
+        workflow.assertNotEnrolled(student, target);
+
+        FeeQuote quote = workflow.quote(target);
+
+        // Free: enroll immediately, nothing to pay
+        if (quote.isFree()) {
+            return workflow.toCheckoutResponse(workflow.settleFree(student, target, quote));
         }
 
-        if (enrollment.getStatus() == EnrollmentStatus.CANCELLED) {
-            throw new BadRequestException("Enrollment is cancelled");
+        // Reuse an unpaid order for the same amount (retry, or a request sent by admin)
+        Optional<Payment> open = workflow.findOpenRequest(student, target);
+        if (open.isPresent() && open.get().getAmount().compareTo(quote.payable()) == 0) {
+            logger.info("Reusing open payment #{} (order {})", open.get().getId(), open.get().getRazorpayOrderId());
+            return workflow.toCheckoutResponse(open.get());
         }
 
-        // Amount is always calculated on the server, never taken from the client
-        BigDecimal amount = calculateAmount(enrollment);
-        long amountInPaise = amount.multiply(BigDecimal.valueOf(100))
-                .setScale(0, RoundingMode.HALF_UP)
-                .longValueExact();
-
-        // Razorpay minimum order amount is 100 paise
-        if (amountInPaise < 100) {
-            throw new BadRequestException("Payable amount must be at least 1.00 " + currency);
-        }
-
-        String razorpayOrderId;
-        try {
-            JSONObject orderRequest = new JSONObject();
-            orderRequest.put("amount", amountInPaise);
-            orderRequest.put("currency", currency);
-            // receipt is limited to 40 characters by Razorpay
-            orderRequest.put("receipt", "enr_" + enrollment.getId() + "_" + System.currentTimeMillis());
-
-            JSONObject notes = new JSONObject();
-            notes.put("enrollmentId", String.valueOf(enrollment.getId()));
-            notes.put("studentId", enrollment.getStudent().getStudentId());
-            orderRequest.put("notes", notes);
-
-            Order order = razorpayClient.orders.create(orderRequest);
-            razorpayOrderId = order.get("id");
-
-        } catch (RazorpayException e) {
-            logger.error("Razorpay order creation failed for enrollmentId: {}", enrollment.getId(), e);
-            throw new PaymentGatewayException("Unable to create payment order. Please try again.", e);
-        }
-
-        Payment payment = new Payment();
-        payment.setEnrollment(enrollment);
-        payment.setRazorpayOrderId(razorpayOrderId);
-        payment.setAmount(amount);
-        payment.setCurrency(currency);
-        payment.setStatus(PaymentStatus.CREATED);
-        paymentRepository.save(payment);
-
-        logger.info("Razorpay order {} created for enrollmentId: {} amount: {}",
-                razorpayOrderId, enrollment.getId(), amount);
-
-        PaymentOrderResponse response = new PaymentOrderResponse();
-        response.setRazorpayOrderId(razorpayOrderId);
-        response.setKeyId(keyId);
-        response.setAmount(amount);
-        response.setAmountInPaise(amountInPaise);
-        response.setCurrency(currency);
-        response.setEnrollmentId(enrollment.getId());
-        return response;
+        Payment payment = workflow.createOnlineRequest(student, target, quote, studentOrderExpiryHours);
+        return workflow.toCheckoutResponse(payment);
     }
 
     // ============================================================
@@ -169,8 +116,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .findByRazorpayOrderIdForUpdate(request.getRazorpayOrderId())
                 .orElseThrow(() -> new ResourceNotFoundException("Payment order not found"));
 
-        // Ownership check on the enrollment linked to this order
-        assertOwner(payment.getEnrollment(), false);
+        assertCanAccess(payment.getStudent(), false);
 
         boolean valid;
         try {
@@ -188,9 +134,9 @@ public class PaymentServiceImpl implements PaymentService {
             throw new InvalidPaymentSignatureException("Payment signature verification failed");
         }
 
-        markPaid(payment, request.getRazorpayPaymentId(), request.getRazorpaySignature());
+        workflow.markOnlinePaid(payment, request.getRazorpayPaymentId(), request.getRazorpaySignature());
 
-        return toResponse(payment);
+        return workflow.toResponse(payment);
     }
 
     // ============================================================
@@ -227,14 +173,28 @@ public class PaymentServiceImpl implements PaymentService {
 
         JSONObject paymentEntity = entity(eventPayload, "payment");
         JSONObject orderEntity = entity(eventPayload, "order");
+        JSONObject refundEntity = entity(eventPayload, "refund");
+
+        logger.info("Razorpay webhook event: {}", eventType);
+
+        switch (eventType) {
+            case "payment.captured", "order.paid", "payment.failed" ->
+                    handlePaymentEvent(eventType, paymentEntity, orderEntity);
+
+            case "refund.processed", "refund.failed" ->
+                    handleRefundEvent(eventType, refundEntity, paymentEntity);
+
+            default -> logger.info("Unhandled Razorpay webhook event: {}", eventType);
+        }
+    }
+
+    private void handlePaymentEvent(String eventType, JSONObject paymentEntity, JSONObject orderEntity) {
 
         String orderId = paymentEntity != null ? paymentEntity.optString("order_id", null) : null;
         if (orderId == null && orderEntity != null) {
             orderId = orderEntity.optString("id", null);
         }
         String razorpayPaymentId = paymentEntity != null ? paymentEntity.optString("id", null) : null;
-
-        logger.info("Razorpay webhook event: {} orderId: {} paymentId: {}", eventType, orderId, razorpayPaymentId);
 
         if (orderId == null) {
             logger.warn("Razorpay webhook {} has no order id, ignoring", eventType);
@@ -250,18 +210,51 @@ public class PaymentServiceImpl implements PaymentService {
 
         Payment payment = paymentOpt.get();
 
-        switch (eventType) {
-            case "payment.captured", "order.paid" ->
-                    markPaid(payment, razorpayPaymentId, null);
+        if ("payment.failed".equals(eventType)) {
+            String reason = paymentEntity != null ? paymentEntity.optString("error_description", null) : null;
+            workflow.markOnlineFailed(payment, razorpayPaymentId, reason);
+        } else {
+            workflow.markOnlinePaid(payment, razorpayPaymentId, null);
+        }
+    }
 
-            case "payment.failed" -> {
-                String reason = paymentEntity != null
-                        ? paymentEntity.optString("error_description", null)
-                        : null;
-                markFailed(payment, razorpayPaymentId, reason);
+    private void handleRefundEvent(String eventType, JSONObject refundEntity, JSONObject paymentEntity) {
+
+        String razorpayPaymentId = refundEntity != null ? refundEntity.optString("payment_id", null) : null;
+        if (razorpayPaymentId == null && paymentEntity != null) {
+            razorpayPaymentId = paymentEntity.optString("id", null);
+        }
+        if (razorpayPaymentId == null) {
+            logger.warn("Razorpay webhook {} has no payment id, ignoring", eventType);
+            return;
+        }
+
+        Optional<Payment> paymentOpt = paymentRepository.findByRazorpayPaymentIdForUpdate(razorpayPaymentId);
+        if (paymentOpt.isEmpty()) {
+            logger.warn("Razorpay webhook {} for unknown paymentId: {}, ignoring", eventType, razorpayPaymentId);
+            return;
+        }
+
+        Payment payment = paymentOpt.get();
+
+        if ("refund.processed".equals(eventType)) {
+            if (payment.getStatus() == PaymentStatus.REFUNDED) {
+                return;
             }
-
-            default -> logger.info("Unhandled Razorpay webhook event: {}", eventType);
+            payment.setStatus(PaymentStatus.REFUNDED);
+            payment.setRefundedAt(LocalDateTime.now());
+            if (paymentEntity != null && paymentEntity.has("amount_refunded")) {
+                payment.setRefundedAmount(BigDecimal.valueOf(paymentEntity.getLong("amount_refunded"))
+                        .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP));
+            }
+            logger.info("Refund processed for payment #{}", payment.getId());
+        } else {
+            // Refund failed: money is still with us; admin can retry the refund
+            if (payment.getStatus() == PaymentStatus.REFUND_PENDING) {
+                payment.setStatus(PaymentStatus.PAID);
+            }
+            payment.setFailureReason("Refund failed at Razorpay, please retry");
+            logger.error("Refund FAILED for payment #{}", payment.getId());
         }
     }
 
@@ -273,12 +266,28 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional(readOnly = true)
     public List<PaymentResponse> getPaymentsByEnrollment(Long enrollmentId) {
 
-        Enrollment enrollment = getOwnedEnrollment(enrollmentId, true);
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found"));
+
+        assertCanAccess(enrollment.getStudent(), true);
 
         return paymentRepository
                 .findByEnrollment_IdOrderByCreatedDtDescIdDesc(enrollment.getId())
                 .stream()
-                .map(this::toResponse)
+                .map(workflow::toResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PaymentResponse> getMyPayments() {
+
+        Student me = studentRepository.findByEmailId(SecurityUtils.getCurrentUser())
+                .orElseThrow(() -> new UnauthorizedAccessException("Only students can view their payments"));
+
+        return paymentRepository.findByStudent_StudentIdOrderByIdDesc(me.getStudentId())
+                .stream()
+                .map(workflow::toResponse)
                 .toList();
     }
 
@@ -286,129 +295,27 @@ public class PaymentServiceImpl implements PaymentService {
     // HELPERS
     // ============================================================
 
-    private void markPaid(Payment payment, String razorpayPaymentId, String signature) {
-
-        if (payment.getStatus() == PaymentStatus.PAID) {
-            // Idempotent: verify and webhook can both arrive for the same order
-            logger.info("Payment for orderId: {} is already PAID", payment.getRazorpayOrderId());
-            return;
-        }
-
-        payment.setStatus(PaymentStatus.PAID);
-        if (razorpayPaymentId != null) {
-            payment.setRazorpayPaymentId(razorpayPaymentId);
-        }
-        if (signature != null) {
-            payment.setRazorpaySignature(signature);
-        }
-        payment.setFailureReason(null);
-        payment.setPaidAt(LocalDateTime.now());
-
-        Enrollment enrollment = payment.getEnrollment();
-        enrollment.setPaymentStatus(PAYMENT_STATUS_PAID);
-        enrollment.setStatus(EnrollmentStatus.ACTIVE);
-
-        logger.info("Payment PAID for orderId: {} enrollmentId: {}",
-                payment.getRazorpayOrderId(), enrollment.getId());
-    }
-
-    private void markFailed(Payment payment, String razorpayPaymentId, String reason) {
-
-        if (payment.getStatus() == PaymentStatus.PAID) {
-            // A failed attempt must never override a successful one on the same order
-            logger.info("Ignoring payment.failed for already PAID orderId: {}", payment.getRazorpayOrderId());
-            return;
-        }
-
-        payment.setStatus(PaymentStatus.FAILED);
-        if (razorpayPaymentId != null) {
-            payment.setRazorpayPaymentId(razorpayPaymentId);
-        }
-        if (reason != null && reason.length() > 500) {
-            reason = reason.substring(0, 500);
-        }
-        payment.setFailureReason(reason);
-
-        Enrollment enrollment = payment.getEnrollment();
-        if (!PAYMENT_STATUS_PAID.equals(enrollment.getPaymentStatus())) {
-            enrollment.setPaymentStatus(PAYMENT_STATUS_FAILED);
-        }
-
-        logger.info("Payment FAILED for orderId: {} reason: {}", payment.getRazorpayOrderId(), reason);
-    }
-
-    private BigDecimal calculateAmount(Enrollment enrollment) {
-
-        LocalDate today = LocalDate.now();
-        BigDecimal fee;
-        BigDecimal discount;
-
-        if (enrollment.getEnrollmentType() == EnrollmentType.COURSE) {
-            CourseFee courseFee = courseFeeRepository
-                    .findTopByCourse_IdAndEffectiveDateLessThanEqualOrderByEffectiveDateDesc(
-                            enrollment.getCourse().getId(), today)
-                    .orElseThrow(() -> new ResourceNotFoundException("No fee configured for this course"));
-            fee = courseFee.getFee();
-            discount = courseFee.getDiscount();
-
-        } else {
-            ProgramFee programFee = programFeeRepository
-                    .findTopByProgram_IdAndEffectiveDateLessThanEqualOrderByEffectiveDateDesc(
-                            enrollment.getProgram().getId(), today)
-                    .orElseThrow(() -> new ResourceNotFoundException("No fee configured for this program"));
-            fee = programFee.getFee();
-            discount = programFee.getDiscount();
-        }
-
-        BigDecimal amount = fee.subtract(discount != null ? discount : BigDecimal.ZERO);
-        return amount.max(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP);
-    }
-
-    private Enrollment getOwnedEnrollment(Long enrollmentId, boolean allowStaff) {
-
-        Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found"));
-
-        assertOwner(enrollment, allowStaff);
-        return enrollment;
-    }
-
-    /**
-     * Access rules:
-     *  - ADMIN: always allowed (can create/verify payments on behalf of a student and view history)
-     *  - STAFF: allowed only when allowStaff is true (read-only payment history)
-     *  - STUDENT: allowed only for their own enrollment
+    /*
+     * ADMIN: always allowed
+     * STAFF: allowed only when allowStaff is true (read-only history)
+     * STUDENT: only their own payments
      */
-    private void assertOwner(Enrollment enrollment, boolean allowStaff) {
+    private void assertCanAccess(Student owner, boolean allowStaff) {
 
-        if (hasRole("ROLE_ADMIN")) {
-            logger.info("Admin {} accessing payment for enrollmentId: {}",
-                    SecurityUtils.getCurrentUser(), enrollment.getId());
+        if (PaymentWorkflow.hasRole("ROLE_ADMIN")) {
             return;
         }
-
-        if (allowStaff && hasRole("ROLE_STAFF")) {
+        if (allowStaff && PaymentWorkflow.hasRole("ROLE_STAFF")) {
             return;
         }
 
         String currentUser = SecurityUtils.getCurrentUser();
-        String ownerEmail = enrollment.getStudent().getEmailId();
+        String ownerEmail = owner.getEmailId();
 
         if (currentUser == null || ownerEmail == null || !ownerEmail.equalsIgnoreCase(currentUser)) {
-            logger.warn("User {} attempted to access enrollmentId: {} they do not own",
-                    currentUser, enrollment.getId());
-            throw new UnauthorizedAccessException("You are not allowed to access this enrollment");
+            logger.warn("User {} attempted to access payments of student {}", currentUser, owner.getStudentId());
+            throw new UnauthorizedAccessException("You are not allowed to access this payment");
         }
-    }
-
-    private boolean hasRole(String role) {
-
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null) {
-            return false;
-        }
-        return auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals(role));
     }
 
     private static JSONObject entity(JSONObject eventPayload, String key) {
@@ -418,21 +325,5 @@ public class PaymentServiceImpl implements PaymentService {
         }
         JSONObject wrapper = eventPayload.optJSONObject(key);
         return wrapper != null ? wrapper.optJSONObject("entity") : null;
-    }
-
-    private PaymentResponse toResponse(Payment payment) {
-
-        PaymentResponse response = new PaymentResponse();
-        response.setId(payment.getId());
-        response.setEnrollmentId(payment.getEnrollment().getId());
-        response.setRazorpayOrderId(payment.getRazorpayOrderId());
-        response.setRazorpayPaymentId(payment.getRazorpayPaymentId());
-        response.setAmount(payment.getAmount());
-        response.setCurrency(payment.getCurrency());
-        response.setStatus(payment.getStatus());
-        response.setFailureReason(payment.getFailureReason());
-        response.setPaidAt(payment.getPaidAt());
-        response.setCreatedDt(payment.getCreatedDt());
-        return response;
     }
 }

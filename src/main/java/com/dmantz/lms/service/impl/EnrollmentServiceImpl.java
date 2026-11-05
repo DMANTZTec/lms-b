@@ -1,24 +1,20 @@
 package com.dmantz.lms.service.impl;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.dmantz.lms.dto.request.EnrollmentRequest;
 import com.dmantz.lms.dto.response.EnrollmentResponse;
-import com.dmantz.lms.entity.Course;
 import com.dmantz.lms.entity.Enrollment;
 import com.dmantz.lms.entity.EnrollmentStatus;
-import com.dmantz.lms.entity.EnrollmentType;
-import com.dmantz.lms.entity.Program;
-import com.dmantz.lms.entity.Student;
+import com.dmantz.lms.exceptions.BadRequestException;
+import com.dmantz.lms.exceptions.ResourceNotFoundException;
 import com.dmantz.lms.mapper.EnrollmentMapper;
-import com.dmantz.lms.repository.CourseRepository;
 import com.dmantz.lms.repository.EnrollmentRepository;
-import com.dmantz.lms.repository.ProgramRepository;
 import com.dmantz.lms.repository.StudentRepository;
 import com.dmantz.lms.service.EnrollmentService;
 
@@ -26,128 +22,24 @@ import com.dmantz.lms.service.EnrollmentService;
 @Transactional
 public class EnrollmentServiceImpl implements EnrollmentService {
 
+    private static final Logger logger = LogManager.getLogger(EnrollmentServiceImpl.class);
+
     private final EnrollmentRepository enrollmentRepository;
     private final StudentRepository studentRepository;
-    private final CourseRepository courseRepository;
-    private final ProgramRepository programRepository;
     private final EnrollmentMapper enrollmentMapper;
+    private final PaymentWorkflow paymentWorkflow;
 
     public EnrollmentServiceImpl(
             EnrollmentRepository enrollmentRepository,
             StudentRepository studentRepository,
-            CourseRepository courseRepository,
-            ProgramRepository programRepository,
-            EnrollmentMapper enrollmentMapper) {
+            EnrollmentMapper enrollmentMapper,
+            PaymentWorkflow paymentWorkflow) {
 
         this.enrollmentRepository = enrollmentRepository;
         this.studentRepository = studentRepository;
-        this.courseRepository = courseRepository;
-        this.programRepository = programRepository;
         this.enrollmentMapper = enrollmentMapper;
+        this.paymentWorkflow = paymentWorkflow;
     }
-
-    // ============================================================
-    // CREATE ENROLLMENT
-    // ============================================================
-
-    @Override
-    public EnrollmentResponse createEnrollment(
-            EnrollmentRequest request) {
-
-        validateEnrollmentRequest(request);
-
-        Student student = studentRepository
-                .findByStudentId(request.getStudentId())
-                .orElseThrow(() ->
-                        new RuntimeException("Student not found"));
-
-        Enrollment enrollment = new Enrollment();
-
-        enrollment.setStudent(student);
-
-        enrollment.setEnrollmentDate(LocalDateTime.now());
-
-        enrollment.setStatus(EnrollmentStatus.PENDING);
-
-        enrollment.setPaymentStatus("PENDING");
-
-
-        // ==========================
-        // COURSE ENROLLMENT
-        // ==========================
-
-        if (request.getCourseId() != null) {
-
-            boolean alreadyEnrolled =
-                    enrollmentRepository
-                            .existsByStudentStudentIdAndCourseCourseId(
-                                    request.getStudentId(),
-                                    request.getCourseId()
-                            );
-
-            if (alreadyEnrolled) {
-                throw new RuntimeException(
-                        "Student is already enrolled in this course"
-                );
-            }
-
-            Course course = courseRepository
-                    .findByCourseIdAndIsDeletedFalse(request.getCourseId())
-                    .orElseThrow(() ->
-                            new RuntimeException("Course not found"));
-
-            enrollment.setCourse(course);
-
-            // Program must be null for course enrollment
-            enrollment.setProgram(null);
-
-            enrollment.setEnrollmentType(
-                    EnrollmentType.COURSE
-            );
-        }
-
-
-        // ==========================
-        // PROGRAM ENROLLMENT
-        // ==========================
-
-        if (request.getProgramId() != null) {
-
-            boolean alreadyEnrolled =
-                    enrollmentRepository
-                            .existsByStudentStudentIdAndProgramProgramId(
-                                    request.getStudentId(),
-                                    request.getProgramId()
-                            );
-
-            if (alreadyEnrolled) {
-                throw new RuntimeException(
-                        "Student is already enrolled in this program"
-                );
-            }
-
-            Program program = programRepository
-                    .findByProgramId(request.getProgramId())
-                    .orElseThrow(() ->
-                            new RuntimeException("Program not found"));
-
-            enrollment.setProgram(program);
-
-            // Course must be null for program enrollment
-            enrollment.setCourse(null);
-
-            enrollment.setEnrollmentType(
-                    EnrollmentType.PROGRAM
-            );
-        }
-
-
-        Enrollment savedEnrollment =
-                enrollmentRepository.save(enrollment);
-
-        return enrollmentMapper.toResponse(savedEnrollment);
-    }
-
 
     // ============================================================
     // GET ALL ENROLLMENTS
@@ -164,7 +56,6 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 .collect(Collectors.toList());
     }
 
-
     // ============================================================
     // GET ENROLLMENT BY ID
     // ============================================================
@@ -175,12 +66,10 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
         Enrollment enrollment = enrollmentRepository
                 .findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("Enrollment not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found"));
 
         return enrollmentMapper.toResponse(enrollment);
     }
-
 
     // ============================================================
     // GET ENROLLMENTS BY STUDENT ID
@@ -188,14 +77,11 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<EnrollmentResponse> getEnrollmentsByStudent(
-            String studentId) {
+    public List<EnrollmentResponse> getEnrollmentsByStudent(String studentId) {
 
-        // Optional: check student exists first
         studentRepository
                 .findByStudentId(studentId)
-                .orElseThrow(() ->
-                        new RuntimeException("Student not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
 
         return enrollmentRepository
                 .findByStudentStudentId(studentId)
@@ -204,134 +90,26 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 .collect(Collectors.toList());
     }
 
-
     // ============================================================
-    // UPDATE ENROLLMENT
-    // ============================================================
-
-    @Override
-    public EnrollmentResponse updateEnrollment(
-            Long id,
-            EnrollmentRequest request) {
-
-        validateEnrollmentRequest(request);
-
-        Enrollment enrollment = enrollmentRepository
-                .findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("Enrollment not found"));
-
-        Student student = studentRepository
-                .findByStudentId(request.getStudentId())
-                .orElseThrow(() ->
-                        new RuntimeException("Student not found"));
-
-        enrollment.setStudent(student);
-
-
-        // ==========================
-        // UPDATE TO COURSE
-        // ==========================
-
-        if (request.getCourseId() != null) {
-
-            Course course = courseRepository
-                    .findByCourseIdAndIsDeletedFalse(request.getCourseId())
-                    .orElseThrow(() ->
-                            new RuntimeException("Course not found"));
-
-            enrollment.setCourse(course);
-            enrollment.setProgram(null);
-
-            enrollment.setEnrollmentType(
-                    EnrollmentType.COURSE
-            );
-        }
-
-
-        // ==========================
-        // UPDATE TO PROGRAM
-        // ==========================
-
-        if (request.getProgramId() != null) {
-
-            Program program = programRepository
-                    .findByProgramId(request.getProgramId())
-                    .orElseThrow(() ->
-                            new RuntimeException("Program not found"));
-
-            enrollment.setProgram(program);
-            enrollment.setCourse(null);
-
-            enrollment.setEnrollmentType(
-                    EnrollmentType.PROGRAM
-            );
-        }
-
-        Enrollment updatedEnrollment =
-                enrollmentRepository.save(enrollment);
-
-        return enrollmentMapper.toResponse(updatedEnrollment);
-    }
-
-
-    // ============================================================
-    // DELETE ENROLLMENT
+    // CANCEL ENROLLMENT (no refund)
     // ============================================================
 
     @Override
-    public void deleteEnrollment(Long id) {
+    public EnrollmentResponse cancelEnrollment(Long id) {
 
         Enrollment enrollment = enrollmentRepository
                 .findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("Enrollment not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found"));
 
-        enrollmentRepository.delete(enrollment);
-    }
-
-
-    // ============================================================
-    // VALIDATION
-    // ============================================================
-
-    private void validateEnrollmentRequest(
-            EnrollmentRequest request) {
-
-        if (request.getStudentId() == null
-                || request.getStudentId().isBlank()) {
-
-            throw new RuntimeException(
-                    "Student ID is required"
-            );
+        if (enrollment.getStatus() == EnrollmentStatus.CANCELLED) {
+            throw new BadRequestException("Enrollment #" + id + " is already cancelled");
         }
 
-        boolean hasCourse =
-                request.getCourseId() != null
-                && !request.getCourseId().isBlank();
+        // Rows are kept (payments reference them); access is removed
+        paymentWorkflow.cancelEnrollment(enrollment, enrollment.getPaymentStatus());
 
-        boolean hasProgram =
-                request.getProgramId() != null
-                && !request.getProgramId().isBlank();
+        logger.info("Enrollment #{} cancelled by staff {}", id, PaymentWorkflow.currentStaffId());
 
-
-        // Neither course nor program
-
-        if (!hasCourse && !hasProgram) {
-
-            throw new RuntimeException(
-                    "Either course ID or program ID is required"
-            );
-        }
-
-
-        // Both course and program
-
-        if (hasCourse && hasProgram) {
-
-            throw new RuntimeException(
-                    "Student can enroll in either a course or a program, not both"
-            );
-        }
+        return enrollmentMapper.toResponse(enrollment);
     }
 }

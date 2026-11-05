@@ -1,5 +1,7 @@
 package com.dmantz.lms.repository;
 
+import jakarta.persistence.LockModeType;
+import org.springframework.data.jpa.repository.Lock;
 import com.dmantz.lms.entity.Student;
 import com.dmantz.lms.entity.StudentOtp;
 
@@ -28,6 +30,11 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 //    List<Student> findByStudentIdOrderByCreatedDtDesc(String studentId);
 
     Optional<Student> findByStudentId(String studentId);
+
+    // Locks the student row so two payments for the same student cannot create duplicate enrollments
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT s FROM Student s WHERE s.studentId = :studentId")
+    Optional<Student> findByStudentIdForUpdate(@Param("studentId") String studentId);
 
 
     List<Student> findByStudentIdIn(List<String> studentIds);

@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,9 +13,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.dmantz.lms.dto.request.CreatePaymentOrderRequest;
 import com.dmantz.lms.dto.request.VerifyPaymentRequest;
-import com.dmantz.lms.dto.response.PaymentOrderResponse;
 import com.dmantz.lms.dto.response.PaymentResponse;
 import com.dmantz.lms.service.PaymentService;
 
@@ -32,20 +29,6 @@ public class PaymentController {
 
     public PaymentController(PaymentService paymentService) {
         this.paymentService = paymentService;
-    }
-
-
-    // CREATE RAZORPAY ORDER
-
-    @PostMapping("/order")
-    public ResponseEntity<PaymentOrderResponse> createOrder(
-            @Valid @RequestBody CreatePaymentOrderRequest request) {
-
-        logger.info("Received create payment order request for enrollmentId: {}", request.getEnrollmentId());
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(paymentService.createOrder(request));
     }
 
 
@@ -82,5 +65,14 @@ public class PaymentController {
             @PathVariable Long enrollmentId) {
 
         return ResponseEntity.ok(paymentService.getPaymentsByEnrollment(enrollmentId));
+    }
+
+
+    // LOGGED-IN STUDENT'S PAYMENTS (incl. pending requests from admin)
+
+    @GetMapping("/me")
+    public ResponseEntity<List<PaymentResponse>> getMyPayments() {
+
+        return ResponseEntity.ok(paymentService.getMyPayments());
     }
 }

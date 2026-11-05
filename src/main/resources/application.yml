@@ -120,6 +120,18 @@
 
 
   # ------------------------------------------
+  # Payment workflow
+  # ------------------------------------------
+  payment:
+    # Unpaid online orders started by a student expire after this many hours
+    student-order-expiry-hours: 24
+    # "Pay later" requests created by admin expire after this many hours
+    admin-request-expiry-hours: 72
+    # How often unpaid orders are expired (checks Razorpay for missed payments first)
+    expiry-cron: "0 */30 * * * *"
+
+
+  # ------------------------------------------
   # Logging
   # ------------------------------------------
   logging:

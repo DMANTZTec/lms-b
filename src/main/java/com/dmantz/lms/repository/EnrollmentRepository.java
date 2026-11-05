@@ -1,6 +1,7 @@
 package com.dmantz.lms.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -30,6 +31,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
             SELECT DISTINCT e.student.studentId
             FROM Enrollment e
             WHERE e.enrollmentType = com.dmantz.lms.entity.EnrollmentType.COURSE
+            AND e.status <> com.dmantz.lms.entity.EnrollmentStatus.CANCELLED
             AND e.course.id IN :courseIds
             """)
     List<String> findDistinctStudentIdsByCourseIds(@Param("courseIds") List<Long> courseIds);
@@ -40,11 +42,22 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
             FROM Enrollment e
             JOIN ProgramCourse pc ON pc.program.id = e.program.id
             WHERE e.enrollmentType = com.dmantz.lms.entity.EnrollmentType.PROGRAM
+            AND e.status <> com.dmantz.lms.entity.EnrollmentStatus.CANCELLED
             AND pc.course.id IN :courseIds
             """)
     List<String> findDistinctStudentIdsByProgramCourseIds(@Param("courseIds") List<Long> courseIds);
     
     
     List<Enrollment> findByCourse_CourseIdAndStatusNot(String courseId, EnrollmentStatus status);
+
+    // Current (not cancelled) enrollment of a student in a course / program
+    Optional<Enrollment> findFirstByStudentStudentIdAndCourseCourseIdAndStatusNot(
+            String studentId, String courseId, EnrollmentStatus status);
+
+    Optional<Enrollment> findFirstByStudentStudentIdAndProgramProgramIdAndStatusNot(
+            String studentId, String programId, EnrollmentStatus status);
+
+    boolean existsByStudentStudentIdAndCourseCourseIdAndStatusNot(
+            String studentId, String courseId, EnrollmentStatus status);
 
 }

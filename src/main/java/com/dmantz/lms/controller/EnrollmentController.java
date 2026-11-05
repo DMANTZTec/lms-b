@@ -2,14 +2,16 @@ package com.dmantz.lms.controller;
 
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.dmantz.lms.dto.request.EnrollmentRequest;
 import com.dmantz.lms.dto.response.EnrollmentResponse;
 import com.dmantz.lms.service.EnrollmentService;
 
+/*
+ * Read and cancel enrollments. Enrollments are created only through payment:
+ *   student -> POST /api/checkout, admin -> POST /api/admin/enrollments
+ */
 @RestController
 @RequestMapping("/api/enrollments")
 public class EnrollmentController {
@@ -20,21 +22,6 @@ public class EnrollmentController {
             EnrollmentService enrollmentService) {
 
         this.enrollmentService = enrollmentService;
-    }
-
-
-    // CREATE
-
-    @PostMapping
-    public ResponseEntity<EnrollmentResponse> createEnrollment(
-            @RequestBody EnrollmentRequest request) {
-
-        EnrollmentResponse response =
-                enrollmentService.createEnrollment(request);
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(response);
     }
 
 
@@ -77,29 +64,14 @@ public class EnrollmentController {
     }
 
 
-    // UPDATE
-
-    @PutMapping("/{id}")
-    public ResponseEntity<EnrollmentResponse>
-            updateEnrollment(
-                    @PathVariable Long id,
-                    @RequestBody EnrollmentRequest request) {
-
-        return ResponseEntity.ok(
-                enrollmentService
-                        .updateEnrollment(id, request)
-        );
-    }
-
-
-    // DELETE
+    // CANCEL (admin; no refund. Use POST /api/admin/payments/{id}/refund to return money)
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteEnrollment(
+    public ResponseEntity<EnrollmentResponse> cancelEnrollment(
             @PathVariable Long id) {
 
-        enrollmentService.deleteEnrollment(id);
-
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(
+                enrollmentService.cancelEnrollment(id)
+        );
     }
 }

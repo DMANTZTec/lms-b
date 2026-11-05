@@ -84,6 +84,13 @@ public class EnrollmentBatchServiceImpl implements EnrollmentBatchService {
 				.orElseThrow(() -> new RuntimeException("Batch not found with id: " + request.getBatchId()));
 
 		/*
+		 * 3. Only a current (paid) enrollment can be placed in a batch.
+		 */
+		if (enrollment.getStatus() == EnrollmentStatus.CANCELLED) {
+			throw new RuntimeException("Enrollment " + enrollment.getId() + " is cancelled and cannot be assigned to a batch");
+		}
+
+		/*
 		 * 4. Validate that student's enrollment belongs to the course of this batch.
 		 */
 		validateEnrollmentForBatch(enrollment, batch);
@@ -250,6 +257,10 @@ public class EnrollmentBatchServiceImpl implements EnrollmentBatchService {
 				.findByEnrollmentIdAndClassBatchId(request.getEnrollmentId(), request.getFromBatchId())
 				.orElseThrow(() -> new RuntimeException(
 						"Student is not assigned to the given batch with id: " + request.getFromBatchId()));
+
+		if (enrollmentBatch.getEnrollment().getStatus() == EnrollmentStatus.CANCELLED) {
+			throw new RuntimeException("Enrollment " + request.getEnrollmentId() + " is cancelled and cannot switch batch");
+		}
 
 		/*
 		 * 2. Find batch the student is being moved to

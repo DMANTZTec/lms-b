@@ -125,4 +125,7 @@
     <!-- payment table (Razorpay) -->
     <include file="db/changelog/changelogs/202611041200-create-payment-table.xml"/>
 
+    <!-- payment workflow: order first, enrollment after payment -->
+    <include file="db/changelog/changelogs/202611051000-payment-workflow.xml"/>
+
 </databaseChangeLog>

@@ -55,7 +55,8 @@ public class Enrollment extends AuditFields {
     private LocalDateTime enrollmentDate;
 
     /*
-     * PENDING / ACTIVE / CANCELLED
+     * ACTIVE / COMPLETED / CANCELLED
+     * An enrollment is created only after its payment is settled.
      */
     @Enumerated(EnumType.STRING)
     @Column(
@@ -65,14 +66,21 @@ public class Enrollment extends AuditFields {
     private EnrollmentStatus status;
 
     /*
-     * Initially PENDING
-     * Later payment API can update it to PAID or FAILED
+     * Summary of how the fee was settled, kept for existing API consumers:
+     * PAID / WAIVED / FREE / REFUNDED. The payment table is the source of truth.
      */
     @Column(
             name = "payment_status",
             nullable = false
     )
     private String paymentStatus;
+
+    /*
+     * SELF (student checkout) or ADMIN (enrolled by admin)
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "source")
+    private EnrollmentSource source;
 
 
     public Long getId() {
@@ -137,5 +145,13 @@ public class Enrollment extends AuditFields {
 
     public void setPaymentStatus(String paymentStatus) {
         this.paymentStatus = paymentStatus;
+    }
+
+    public EnrollmentSource getSource() {
+        return source;
+    }
+
+    public void setSource(EnrollmentSource source) {
+        this.source = source;
     }
 }

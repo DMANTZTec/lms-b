@@ -8,6 +8,7 @@ import com.dmantz.lms.dto.response.StudentTaskListResponse;
 import com.dmantz.lms.dto.response.StudentTaskResponse;
 import com.dmantz.lms.dto.response.TopicDropdownResponse;
 import com.dmantz.lms.entity.AssignedByType;
+import com.dmantz.lms.entity.EnrollmentStatus;
 import com.dmantz.lms.entity.Chapter;
 import com.dmantz.lms.entity.ClassBatch;
 import com.dmantz.lms.entity.Course;
@@ -86,8 +87,8 @@ public class StudentTaskServiceImpl implements StudentTaskService {
 
 		logger.info("Creating task for studentId: {} courseId: {}", student.getStudentId(), request.getCourseId());
 
-		boolean isEnrolled = enrollmentRepository.existsByStudentStudentIdAndCourseCourseId(student.getStudentId(),
-				request.getCourseId());
+		boolean isEnrolled = enrollmentRepository.existsByStudentStudentIdAndCourseCourseIdAndStatusNot(
+				student.getStudentId(), request.getCourseId(), EnrollmentStatus.CANCELLED);
 
 		if (!isEnrolled) {
 			throw new IllegalStateException("Student is not actively enrolled in the selected course");
@@ -148,6 +149,7 @@ public class StudentTaskServiceImpl implements StudentTaskService {
 				.orElseThrow(() -> new ResourceNotFoundException("Student not found: " + studentId));
 
 		return enrollmentRepository.findByStudentStudentId(studentId).stream()
+				.filter(sc -> sc.getStatus() != EnrollmentStatus.CANCELLED && sc.getCourse() != null)
 				.map(sc -> new CourseDropdownResponse(sc.getCourse().getCourseId(), sc.getCourse().getCourseTitle()))
 				.toList();
 	}
