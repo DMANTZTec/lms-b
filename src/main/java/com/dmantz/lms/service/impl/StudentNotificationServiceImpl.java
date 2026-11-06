@@ -1,9 +1,12 @@
 package com.dmantz.lms.service.impl;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -13,6 +16,7 @@ import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.dmantz.lms.dto.request.SendBulkStudentNotificationRequest;
 import com.dmantz.lms.dto.request.SendStudentNotificationRequest;
 import com.dmantz.lms.dto.response.StudentNotificationResponse;
 import com.dmantz.lms.entity.ClassBatch;
@@ -126,6 +130,91 @@ public class StudentNotificationServiceImpl implements StudentNotificationServic
 				notification.getEmailStatus());
 
 		return toResponse(notification);
+	}
+
+	@Override
+	@Transactional
+	public List<StudentNotificationResponse> sendBulkNotifications(String instructorId,
+			SendBulkStudentNotificationRequest request) {
+
+		Staff instructor = staffRepository.findByStaffId(instructorId)
+				.orElseThrow(() -> new ResourceNotFoundException("Instructor not found: " + instructorId));
+
+		ClassBatch batch = classBatchRepository.findById(request.getBatchId())
+				.orElseThrow(() -> new ResourceNotFoundException("Batch not found: " + request.getBatchId()));
+
+		// Unproxy: student_notification.course_id references course.course_id (not the PK).
+		Course course = (Course) Hibernate.unproxy(batch.getCourse());
+		if (course == null || !course.getCourseId().equalsIgnoreCase(request.getCourseId().trim())) {
+			throw new IllegalArgumentException(
+					"Batch " + request.getBatchId() + " does not belong to course " + request.getCourseId());
+		}
+
+		// Instructor must teach this batch, or at least be assigned to its course.
+		boolean instructorAllowed = classBatchRepository.existsByIdAndInstructorsStaffId(batch.getId(),
+				instructor.getStaffId())
+				|| staffCourseRepository.existsByStaff_StaffIdAndCourse_CourseId(instructor.getStaffId(),
+						course.getCourseId());
+		if (!instructorAllowed) {
+			throw new UnauthorizedAccessException("Instructor " + instructor.getStaffId()
+					+ " is not assigned to batch " + batch.getId() + " / course " + course.getCourseId());
+		}
+
+		// Validate every recipient up front: emails cannot be rolled back, so nothing is sent
+		// unless the whole request is valid.
+		Map<String, Student> recipients = new LinkedHashMap<>();
+		for (SendBulkStudentNotificationRequest.StudentMessage entry : request.getStudents()) {
+			String studentId = entry.getStudentId().trim();
+			if (recipients.containsKey(studentId)) {
+				throw new IllegalArgumentException("Student " + studentId + " is listed more than once");
+			}
+			Student student = studentRepository.findByStudentId(studentId)
+					.orElseThrow(() -> new ResourceNotFoundException("Student not found: " + studentId));
+			if (!enrollmentBatchRepository.existsByEnrollment_Student_StudentIdAndClassBatch_Id(
+					student.getStudentId(), batch.getId())) {
+				throw new IllegalArgumentException(
+						"Student " + student.getStudentId() + " is not enrolled in batch " + batch.getId());
+			}
+			recipients.put(studentId, student);
+		}
+
+		// No channel selected -> deliver through every channel (in-app + email).
+		Set<NotificationChannel> channels = request.getChannels() == null || request.getChannels().isEmpty()
+				? new LinkedHashSet<>(List.of(NotificationChannel.values()))
+				: new LinkedHashSet<>(request.getChannels());
+		String channelsCsv = channels.stream().map(Enum::name).collect(Collectors.joining(","));
+
+		List<StudentNotificationResponse> responses = new ArrayList<>();
+		for (SendBulkStudentNotificationRequest.StudentMessage entry : request.getStudents()) {
+			Student student = recipients.get(entry.getStudentId().trim());
+
+			StudentNotification notification = new StudentNotification();
+			notification.setStudent(student);
+			notification.setStaff(instructor);
+			notification.setClassBatch(batch);
+			notification.setCourse(course);
+			notification.setMessage(entry.getMessage().trim());
+			notification.setChannels(channelsCsv);
+			notification.setSentAt(LocalDateTime.now());
+
+			// A failed email must not lose the in-app message, so email errors are recorded, not thrown.
+			notification.setEmailStatus(channels.contains(NotificationChannel.EMAIL)
+					? sendEmail(student, instructor, course, batch, notification.getMessage())
+					: NotificationEmailStatus.NOT_REQUESTED);
+
+			// Only in-app messages are stored (they are what the student dashboard shows).
+			if (channels.contains(NotificationChannel.IN_APP)) {
+				notification = notificationRepository.save(notification);
+			}
+
+			logger.info("Instructor {} sent bulk notification {} to student {} via {} (email: {})",
+					instructor.getStaffId(), notification.getId(), student.getStudentId(),
+					notification.getChannels(), notification.getEmailStatus());
+
+			responses.add(toResponse(notification));
+		}
+
+		return responses;
 	}
 
 	@Override

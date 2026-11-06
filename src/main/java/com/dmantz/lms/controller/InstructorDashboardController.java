@@ -21,6 +21,7 @@ import com.dmantz.lms.dto.request.InstructorTaskRequest;
 import com.dmantz.lms.dto.request.PlanClassTopicsRequest;
 import com.dmantz.lms.dto.request.ReviewSubmissionRequest;
 import com.dmantz.lms.dto.request.ScheduleTaskRequest;
+import com.dmantz.lms.dto.request.SendBulkStudentNotificationRequest;
 import com.dmantz.lms.dto.request.SendStudentNotificationRequest;
 import com.dmantz.lms.service.InstructorDashboardService;
 import com.dmantz.lms.service.StudentNotificationService;
@@ -240,6 +241,24 @@ public class InstructorDashboardController {
 				request.getChannels());
 
 		StudentNotificationResponse response = studentNotificationService.sendNotification(instructorId, request);
+
+		return ResponseEntity.ok(response);
+	}
+
+	// Instructor sends personalised messages to several students of one batch in a single call.
+	// Returns one entry per student, in request order.
+	@PostMapping("/notifications/bulk")
+	public ResponseEntity<List<StudentNotificationResponse>> sendBulkStudentNotifications(
+			@RequestParam String instructorId, @Valid @RequestBody SendBulkStudentNotificationRequest request) {
+
+		logger.info("POST /notifications/bulk - instructorId: {} -> batchId: {}, courseId: {}, channels: {}, students: {}",
+				instructorId, request.getBatchId(), request.getCourseId(), request.getChannels(),
+				request.getStudents().size());
+
+		List<StudentNotificationResponse> response = studentNotificationService.sendBulkNotifications(instructorId,
+				request);
+
+		logger.info("Sent {} bulk notification(s) for batchId: {}", response.size(), request.getBatchId());
 
 		return ResponseEntity.ok(response);
 	}
