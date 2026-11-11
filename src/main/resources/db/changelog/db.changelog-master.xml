@@ -122,10 +122,7 @@
     <!-- student_task.schedule_id for schedule-scoped instructor tasks -->
     <include file="db/changelog/changelogs/202610081200-add-schedule_id-to-student_task.xml"/>
 
-    <!-- payment table (Razorpay) -->
-    <include file="db/changelog/changelogs/202611041200-create-payment-table.xml"/>
-
-    <!-- payment workflow: order first, enrollment after payment -->
-    <include file="db/changelog/changelogs/202611051000-payment-workflow.xml"/>
+    <!-- payment table (Razorpay / offline / waiver): order first, enrollment after payment -->
+    <include file="db/changelog/changelogs/202611111200-create-payment-table.xml"/>
 
 </databaseChangeLog>
